@@ -1,0 +1,30 @@
+import Link from 'next/link';
+
+export default function SuccessPage() {
+    return (
+        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 font-sans">
+            <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center border border-green-100">
+
+                <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-3xl">
+                    ✓
+                </div>
+
+                <h1 className="text-2xl font-bold text-slate-800 mb-2">Feedback Submitted!</h1>
+                <p className="text-slate-600 mb-8">
+                    Thank you for rating the training program. Your feedback helps us improve future sessions.
+                </p>
+
+                <div className="bg-slate-50 p-4 rounded-lg text-sm text-slate-500 mb-6">
+                    Your manager has been notified to validate your effectiveness rating.
+                </div>
+
+                <Link
+                    href="/"
+                    className="block w-full bg-slate-900 text-white font-bold py-3 rounded-lg hover:bg-slate-800 transition"
+                >
+                    Return to Home
+                </Link>
+            </div>
+        </div>
+    );
+}

@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 1. Training Sessions (Unchanged)
+model TrainingSession {
+  id             String   @id @default(uuid())
+  programName    String   @map("program_name")
+  trainerName    String?  @map("trainer_name")
+  completionDate DateTime @map("completion_date")
+  templateType   String   @default("Technical") @map("template_type")
+  emailsSent     Boolean  @default(false) @map("emails_sent")
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  enrollments    Enrollment[]
+
+  @@map("training_sessions")
+}
+
+// 2. Enrollments (Unchanged)
+model Enrollment {
+  id        String @id @default(uuid())
+  sessionId String @map("session_id")
+
+  // --- Participant Details ---
+  employeeName  String  @map("employee_name")
+  employeeEmail String  @map("employee_email")
+  managerEmail  String  @map("manager_email")
+
+  status String @default("Pending") // Pending, Completed
+
+  // --- Detailed Employee Feedback ---
+  q1_Relevance   Int?   @map("q1_relevance")
+  q2_Application Int?   @map("q2_application")
+  q3_Performance Int?   @map("q3_performance")
+  q4_Influence   Int?   @map("q4_influence")
+  q5_Efficiency  Int?   @map("q5_efficiency")
+  
+  averageRating  Float? @map("average_rating")
+
+  // --- Manager Review Data ---
+  managerAgrees  String? @map("manager_agrees")
+  managerComment String? @map("manager_comment")
+
+  updatedAt DateTime @default(now()) @map("updated_at")
+
+  session TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, employeeEmail])
+  @@index([sessionId])
+  @@map("enrollments")
+}
+
+// 3. Nominations (NEW - With specific columns for Editing)
+model Nomination {
+  id            String   @id @default(uuid())
+  
+  // -- Employee Info --
+  employeeName  String   @map("employee_name")
+  employeeEmail String   @map("employee_email")
+  empId         String   @map("emp_id")        // Specific column for Edit
+  site          String   // Specific column for Edit
+  designation   String   // Specific column for Edit
+  mobile        String   // Specific column for Edit
+  experience    String   // Specific column for Edit
+  
+  // -- Nomination Info --
+  managerEmail  String   @map("manager_email")
+  managerName   String   @map("manager_name")  // Stored for email template
+  programName   String   @default("General Nomination") @map("program_name")
+  
+  // Justification text
+  justification String   @db.Text 
+  
+  // Status: Pending, Approved, Rejected
+  status        String   @default("Pending")
+  
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("nominations")
+}
