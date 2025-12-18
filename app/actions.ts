@@ -2,7 +2,6 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-// 🟢 FIX: Import the new helper function
 import { sendEmail, sendFeedbackRequestEmail } from '@/lib/email';
 
 // --- TYPES ---
@@ -12,18 +11,22 @@ export type ParticipantData = {
     managerEmail: string;
 };
 
-// 1. DASHBOARD LOGIC
+// 1. DASHBOARD LOGIC (Updated for Start Date)
 export async function getDashboardData() {
     try {
         const sessions = await db.trainingSession.findMany({
-            include: { enrollments: true },
-            orderBy: { completionDate: 'desc' },
+            include: { enrollments: true }, // 👈 This fixes the "enrollments missing" error
+            orderBy: { startDate: 'desc' }, // 🟢 Updated from completionDate
         });
+
+        // Count pending reviews (Status = 'Pending Manager')
         const pendingCount = await db.enrollment.count({
-            where: { status: { not: 'Completed' } },
+            where: { status: 'Pending Manager' },
         });
+
         return { sessions, pendingCount };
     } catch (error) {
+        console.error("Dashboard Data Error:", error);
         return { sessions: [], pendingCount: 0 };
     }
 }
@@ -32,8 +35,8 @@ export async function getDashboardData() {
 export async function getUpcomingSessions() {
     try {
         return await db.trainingSession.findMany({
-            where: { completionDate: { gte: new Date() } },
-            orderBy: { completionDate: 'asc' },
+            where: { startDate: { gte: new Date() } }, // 🟢 Updated
+            orderBy: { startDate: 'asc' },
         });
     } catch (error) {
         return [];
@@ -89,7 +92,6 @@ export async function submitEmployeeFeedback(formData: FormData) {
                 averageRating: average,
                 status: 'Pending Manager',
             },
-            // Select details needed for the email
             select: {
                 managerEmail: true,
                 employeeName: true,
@@ -98,7 +100,6 @@ export async function submitEmployeeFeedback(formData: FormData) {
         });
 
         // 2. Send Email to Manager
-        // 🟢 FIX: Use Production URL logic here
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
         const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
 
@@ -111,9 +112,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
             <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
             <p>The employee has submitted their post-training feedback.</p>
             <p><strong>Please click the link below to validate their ratings:</strong></p>
-            <p><a href="${managerLink}"> Please Review</a></p>
-            <br />
-            <p><em>This is an automated message from the Thriveni Training System.</em></p>
+            <p><a href="${managerLink}">👉 Click Here to Review</a></p>
             `
         );
 
@@ -157,16 +156,16 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         if (!session) return { success: false, error: "Session not found" };
 
+        let count = 0;
         for (const enrollment of session.enrollments) {
             if (enrollment.status === 'Pending') {
-                // 🟢 FIX: Use the new helper function we created in lib/email.ts
-                // This automatically handles the URL generation for production
                 await sendFeedbackRequestEmail(
                     enrollment.employeeEmail,
                     enrollment.employeeName,
                     session.programName,
                     enrollment.id
                 );
+                count++;
             }
         }
 
@@ -176,20 +175,24 @@ export async function sendFeedbackEmails(sessionId: string) {
         });
 
         revalidatePath('/admin/dashboard');
-        return { success: true, message: `Emails sent to ${session.enrollments.length} employees.` };
+        return { success: true, message: `Emails sent to ${count} employees.` };
     } catch (error) {
         console.error("Bulk Email Error:", error);
         return { success: false, error: "Failed to send emails" };
     }
 }
 
-// 6. CREATE SESSION LOGIC
+// 6. CREATE SESSION LOGIC (🟢 UPDATED for Start/End Dates)
 export async function createTrainingSession(formData: FormData) {
     const programName = formData.get('programName') as string;
     const trainerName = formData.get('trainerName') as string;
-    const dateStr = formData.get('date') as string;
 
-    if (!programName || !dateStr) {
+    // 🟢 Get the new date fields
+    const startDateStr = formData.get('startDate') as string;
+    const endDateStr = formData.get('endDate') as string;
+    const feedbackDateStr = formData.get('feedbackCreationDate') as string;
+
+    if (!programName || !startDateStr || !endDateStr) {
         return { success: false, message: "Missing required fields" };
     }
 
@@ -198,7 +201,10 @@ export async function createTrainingSession(formData: FormData) {
             data: {
                 programName,
                 trainerName,
-                completionDate: new Date(dateStr),
+                startDate: new Date(startDateStr),
+                endDate: new Date(endDateStr),
+                // Only set this if the user provided it, otherwise it can be null or handled by logic
+                feedbackCreationDate: feedbackDateStr ? new Date(feedbackDateStr) : null,
                 templateType: 'Technical',
                 emailsSent: false,
             },
