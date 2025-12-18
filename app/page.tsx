@@ -8,20 +8,6 @@ export default function Home() {
       {/* Main Container */}
       <div className="max-w-4xl w-full space-y-8 md:space-y-12">
 
-        {/* Responsive Logo Header Section */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-6 w-full mb-4 md:mb-8">
-          <div className="relative w-50 md:w-52 h-17">
-            <Image
-              src="/Thriveni logo.webp"
-              alt="Thriveni logo"
-              fill
-              className="object-contain"
-              priority
-            />
-          </div>
-
-        </div>
-
         {/* Header Section */}
         <div className="text-center space-y-4">
           <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
@@ -48,7 +34,7 @@ export default function Home() {
             </div>
 
             <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-blue-700 transition-colors">
-              Nomination System
+              Nominations
             </h2>
             <p className="text-slate-700 font-medium leading-relaxed">
               Submit new training requests, manage approvals, and view upcoming program nominations.
@@ -67,7 +53,7 @@ export default function Home() {
             </div>
 
             <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-700 transition-colors">
-              Feedback System
+              Feedback Hub
             </h2>
             <p className="text-slate-700 font-medium leading-relaxed">
               <span className="text-indigo-700 font-bold underline">Admin Access Only.</span> Manage training calendars, trigger feedback emails, and review performance reports.
