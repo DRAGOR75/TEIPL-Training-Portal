@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { ClipboardList, BarChart3, ChevronRight, GraduationCap, ShieldCheck } from 'lucide-react';
 
 export default function Home() {
   return (
@@ -8,14 +9,21 @@ export default function Home() {
       {/* Main Container */}
       <div className="max-w-4xl w-full space-y-8 md:space-y-12">
 
+        {/* Logo Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-8 w-full mb-4">
+          {/* Add your Image components back here if needed */}
+          <div className="h-10 w-48 bg-slate-200 animate-pulse rounded md:block hidden" /> {/* Placeholder for Logos */}
+          <div className="h-10 w-48 bg-slate-200 animate-pulse rounded md:block hidden" />
+        </div>
+
         {/* Header Section */}
         <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-            Thriveni Training Portal
+
+          <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tighter leading-none">
+            Thriveni Training <span className="text-blue-700">Portal</span>
           </h1>
-          <p className="text-base md:text-lg text-slate-700 max-w-2xl mx-auto font-medium">
-            Welcome to the centralized hub for employee development.
-            Select an option below to get started.
+          <p className="text-lg md:text-xl text-slate-700 max-w-2xl mx-auto font-bold leading-snug">
+            Centralized hub for employee growth. Select a system to manage training requirements and performance.
           </p>
         </div>
 
@@ -25,50 +33,64 @@ export default function Home() {
           {/* Card 1: Nominations */}
           <Link
             href="/nominations"
-            className="group relative bg-white rounded-2xl p-6 md:p-8 shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-blue-600 transition-all duration-300"
+            className="group relative bg-white rounded-3xl p-8 shadow-xl border-2 border-transparent hover:border-blue-600 transition-all duration-500 overflow-hidden"
           >
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Visual Flair */}
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-blue-50 rounded-full group-hover:scale-150 transition-transform duration-700 opacity-50" />
 
-            <div className="w-14 h-14 bg-blue-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-blue-600 transition-colors">
-              <span className="text-3xl group-hover:scale-110 transition-transform">📝</span>
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-blue-700 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-blue-200 group-hover:rotate-6 transition-transform">
+                <ClipboardList size={32} strokeWidth={2.5} />
+              </div>
+
+              <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+                Nominations
+              </h2>
+              <p className="text-slate-600 font-bold text-sm leading-relaxed mb-6">
+                Submit new training requests, track employee eligibility, and manage the approval workflow for upcoming programs.
+              </p>
+
+              <div className="flex items-center gap-2 text-blue-700 font-black text-xs uppercase tracking-widest">
+                Access System <ChevronRight size={16} />
+              </div>
             </div>
-
-            <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-blue-700 transition-colors">
-              Nominations
-            </h2>
-            <p className="text-slate-700 font-medium leading-relaxed">
-              Submit new training requests, manage approvals, and view upcoming program nominations.
-            </p>
           </Link>
 
-          {/* Card 2: Admin / Feedback Portal */}
+          {/* Card 2: Feedback Hub */}
           <Link
             href="/admin/dashboard"
-            className="group relative bg-white rounded-2xl p-6 md:p-8 shadow-md border border-slate-200 hover:shadow-xl hover:-translate-y-1 hover:border-indigo-600 transition-all duration-300"
+            className="group relative bg-white rounded-3xl p-8 shadow-xl border-2 border-transparent hover:border-indigo-600 transition-all duration-500 overflow-hidden"
           >
-            <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-600 rounded-t-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+            {/* Visual Flair */}
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-indigo-50 rounded-full group-hover:scale-150 transition-transform duration-700 opacity-50" />
 
-            <div className="w-14 h-14 bg-indigo-50 rounded-xl flex items-center justify-center mb-6 group-hover:bg-indigo-600 transition-colors">
-              <span className="text-3xl group-hover:scale-110 transition-transform">📊</span>
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-indigo-700 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-indigo-200 group-hover:-rotate-6 transition-transform">
+                <BarChart3 size={32} strokeWidth={2.5} />
+              </div>
+
+              <h2 className="text-2xl font-black text-slate-900 mb-3 tracking-tight">
+                Feedback Hub
+              </h2>
+              <p className="text-slate-600 font-bold text-sm leading-relaxed mb-6">
+                Review training effectiveness, trigger automated email assessments, and analyze L&D performance reports.
+              </p>
+
+              <div className="flex items-center gap-2 text-indigo-700 font-black text-xs uppercase tracking-widest">
+                Admin Portal <ShieldCheck size={16} />
+              </div>
             </div>
-
-            <h2 className="text-2xl font-bold text-slate-900 mb-3 group-hover:text-indigo-700 transition-colors">
-              Feedback Hub
-            </h2>
-            <p className="text-slate-700 font-medium leading-relaxed">
-              <span className="text-indigo-700 font-bold underline">Admin Access Only.</span> Manage training calendars, trigger feedback emails, and review performance reports.
-            </p>
           </Link>
 
         </div>
 
         {/* Footer */}
-        <div className="text-center pt-8 border-t border-slate-200">
-          <p className="text-slate-600 font-bold text-xs md:text-sm tracking-wider uppercase">
+        <div className="text-center pt-8 border-t-2 border-slate-200">
+          <p className="text-slate-900 font-black text-xs md:text-sm tracking-widest uppercase">
             Thriveni Earthmovers And Infra Pvt. Ltd.
           </p>
-          <p className="text-slate-500 text-[10px] md:text-xs mt-1 uppercase tracking-widest">
-            Training Department
+          <p className="text-slate-500 font-bold text-[10px] md:text-xs mt-1 uppercase tracking-[0.2em]">
+            Digital Learning Infrastructure 2025
           </p>
         </div>
 
