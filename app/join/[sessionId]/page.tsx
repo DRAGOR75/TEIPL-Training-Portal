@@ -90,6 +90,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                         <p className="text-xs text-slate-500 mb-4">Scale: 1 (Poor) to 5 (Excellent)</p>
 
                         <RatingField label="Rate your knowledge level BEFORE training" name="preTrainingRating" />
+                        <RatingField label="Rate your knowledge level AFTER training" name="postTrainingRating" />
                         <RatingField label="How do you like the training?" name="trainingRating" />
                         <RatingField label="Contents covered are useful for my work" name="contentRating" />
                         <RatingField label="Trainer Knowledge and Delivery" name="trainerRating" />
@@ -122,11 +123,28 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
 
             </div>
 
-            {/* Quick Styles for this page */}
+            {/* 🟢 UPDATED STYLES HERE */}
             <style>{`
         .label-text { display: block; font-size: 0.875rem; font-weight: 600; color: #334155; margin-bottom: 0.25rem; }
-        .input-field { width: 100%; padding: 0.75rem; border: 1px solid #cbd5e1; border-radius: 0.5rem; outline: none; transition: all 0.2s; }
-        .input-field:focus { border-color: #3b82f6; ring: 2px; ring-color: #3b82f6; }
+        
+        /* Added background-color and color */
+        .input-field { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid #cbd5e1; 
+            background-color: #f8fafc; /* Slight gray background */
+            color: #1e293b; /* Dark text color */
+            border-radius: 0.5rem; 
+            outline: none; 
+            transition: all 0.2s; 
+        }
+
+        /* Added explicit color for placeholders */
+        .input-field::placeholder {
+            color: #94a3b8; /* Lighter gray for placeholder */
+        }
+
+        .input-field:focus { border-color: #3b82f6; ring: 2px; ring-color: #3b82f6; background-color: #ffffff; }
       `}</style>
         </div>
     );

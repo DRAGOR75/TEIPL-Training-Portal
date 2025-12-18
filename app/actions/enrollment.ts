@@ -15,6 +15,7 @@ export async function selfEnroll(formData: FormData) {
 
     // 2. Extract Level 1 Ratings (Parse as Integers, default to 0 if missing)
     const preTrainingRating = parseInt(formData.get('preTrainingRating') as string) || 0;
+    const postTrainingRating = parseInt(formData.get('postTrainingRating') as string) || 0;
     const trainingRating = parseInt(formData.get('trainingRating') as string) || 0;
     const contentRating = parseInt(formData.get('contentRating') as string) || 0;
     const trainerRating = parseInt(formData.get('trainerRating') as string) || 0;
@@ -58,6 +59,7 @@ export async function selfEnroll(formData: FormData) {
 
                     // Save Level 1 Feedback Ratings
                     preTrainingRating,
+                    postTrainingRating,
                     trainingRating,
                     contentRating,
                     trainerRating,

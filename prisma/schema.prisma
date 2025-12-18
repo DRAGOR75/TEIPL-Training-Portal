@@ -7,46 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// 1. Training Sessions (UPDATED with Dates)
+// 1. Training Sessions
 model TrainingSession {
-  id                   String   @id @default(uuid())
-  programName          String   @map("program_name")
-  
-  // Trainer Name (Selected from Dropdown in UI)
-  trainerName          String?  @map("trainer_name")
-
-  // 🟢 NEW: Course Duration & Schedule
-  startDate            DateTime @map("start_date")
-  endDate              DateTime @map("end_date")
-  feedbackCreationDate DateTime? @map("feedback_creation_date") // When to send Level 3 emails
-
-  templateType         String   @default("Technical") @map("template_type")
-  emailsSent           Boolean  @default(false) @map("emails_sent")
-  createdAt            DateTime @default(now()) @map("created_at")
+  id                   String        @id @default(uuid())
+  programName          String        @map("program_name")
+  trainerName          String?       @map("trainer_name")
+  startDate            DateTime      @map("start_date")
+  endDate              DateTime      @map("end_date")
+  feedbackCreationDate DateTime?     @map("feedback_creation_date")
+  templateType         String        @default("Technical") @map("template_type")
+  emailsSent           Boolean       @default(false) @map("emails_sent")
+  createdAt            DateTime      @default(now()) @map("created_at")
   
   enrollments          Enrollment[]
 
   @@map("training_sessions")
 }
 
-// 2. Enrollments (Unchanged from your snippet - Includes Level 1 & 3)
+// 2. Enrollments (UPDATED)
 model Enrollment {
-  id        String @id @default(uuid())
-  sessionId String @map("session_id")
-
-  // --- Participant Details ---
-  employeeName  String  @map("employee_name")
-  employeeEmail String  @map("employee_email")
-  managerEmail  String  @map("manager_email")
-  
-  // Identity Fields for QR Code Form
+  id            String @id @default(uuid())
+  sessionId     String @map("session_id")
+  employeeName  String @map("employee_name")
+  employeeEmail String @map("employee_email")
+  managerEmail  String @map("manager_email")
   empId         String? @map("emp_id")       
   managerName   String? @map("manager_name") 
-
-  status        String  @default("Pending") // Pending, Pending Manager, Completed
+  status        String @default("Pending")
 
   // --- Level 1 Feedback (Immediate / Day 0) ---
   preTrainingRating    Int?    @map("pre_training_rating")
+  // 🟢 NEW FIELD: Rate knowledge AFTER training
+  postTrainingRating   Int?    @map("post_training_rating") 
+  
   trainingRating       Int?    @map("training_rating")
   contentRating        Int?    @map("content_rating")
   trainerRating        Int?    @map("trainer_rating")
@@ -63,15 +56,11 @@ model Enrollment {
   q3_Performance       Int?    @map("q3_performance")
   q4_Influence         Int?    @map("q4_influence")
   q5_Efficiency        Int?    @map("q5_efficiency")
-  
   averageRating        Float?  @map("average_rating")
 
-  // --- Manager Review Data ---
   managerAgrees        String? @map("manager_agrees")
   managerComment       String? @map("manager_comment")
-
   updatedAt            DateTime @default(now()) @map("updated_at")
-
   session              TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, employeeEmail])
@@ -82,8 +71,6 @@ model Enrollment {
 // 3. Nominations (Unchanged)
 model Nomination {
   id             String   @id @default(uuid())
-  
-  // -- Employee Info --
   employeeName   String   @map("employee_name")
   employeeEmail  String   @map("employee_email")
   empId          String   @map("emp_id")
@@ -91,31 +78,35 @@ model Nomination {
   designation    String   
   mobile         String   
   experience     String   
-  
-  // -- Nomination Info --
   managerEmail   String   @map("manager_email")
   managerName    String   @map("manager_name")
   programName    String   @default("General Nomination") @map("program_name")
-  
-  // Justification text
   justification  String   @db.Text 
-  
-  // Status: Pending, Approved, Rejected
   status         String   @default("Pending")
-  
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   @@map("nominations")
 }
 
-// 4. Trainers (🟢 NEW TABLE)
+// 4. Trainers (🟢 UPDATED: Added Phone, Removed Expertise)
 model Trainer {
   id        String   @id @default(uuid())
   name      String   @unique
-  email     String?  
-  expertise String?  
+  email     String?  @unique
+  phone     String?  // 🟢 NEW field
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("trainers")
+}
+
+// 5. Admin Users (🟢 NEW: For Auth.js Login)
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // Hashed password
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
 }
