@@ -10,7 +10,8 @@ import {
     MessageSquare,
     CheckCircle2,
     Building2,
-    BookOpen
+    BookOpen,
+    Circle
 } from 'lucide-react';
 
 export default async function JoinSessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
@@ -156,7 +157,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-8">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                                <Star size={20} />
+                                <Circle size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Feedback Ratings</h3>
