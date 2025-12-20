@@ -3,10 +3,6 @@ import { google } from 'googleapis';
 
 const OAuth2 = google.auth.OAuth2;
 
-/**
- * 1. OAUTH2 HANDSHAKE UTILITY
- * This fetches a fresh access token using your Refresh Token
- */
 const getOAuthTransporter = async () => {
   const oauth2Client = new OAuth2(
     process.env.GMAIL_CLIENT_ID,
@@ -18,7 +14,6 @@ const getOAuthTransporter = async () => {
     refresh_token: process.env.GMAIL_REFRESH_TOKEN,
   });
 
-  // Automatically fetch a fresh temporary key
   const accessToken = await new Promise((resolve, reject) => {
     oauth2Client.getAccessToken((err, token) => {
       if (err) reject("Failed to create access token :(");
@@ -26,7 +21,6 @@ const getOAuthTransporter = async () => {
     });
   });
 
-  // Create the professional transporter
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
@@ -40,102 +34,69 @@ const getOAuthTransporter = async () => {
   } as any);
 };
 
-/**
- * HELPER: Get the Base URL (Production Safe)
- */
-const getBaseUrl = () => {
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3000';
-  }
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  return 'https://templtrainingportal.vercel.app';
-};
-
-/**
- * GENERIC EMAIL FUNCTION (Now using OAuth2)
- */
 export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    const transporter = await getOAuthTransporter(); //
+    const transporter = await getOAuthTransporter();
     const info = await transporter.sendMail({
       from: `"Thriveni Training System" <${process.env.EMAIL_USER}>`,
-      to: to,
-      subject: subject,
-      html: html,
+      to,
+      subject,
+      html,
     });
-    console.log(`📧 OAuth2 Email sent to ${to} (ID: ${info.messageId})`);
+    console.log(`📧 Email sent to ${to}`);
     return { success: true };
   } catch (error) {
-    console.error('❌ OAuth2 Email failed:', error);
+    console.error('❌ Email failed:', error);
     return { success: false, error };
   }
 }
 
 /**
- * 1. NOMINATION APPROVAL FUNCTION (For Managers)
+ * EMAIL FOR MANAGERS (Nominations)
  */
 export async function sendApprovalEmail(
   managerEmail: string,
   managerName: string,
-  nomineeName: string,
+  employeeName: string, // Match schema
   justification: string,
   nominationId: string
 ) {
-  const baseUrl = getBaseUrl();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px;">Nomination Approval Request</h2>
-        <p>Dear <strong>${managerName}</strong>,</p>
-        <p>A new training nomination has been submitted for <strong style="color: #2c3e50;">${nomineeName}</strong>.</p>
-        <div style="background-color: #f8f9fa; border-left: 4px solid #0056b3; padding: 15px; margin: 20px 0;">
-          <strong style="display: block; margin-bottom: 5px; color: #555;">Justification / Details:</strong>
-          <span style="font-style: italic; color: #333;">${justification.replace(/\n/g, '<br/>')}</span>
-        </div>
-        <p>Your action is required to proceed. Please click the button below to review this request.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${approvalLink}" style="background-color: #0056b3; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
-            Review & Take Action
-          </a>
-        </div>
-        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-        <p style="font-size: 12px; color: #888; text-align: center;">Thriveni Training & Development System</p>
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+      <h2 style="color: #0056b3;">Nomination Approval Request</h2>
+      <p>Dear <strong>${managerName}</strong>,</p>
+      <p>A training nomination is submitted for <strong>${employeeName}</strong>.</p>
+      <div style="background: #f9f9f9; padding: 10px; border-left: 4px solid #0056b3;">
+        <strong>Justification:</strong><br/>${justification}
       </div>
-    `;
+      <p><a href="${approvalLink}" style="background: #0056b3; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin-top: 15px;">Review & Approve</a></p>
+    </div>`;
 
-  return await sendEmail(managerEmail, `Action Required: Nomination Approval for ${nomineeName}`, html);
+  return await sendEmail(managerEmail, `Action Required: Nomination for ${employeeName}`, html);
 }
 
 /**
- * 2. FEEDBACK REQUEST EMAIL (For Employees)
+ * EMAIL FOR EMPLOYEES (Feedback)
  */
 export async function sendFeedbackRequestEmail(
   employeeEmail: string,
-  employeeName: string,
+  employeeName: string, // Match schema
   programName: string,
   enrollmentId: string
 ) {
-  const baseUrl = getBaseUrl();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 10px;">Training Feedback Request</h2>
-        <p>Dear <strong>${employeeName}</strong>,</p>
-        <p>You recently completed: <strong style="color: #2c3e50;">${programName}</strong>.</p>
-        <p>We value your feedback! Please click below to rate the effectiveness of this training.</p>
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${feedbackLink}" style="background-color: #2e7d32; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
-            Submit Feedback
-          </a>
-        </div>
-        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-        <p style="font-size: 12px; color: #888; text-align: center;">Thriveni Training & Development System</p>
-      </div>
-    `;
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+      <h2 style="color: #2e7d32;">Training Feedback Request</h2>
+      <p>Dear <strong>${employeeName}</strong>,</p>
+      <p>Please provide your feedback for: <strong>${programName}</strong>.</p>
+      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin-top: 15px;">Submit Feedback</a></p>
+    </div>`;
 
   return await sendEmail(employeeEmail, `Feedback Required: ${programName}`, html);
 }

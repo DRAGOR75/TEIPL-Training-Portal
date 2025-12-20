@@ -1,10 +1,10 @@
 'use server'
 
 import { sendApprovalEmail, sendFeedbackRequestEmail } from '@/lib/email';
-import { db } from '@/lib/db'; // Adjust this to your Prisma client path
+import { db } from '@/lib/db';
 
 /**
- * Triggered when you want to notify a Manager about a new Nomination
+ * Triggered from the Nominations Dashboard
  */
 export async function notifyManagerAction(nominationId: string) {
     try {
@@ -14,27 +14,27 @@ export async function notifyManagerAction(nominationId: string) {
 
         if (!nomination) return { success: false, error: "Nomination not found" };
 
-        // Calls your updated OAuth2 email function
         return await sendApprovalEmail(
             nomination.managerEmail,
             nomination.managerName,
-            nomination.employeeName,
-            nomination.justification || "Training nomination request",
+            nomination.employeeName, // Corrected from nomineeName to employeeName
+            nomination.justification,
             nomination.id
         );
     } catch (error) {
         console.error("Action Error:", error);
-        return { success: false, error: "System failed to send mail" };
+        return { success: false, error: "Failed to notify manager" };
     }
 }
 
 /**
- * Triggered when you click "Send Feedback Link" for an Employee
+ * Triggered from the Training Sessions / Enrollments Dashboard
  */
 export async function sendEmployeeFeedbackAction(enrollmentId: string) {
     try {
         const enrollment = await db.enrollment.findUnique({
             where: { id: enrollmentId },
+            include: { session: true } // Need this to get the programName from the relation
         });
 
         if (!enrollment) return { success: false, error: "Enrollment not found" };
@@ -42,11 +42,11 @@ export async function sendEmployeeFeedbackAction(enrollmentId: string) {
         return await sendFeedbackRequestEmail(
             enrollment.employeeEmail,
             enrollment.employeeName,
-            enrollment.programName,
+            enrollment.session.programName, // Accessing programName via the session relation
             enrollment.id
         );
     } catch (error) {
         console.error("Action Error:", error);
-        return { success: false, error: "System failed to send feedback link" };
+        return { success: false, error: "Failed to send feedback link" };
     }
 }
