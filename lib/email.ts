@@ -1,96 +1,82 @@
 import nodemailer from 'nodemailer';
 
-// 1. Create the Transporter
+/**
+ * Creates a standard Nodemailer transporter using an App Password.
+ * This bypasses OAuth complexity for immediate reliability.
+ */
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
+    user: process.env.EMAIL_USER, // Your @thriveni.com email
+    pass: process.env.EMAIL_PASS, // Your 16-character App Password
   },
+  // Keeps the connection alive for multiple messages (optional but good for performance)
+  pool: true,
+  maxConnections: 1,
 });
 
 /**
- * HELPER: Get the Base URL (Production Safe)
+ * CORE SENDER FUNCTION
  */
-const getBaseUrl = () => {
-  // 1. Development Mode always uses localhost
-  if (process.env.NODE_ENV === 'development') {
-    return 'http://localhost:3000';
-  }
-
-  // 2. If you set NEXT_PUBLIC_APP_URL in Vercel, use it (Best Practice)
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-
-  // 3. Fallback to the specific URL you found (Safety Net)
-  return 'https://templtrainingportal.vercel.app';
-};
-
-/**
- * GENERIC EMAIL FUNCTION
- */
-export async function sendEmail(to: string, subject: string, html: string) {
+export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   try {
+    // Verify connection before sending (optional, helps debugging)
+    await new Promise((resolve, reject) => {
+      transporter.verify(function (error, success) {
+        if (error) reject(error);
+        else resolve(success);
+      });
+    });
+
     const info = await transporter.sendMail({
       from: `"Thriveni Training System" <${process.env.EMAIL_USER}>`,
-      to: to,
-      subject: subject,
-      html: html,
+      to,
+      subject,
+      html,
     });
-    console.log(`📧 Generic Email sent to ${to} (ID: ${info.messageId})`);
+
+    console.log(`✅ Email sent to ${to}: ${info.messageId}`);
     return { success: true };
-  } catch (error) {
-    console.error('❌ Generic Email failed:', error);
-    return { success: false, error };
+  } catch (error: any) {
+    console.error('❌ Email failed:', error);
+    return { success: false, error: error.message || error };
   }
 }
 
 /**
- * 1. NOMINATION APPROVAL FUNCTION (For Managers)
+ * EMAIL FOR MANAGERS (Nominations)
  */
 export async function sendApprovalEmail(
   managerEmail: string,
   managerName: string,
-  nomineeName: string,
+  employeeName: string,
   justification: string,
   nominationId: string
 ) {
-  const baseUrl = getBaseUrl();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 10px;">Nomination Approval Request</h2>
-        
-        <p>Dear <strong>${managerName}</strong>,</p>
-        
-        <p>A new training nomination has been submitted for <strong style="color: #2c3e50;">${nomineeName}</strong>.</p>
-        
-        <div style="background-color: #f8f9fa; border-left: 4px solid #0056b3; padding: 15px; margin: 20px 0;">
-          <strong style="display: block; margin-bottom: 5px; color: #555;">Justification / Details:</strong>
-          <span style="font-style: italic; color: #333;">${justification.replace(/\n/g, '<br/>')}</span>
-        </div>
-
-        <p>Your action is required to proceed with this nomination. Please click the button below to review, approve, or reject this request.</p>
-
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${approvalLink}" style="background-color: #0056b3; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
-            Review & Take Action
-          </a>
-        </div>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-        <p style="font-size: 12px; color: #888; text-align: center;">Thriveni Training & Development System</p>
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #0056b3;">Nomination Approval Request</h2>
+      <p>Dear <strong>${managerName}</strong>,</p>
+      <p>A training nomination has been submitted for <strong>${employeeName}</strong>.</p>
+      <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 15px 0;">
+        <strong>Justification:</strong><br/>${justification}
       </div>
-    `;
+      <p>Please review the details and provide your decision below:</p>
+      <p><a href="${approvalLink}" style="background: #0056b3; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Review & Approve</a></p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+    </div>`;
 
-  return await sendEmail(managerEmail, `Action Required: Nomination Approval for ${nomineeName}`, html);
+  return await sendEmail({ to: managerEmail, subject: `Action Required: Nomination for ${employeeName}`, html });
 }
 
 /**
- * 2. FEEDBACK REQUEST EMAIL (For Employees)
- * 🟢 Added this back so your feedback system works!
+ * EMAIL FOR EMPLOYEES (Feedback)
  */
 export async function sendFeedbackRequestEmail(
   employeeEmail: string,
@@ -98,29 +84,19 @@ export async function sendFeedbackRequestEmail(
   programName: string,
   enrollmentId: string
 ) {
-  const baseUrl = getBaseUrl();
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
-      <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <h2 style="color: #2e7d32; border-bottom: 2px solid #2e7d32; padding-bottom: 10px;">Training Feedback Request</h2>
-        
-        <p>Dear <strong>${employeeName}</strong>,</p>
-        
-        <p>You recently completed the training program: <strong style="color: #2c3e50;">${programName}</strong>.</p>
-        
-        <p>We value your feedback! Please take a moment to rate the effectiveness of this training to help us improve.</p>
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #2e7d32;">Training Feedback Request</h2>
+      <p>Dear <strong>${employeeName}</strong>,</p>
+      <p>Thank you for participating in the <strong>${programName}</strong> program.</p>
+      <p>Your feedback is valuable to us. Please click the button below to submit your evaluation:</p>
+      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Submit Feedback</a></p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+    </div>`;
 
-        <div style="text-align: center; margin: 30px 0;">
-          <a href="${feedbackLink}" style="background-color: #2e7d32; color: white; padding: 14px 28px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px; display: inline-block;">
-            Submit Feedback
-          </a>
-        </div>
-        
-        <hr style="border: 0; border-top: 1px solid #eee; margin-top: 30px;">
-        <p style="font-size: 12px; color: #888; text-align: center;">Thriveni Training & Development System</p>
-      </div>
-    `;
-
-  return await sendEmail(employeeEmail, `Feedback Required: ${programName}`, html);
+  return await sendEmail({ to: employeeEmail, subject: `Feedback Required: ${programName}`, html });
 }

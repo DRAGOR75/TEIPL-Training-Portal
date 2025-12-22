@@ -103,10 +103,10 @@ export async function submitEmployeeFeedback(formData: FormData) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
         const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
 
-        await sendEmail(
-            updatedEnrollment.managerEmail,
-            `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
-            `
+        await sendEmail({
+            to: updatedEnrollment.managerEmail,
+            subject: `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
+            html: `
             <h2>Training Effectiveness Review</h2>
             <p><strong>Employee:</strong> ${updatedEnrollment.employeeName}</p>
             <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
@@ -114,7 +114,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
             <p><strong>Please click the link below to validate their ratings:</strong></p>
             <p><a href="${managerLink}">👉 Click Here to Review</a></p>
             `
-        );
+        });
 
         return { success: true };
     } catch (error) {
@@ -196,13 +196,30 @@ export async function createTrainingSession(formData: FormData) {
         return { success: false, message: "Missing required fields" };
     }
 
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
     try {
+        // 1. Check for Duplicates (Double-click prevention / Logic check)
+        const existingSession = await db.trainingSession.findFirst({
+            where: {
+                programName,
+                startDate,
+                endDate,
+            },
+        });
+
+        if (existingSession) {
+            return { success: false, message: "A session with this name and dates already exists." };
+        }
+
+        // 2. Create Session
         await db.trainingSession.create({
             data: {
                 programName,
                 trainerName,
-                startDate: new Date(startDateStr),
-                endDate: new Date(endDateStr),
+                startDate,
+                endDate,
                 // Only set this if the user provided it, otherwise it can be null or handled by logic
                 feedbackCreationDate: feedbackDateStr ? new Date(feedbackDateStr) : null,
                 templateType: 'Technical',

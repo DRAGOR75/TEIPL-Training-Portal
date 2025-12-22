@@ -73,7 +73,7 @@ export default function Home() {
                 Feedback Hub
               </h2>
               <p className="text-slate-600 font-bold text-sm leading-relaxed mb-6">
-                Review training effectiveness, trigger automated email assessments, and analyze L&D performance reports.
+                Review training effectiveness and trigger automated email assessments.
               </p>
 
               <div className="flex items-center gap-2 text-indigo-700 font-black text-xs uppercase tracking-widest">
@@ -90,7 +90,7 @@ export default function Home() {
             Thriveni Earthmovers And Infra Pvt. Ltd.
           </p>
           <p className="text-slate-500 font-bold text-[10px] md:text-xs mt-1 uppercase tracking-[0.2em]">
-            Digital Learning Infrastructure 2025
+            Training Department
           </p>
         </div>
 

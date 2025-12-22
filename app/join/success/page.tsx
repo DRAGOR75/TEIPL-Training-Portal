@@ -1,8 +1,14 @@
+import { CheckCircle } from 'lucide-react';
+
 export default function SuccessPage() {
     return (
         <div className="min-h-screen flex items-center justify-center bg-green-50 p-4">
             <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-green-100 max-w-md w-full">
-                <div className="text-6xl mb-4">🎉</div>
+                <div className="flex justify-center mb-6">
+                    <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                        <CheckCircle size={32} strokeWidth={3} />
+                    </div>
+                </div>
                 <h1 className="text-2xl font-bold text-green-800 mb-2">Feedback Submitted!</h1>
                 <p className="text-green-700 font-medium">
                     Your attendance has been marked.

@@ -10,7 +10,8 @@ import {
     MessageSquare,
     CheckCircle2,
     Building2,
-    BookOpen
+    BookOpen,
+    Circle
 } from 'lucide-react';
 
 export default async function JoinSessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
@@ -43,9 +44,9 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                         <div className="inline-flex items-center gap-2 bg-blue-800/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-blue-400/30 text-blue-100 text-xs font-bold uppercase tracking-widest mb-4">
                             <CheckCircle2 size={14} /> Official Training Record
                         </div>
-                        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Training Feedback & Attendance</h1>
+                        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Training Feedback</h1>
                         <p className="text-blue-100/90 text-base max-w-lg mx-auto font-medium">
-                            Complete this form to mark your attendance and share your valuable feedback.
+                            Complete this form to share your valuable feedback and help us do better.
                         </p>
                     </div>
 
@@ -156,22 +157,22 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-8">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                                <Star size={20} />
+                                <Circle size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Feedback Ratings</h3>
-                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Scale: 1 (Poor) to 5 (Excellent)</p>
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">Please rate the following parameters</p>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 gap-x-8 gap-y-6">
-                            <StarRatingField label="Rate your knowledge level BEFORE training" name="preTrainingRating" />
-                            <StarRatingField label="Rate your knowledge level AFTER training" name="postTrainingRating" />
-                            <StarRatingField label="How would you rate the overall training?" name="trainingRating" />
-                            <StarRatingField label="Contents covered were useful for my work" name="contentRating" />
-                            <StarRatingField label="Trainer Knowledge and Delivery" name="trainerRating" />
-                            <StarRatingField label="Quality of Training Materials" name="materialRating" />
-                            <StarRatingField label="I would recommend this training to others" name="recommendationRating" />
+                            <NumericRatingField label="Rate your knowledge level BEFORE training" name="preTrainingRating" />
+                            <NumericRatingField label="Rate your knowledge level AFTER training" name="postTrainingRating" />
+                            <NumericRatingField label="How would you rate the overall training?" name="trainingRating" />
+                            <NumericRatingField label="Contents covered were useful for my work" name="contentRating" />
+                            <NumericRatingField label="Trainer Knowledge and Delivery" name="trainerRating" />
+                            <NumericRatingField label="Quality of Training Materials" name="materialRating" />
+                            <NumericRatingField label="I would recommend this training to others" name="recommendationRating" />
                         </div>
                     </section>
 
@@ -253,13 +254,13 @@ function TextAreaField({ label, name, placeholder }: { label: string, name: stri
     )
 }
 
-function StarRatingField({ label, name }: { label: string, name: string }) {
+function NumericRatingField({ label, name }: { label: string, name: string }) {
     return (
-        <div className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 hover:border-blue-100 transition-colors">
-            <label className="block text-sm font-bold text-slate-700 mb-3">{label}</label>
-            <div className="flex flex-wrap items-center gap-4 sm:gap-8">
-                <div className="flex flex-row-reverse justify-end gap-1 group/rating">
-                    {[5, 4, 3, 2, 1].map((num) => (
+        <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
+            <label className="block text-sm font-bold text-slate-700 mb-4">{label} <span className="text-red-500">*</span></label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((num) => (
                         <div key={num} className="relative">
                             <input
                                 type="radio"
@@ -271,15 +272,16 @@ function StarRatingField({ label, name }: { label: string, name: string }) {
                             />
                             <label
                                 htmlFor={`${name}-${num}`}
-                                className="cursor-pointer text-slate-300 peer-checked:text-amber-400 hover:text-amber-300 peer-hover:text-amber-300 transition-colors"
+                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 font-bold cursor-pointer transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300"
                             >
-                                <Star size={28} fill="currentColor" strokeWidth={1} />
+                                {num}
                             </label>
                         </div>
                     ))}
                 </div>
-                <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider hidden sm:block">
-                    Select 1 to 5 Stars
+                <div className="flex justify-between w-full sm:w-auto sm:gap-12 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    <span>Poor</span>
+                    <span>Excellent</span>
                 </div>
             </div>
         </div>

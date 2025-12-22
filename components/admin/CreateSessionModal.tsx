@@ -5,6 +5,7 @@ import { createTrainingSession } from '@/app/actions'; // Ensure this action exi
 
 export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Auto-calculate Feedback Date (+25 days)
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,9 +36,23 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                 </div>
 
                 <form action={async (formData) => {
-                    await createTrainingSession(formData);
-                    setIsOpen(false);
-                    window.location.reload();
+                    if (isSubmitting) return;
+                    setIsSubmitting(true);
+
+                    try {
+                        const result = await createTrainingSession(formData);
+                        if (result.success) {
+                            setIsOpen(false);
+                            window.location.reload();
+                        } else {
+                            alert(result.message || "Failed to create session.");
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        alert("An unexpected error occurred.");
+                    } finally {
+                        setIsSubmitting(false);
+                    }
                 }} className="p-6 space-y-4 text-left">
 
                     <div>
@@ -87,8 +102,10 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                     </div>
 
                     <div className="pt-2 flex justify-end gap-3">
-                        <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium">Cancel</button>
-                        <button type="submit" className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm">Create Session</button>
+                        <button type="button" disabled={isSubmitting} onClick={() => setIsOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium disabled:opacity-50">Cancel</button>
+                        <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                            {isSubmitting ? 'Creating...' : 'Create Session'}
+                        </button>
                     </div>
 
                 </form>
