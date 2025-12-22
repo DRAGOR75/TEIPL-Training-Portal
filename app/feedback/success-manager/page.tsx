@@ -19,10 +19,6 @@ export default function ManagerSuccessPage() {
                     Thankyou for Your Valuable time.
                 </div>
 
-                <Link href="/" className="inline-block w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
-                    Return to Home
-                </Link>
-
 
             </div>
         </div>
