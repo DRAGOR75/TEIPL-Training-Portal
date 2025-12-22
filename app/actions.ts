@@ -103,10 +103,10 @@ export async function submitEmployeeFeedback(formData: FormData) {
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
         const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
 
-        await sendEmail(
-            updatedEnrollment.managerEmail,
-            `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
-            `
+        await sendEmail({
+            to: updatedEnrollment.managerEmail,
+            subject: `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
+            html: `
             <h2>Training Effectiveness Review</h2>
             <p><strong>Employee:</strong> ${updatedEnrollment.employeeName}</p>
             <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
@@ -114,7 +114,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
             <p><strong>Please click the link below to validate their ratings:</strong></p>
             <p><a href="${managerLink}">👉 Click Here to Review</a></p>
             `
-        );
+        });
 
         return { success: true };
     } catch (error) {
