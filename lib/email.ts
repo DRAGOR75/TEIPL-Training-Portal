@@ -55,7 +55,7 @@ export async function sendApprovalEmail(
   justification: string,
   nominationId: string
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
@@ -84,7 +84,7 @@ export async function sendFeedbackRequestEmail(
   programName: string,
   enrollmentId: string
 ) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `

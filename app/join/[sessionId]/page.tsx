@@ -172,7 +172,23 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <NumericRatingField label="Contents covered were useful for my work" name="contentRating" />
                             <NumericRatingField label="Trainer Knowledge and Delivery" name="trainerRating" />
                             <NumericRatingField label="Quality of Training Materials" name="materialRating" />
-                            <NumericRatingField label="I would recommend this training to others" name="recommendationRating" />
+                            <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
+                                <label className="block text-sm font-bold text-slate-700 mb-4">I would recommend this training to others <span className="text-red-500">*</span></label>
+                                <div className="flex items-center gap-4">
+                                    <label className="cursor-pointer relative">
+                                        <input type="radio" name="recommendationRating" value="5" required className="peer sr-only" />
+                                        <div className="px-6 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 font-bold transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm">
+                                            Yes
+                                        </div>
+                                    </label>
+                                    <label className="cursor-pointer relative">
+                                        <input type="radio" name="recommendationRating" value="1" required className="peer sr-only" />
+                                        <div className="px-6 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 font-bold transition-all peer-checked:bg-slate-600 peer-checked:text-white peer-checked:border-slate-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm">
+                                            No
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                     </section>
 
