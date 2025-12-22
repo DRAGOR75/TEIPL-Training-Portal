@@ -1,53 +1,47 @@
 import nodemailer from 'nodemailer';
-import { google } from 'googleapis';
 
-const OAuth2 = google.auth.OAuth2;
+/**
+ * Creates a standard Nodemailer transporter using an App Password.
+ * This bypasses OAuth complexity for immediate reliability.
+ */
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // Use SSL
+  auth: {
+    user: process.env.EMAIL_USER, // Your @thriveni.com email
+    pass: process.env.EMAIL_PASS, // Your 16-character App Password
+  },
+  // Keeps the connection alive for multiple messages (optional but good for performance)
+  pool: true,
+  maxConnections: 1,
+});
 
-const getOAuthTransporter = async () => {
-  const oauth2Client = new OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    "https://developers.google.com/oauthplayground"
-  );
-
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
-  });
-
-  const accessToken = await new Promise((resolve, reject) => {
-    oauth2Client.getAccessToken((err, token) => {
-      if (err) reject("Failed to create access token :(");
-      resolve(token);
-    });
-  });
-
-  return nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      type: 'OAuth2',
-      user: process.env.EMAIL_USER,
-      accessToken,
-      clientId: process.env.GMAIL_CLIENT_ID,
-      clientSecret: process.env.GMAIL_CLIENT_SECRET,
-      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-    },
-  } as any);
-};
-
-export async function sendEmail(to: string, subject: string, html: string) {
+/**
+ * CORE SENDER FUNCTION
+ */
+export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   try {
-    const transporter = await getOAuthTransporter();
+    // Verify connection before sending (optional, helps debugging)
+    await new Promise((resolve, reject) => {
+      transporter.verify(function (error, success) {
+        if (error) reject(error);
+        else resolve(success);
+      });
+    });
+
     const info = await transporter.sendMail({
       from: `"Thriveni Training System" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
-    console.log(`📧 Email sent to ${to}`);
+
+    console.log(`✅ Email sent to ${to}: ${info.messageId}`);
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Email failed:', error);
-    return { success: false, error };
+    return { success: false, error: error.message || error };
   }
 }
 
@@ -57,7 +51,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
 export async function sendApprovalEmail(
   managerEmail: string,
   managerName: string,
-  employeeName: string, // Match schema
+  employeeName: string,
   justification: string,
   nominationId: string
 ) {
@@ -65,17 +59,20 @@ export async function sendApprovalEmail(
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Nomination Approval Request</h2>
       <p>Dear <strong>${managerName}</strong>,</p>
-      <p>A training nomination is submitted for <strong>${employeeName}</strong>.</p>
-      <div style="background: #f9f9f9; padding: 10px; border-left: 4px solid #0056b3;">
+      <p>A training nomination has been submitted for <strong>${employeeName}</strong>.</p>
+      <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 15px 0;">
         <strong>Justification:</strong><br/>${justification}
       </div>
-      <p><a href="${approvalLink}" style="background: #0056b3; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin-top: 15px;">Review & Approve</a></p>
+      <p>Please review the details and provide your decision below:</p>
+      <p><a href="${approvalLink}" style="background: #0056b3; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Review & Approve</a></p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
 
-  return await sendEmail(managerEmail, `Action Required: Nomination for ${employeeName}`, html);
+  return await sendEmail({ to: managerEmail, subject: `Action Required: Nomination for ${employeeName}`, html });
 }
 
 /**
@@ -83,7 +80,7 @@ export async function sendApprovalEmail(
  */
 export async function sendFeedbackRequestEmail(
   employeeEmail: string,
-  employeeName: string, // Match schema
+  employeeName: string,
   programName: string,
   enrollmentId: string
 ) {
@@ -91,12 +88,15 @@ export async function sendFeedbackRequestEmail(
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #2e7d32;">Training Feedback Request</h2>
       <p>Dear <strong>${employeeName}</strong>,</p>
-      <p>Please provide your feedback for: <strong>${programName}</strong>.</p>
-      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 10px 20px; text-decoration: none; display: inline-block; margin-top: 15px;">Submit Feedback</a></p>
+      <p>Thank you for participating in the <strong>${programName}</strong> program.</p>
+      <p>Your feedback is valuable to us. Please click the button below to submit your evaluation:</p>
+      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Submit Feedback</a></p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
 
-  return await sendEmail(employeeEmail, `Feedback Required: ${programName}`, html);
+  return await sendEmail({ to: employeeEmail, subject: `Feedback Required: ${programName}`, html });
 }
