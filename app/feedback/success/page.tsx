@@ -19,6 +19,10 @@ export default function SuccessPage() {
                     Your manager has been notified to validate your effectiveness rating.
                 </div>
 
+                <Link href="/" className="inline-block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200">
+                    Return to Home
+                </Link>
+
 
             </div>
         </div>
