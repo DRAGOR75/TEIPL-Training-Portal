@@ -9,8 +9,8 @@ const transporter = nodemailer.createTransport({
   port: parseInt(process.env.EMAIL_PORT || '587'), // Standard SMTP port
   secure: false, // Must be false for port 587 (uses STARTTLS)
   auth: {
-    user: process.env.EMAIL_USER, // Your Brevo Login Email
-    pass: process.env.EMAIL_PASS, // Your Brevo SMTP Key
+    user: process.env.SMTP_USER, // Your Brevo Login Email
+    pass: process.env.SMTP_KEY, // Your Brevo SMTP Key
   },
   // Keeps the connection alive for multiple messages (optional but good for performance)
   pool: true,
