@@ -89,7 +89,7 @@ export default function DashboardClient({
             if (hasFeedbackTrigger) {
                 return (
                     <div className="flex justify-center mt-1">
-                        <div className="h-1.5 w-1.5 bg-red-600 rounded-full" title="Level 3 Feedback Trigger"></div>
+                        <div className="h-1.5 w-1.5 bg-red-600 rounded-full" title="Post Feedback Assesment"></div>
                     </div>
                 );
             }
@@ -97,7 +97,7 @@ export default function DashboardClient({
             if (hasSessionEnd) {
                 return (
                     <div className="flex justify-center mt-1">
-                        <div className="h-1.5 w-1.5 bg-blue-400 rounded-full" title="Session Ends"></div>
+                        <div className="h-1.5 w-1.5 bg-blue-400 rounded-full" title="Training End Date"></div>
                     </div>
                 );
             }
@@ -165,7 +165,7 @@ export default function DashboardClient({
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-red-600 rounded-full"></div>
-                                    <span className="text-slate-500">L3 Feedback</span>
+                                    <span className="text-slate-500">Post Feedback Assesment</span>
                                 </div>
                             </div>
                         </div>

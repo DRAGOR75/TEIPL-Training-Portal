@@ -30,8 +30,8 @@ export default function LoginPage() {
                 setError("Invalid email or password.");
                 setLoading(false);
             } else {
-                router.push("/admin/dashboard");
-                router.refresh();
+                // Force full reload to ensure session is picked up by Middleware/Server
+                window.location.href = "/admin/dashboard";
             }
         } catch (err) {
             setError("Something went wrong. Please try again.");
