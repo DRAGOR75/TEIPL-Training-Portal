@@ -30,6 +30,7 @@ type Session = {
     trainerName: string | null;
     startDate: Date;
     endDate: Date;
+    feedbackCreationDate?: Date | null;
     emailsSent: boolean;
     enrollments: any[];
 };
@@ -54,11 +55,7 @@ export default function DashboardClient({
     initialPendingReviews
 }: DashboardClientProps) {
     const [date, setDate] = useState<any>(new Date());
-    // We can use state if we need client-side updates, 
-    // but typically server actions + router.refresh() handles updates.
-    // However, keeping state allows for immediate UI updates if we wanted.
-    // For this refactor, we'll initialize with props.
-    // Since revalidatePath reloads the page, props will update.
+
     const sessions = initialSessions;
     const trainers = initialTrainers;
     const pendingReviews = initialPendingReviews;
@@ -69,27 +66,49 @@ export default function DashboardClient({
         return `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${e.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     };
 
+    const isSameDay = (date1: Date, date2: Date) => {
+        if (!date1 || !date2) return false;
+        const d1 = new Date(date1);
+        const d2 = new Date(date2);
+
+        return d1.getFullYear() === d2.getFullYear() &&
+            d1.getMonth() === d2.getMonth() &&
+            d1.getDate() === d2.getDate();
+    };
+
     const tileContent = ({ date, view }: { date: Date; view: string }) => {
         if (view === 'month') {
-            const hasSession = sessions.some(s => {
-                const start = new Date(s.startDate);
-                const end = new Date(s.endDate);
-                const current = new Date(date);
-                start.setHours(0, 0, 0, 0);
-                end.setHours(23, 59, 59, 999);
-                return current >= start && current <= end;
-            });
+            // Check for Level 3 Feedback Date
+            const hasFeedbackTrigger = sessions.some(s =>
+                s.feedbackCreationDate && isSameDay(date, s.feedbackCreationDate)
+            );
 
-            if (hasSession) {
+            // Check for Session End Date
+            const hasSessionEnd = sessions.some(s => isSameDay(date, s.endDate));
+
+            if (hasFeedbackTrigger) {
                 return (
                     <div className="flex justify-center mt-1">
-                        <div className="h-1.5 w-1.5 bg-blue-600 rounded-full"></div>
+                        <div className="h-1.5 w-1.5 bg-red-600 rounded-full" title="Post Feedback Assesment"></div>
+                    </div>
+                );
+            }
+
+            if (hasSessionEnd) {
+                return (
+                    <div className="flex justify-center mt-1">
+                        <div className="h-1.5 w-1.5 bg-blue-400 rounded-full" title="Training End Date"></div>
                     </div>
                 );
             }
         }
         return null;
     };
+
+    const filteredSessions = sessions.filter(s =>
+        (s.feedbackCreationDate && isSameDay(date, s.feedbackCreationDate)) ||
+        isSameDay(date, s.endDate)
+    );
 
     const downloadQRCode = (sessionId: string, programName: string) => {
         const svg = document.getElementById(`qr-${sessionId}`);
@@ -139,6 +158,16 @@ export default function DashboardClient({
                                 tileContent={tileContent}
                                 className="rounded-xl border-none w-full p-2"
                             />
+                            <div className="flex gap-4 mt-4 text-xs justify-center">
+                                <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <span className="text-slate-500">Session End</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-red-600 rounded-full"></div>
+                                    <span className="text-slate-500">Post Feedback Assesment</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -176,16 +205,18 @@ export default function DashboardClient({
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
                             <QrCode className="text-blue-700" size={20} />
-                            <h2 className="text-lg font-bold text-slate-900">Active Sessions</h2>
+                            <h2 className="text-lg font-bold text-slate-900">
+                                {date ? `Sessions for ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Active Sessions'}
+                            </h2>
                         </div>
 
-                        {sessions.length === 0 ? (
+                        {filteredSessions.length === 0 ? (
                             <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-                                <p className="text-slate-500 font-medium italic">No active sessions found.</p>
+                                <p className="text-slate-500 font-medium italic">No sessions scheduled for this date.</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {sessions.map((t) => (
+                                {filteredSessions.map((t) => (
                                     <div key={t.id} className="p-5 border border-slate-200 rounded-2xl bg-white hover:border-blue-300 hover:shadow-md transition-all group">
                                         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                                             <div className="flex-1 space-y-4">
@@ -206,6 +237,12 @@ export default function DashboardClient({
                                                         <CalendarIcon size={16} className="text-slate-400" />
                                                         <span>{formatDateRange(t.startDate, t.endDate)}</span>
                                                     </div>
+                                                    {t.feedbackCreationDate && (
+                                                        <div className="flex items-center gap-2 text-red-600">
+                                                            <CalendarIcon size={16} />
+                                                            <span>L3 Trigger: {new Date(t.feedbackCreationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-2">
                                                         <Users size={16} className="text-slate-400" />
                                                         <span>{t.enrollments.length} Participants</span>

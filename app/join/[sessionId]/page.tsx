@@ -35,50 +35,52 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
             <div className="max-w-3xl w-full mx-auto bg-white rounded-2xl shadow-xl shadow-slate-200 border border-slate-100 overflow-hidden">
 
                 {/* Header Section */}
-                <div className="bg-gradient-to-r from-blue-700 to-blue-900 p-10 text-white relative overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-slate-900 p-8 md:p-12 text-center text-white relative overflow-hidden">
                     {/* Background Pattern */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32 pointer-events-none"></div>
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-24 -mb-24 pointer-events-none"></div>
+                    <div className="absolute top-0 left-0 w-full h-full opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-500 via-slate-900 to-slate-900 pointer-events-none"></div>
 
-                    <div className="relative z-10 text-center">
-                        <div className="inline-flex items-center gap-2 bg-blue-800/50 backdrop-blur-sm px-4 py-1.5 rounded-full border border-blue-400/30 text-blue-100 text-xs font-bold uppercase tracking-widest mb-4">
-                            <CheckCircle2 size={14} /> Official Training Record
+                    <div className="relative z-10 max-w-2xl mx-auto">
+                        <div className="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-sm px-3 py-1 rounded-full border border-blue-500/20 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-6">
+                            <CheckCircle2 size={12} /> Official Training Record
                         </div>
-                        <h1 className="text-3xl font-extrabold mb-3 tracking-tight">Training Feedback</h1>
-                        <p className="text-blue-100/90 text-base max-w-lg mx-auto font-medium">
-                            Complete this form to share your valuable feedback and help us do better.
+
+                        <h1 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight text-white">
+                            Training Feedback
+                        </h1>
+                        <p className="text-slate-300 text-sm md:text-base font-medium mb-8 leading-relaxed">
+                            Your insights help us elevate the training experience. Please take a moment to share your feedback.
                         </p>
-                    </div>
 
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <BookOpen size={18} className="text-blue-200" />
+                        {/* Professional Metadata Strip */}
+                        <div className="inline-flex flex-wrap items-center justify-center gap-y-3 gap-x-6 md:gap-x-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 mx-auto">
+                            <div className="text-left">
+                                <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Program</p>
+                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                    <BookOpen size={14} className="text-blue-400" />
+                                    {session.programName}
                                 </div>
-                                <p className="text-[10px] uppercase text-blue-200 font-bold tracking-wider">Program</p>
                             </div>
-                            <p className="font-bold text-lg text-white leading-tight pl-[3.25rem]">{session.programName}</p>
-                        </div>
 
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <User size={18} className="text-blue-200" />
-                                </div>
-                                <p className="text-[10px] uppercase text-blue-200 font-bold tracking-wider">Trainer</p>
-                            </div>
-                            <p className="font-bold text-lg text-white leading-tight pl-[3.25rem]">{session.trainerName}</p>
-                        </div>
+                            <div className="w-px h-8 bg-white/10 hidden md:block"></div>
 
-                        <div className="bg-white/10 backdrop-blur-md rounded-xl p-4 border border-white/10">
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="p-2 bg-blue-500/20 rounded-lg">
-                                    <Calendar size={18} className="text-blue-200" />
+                            <div className="text-left">
+                                <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Trainer</p>
+                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                    <User size={14} className="text-blue-400" />
+                                    {session.trainerName}
                                 </div>
-                                <p className="text-[10px] uppercase text-blue-200 font-bold tracking-wider">Date</p>
                             </div>
-                            <p className="font-bold text-lg text-white leading-tight pl-[3.25rem]">{dateStr}</p>
+
+                            <div className="w-px h-8 bg-white/10 hidden md:block"></div>
+
+                            <div className="text-left">
+                                <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Date</p>
+                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                    <Calendar size={14} className="text-blue-400" />
+                                    {dateStr}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -274,8 +276,9 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
     return (
         <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
             <label className="block text-sm font-bold text-slate-700 mb-4">{label} <span className="text-red-500">*</span></label>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-center gap-2">
+
+            <div className="inline-block"> {/* Constrains width to the content */}
+                <div className="flex items-center gap-3 mb-2">
                     {[1, 2, 3, 4, 5].map((num) => (
                         <div key={num} className="relative">
                             <input
@@ -288,16 +291,18 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
                             />
                             <label
                                 htmlFor={`${name}-${num}`}
-                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 font-bold cursor-pointer transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300"
+                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 font-bold cursor-pointer transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm"
                             >
                                 {num}
                             </label>
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-between w-full sm:w-auto sm:gap-12 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                    <span>Poor</span>
-                    <span>Excellent</span>
+
+                {/* Labels matched to the button width (w-10 matches button w-10) */}
+                <div className="flex justify-between w-full px-0.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-10">Poor</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-10">Excellent</span>
                 </div>
             </div>
         </div>
