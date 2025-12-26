@@ -192,7 +192,7 @@ export default function DashboardClient({
                                     <div>
                                         <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Active</p>
                                         <h3 className="text-4xl font-black">
-                                            {sessions.filter(s => !s.emailsSent).length}
+                                            {filteredSessions.filter(s => !s.emailsSent).length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80">
                                             In Progress
@@ -203,7 +203,7 @@ export default function DashboardClient({
                                     <div className="border-l border-blue-500/30 pl-8">
                                         <p className="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Completed</p>
                                         <h3 className="text-4xl font-black text-emerald-100">
-                                            {sessions.filter(s => s.emailsSent).length}
+                                            {filteredSessions.filter(s => s.emailsSent).length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80 text-emerald-100">
                                             Finished
