@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { auth } from "@/auth"; // Updated: Import auth
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -19,18 +20,21 @@ export const metadata: Metadata = {
 
 import Navbar from "@/components/Navbar";
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const session = await auth(); // Updated: Fetch session
+
     return (
         <html lang="en">
             <body
                 className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans text-slate-900`}
                 suppressHydrationWarning={true}
             >
-                <Navbar />
+                {/* Updated: Pass session to Navbar */}
+                <Navbar session={session} />
                 {children}
             </body>
         </html>

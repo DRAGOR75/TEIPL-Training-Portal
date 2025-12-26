@@ -1,27 +1,37 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 
-export const dynamic = 'force-dynamic'; // Ensures Vercel doesn't cache this route
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    console.log("Starting Hardcoded Brevo Test...");
+    // --- 🔍 DEBUGGER START ---
+    console.log("==========================================");
+    console.log("DEBUG: Checking Environment Variables...");
+    // Consistently using SMTP (Simple Mail Transfer Protocol)
+    console.log("SMTP_USER:", process.env.SMTP_USER ? `'${process.env.SMTP_USER}'` : "❌ MISSING");
+    console.log("SMTP_KEY Length:", process.env.SMTP_KEY ? process.env.SMTP_KEY.length : "❌ MISSING");
 
-    // 1. Setup Transporter with HARDCODED Credentials
+    if (process.env.SMTP_USER && process.env.SMTP_USER.endsWith(' ')) {
+        console.log("⚠️ WARNING: SMTP_USER has a hidden space at the end!");
+    }
+    console.log("==========================================");
+    // --- 🔍 DEBUGGER END ---
+
     const transporter = nodemailer.createTransport({
         host: 'smtp-relay.brevo.com',
         port: 587,
-        secure: false, // true for 465, false for other ports
+        secure: false,
         auth: {
+            // Updated variable names to match standard SMTP spelling
             user: process.env.SMTP_USER,
             pass: process.env.SMTP_KEY,
         },
         tls: {
-            rejectUnauthorized: false // Helps avoid some Vercel SSL handshake errors
+            rejectUnauthorized: false
         }
     });
 
     try {
-        // 2. Verify Connection First
         await new Promise((resolve, reject) => {
             transporter.verify(function (error, success) {
                 if (error) {
@@ -34,29 +44,25 @@ export async function GET() {
             });
         });
 
-        // 3. Send Email
         const info = await transporter.sendMail({
             from: '"Vercel Debugger" <bvg@thriveni.com>',
             to: 'bvg@thriveni.com',
-            subject: 'Brevo Hardcoded Test - Vercel',
+            subject: 'Brevo SMTP spelling Fix Test',
             html: `
-        <div style="padding: 20px; font-family: sans-serif;">
-          <h2 style="color: green;">It Works!</h2>
-          <p>If you are reading this, your Brevo credentials are correct.</p>
-          <p><strong>Environment:</strong> Vercel / Production</p>
-        </div>
-      `,
+                <div style="padding: 20px; font-family: sans-serif;">
+                  <h2 style="color: green;">✅ SMTP Spelling Fixed!</h2>
+                  <p>The code and .env are now perfectly aligned.</p>
+                </div>
+            `,
         });
 
-        console.log("Email sent: ", info.messageId);
         return NextResponse.json({ success: true, messageId: info.messageId });
 
     } catch (error: any) {
-        console.error("Hardcoded Send Error:", error);
         return NextResponse.json({
             success: false,
             error: error.message || error,
-            stack: error.stack
+            isAuthError: error.message.includes('535')
         }, { status: 500 });
     }
 }

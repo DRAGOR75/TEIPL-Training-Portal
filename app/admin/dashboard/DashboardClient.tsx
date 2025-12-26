@@ -177,18 +177,43 @@ export default function DashboardClient({
                 {/* RIGHT COLUMN */}
                 <div className="w-full lg:w-2/3 flex flex-col gap-6">
                     {/* Stats & Actions */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-blue-700 text-white rounded-2xl p-6 shadow-lg flex flex-col justify-between relative overflow-hidden">
-                            <Users className="absolute -right-4 -bottom-4 text-white/10" size={120} />
-                            <div>
-                                <p className="text-blue-100 text-xs font-black uppercase tracking-widest mb-1">Pending Reviews</p>
-                                <h3 className="text-4xl font-black">{pendingReviews}</h3>
-                            </div>
-                            <div className="mt-4 flex items-center gap-2 text-xs bg-white/20 backdrop-blur-md p-2 rounded-lg w-fit font-bold">
-                                <Clock size={14} /> System Online
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Session Overview Card */}
+                        <div className="bg-blue-700 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
+                            <LayoutDashboard className="absolute -right-8 -bottom-8 text-white/10" size={150} />
+
+                            <div className="relative z-10">
+                                <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
+                                    <Clock size={18} /> Session Overview
+                                </h3>
+
+                                <div className="grid grid-cols-2 gap-8">
+                                    {/* Active Count */}
+                                    <div>
+                                        <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Active</p>
+                                        <h3 className="text-4xl font-black">
+                                            {sessions.filter(s => !s.emailsSent).length}
+                                        </h3>
+                                        <div className="mt-2 text-[10px] font-medium opacity-80">
+                                            In Progress
+                                        </div>
+                                    </div>
+
+                                    {/* Completed Count */}
+                                    <div className="border-l border-blue-500/30 pl-8">
+                                        <p className="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Completed</p>
+                                        <h3 className="text-4xl font-black text-emerald-100">
+                                            {sessions.filter(s => s.emailsSent).length}
+                                        </h3>
+                                        <div className="mt-2 text-[10px] font-medium opacity-80 text-emerald-100">
+                                            Finished
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
+                        {/* Create Session */}
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
                             <div className="p-3 bg-blue-50 rounded-full text-blue-700">
                                 <PlusCircle size={32} />
@@ -240,7 +265,7 @@ export default function DashboardClient({
                                                     {t.feedbackCreationDate && (
                                                         <div className="flex items-center gap-2 text-red-600">
                                                             <CalendarIcon size={16} />
-                                                            <span>L3 Trigger: {new Date(t.feedbackCreationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                                            <span>Post Feedback Assessment: {new Date(t.feedbackCreationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                                         </div>
                                                     )}
                                                     <div className="flex items-center gap-2">

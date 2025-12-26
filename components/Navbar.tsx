@@ -5,9 +5,11 @@ import Image from 'next/image';
 import { useState } from 'react';
 import { Menu, X, Home, ShieldCheck, FileText, LayoutDashboard } from 'lucide-react';
 import SignOutButton from './auth/SignOutButton';
+import { Session } from 'next-auth';
 
-export default function Navbar() {
+export default function Navbar({ session }: { session: Session | null }) {
     const [isOpen, setIsOpen] = useState(false);
+    const isLoggedIn = !!session?.user;
 
     return (
         <nav className="bg-white shadow-md border-b border-slate-200 sticky top-0 z-50">
@@ -46,9 +48,12 @@ export default function Navbar() {
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
                         <NavLink href="/nominations" icon={<FileText size={18} />} text="Nominations" />
                         <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Hub" />
-                        <div className="ml-4 pl-4 border-l border-slate-200">
-                            <SignOutButton />
-                        </div>
+
+                        {isLoggedIn && (
+                            <div className="ml-4 pl-4 border-l border-slate-200">
+                                <SignOutButton />
+                            </div>
+                        )}
                     </div>
 
                     {/* Mobile Menu Button */}
@@ -70,9 +75,12 @@ export default function Navbar() {
                         <MobileNavLink href="/" onClick={() => setIsOpen(false)} text="Home" />
                         <MobileNavLink href="/nominations" onClick={() => setIsOpen(false)} text="Nominations" />
                         <MobileNavLink href="/admin/dashboard" onClick={() => setIsOpen(false)} text="Feedback Hub" />
-                        <div className="pt-4 border-t border-slate-100 mt-2 flex justify-center">
-                            <SignOutButton />
-                        </div>
+
+                        {isLoggedIn && (
+                            <div className="pt-4 border-t border-slate-100 mt-2 flex justify-center">
+                                <SignOutButton />
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

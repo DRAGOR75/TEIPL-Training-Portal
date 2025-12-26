@@ -53,20 +53,21 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                         </p>
 
                         {/* Professional Metadata Strip */}
-                        <div className="inline-flex flex-wrap items-center justify-center gap-y-3 gap-x-6 md:gap-x-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 mx-auto">
-                            <div className="text-left">
+                        <div className="inline-flex flex-wrap items-center justify-center gap-y-4 gap-x-6 md:gap-x-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 mx-auto w-full md:w-auto">
+                            <div className="text-center md:text-left w-full md:w-auto">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Program</p>
-                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
                                     <BookOpen size={14} className="text-blue-400" />
                                     {session.programName}
                                 </div>
                             </div>
 
+
                             <div className="w-px h-8 bg-white/10 hidden md:block"></div>
 
-                            <div className="text-left">
+                            <div className="text-center md:text-left w-full md:w-auto">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Trainer</p>
-                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
                                     <User size={14} className="text-blue-400" />
                                     {session.trainerName}
                                 </div>
@@ -74,9 +75,9 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
 
                             <div className="w-px h-8 bg-white/10 hidden md:block"></div>
 
-                            <div className="text-left">
+                            <div className="text-center md:text-left w-full md:w-auto">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Date</p>
-                                <div className="flex items-center gap-2 text-white font-semibold text-sm">
+                                <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
                                     <Calendar size={14} className="text-blue-400" />
                                     {dateStr}
                                 </div>
@@ -86,7 +87,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                 </div>
 
                 {/* The Form */}
-                <form action={selfEnroll} className="p-8 md:p-10 space-y-10">
+                <form action={selfEnroll} className="p-5 md:p-10 space-y-8 md:space-y-10">
                     <input type="hidden" name="sessionId" value={sessionId} />
 
                     {/* SECTION 1: Personal Details */}
@@ -277,8 +278,8 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
         <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
             <label className="block text-sm font-bold text-slate-700 mb-4">{label} <span className="text-red-500">*</span></label>
 
-            <div className="inline-block"> {/* Constrains width to the content */}
-                <div className="flex items-center gap-3 mb-2">
+            <div className="inline-block max-w-full"> {/* Constrains width to the content */}
+                <div className="flex items-center gap-1 md:gap-3 mb-2">
                     {[1, 2, 3, 4, 5].map((num) => (
                         <div key={num} className="relative">
                             <input
@@ -291,7 +292,7 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
                             />
                             <label
                                 htmlFor={`${name}-${num}`}
-                                className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 font-bold cursor-pointer transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm"
+                                className="w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 font-bold cursor-pointer transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 hover:border-slate-300 shadow-sm text-sm md:text-base"
                             >
                                 {num}
                             </label>
@@ -301,8 +302,8 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
 
                 {/* Labels matched to the button width (w-10 matches button w-10) */}
                 <div className="flex justify-between w-full px-0.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-10">Poor</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-10">Excellent</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">Poor</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">Excellent</span>
                 </div>
             </div>
         </div>

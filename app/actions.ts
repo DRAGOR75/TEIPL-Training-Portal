@@ -112,7 +112,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
             <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
             <p>The employee has submitted their post-training feedback.</p>
             <p><strong>Please click the link below to validate their ratings:</strong></p>
-            <p><a href="${managerLink}">👉 Click Here to Review</a></p>
+            <p><a href="${managerLink}"> Click Here to Review</a></p>
             `
         });
 
@@ -169,10 +169,10 @@ export async function sendFeedbackEmails(sessionId: string) {
             }
         }
 
-        await db.trainingSession.update({
-            where: { id: sessionId },
-            data: { emailsSent: true }
-        });
+        // await db.trainingSession.update({
+        //     where: { id: sessionId },
+        //     data: { emailsSent: true }
+        // });
 
         revalidatePath('/admin/dashboard');
         return { success: true, message: `Emails sent to ${count} employees.` };
