@@ -3,41 +3,47 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  // The Pooled URL (Fast for your app users)
+  url       = env("DATABASE_URL")
+  // The Direct URL (Required for migrations to work on Neon)
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
+
+// ==========================================
+// EXISTING TRAINING SYSTEM (UNCHANGED)
+// ==========================================
 
 // 1. Training Sessions
 model TrainingSession {
-  id                   String        @id @default(uuid())
-  programName          String        @map("program_name")
-  trainerName          String?       @map("trainer_name")
-  startDate            DateTime      @map("start_date")
-  endDate              DateTime      @map("end_date")
-  feedbackCreationDate DateTime?     @map("feedback_creation_date")
-  templateType         String        @default("Technical") @map("template_type")
-  emailsSent           Boolean       @default(false) @map("emails_sent")
-  createdAt            DateTime      @default(now()) @map("created_at")
+  id                   String      @id @default(uuid())
+  programName          String      @map("program_name")
+  trainerName          String?     @map("trainer_name")
+  startDate            DateTime    @map("start_date")
+  endDate              DateTime    @map("end_date")
+  feedbackCreationDate DateTime?   @map("feedback_creation_date")
+  templateType         String      @default("Technical") @map("template_type")
+  emailsSent           Boolean     @default(false) @map("emails_sent")
+  createdAt            DateTime    @default(now()) @map("created_at")
   
   enrollments          Enrollment[]
 
   @@map("training_sessions")
 }
 
-// 2. Enrollments (UPDATED)
+// 2. Enrollments
 model Enrollment {
-  id            String @id @default(uuid())
-  sessionId     String @map("session_id")
-  employeeName  String @map("employee_name")
-  employeeEmail String @map("employee_email")
-  managerEmail  String @map("manager_email")
-  empId         String? @map("emp_id")       
-  managerName   String? @map("manager_name") 
-  status        String @default("Pending")
+  id             String @id @default(uuid())
+  sessionId      String @map("session_id")
+  employeeName   String @map("employee_name")
+  employeeEmail  String @map("employee_email")
+  managerEmail   String @map("manager_email")
+  empId          String? @map("emp_id")        
+  managerName    String? @map("manager_name") 
+  status         String @default("Pending")
 
-  // --- Level 1 Feedback (Immediate / Day 0) ---
+  // --- Feedback (Immediate / Day 0) ---
   preTrainingRating    Int?    @map("pre_training_rating")
-  // 🟢 NEW FIELD: Rate knowledge AFTER training
   postTrainingRating   Int?    @map("post_training_rating") 
   
   trainingRating       Int?    @map("training_rating")
@@ -50,7 +56,7 @@ model Enrollment {
   actionPlan           String? @map("action_plan")
   suggestions          String? @map("suggestions")
 
-  // --- Level 3 Feedback (Post-Training / Day 25) ---
+  // --- Post Feedback Assessment (Post-Training / Day 25) ---
   q1_Relevance         Int?    @map("q1_relevance")
   q2_Application       Int?    @map("q2_application")
   q3_Performance       Int?    @map("q3_performance")
@@ -68,7 +74,7 @@ model Enrollment {
   @@map("enrollments")
 }
 
-// 3. Nominations (Unchanged)
+// 3. Nominations
 model Nomination {
   id             String   @id @default(uuid())
   employeeName   String   @map("employee_name")
@@ -89,18 +95,18 @@ model Nomination {
   @@map("nominations")
 }
 
-// 4. Trainers (🟢 UPDATED: Added Phone, Removed Expertise)
+// 4. Trainers 
 model Trainer {
   id        String   @id @default(uuid())
   name      String   @unique
   email     String?  @unique
-  phone     String?  // 🟢 NEW field
+  phone     String?  
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("trainers")
 }
 
-// 5. Admin Users (🟢 NEW: For Auth.js Login)
+// 5. Admin Users 
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
