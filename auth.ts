@@ -43,6 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     callbacks: {
         // This function runs on every request to check permissions
         authorized({ auth, request: { nextUrl } }) {
+            // 🟢 SKIP AUTH ON LOCALHOST
+            if (process.env.NODE_ENV === 'development') {
+                return true;
+            }
+
             const isLoggedIn = !!auth?.user;
             const isAdminRoute = nextUrl.pathname.startsWith('/admin');
 

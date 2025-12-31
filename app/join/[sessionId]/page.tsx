@@ -113,7 +113,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 label="Employee ID"
                                 name="empId"
                                 icon={<Building2 size={16} />}
-                                placeholder="e.g. EMP001"
+                                placeholder="e.g. 10000111"
                             />
                             <div className="md:col-span-2">
                                 <InputField
@@ -121,7 +121,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                     name="email"
                                     type="email"
                                     icon={<Mail size={16} />}
-                                    placeholder="e.g. john.doe@thriveni.com"
+                                    placeholder="e.g. jod@thriveni.com"
                                 />
                             </div>
                         </div>
@@ -151,7 +151,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 name="managerEmail"
                                 type="email"
                                 icon={<Mail size={16} />}
-                                placeholder="e.g. jane.smith@thriveni.com"
+                                placeholder="e.g. jtr@thriveni.com"
                             />
                         </div>
                     </section>
@@ -211,15 +211,17 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <TextAreaField
                                 label="Topics learned & Activities done"
                                 name="topicsLearned"
+                                required={true}
                                 placeholder="What were the key takeaways from this session?"
                             />
                             <TextAreaField
                                 label="Action Plan (How will you use this?)"
                                 name="actionPlan"
+                                required={true}
                                 placeholder="How do you plan to apply this knowledge in your daily work?"
                             />
                             <TextAreaField
-                                label="Suggestions for Improvement"
+                                label="Suggestions if any"
                                 name="suggestions"
                                 placeholder="Any ideas on how we can make this training better?"
                             />
@@ -259,12 +261,13 @@ function InputField({ label, name, type = "text", placeholder, icon }: { label: 
     )
 }
 
-function TextAreaField({ label, name, placeholder }: { label: string, name: string, placeholder?: string }) {
+function TextAreaField({ label, name, placeholder, required = false }: { label: string, name: string, placeholder?: string, required?: boolean }) {
     return (
         <div className="space-y-1.5">
-            <label className="block text-sm font-bold text-slate-700 ml-1">{label}</label>
+            <label className="block text-sm font-bold text-slate-700 ml-1">{label} {required && <span className="text-red-500">*</span>}</label>
             <textarea
                 name={name}
+                required={required}
                 rows={3}
                 className="w-full p-4 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all hover:bg-slate-100/50 resize-y min-h-[100px]"
                 placeholder={placeholder}

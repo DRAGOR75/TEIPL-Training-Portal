@@ -32,7 +32,7 @@ export default async function ManagerFeedbackPage({ params }: { params: Promise<
                 {/* Header */}
                 <div className="bg-indigo-900 p-6 text-white flex justify-between items-center">
                     <div>
-                        <h1 className="text-xl font-bold">Training Effectiveness Review</h1>
+                        <h1 className="text-xl font-bold">Post training (30 days) performance feedback Review</h1>
                         <p className="opacity-80 text-sm">Reviewing Employee: <span className="font-bold text-yellow-400">{enrollment.employeeName}</span></p>
                     </div>
                     <div className="text-right">

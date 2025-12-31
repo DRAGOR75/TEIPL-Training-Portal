@@ -55,6 +55,7 @@ export async function sendApprovalEmail(
   justification: string,
   nominationId: string
 ) {
+  // Dynamic URL: Uses env var if set (e.g., localhost in dev), otherwise falls back to production
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
@@ -84,12 +85,13 @@ export async function sendFeedbackRequestEmail(
   programName: string,
   enrollmentId: string
 ) {
+  // Dynamic URL: Uses env var if set (e.g., localhost in dev), otherwise falls back to production
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
     <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <h2 style="color: #2e7d32;">Training Feedback Request</h2>
+      <h2 style="color: #2e7d32;">Post training (30 days) performance feedback</h2>
       <p>Dear <strong>${employeeName}</strong>,</p>
       <p>Thank you for participating in the <strong>${programName}</strong> program.</p>
       <p>Your feedback is valuable to us. Please click the button below to submit your evaluation:</p>
@@ -98,5 +100,5 @@ export async function sendFeedbackRequestEmail(
       <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
 
-  return await sendEmail({ to: employeeEmail, subject: `Feedback Required: ${programName}`, html });
+  return await sendEmail({ to: employeeEmail, subject: `Action Required: Post training (30 days) performance feedback for ${programName}`, html });
 }

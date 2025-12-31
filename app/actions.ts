@@ -25,8 +25,8 @@ export async function getDashboardData() {
         });
 
         return { sessions, pendingCount };
-    } catch (error) {
-        console.error("Dashboard Data Error:", error);
+    } catch (error: any) {
+        console.error("Dashboard Data Error:", error?.message || error);
         return { sessions: [], pendingCount: 0 };
     }
 }
@@ -40,6 +40,24 @@ export async function getUpcomingSessions() {
         });
     } catch (error) {
         return [];
+    }
+}
+
+// 2.a SESSION DETAILS (Deep Dive)
+export async function getSessionDetails(sessionId: string) {
+    try {
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: {
+                enrollments: {
+                    orderBy: { employeeName: 'asc' }
+                }
+            }
+        });
+        return session;
+    } catch (error) {
+        console.error("Error fetching session details:", error);
+        return null;
     }
 }
 
@@ -100,6 +118,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
         });
 
         // 2. Send Email to Manager
+        // Dynamic URL for flexible testing (Localhost vs Prod)
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://templtrainingportal.vercel.app';
         const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
 
@@ -107,7 +126,7 @@ export async function submitEmployeeFeedback(formData: FormData) {
             to: updatedEnrollment.managerEmail,
             subject: `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
             html: `
-            <h2>Training Effectiveness Review</h2>
+            <h2>Post training (30 days) performance feedback</h2>
             <p><strong>Employee:</strong> ${updatedEnrollment.employeeName}</p>
             <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
             <p>The employee has submitted their post-training feedback.</p>
@@ -169,10 +188,10 @@ export async function sendFeedbackEmails(sessionId: string) {
             }
         }
 
-        // await db.trainingSession.update({
-        //     where: { id: sessionId },
-        //     data: { emailsSent: true }
-        // });
+        await db.trainingSession.update({
+            where: { id: sessionId },
+            data: { emailsSent: true }
+        });
 
         revalidatePath('/admin/dashboard');
         return { success: true, message: `Emails sent to ${count} employees.` };

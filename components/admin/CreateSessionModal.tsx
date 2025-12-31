@@ -1,11 +1,28 @@
 'use client'
 
 import { useState } from 'react';
-import { createTrainingSession } from '@/app/actions'; // Ensure this action exists in app/actions/index.ts or similar
+import { useFormStatus } from 'react-dom'; // Add this import
+import { createTrainingSession } from '@/app/actions';
+
+function SubmitButton() {
+    const { pending } = useFormStatus();
+
+    return (
+        <button
+            type="submit"
+            disabled={pending}
+            className={`px-6 py-2 font-bold rounded-lg text-sm transition-all shadow-sm ${pending
+                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md'
+                }`}
+        >
+            {pending ? 'Creating Session...' : 'Create Session'}
+        </button>
+    );
+}
 
 export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // Auto-calculate Feedback Date (+25 days)
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,22 +53,18 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                 </div>
 
                 <form action={async (formData) => {
-                    if (isSubmitting) return;
-                    setIsSubmitting(true);
-
                     try {
                         const result = await createTrainingSession(formData);
                         if (result.success) {
                             setIsOpen(false);
-                            window.location.reload();
+                            // Optional: Show success toast?
+                            // window.location.reload(); // Server action should handle revalidation
                         } else {
                             alert(result.message || "Failed to create session.");
                         }
                     } catch (err) {
                         console.error(err);
                         alert("An unexpected error occurred.");
-                    } finally {
-                        setIsSubmitting(false);
                     }
                 }} className="p-6 space-y-4 text-left">
 
@@ -88,24 +101,17 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                         </div>
                     </div>
 
-                    <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
-                        <label className="block text-xs font-bold text-blue-800 mb-1">
-                            Feedback Trigger Date (Level 3)
-                        </label>
-                        <input
-                            id="feedbackCreationDate"
-                            name="feedbackCreationDate"
-                            required
-                            type="date"
-                            className="w-full p-2 border border-blue-200 rounded text-sm"
-                        />
-                    </div>
+                    {/* Hidden Field for Logic Continuity */}
+                    <input
+                        id="feedbackCreationDate"
+                        name="feedbackCreationDate"
+                        required
+                        type="hidden"
+                    />
 
                     <div className="pt-2 flex justify-end gap-3">
-                        <button type="button" disabled={isSubmitting} onClick={() => setIsOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium disabled:opacity-50">Cancel</button>
-                        <button type="submit" disabled={isSubmitting} className="px-6 py-2 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                            {isSubmitting ? 'Creating...' : 'Create Session'}
-                        </button>
+                        <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium">Cancel</button>
+                        <SubmitButton />
                     </div>
 
                 </form>

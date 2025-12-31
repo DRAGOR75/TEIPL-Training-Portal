@@ -56,7 +56,7 @@ model Enrollment {
   actionPlan           String? @map("action_plan")
   suggestions          String? @map("suggestions")
 
-  // --- Post Feedback Assessment (Post-Training / Day 25) ---
+  // --- Post training (30 days) performance feedback (Post-Training / Day 30) ---
   q1_Relevance         Int?    @map("q1_relevance")
   q2_Application       Int?    @map("q2_application")
   q3_Performance       Int?    @map("q3_performance")

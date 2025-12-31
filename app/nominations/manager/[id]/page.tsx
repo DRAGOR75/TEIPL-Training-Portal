@@ -1,6 +1,10 @@
 import { db } from '@/lib/db';
 import { notFound } from 'next/navigation';
 import { updateStatus } from '@/app/actions/nominations';
+import {
+    Check,
+    X
+} from 'lucide-react';
 
 // 🟢 1. Update the interface to use Promise
 interface PageProps {
@@ -72,7 +76,7 @@ export default async function ManagerApprovalPage({ params }: PageProps) {
                                 <input type="hidden" name="id" value={nomination.id} />
                                 <input type="hidden" name="action" value="APPROVED" />
                                 <button className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-lg transition">
-                                    ✅ Approve
+                                    <Check size={32} /> Approve
                                 </button>
                             </form>
 
@@ -81,7 +85,7 @@ export default async function ManagerApprovalPage({ params }: PageProps) {
                                 <input type="hidden" name="id" value={nomination.id} />
                                 <input type="hidden" name="action" value="REJECTED" />
                                 <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition">
-                                    ❌ Reject
+                                    <X size={32} /> Reject
                                 </button>
                             </form>
                         </div>

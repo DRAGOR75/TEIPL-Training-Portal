@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { submitEmployeeFeedback } from '@/app/actions';
 import { redirect } from 'next/navigation';
 
-// 🟢 FIX STEP 1: Move this component OUTSIDE the main function
+
 const RatingQuestion = ({ label, name }: { label: string; name: string }) => (
     <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
         <label className="block text-slate-800 font-medium mb-3">{label}</label>
@@ -21,7 +21,7 @@ const RatingQuestion = ({ label, name }: { label: string; name: string }) => (
     </div>
 );
 
-// 🟢 FIX STEP 2: Main component stays clean
+
 export default async function EmployeeFeedbackPage({ params }: { params: Promise<{ id: string }> }) {
 
     const { id } = await params;
@@ -44,7 +44,7 @@ export default async function EmployeeFeedbackPage({ params }: { params: Promise
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4 font-sans">
             <div className="max-w-2xl w-full bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
                 <div className="bg-slate-900 p-6 text-white">
-                    <h1 className="text-2xl font-bold">Post-Training Effectiveness</h1>
+                    <h1 className="text-2xl font-bold">Post training (30 days) performance feedback</h1>
                     <p className="opacity-80 text-sm mt-1">Please rate the impact of: <span className="font-bold text-blue-300">{enrollment.session.programName}</span></p>
                 </div>
 
@@ -52,7 +52,7 @@ export default async function EmployeeFeedbackPage({ params }: { params: Promise
                     <input type="hidden" name="enrollmentId" value={id} />
 
                     <div className="space-y-4">
-                        {/* Now these work perfectly because the component is defined outside */}
+
                         <RatingQuestion name="q1" label="Q1. This program was relevant and useful for my current work." />
                         <RatingQuestion name="q2" label="Q2. I am able to apply most of the knowledge/skills at my workplace." />
                         <RatingQuestion name="q3" label="Q3. I am able to do my job better after the training." />

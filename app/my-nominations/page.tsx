@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
+import { Search, ArrowLeft, MapPin, Tag, AlertCircle, Clock, CheckCircle2, Edit } from 'lucide-react';
 
 // Define what a Nomination looks like
 interface Nomination {
@@ -36,31 +37,46 @@ export default function MyNominations() {
     };
 
     return (
-        <main className="min-h-screen bg-gray-50 p-8 flex justify-center">
-            <div className="max-w-4xl w-full">
-                {/* Navigation / Header */}
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800">My Nominations</h1>
-                    <Link href="/" className="text-blue-600 hover:underline">← Back to Home</Link>
+        <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
+            {/* Header */}
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
+                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Link href="/nominations" className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
+                            <ArrowLeft size={20} />
+                        </Link>
+                        <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                            <Search size={20} className="text-emerald-600" />
+                            Track & Edit Nominations
+                        </h1>
+                    </div>
                 </div>
+            </div>
 
+            <main className="flex-1 max-w-4xl mx-auto w-full p-6 md:p-8">
                 {/* Search Box */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-8">
+                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 mb-8">
+                    <h2 className="text-lg font-bold text-slate-900 mb-4">Find Your Nominations</h2>
                     <form onSubmit={handleSearch} className="flex gap-4">
-                        <input
-                            type="email"
-                            placeholder="Enter your email to view your submissions..."
-                            className="flex-1 border border-gray-300 p-3 rounded-lg text-black focus:ring-2 focus:ring-blue-500 outline-none"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
+                        <div className="flex-1 relative">
+                            <span className="absolute left-4 top-3.5 text-slate-400">
+                                <Search size={20} />
+                            </span>
+                            <input
+                                type="email"
+                                placeholder="Enter your email address..."
+                                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                required
+                            />
+                        </div>
                         <button
                             type="submit"
-                            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-blue-700 transition"
+                            className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             disabled={loading}
                         >
-                            {loading ? 'Searching...' : 'Find Nominations'}
+                            {loading ? 'Searching...' : 'Search'}
                         </button>
                     </form>
                 </div>
@@ -69,43 +85,73 @@ export default function MyNominations() {
                 {searched && (
                     <div className="space-y-4">
                         {nominations.length === 0 ? (
-                            <div className="text-center py-10 bg-white rounded-xl border border-gray-200">
-                                <p className="text-gray-500 text-lg">No nominations found for this email.</p>
-                                <p className="text-gray-400 text-sm mt-1">Make sure you are using the exact email you submitted with.</p>
+                            <div className="text-center py-16 bg-white rounded-2xl border border-slate-200 shadow-sm">
+                                <Search size={48} className="mx-auto text-slate-200 mb-4" />
+                                <h3 className="text-slate-900 font-bold text-lg">No nominations found</h3>
+                                <p className="text-slate-500 text-sm mt-1 max-w-xs mx-auto">
+                                    We couldn't find any records for <span className="font-medium text-slate-900">{email}</span>. Check the spelling or try another email.
+                                </p>
                             </div>
                         ) : (
                             nominations.map((nom) => (
-                                <div key={nom.nomination_id} className="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500 flex flex-col md:flex-row justify-between items-center gap-4">
+                                <div key={nom.nomination_id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 hover:border-blue-300 transition-all flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group">
 
                                     {/* Info Section */}
-                                    <div>
-                                        <h3 className="text-xl font-bold text-gray-800">{nom.nominee_name}</h3>
-                                        <div className="text-gray-600 text-sm mt-1 space-x-3">
-                                            <span>📍 {nom.nominee_site}</span>
-                                            <span>🏷️ {nom.category}</span>
-                                        </div>
-                                        <div className="mt-3">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold ${nom.status === 'Approved' ? 'bg-green-100 text-green-800' :
-                                                nom.status === 'Pending Manager' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                Status: {nom.status}
+                                    <div className="space-y-2">
+                                        <div className="flex items-start justify-between md:hidden w-full">
+                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusStyles(nom.status)}`}>
+                                                {getStatusIcon(nom.status)} {nom.status}
                                             </span>
+                                        </div>
+
+                                        <h3 className="text-lg font-black text-slate-900 tracking-tight">{nom.nominee_name}</h3>
+                                        <div className="flex flex-wrap gap-4 text-xs font-medium text-slate-500">
+                                            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
+                                                <MapPin size={14} className="text-slate-400" />
+                                                {nom.nominee_site}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
+                                                <Tag size={14} className="text-slate-400" />
+                                                {nom.category}
+                                            </div>
+                                            <div className="flex items-center gap-1.5 bg-slate-50 px-2 py-1 rounded-md">
+                                                <Clock size={14} className="text-slate-400" />
+                                                {new Date(nom.submitted_at).toLocaleDateString()}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Edit Button - UPDATED TO 'MODIFY' */}
-                                    <Link
-                                        href={`/modify/${nom.nomination_id}`}
-                                        className="bg-white text-blue-600 px-6 py-2 rounded-lg border border-blue-200 hover:bg-blue-50 font-semibold transition shadow-sm whitespace-nowrap"
-                                    >
-                                        Edit ✏️
-                                    </Link>
+                                    {/* Actions & Status Desktop */}
+                                    <div className="flex items-center gap-4 self-end md:self-auto w-full md:w-auto justify-between md:justify-end">
+                                        <span className={`hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${getStatusStyles(nom.status)}`}>
+                                            {getStatusIcon(nom.status)} {nom.status}
+                                        </span>
+
+                                        <Link
+                                            href={`/modify/${nom.nomination_id}`}
+                                            className="inline-flex items-center gap-2 bg-white text-slate-700 px-5 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 hover:text-blue-600 hover:border-blue-200 font-bold text-sm transition shadow-sm active:scale-95"
+                                        >
+                                            <Edit size={16} /> Edit
+                                        </Link>
+                                    </div>
                                 </div>
                             ))
                         )}
                     </div>
                 )}
-            </div>
-        </main>
+            </main>
+        </div>
     );
+}
+
+function getStatusStyles(status: string) {
+    if (status === 'Approved') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    if (status === 'Pending Manager') return 'bg-amber-50 text-amber-700 border-amber-200';
+    return 'bg-slate-50 text-slate-600 border-slate-200';
+}
+
+function getStatusIcon(status: string) {
+    if (status === 'Approved') return <CheckCircle2 size={12} />;
+    if (status === 'Pending Manager') return <Clock size={12} />;
+    return <AlertCircle size={12} />;
 }

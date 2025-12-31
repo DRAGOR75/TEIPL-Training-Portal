@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { Menu, X, Home, ShieldCheck, FileText, LayoutDashboard } from 'lucide-react';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
@@ -10,6 +11,12 @@ import { Session } from 'next-auth';
 export default function Navbar({ session }: { session: Session | null }) {
     const [isOpen, setIsOpen] = useState(false);
     const isLoggedIn = !!session?.user;
+    const pathname = usePathname();
+
+    // Hide Navbar on Feedback & Join Pages
+    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback')) {
+        return null;
+    }
 
     return (
         <nav className="bg-white shadow-md border-b border-slate-200 sticky top-0 z-50">
@@ -20,9 +27,9 @@ export default function Navbar({ session }: { session: Session | null }) {
                     <div className="flex items-center gap-4">
                         <Link href="/" className="flex items-center gap-3 group">
                             {/* Thriveni Logo */}
-                            <div className="relative w-52 h-16 transition-transform group-hover:scale-105">
+                            <div className="relative w-32 h-16 transition-transform group-hover:scale-105">
                                 <Image
-                                    src="/Thriveni logo.webp"
+                                    src="/thriveny_logo.svg"
                                     alt="Thriveni Logo"
                                     fill
                                     className="object-contain"
@@ -31,7 +38,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                             </div>
                             <div className="h-8 w-[1px] bg-slate-300 mx-2 hidden sm:block"></div>
                             {/* Lloyds Logo */}
-                            <div className="relative w-24 h-10 transition-transform group-hover:scale-105">
+                            <div className="relative w-34 h-10 transition-transform group-hover:scale-105">
                                 <Image
                                     src="/Loyyds metals logo.png"
                                     alt="Lloyds Metals Logo"
