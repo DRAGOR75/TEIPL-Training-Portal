@@ -14,7 +14,7 @@ const transporter = nodemailer.createTransport({
   },
   // Keeps the connection alive for multiple messages (optional but good for performance)
   pool: true,
-  maxConnections: 1,
+  maxConnections: 5, // Allow 5 simultaneous connections for batch sending
 });
 
 /**
@@ -31,7 +31,7 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
     });
 
     const info = await transporter.sendMail({
-      from: `"Thriveni Training System" <${process.env.EMAIL_USER}>`, // Must be verified in Brevo
+      from: `"Training Thriveni" <${process.env.EMAIL_USER}>`, // Must be verified in Brevo
       to,
       subject,
       html,

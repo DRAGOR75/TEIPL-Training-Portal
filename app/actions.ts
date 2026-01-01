@@ -12,6 +12,7 @@ export type ParticipantData = {
 };
 
 // 1. DASHBOARD LOGIC (Updated for Start Date)
+// 1. DASHBOARD LOGIC (Updated for Start Date)
 export async function getDashboardData() {
     try {
         const sessions = await db.trainingSession.findMany({
@@ -190,18 +191,34 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         if (!session) return { success: false, error: "Session not found" };
 
-        let count = 0;
-        for (const enrollment of session.enrollments) {
-            if (enrollment.status === 'Pending') {
-                await sendFeedbackRequestEmail(
-                    enrollment.employeeEmail,
-                    enrollment.employeeName,
-                    session.programName,
-                    enrollment.id
-                );
-                count++;
-            }
+        // 🟢 Optimized: Batch Sending (Chunk of 5)
+        const BATCH_SIZE = 5;
+        const pendingEnrollments = session.enrollments.filter(e => e.status === 'Pending');
+        let successCount = 0;
+
+        for (let i = 0; i < pendingEnrollments.length; i += BATCH_SIZE) {
+            const chunk = pendingEnrollments.slice(i, i + BATCH_SIZE);
+
+            // Process chunk in parallel
+            const chunkResults = await Promise.all(chunk.map(async (enrollment) => {
+                try {
+                    await sendFeedbackRequestEmail(
+                        enrollment.employeeEmail,
+                        enrollment.employeeName,
+                        session.programName,
+                        enrollment.id
+                    );
+                    return 1;
+                } catch (error) {
+                    console.error(`Failed to send to ${enrollment.employeeEmail} in batch`, error);
+                    return 0;
+                }
+            }));
+
+            successCount += chunkResults.reduce((a: number, b) => a + (b as number), 0);
         }
+
+        const count = successCount;
 
         await db.trainingSession.update({
             where: { id: sessionId },

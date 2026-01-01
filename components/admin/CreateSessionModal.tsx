@@ -84,7 +84,7 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                         {trainers.length === 0 && <p className="text-xs text-red-500 mt-1">No trainers found. Add one in "Manage Trainers" first.</p>}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
                             <input name="startDate" required type="date" className="w-full p-2.5 border border-slate-300 rounded-lg" />

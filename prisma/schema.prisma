@@ -29,6 +29,7 @@ model TrainingSession {
   
   enrollments          Enrollment[]
 
+  @@unique([programName, startDate, endDate, trainerName])
   @@map("training_sessions")
 }
 

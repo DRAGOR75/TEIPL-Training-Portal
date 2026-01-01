@@ -54,7 +54,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                     {/* Right Side: Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
-                        <NavLink href="/nominations" icon={<FileText size={18} />} text="Nominations" />
+                        <NavLink href="/wip" icon={<FileText size={18} />} text="Nominations" />
                         <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Hub" />
 
                         {isLoggedIn && (
@@ -81,7 +81,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                 <div className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg animate-in slide-in-from-top-5">
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         <MobileNavLink href="/" onClick={() => setIsOpen(false)} text="Home" />
-                        <MobileNavLink href="/nominations" onClick={() => setIsOpen(false)} text="Nominations" />
+                        <MobileNavLink href="/wip" onClick={() => setIsOpen(false)} text="Nominations" />
                         <MobileNavLink href="/admin/dashboard" onClick={() => setIsOpen(false)} text="Feedback Hub" />
 
                         {isLoggedIn && (

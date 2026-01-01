@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import QRCode from "react-qr-code";
@@ -22,6 +22,7 @@ import { sendFeedbackEmails } from '@/app/actions';
 
 import TrainerManager from '@/components/admin/TrainerManager';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
+import LoadingScreen from '@/app/loading';
 
 type Session = {
     id: string;
@@ -47,33 +48,44 @@ type DashboardClientProps = {
     initialSessions: Session[];
     initialTrainers: Trainer[];
     initialPendingReviews: number;
+    currentPage: number;
+    totalPages: number;
 };
 
 export default function DashboardClient({
     initialSessions,
     initialTrainers,
-    initialPendingReviews
+    initialPendingReviews,
+    currentPage,
+    totalPages,
 }: DashboardClientProps) {
     const [date, setDate] = useState<any>(new Date());
+    const [optimisticToggles, setOptimisticToggles] = useState<Record<string, boolean>>({});
+    const [isNavigating, setIsNavigating] = useState(false);
     const router = useRouter();
 
-    const toggleSessionEmail = async (sessionId: string, currentStatus: boolean) => {
-        // Optimistic / Server Action Call
-        // We import the action dynamically or pass it? Imports from 'app/actions' in client components work if it's "use server"
-        // But better to import at top level.
-        // I need to import { toggleFeedbackAutomation } from '@/app/actions';
-        // But first let's just use the logic here.
+    const [sessions, setSessions] = useState<Session[]>(initialSessions);
+
+    useEffect(() => {
+        setSessions(initialSessions);
+    }, [initialSessions]);
+
+    const toggleSessionEmail = async (sessionId: string, currentStatus: boolean, realStatus: boolean) => {
+        // Optimistic Update: Immediately flip the state in local memory
+        const nextStatus = !currentStatus;
+        setOptimisticToggles(prev => ({ ...prev, [sessionId]: nextStatus }));
 
         try {
             const { toggleFeedbackAutomation } = await import('@/app/actions');
-            await toggleFeedbackAutomation(sessionId, !currentStatus);
+            await toggleFeedbackAutomation(sessionId, nextStatus);
             router.refresh();
         } catch (error) {
             alert("Failed to update settings");
+            // Revert on failure
+            setOptimisticToggles(prev => ({ ...prev, [sessionId]: realStatus }));
         }
     };
 
-    const sessions = initialSessions;
     const trainers = initialTrainers;
     const pendingReviews = initialPendingReviews;
 
@@ -167,6 +179,7 @@ export default function DashboardClient({
 
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
+            {isNavigating && <LoadingScreen />}
 
 
             <main className="flex-1 p-6 md:p-8 flex flex-col lg:flex-row gap-8">
@@ -274,23 +287,40 @@ export default function DashboardClient({
                                     const trainingFeedbackCount = t.enrollments.filter((e: any) => e.trainingRating != null).length;
                                     const postFeedbackCount = t.enrollments.filter((e: any) => e.averageRating != null || e.q1_Relevance != null).length;
 
+                                    // Determine the effective status (Optimistic > Server Data)
+                                    const isAutoSendEnabled = optimisticToggles[t.id] ?? t.sendFeedbackAutomatically;
+
                                     return (
                                         <div
                                             key={t.id}
-                                            onClick={() => router.push(`/admin/dashboard/session/${t.id}`)}
+                                            onClick={() => {
+                                                setIsNavigating(true);
+                                                router.push(`/admin/dashboard/session/${t.id}`);
+                                            }}
                                             className="p-5 border border-slate-200 rounded-2xl bg-white hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer relative"
                                         >
                                             {/* ROW 1: Program Name and Dates - Moved to Top Level */}
-                                            <div className="flex flex-row justify-between items-center gap-4 pb-4 border-b border-slate-100">
-                                                <h3 className="font-black text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
-                                                    {t.programName}
-                                                </h3>
-                                                <div className="flex items-center gap-3 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 whitespace-nowrap">
+                                            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
+                                                <div className="flex items-center gap-3 flex-wrap">
+                                                    <h3 className="font-black text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
+                                                        {t.programName}
+                                                    </h3>
+                                                    {t.emailsSent ? (
+                                                        <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 uppercase tracking-wide flex items-center gap-1">
+                                                            <CheckCircle2 size={10} /> Completed
+                                                        </span>
+                                                    ) : (
+                                                        <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full border border-emerald-200 uppercase tracking-wide flex items-center gap-1 animate-pulse">
+                                                            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full" /> Active
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="flex flex-wrap md:flex-nowrap items-center gap-3 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-full md:w-auto">
                                                     <div className="flex items-center gap-1.5">
                                                         <CalendarIcon size={14} className="text-blue-500" />
                                                         <span>StartDate: {new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                     </div>
-                                                    <div className="w-px h-3 bg-slate-300 mx-1"></div>
+                                                    <div className="hidden md:block w-px h-3 bg-slate-300 mx-1"></div>
                                                     <div className="flex items-center gap-1.5">
                                                         <CalendarIcon size={14} className="text-emerald-500" />
                                                         <span>EndDate: {new Date(t.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
@@ -332,14 +362,14 @@ export default function DashboardClient({
                                                                 <button
                                                                     onClick={(e) => {
                                                                         e.stopPropagation();
-                                                                        toggleSessionEmail(t.id, t.sendFeedbackAutomatically);
+                                                                        toggleSessionEmail(t.id, isAutoSendEnabled, t.sendFeedbackAutomatically);
                                                                     }}
-                                                                    className={`w-9 h-5 rounded-full transition-colors relative focus:outline-none shrink-0 ${t.sendFeedbackAutomatically ? 'bg-blue-600' : 'bg-slate-300'}`}
+                                                                    className={`w-9 h-5 rounded-full transition-colors relative focus:outline-none shrink-0 ${isAutoSendEnabled ? 'bg-blue-600' : 'bg-slate-300'}`}
                                                                 >
-                                                                    <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] shadow-sm transition-all duration-200 ease-in-out ${t.sendFeedbackAutomatically ? 'left-[18px]' : 'left-[3px]'}`} />
+                                                                    <div className={`w-3.5 h-3.5 bg-white rounded-full absolute top-[3px] shadow-sm transition-all duration-200 ease-in-out ${isAutoSendEnabled ? 'left-[18px]' : 'left-[3px]'}`} />
                                                                 </button>
-                                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${t.sendFeedbackAutomatically ? 'text-blue-700' : 'text-slate-400'}`}>
-                                                                    {t.sendFeedbackAutomatically ? 'Auto-Send On' : 'Enable to send Post Training Performance Feedback'}
+                                                                <span className={`text-[10px] font-bold uppercase tracking-wider ${isAutoSendEnabled ? 'text-blue-700' : 'text-slate-400'}`}>
+                                                                    {isAutoSendEnabled ? 'Auto-Send On' : 'Enable to send Post Training Performance Feedback'}
                                                                 </span>
                                                             </div>
                                                             <button
@@ -367,7 +397,7 @@ export default function DashboardClient({
                                                                         <Clock size={18} />
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Post Feedback Date</span>
+                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"> POST TRAINING (30 DAYS) FEEDBACK DATE</span>
                                                                         <span className="font-bold text-slate-900 text-sm block">{new Date(t.feedbackCreationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                                                     </div>
                                                                 </div>
@@ -377,7 +407,7 @@ export default function DashboardClient({
                                                                         <Clock size={18} />
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Post Feedback Date</span>
+                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">30 Days Post Feedback Date</span>
                                                                         <span className="font-medium text-slate-400 text-sm block">Not Scheduled</span>
                                                                     </div>
                                                                 </div>
@@ -440,6 +470,7 @@ export default function DashboardClient({
                     </div>
                 </div>
             </main>
+
         </div>
     );
 }
