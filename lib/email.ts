@@ -148,7 +148,7 @@ export async function sendFeedbackAcknowledgmentEmail(
     content: number;
     trainer: number;
     material: number;
-    recommendation: number;
+    recommendation: boolean;
     topicsLearned: string;
     actionPlan: string;
     suggestions: string;
@@ -189,7 +189,7 @@ export async function sendFeedbackAcknowledgmentEmail(
           </tr>
           <tr>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Recommendation:</strong></td>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.recommendation}/10</td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.recommendation ? 'Yes' : 'No'}</td>
           </tr>
         </table>
 
