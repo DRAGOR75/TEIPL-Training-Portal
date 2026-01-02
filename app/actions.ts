@@ -191,34 +191,25 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         if (!session) return { success: false, error: "Session not found" };
 
-        // 🟢 Optimized: Batch Sending (Chunk of 5)
-        const BATCH_SIZE = 5;
+        // 🟢 Optimized: Send all simultaneously (Nodemailer pool handles concurrency)
         const pendingEnrollments = session.enrollments.filter(e => e.status === 'Pending');
-        let successCount = 0;
 
-        for (let i = 0; i < pendingEnrollments.length; i += BATCH_SIZE) {
-            const chunk = pendingEnrollments.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(pendingEnrollments.map(async (enrollment) => {
+            try {
+                await sendFeedbackRequestEmail(
+                    enrollment.employeeEmail,
+                    enrollment.employeeName,
+                    session.programName,
+                    enrollment.id
+                );
+                return 1;
+            } catch (error) {
+                console.error(`Failed to send to ${enrollment.employeeEmail}`, error);
+                return 0;
+            }
+        }));
 
-            // Process chunk in parallel
-            const chunkResults = await Promise.all(chunk.map(async (enrollment) => {
-                try {
-                    await sendFeedbackRequestEmail(
-                        enrollment.employeeEmail,
-                        enrollment.employeeName,
-                        session.programName,
-                        enrollment.id
-                    );
-                    return 1;
-                } catch (error) {
-                    console.error(`Failed to send to ${enrollment.employeeEmail} in batch`, error);
-                    return 0;
-                }
-            }));
-
-            successCount += chunkResults.reduce((a: number, b) => a + (b as number), 0);
-        }
-
-        const count = successCount;
+        const count = results.reduce((a: number, b) => a + (b as number), 0);
 
         await db.trainingSession.update({
             where: { id: sessionId },

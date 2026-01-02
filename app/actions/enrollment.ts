@@ -3,6 +3,7 @@
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
 import { revalidatePath } from "next/cache"; // 🟢 Added for auto-sync
+import { sendFeedbackAcknowledgmentEmail } from "@/lib/email";
 
 export async function selfEnroll(formData: FormData) {
     const sessionId = formData.get('sessionId') as string;
@@ -52,6 +53,28 @@ export async function selfEnroll(formData: FormData) {
 
         // 4. 🟢 REVALIDATION: Tell the server the Dashboard is now "Stale"
         revalidatePath("/admin/dashboard");
+
+        // 5. Send Acknowledgment Email (Non-blocking)
+        // Fetch session name first if not available efficiently, but here we query it.
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            select: { programName: true }
+        });
+
+        if (session) {
+            await sendFeedbackAcknowledgmentEmail(email, name, session.programName, {
+                preTraining: data.preTrainingRating,
+                postTraining: data.postTrainingRating,
+                training: data.trainingRating,
+                content: data.contentRating,
+                trainer: data.trainerRating,
+                material: data.materialRating,
+                recommendation: data.recommendationRating,
+                topicsLearned: data.topicsLearned,
+                actionPlan: data.actionPlan,
+                suggestions: data.suggestions
+            });
+        }
 
     } catch (error) {
         console.error("Enrollment Failed", error);

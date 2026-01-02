@@ -133,3 +133,77 @@ export async function sendTrainerReminderEmail(
   return await sendEmail({ to: trainerEmail, subject: `Reminder: Post-Training Feedback Deadline - ${programName}`, html });
 }
 
+
+/**
+ * EMAIL FOR EMPLOYEES (Feedback Acknowledgment)
+ */
+export async function sendFeedbackAcknowledgmentEmail(
+  email: string,
+  name: string,
+  programName: string,
+  feedbackData: {
+    preTraining: number;
+    postTraining: number;
+    training: number;
+    content: number;
+    trainer: number;
+    material: number;
+    recommendation: number;
+    topicsLearned: string;
+    actionPlan: string;
+    suggestions: string;
+  }
+) {
+  const html = `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #0056b3;">Feedback Received</h2>
+      <p>Dear <strong>${name}</strong>,</p>
+      <p>Thank you for submitting your feedback for the training program <strong>${programName}</strong>.</p>
+      
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin: 15px 0;">
+        <h3 style="margin-top: 0; color: #333;">Your Responses</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Pre-Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.preTraining}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Post-Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.postTraining}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.training}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Content Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.content}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Trainer Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.trainer}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Material Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.material}/5</td>
+          </tr>
+          <tr>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Recommendation:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.recommendation}/10</td>
+          </tr>
+        </table>
+
+        <div style="margin-top: 15px;">
+          <p><strong>Topics Learned:</strong><br/>${feedbackData.topicsLearned || 'N/A'}</p>
+          <p><strong>Action Plan:</strong><br/>${feedbackData.actionPlan || 'N/A'}</p>
+          <p><strong>Suggestions:</strong><br/>${feedbackData.suggestions || 'N/A'}</p>
+        </div>
+      </div>
+
+      <p>We appreciate your time and input.</p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+    </div>`;
+
+  return await sendEmail({ to: email, subject: `Feedback Received: ${programName}`, html });
+}

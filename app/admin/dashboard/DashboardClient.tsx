@@ -335,7 +335,7 @@ export default function DashboardClient({
                                                     {/* Unified Grid for Perfect Alignment */}
                                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 py-2">
                                                         {/* Left Col: Trainer */}
-                                                        <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-3 h-full">
                                                             <div className="bg-blue-50 p-2 rounded-lg text-blue-600 shrink-0">
                                                                 <UserCheck size={18} />
                                                             </div>
@@ -346,7 +346,7 @@ export default function DashboardClient({
                                                         </div>
 
                                                         {/* Right Col: Training Feedback */}
-                                                        <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-3 h-full">
                                                             <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600 shrink-0">
                                                                 <CheckCircle2 size={18} />
                                                             </div>
@@ -390,7 +390,7 @@ export default function DashboardClient({
                                                         </div>
 
                                                         {/* Right Col: PFA Date */}
-                                                        <div>
+                                                        <div className="flex items-center h-full">
                                                             {t.feedbackCreationDate ? (
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="bg-red-50 p-2 rounded-lg text-red-600 shrink-0">
