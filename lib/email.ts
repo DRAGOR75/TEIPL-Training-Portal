@@ -4,13 +4,16 @@ import nodemailer from 'nodemailer';
  * Creates a Nodemailer transporter using Brevo SMTP.
  * Replaces Gmail App Password for better deliverability and fewer blocks.
  */
+const clean = (val: string | undefined) => val ? val.replace(/^["']|["']$/g, '').trim() : undefined;
+
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp-relay.brevo.com', // Points to Brevo
-  port: parseInt(process.env.EMAIL_PORT || '587'), // Standard SMTP port
-  secure: false, // Must be false for port 587 (uses STARTTLS)
+  service: 'gmail',
   auth: {
-    user: process.env.SMTP_USER, // Your Brevo Login Email
-    pass: process.env.SMTP_KEY, // Your Brevo SMTP Key
+    type: 'OAuth2',
+    user: clean(process.env.GMAIL_USER_EMAIL) || clean(process.env.EMAIL_USER),
+    clientId: clean(process.env.GMAIL_CLIENT_ID),
+    clientSecret: clean(process.env.GMAIL_CLIENT_SECRET),
+    refreshToken: clean(process.env.GMAIL_REFRESH_TOKEN),
   },
   // Keeps the connection alive for multiple messages (optional but good for performance)
   pool: true,
@@ -31,7 +34,7 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
     });
 
     const info = await transporter.sendMail({
-      from: `"Training Thriveni" <${process.env.EMAIL_USER}>`, // Must be verified in Brevo
+      from: `"Training Thriveni" <${clean(process.env.EMAIL_USER)}>`, // Must be verified in Brevo
       to,
       subject,
       html,
