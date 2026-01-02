@@ -31,7 +31,7 @@ export async function selfEnroll(formData: FormData) {
             contentRating: parseInt(formData.get('contentRating') as string) || 0,
             trainerRating: parseInt(formData.get('trainerRating') as string) || 0,
             materialRating: parseInt(formData.get('materialRating') as string) || 0,
-            recommendationRating: parseInt(formData.get('recommendationRating') as string) || 0,
+            recommendationRating: (formData.get('recommendationRating') as string) === '5', // 5 (Yes) -> true, 1 (No) -> false
             topicsLearned: formData.get('topicsLearned') as string,
             actionPlan: formData.get('actionPlan') as string,
             suggestions: formData.get('suggestions') as string,

@@ -52,7 +52,7 @@ model Enrollment {
   contentRating        Int?    @map("content_rating")
   trainerRating        Int?    @map("trainer_rating")
   materialRating       Int?    @map("material_rating")
-  recommendationRating Int?    @map("recommendation_rating")
+  recommendationRating Boolean?    @map("recommendation_rating")
 
   topicsLearned        String? @map("topics_learned")
   actionPlan           String? @map("action_plan")
