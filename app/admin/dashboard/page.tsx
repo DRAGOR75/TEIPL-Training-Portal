@@ -21,6 +21,8 @@ export default async function AdminDashboardPage() {
             initialSessions={dashboardData.sessions}
             initialTrainers={trainersData}
             initialPendingReviews={dashboardData.pendingCount}
+            currentPage={1}
+            totalPages={1}
         />
     );
 }
