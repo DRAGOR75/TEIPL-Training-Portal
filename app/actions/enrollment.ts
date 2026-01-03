@@ -2,7 +2,7 @@
 
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
-import { revalidatePath } from "next/cache"; // 🟢 Added for auto-sync
+import { revalidatePath } from "next/cache";
 import { sendFeedbackAcknowledgmentEmail } from "@/lib/email";
 
 export async function selfEnroll(formData: FormData) {

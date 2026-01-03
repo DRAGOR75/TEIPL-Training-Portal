@@ -1,68 +1,41 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-    // --- 🔍 DEBUGGER START ---
-    console.log("==========================================");
-    console.log("DEBUG: Checking Environment Variables...");
-    // Consistently using SMTP (Simple Mail Transfer Protocol)
-    console.log("SMTP_USER:", process.env.SMTP_USER ? `'${process.env.SMTP_USER}'` : "❌ MISSING");
-    console.log("SMTP_KEY Length:", process.env.SMTP_KEY ? process.env.SMTP_KEY.length : "❌ MISSING");
-
-    if (process.env.SMTP_USER && process.env.SMTP_USER.endsWith(' ')) {
-        console.log("⚠️ WARNING: SMTP_USER has a hidden space at the end!");
-    }
-    console.log("==========================================");
-    // --- 🔍 DEBUGGER END ---
-
-    const transporter = nodemailer.createTransport({
-        host: 'smtp-relay.brevo.com',
-        port: 587,
-        secure: false,
-        auth: {
-            // Updated variable names to match standard SMTP spelling
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_KEY,
-        },
-        tls: {
-            rejectUnauthorized: false
-        }
-    });
-
     try {
-        await new Promise((resolve, reject) => {
-            transporter.verify(function (error, success) {
-                if (error) {
-                    console.error("Transporter Verification Failed:", error);
-                    reject(error);
-                } else {
-                    console.log("Transporter Verification Success!");
-                    resolve(success);
-                }
-            });
-        });
+        const userEmail = process.env.EMAIL_USER?.replace(/^["']|["']$/g, '').trim();
 
-        const info = await transporter.sendMail({
-            from: '"Vercel Debugger" <bvg@thriveni.com>',
-            to: 'bvg@thriveni.com',
-            subject: 'Brevo SMTP spelling Fix Test',
+        if (!userEmail) {
+            return NextResponse.json({ success: false, error: "EMAIL_USER not set" }, { status: 500 });
+        }
+
+        console.log("Testing Gmail API via sendEmail...");
+
+        const result = await sendEmail({
+            to: userEmail,
+            subject: '✅ Gmail API Integration Test',
             html: `
-                <div style="padding: 20px; font-family: sans-serif;">
-                  <h2 style="color: green;">✅ SMTP Spelling Fixed!</h2>
-                  <p>The code and .env are now perfectly aligned.</p>
+                <div style="padding: 20px; font-family: sans-serif; border: 1px solid #ddd; border-radius: 8px;">
+                  <h2 style="color: #0f9d58;">Gmail API Working!</h2>
+                  <p>This email was sent using the Googleapis REST client, bypassing SMTP.</p>
+                  <p>If you see this, the migration in <code>lib/email.ts</code> is successful.</p>
                 </div>
             `,
         });
 
-        return NextResponse.json({ success: true, messageId: info.messageId });
+        if (result.success) {
+            return NextResponse.json({ success: true, messageId: result.id });
+        } else {
+            throw new Error(String(result.error));
+        }
 
     } catch (error: any) {
+        console.error("Test Route Error:", error);
         return NextResponse.json({
             success: false,
             error: error.message || error,
-            isAuthError: error.message.includes('535')
         }, { status: 500 });
     }
 }

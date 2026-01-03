@@ -1,50 +1,68 @@
-import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
 
 /**
- * Creates a Nodemailer transporter using Brevo SMTP.
- * Replaces Gmail App Password for better deliverability and fewer blocks.
+ * Creates a Gmail API Client using OAuth2.
+ * Uses REST API instead of SMTP for better reliability and bypassing port blocks.
  */
 const clean = (val: string | undefined) => val ? val.replace(/^["']|["']$/g, '').trim() : undefined;
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    type: 'OAuth2',
-    user: clean(process.env.GMAIL_USER_EMAIL) || clean(process.env.EMAIL_USER),
-    clientId: clean(process.env.GMAIL_CLIENT_ID),
-    clientSecret: clean(process.env.GMAIL_CLIENT_SECRET),
-    refreshToken: clean(process.env.GMAIL_REFRESH_TOKEN),
-  },
-  // Keeps the connection alive for multiple messages (optional but good for performance)
-  pool: true,
-  maxConnections: 5, // Allow 5 simultaneous connections for batch sending
-});
+const getGmailClient = () => {
+  const oAuth2Client = new google.auth.OAuth2(
+    clean(process.env.GMAIL_CLIENT_ID),
+    clean(process.env.GMAIL_CLIENT_SECRET),
+    'https://developers.google.com/oauthplayground' // Redirect URL
+  );
+
+  oAuth2Client.setCredentials({
+    refresh_token: clean(process.env.GMAIL_REFRESH_TOKEN),
+  });
+
+  return google.gmail({ version: 'v1', auth: oAuth2Client });
+};
 
 /**
  * CORE SENDER FUNCTION
  */
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   try {
-    // Verify connection before sending (optional, helps debugging)
-    await new Promise((resolve, reject) => {
-      transporter.verify(function (error, success) {
-        if (error) reject(error);
-        else resolve(success);
-      });
+    const gmail = getGmailClient();
+    const userEmail = clean(process.env.EMAIL_USER);
+
+    // Construct the raw email
+    // Headers must be ASCII. Use RFC 2047 encoding for the subject if it contains non-ASCII characters.
+    const encodedSubject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+
+    const str = [
+      `From: "Training Thriveni" <${userEmail}>`,
+      `To: ${to}`,
+      `Subject: ${encodedSubject}`,
+      `Content-Type: text/html; charset=utf-8`,
+      `MIME-Version: 1.0`,
+      ``,
+      html
+    ].join('\n');
+
+    // Encode the string to Base64URL format (Safe for URL)
+    const encodedMessage = Buffer.from(str)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage,
+      },
     });
 
-    const info = await transporter.sendMail({
-      from: `"Training Thriveni" <${clean(process.env.EMAIL_USER)}>`, // Must be verified in Brevo
-      to,
-      subject,
-      html,
-    });
-
-    console.log(`✅ Email sent to ${to}: ${info.messageId}`);
-    return { success: true };
+    console.log(`✅ Email sent via API to ${to}: ${res.data.id}`);
+    return { success: true, id: res.data.id };
   } catch (error: any) {
-    console.error('❌ Email failed:', error);
-    return { success: false, error: error.message || error };
+    console.error('❌ Email failed via API:', error);
+    // Extract more meaningful error from Google API response if available
+    const message = error.response?.data?.error?.message || error.message || error;
+    return { success: false, error: message };
   }
 }
 
@@ -164,31 +182,31 @@ export async function sendFeedbackAcknowledgmentEmail(
         <h3 style="margin-top: 0; color: #333;">Your Responses</h3>
         <table style="width: 100%; border-collapse: collapse;">
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Pre-Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Rate your knowledge level BEFORE training:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.preTraining}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Post-Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Rate your knowledge level After training:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.postTraining}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Training Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>How would you rate the overall training?:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.training}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Content Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>How would you rate the content?:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.content}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Trainer Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>How would you rate the trainer?:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.trainer}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Material Rating:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>How would you rate the material?:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.material}/5</td>
           </tr>
           <tr>
-            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Recommendation:</strong></td>
+            <td style="padding: 8px 0; border-bottom: 1px solid #eee;"><strong>Would you recommend this training to others?:</strong></td>
             <td style="padding: 8px 0; border-bottom: 1px solid #eee;">${feedbackData.recommendation ? 'Yes' : 'No'}</td>
           </tr>
         </table>
@@ -202,7 +220,7 @@ export async function sendFeedbackAcknowledgmentEmail(
 
       <p>We appreciate your time and input.</p>
       <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+      <small style="color: #888;">This is an automated message from Training Thriveni.</small>
     </div>`;
 
   return await sendEmail({ to: email, subject: `Feedback Received: ${programName}`, html });
