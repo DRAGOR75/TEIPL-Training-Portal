@@ -75,11 +75,11 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Full Name</label>
-                                    <input name="name" required placeholder="John Doe" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="name" required placeholder="Your Full Name" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Email Address</label>
-                                    <input name="email" type="email" required placeholder="john@thriveni.com" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="email" type="email" required placeholder="Your Official Email" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                             </div>
 
@@ -87,7 +87,7 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile Number</label>
-                                    <input name="phone" required placeholder="+91 ..." className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                                 <div>
                                     <button

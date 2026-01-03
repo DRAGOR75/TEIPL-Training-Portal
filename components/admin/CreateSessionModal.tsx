@@ -70,7 +70,7 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
 
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Program Name</label>
-                        <input name="programName" required placeholder="e.g. Advanced Java" className="w-full p-2.5 border border-slate-300 rounded-lg" />
+                        <input name="programName" required placeholder="Training Name" className="w-full p-2.5 border border-slate-300 rounded-lg" />
                     </div>
 
                     <div>

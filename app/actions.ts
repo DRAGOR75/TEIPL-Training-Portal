@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { sendEmail, sendFeedbackRequestEmail } from '@/lib/email';
+import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification } from '@/lib/email';
 
 // --- TYPES ---
 export type ParticipantData = {
@@ -165,18 +165,56 @@ export async function submitManagerReview(formData: FormData) {
     const comments = formData.get('comments') as string;
 
     try {
-        await db.enrollment.update({
+        const updatedEnrollment = await db.enrollment.update({
             where: { id: enrollmentId },
             data: {
                 managerAgrees: agree,
                 managerComment: comments,
                 status: 'Completed',
             },
+            select: {
+                managerName: true,
+                managerEmail: true,
+                employeeName: true,
+                session: {
+                    select: {
+                        programName: true,
+                        trainerName: true // 🟢 Fetch Trainer Name
+                    }
+                }
+            }
         });
+
+        // 🚨 Trigger Notification if Manager DISAGREES
+        if (agree === 'No') {
+            try {
+                // 1. Find Trainer Email
+                let trainerEmail = null;
+                if (updatedEnrollment.session.trainerName) {
+                    const trainer = await db.trainer.findUnique({
+                        where: { name: updatedEnrollment.session.trainerName }
+                    });
+                    trainerEmail = trainer?.email;
+                }
+
+                // 2. Send Notification
+                await sendManagerRejectionNotification(
+                    updatedEnrollment.managerName || updatedEnrollment.managerEmail || "The Manager",
+                    updatedEnrollment.employeeName,
+                    updatedEnrollment.session.programName,
+                    comments,
+                    trainerEmail
+                );
+            } catch (emailError) {
+                console.error("Failed to send rejection notification:", emailError);
+                // Don't fail the request, just log it
+            }
+        }
 
         revalidatePath('/admin/dashboard');
         return { success: true };
     } catch (error) {
+        console.error("Review Error:", error);
         return { success: false, error: "Failed to save review" };
     }
 }
@@ -224,7 +262,7 @@ export async function sendFeedbackEmails(sessionId: string) {
     }
 }
 
-// 6. CREATE SESSION LOGIC (🟢 UPDATED for Start/End Dates)
+// 6. CREATE SESSION LOGIC 
 export async function createTrainingSession(formData: FormData) {
     const programName = formData.get('programName') as string;
     const trainerName = formData.get('trainerName') as string;

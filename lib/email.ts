@@ -225,3 +225,44 @@ export async function sendFeedbackAcknowledgmentEmail(
 
   return await sendEmail({ to: email, subject: `Feedback Received: ${programName}`, html });
 }
+
+/**
+ * EMAIL FOR COORDINATORS (Manager Rejection/Disagreement)
+ */
+export async function sendManagerRejectionNotification(
+  managerName: string,
+  employeeName: string,
+  programName: string,
+  managerComment: string,
+  trainerEmail?: string | null
+) {
+  const coordinators = ['pln@thriveni.com', 'goraibaibhav161@gmail.com', 'ssd@thriveni.com'];
+  if (trainerEmail) {
+    coordinators.push(trainerEmail);
+  }
+
+  const subject = `Urgent: Manager Disagreed with Feedback - ${employeeName}`;
+
+  const html = `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #d32f2f; border-radius: 8px;">
+      <h2 style="color: #d32f2f;">Manager Disagreement Alert</h2>
+      <p>The manager <strong>${managerName}</strong> has reviewed the post-training feedback for <strong>${employeeName}</strong> for (${programName}) and disagrees with the comments.</p>
+      
+      <div style="background: #fff5f5; padding: 15px; border-left: 4px solid #d32f2f; margin: 15px 0;">
+        <strong>Manager's Comments:</strong><br/>
+        ${managerComment}
+      </div>
+
+      <p>Please review this candidate's feedback status immediately.</p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">Automated Notification</small>
+    </div>`;
+
+  // Send to all coordinators (and trainer)
+  const promises = coordinators.map(email =>
+    sendEmail({ to: email, subject, html })
+  );
+
+  await Promise.all(promises);
+  return { success: true };
+}

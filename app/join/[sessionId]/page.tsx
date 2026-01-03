@@ -107,13 +107,13 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 label="Full Name"
                                 name="name"
                                 icon={<User size={16} />}
-                                placeholder="e.g. John Doe"
+                                placeholder="Your Full Name"
                             />
                             <InputField
                                 label="Employee ID"
                                 name="empId"
                                 icon={<Building2 size={16} />}
-                                placeholder="e.g. 10000111"
+                                placeholder="Your Employee ID"
                             />
                             <div className="md:col-span-2">
                                 <InputField
@@ -144,14 +144,14 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 label="Manager Name"
                                 name="managerName"
                                 icon={<User size={16} />}
-                                placeholder="e.g. Jane Smith"
+                                placeholder="Your Reporting Manager's Name"
                             />
                             <InputField
                                 label="Manager Email"
                                 name="managerEmail"
                                 type="email"
                                 icon={<Mail size={16} />}
-                                placeholder="e.g. jtr@thriveni.com"
+                                placeholder="Your Reporting Manager's Official Email"
                             />
                         </div>
                     </section>
