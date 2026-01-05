@@ -53,8 +53,8 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                         </p>
 
                         {/* Professional Metadata Strip */}
-                        <div className="inline-flex flex-wrap items-center justify-center gap-y-4 gap-x-6 md:gap-x-12 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-6 py-4 mx-auto w-full md:w-auto">
-                            <div className="text-center md:text-left w-full md:w-auto">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl px-8 py-6 mx-auto w-full max-w-2xl">
+                            <div className="text-center md:text-left">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Program</p>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
                                     <BookOpen size={14} className="text-blue-400" />
@@ -62,22 +62,17 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 </div>
                             </div>
 
-
-                            <div className="w-px h-8 bg-white/10 hidden md:block"></div>
-
-                            <div className="text-center md:text-left w-full md:w-auto">
+                            <div className="text-center md:text-right">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Trainer</p>
-                                <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
+                                <div className="flex items-center justify-center md:justify-end gap-2 text-white font-semibold text-sm">
                                     <User size={14} className="text-blue-400" />
                                     {session.trainerName}
                                 </div>
                             </div>
 
-                            <div className="w-px h-8 bg-white/10 hidden md:block"></div>
-
-                            <div className="text-center md:text-left w-full md:w-auto">
+                            <div className="col-span-1 md:col-span-2 text-center pt-4 border-t border-white/10">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Date</p>
-                                <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
+                                <div className="flex items-center justify-center gap-2 text-white font-semibold text-sm">
                                     <Calendar size={14} className="text-blue-400" />
                                     {dateStr}
                                 </div>

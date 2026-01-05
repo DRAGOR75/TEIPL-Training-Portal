@@ -263,6 +263,39 @@ export async function sendManagerRejectionNotification(
     sendEmail({ to: email, subject, html })
   );
 
+
   await Promise.all(promises);
   return { success: true };
+}
+
+/**
+ * EMAIL FOR MANAGER (Feedback Review Request)
+ */
+export async function sendFeedbackReviewRequestEmail(
+  managerEmail: string,
+  managerName: string | null,
+  employeeName: string,
+  programName: string,
+  enrollmentId: string
+) {
+  // Hardcoded Production URL for reliability
+  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
+
+  const html = `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #0056b3;">Post training (30 days) performance feedback</h2>
+      <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
+      <p>The employee <strong>${employeeName}</strong> has submitted their post-training (30 days) performance feedback for the program <strong>${programName}</strong>.</p>
+      <p>Please review their ratings and provide your validation by clicking the button below:</p>
+      <p><a href="${managerLink}" style="background: #0056b3; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Review Feedback</a></p>
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from Training Thriveni.</small>
+    </div>`;
+
+  return await sendEmail({
+    to: managerEmail,
+    subject: `Action Required: Feedback Review for ${employeeName}`,
+    html
+  });
 }

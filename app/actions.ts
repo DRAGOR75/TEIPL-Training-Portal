@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification } from '@/lib/email';
+import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail } from '@/lib/email';
 
 // --- TYPES ---
 export type ParticipantData = {
@@ -128,28 +128,20 @@ export async function submitEmployeeFeedback(formData: FormData) {
             },
             select: {
                 managerEmail: true,
+                managerName: true, // 🟢 Added managerName
                 employeeName: true,
                 session: { select: { programName: true } }
             }
         });
 
         // 2. Send Email to Manager
-        // Hardcoded Production URL for reliability
-        const baseUrl = 'https://templtrainingportal.vercel.app';
-        const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
-
-        await sendEmail({
-            to: updatedEnrollment.managerEmail,
-            subject: `Action Required: Feedback Review for ${updatedEnrollment.employeeName}`,
-            html: `
-            <h2>Post training (30 days) performance feedback</h2>
-            <p><strong>Employee:</strong> ${updatedEnrollment.employeeName}</p>
-            <p><strong>Program:</strong> ${updatedEnrollment.session.programName}</p>
-            <p>The employee has submitted their post-training feedback.</p>
-            <p><strong>Please click the link below to validate their ratings:</strong></p>
-            <p><a href="${managerLink}"> Click Here to Review</a></p>
-            `
-        });
+        await sendFeedbackReviewRequestEmail(
+            updatedEnrollment.managerEmail,
+            updatedEnrollment.managerName,
+            updatedEnrollment.employeeName,
+            updatedEnrollment.session.programName,
+            enrollmentId
+        );
 
         return { success: true };
     } catch (error) {
@@ -170,7 +162,7 @@ export async function submitManagerReview(formData: FormData) {
             data: {
                 managerAgrees: agree,
                 managerComment: comments,
-                status: 'Completed',
+                status: agree === 'No' ? 'Manager Disagrees' : 'Completed',
             },
             select: {
                 managerName: true,
@@ -179,13 +171,13 @@ export async function submitManagerReview(formData: FormData) {
                 session: {
                     select: {
                         programName: true,
-                        trainerName: true // 🟢 Fetch Trainer Name
+                        trainerName: true
                     }
                 }
             }
         });
 
-        // 🚨 Trigger Notification if Manager DISAGREES
+
         if (agree === 'No') {
             try {
                 // 1. Find Trainer Email
