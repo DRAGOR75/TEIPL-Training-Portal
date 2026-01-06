@@ -44,6 +44,8 @@ export async function updateEmployeeProfile(empId: string, data: {
     grade: unknown; // Use unknown or string if Grade enum not picked up
     sectionName: string;
     location: string;
+    manager_name?: string;
+    manager_email?: string;
 }) {
     try {
         const updated = await db.employee.upsert({
@@ -54,6 +56,8 @@ export async function updateEmployeeProfile(empId: string, data: {
                 grade: data.grade as any, // Cast to any to avoid lint if enum missing
                 sectionName: data.sectionName,
                 location: data.location,
+                manager_name: data.manager_name,
+                manager_email: data.manager_email,
             },
             create: {
                 id: empId,
@@ -62,6 +66,8 @@ export async function updateEmployeeProfile(empId: string, data: {
                 grade: data.grade as any,
                 sectionName: data.sectionName,
                 location: data.location,
+                manager_name: data.manager_name,
+                manager_email: data.manager_email,
             }
         });
         return { success: true, employee: updated };
