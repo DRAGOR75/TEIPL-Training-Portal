@@ -1,4 +1,5 @@
 'use server';
+// Force recompile
 
 import { db } from '@/lib/prisma';
 import { Grade } from '@prisma/client'; // This might still error in editor until reload
@@ -75,4 +76,40 @@ export async function updateEmployeeProfile(empId: string, data: {
         console.error('Profile Update Error:', error);
         return { error: 'Failed to update profile' };
     }
+}
+
+export async function getAvailablePrograms() {
+    return await db.program.findMany({
+        orderBy: { name: 'asc' },
+        include: { sections: true }
+    });
+}
+
+export async function submitTNINomination(formData: FormData) {
+    const empId = formData.get('empId') as string;
+    const programId = formData.get('programId') as string;
+    const justification = formData.get('justification') as string;
+
+    if (!empId || !programId) {
+        throw new Error("Employee ID and Program are required");
+    }
+
+    try {
+        await db.nomination.create({
+            data: {
+                empId,
+                programId,
+                justification,
+                status: 'Pending'
+            }
+        });
+
+        // Revalidate the dashboard so the new nomination shows up
+        // revalidatePath(`/tni/${empId}`); // This might need to be dynamic or we just redirect
+    } catch (error) {
+        console.error("Failed to submit nomination:", error);
+        throw new Error("Failed to submit nomination");
+    }
+
+    redirect(`/tni/${empId}`);
 }

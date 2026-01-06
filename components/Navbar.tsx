@@ -55,7 +55,8 @@ export default function Navbar({ session }: { session: Session | null }) {
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
                         <NavLink href="/wip" icon={<FileText size={18} />} text="Nominations" />
-                        <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Hub" />
+                        <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Dashboard" />
+                        <NavLink href="/admin/master-data" icon={<ShieldCheck size={18} />} text="Master Data" />
 
                         {isLoggedIn && (
                             <div className="ml-4 pl-4 border-l border-slate-200">
