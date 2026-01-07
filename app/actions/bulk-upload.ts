@@ -37,13 +37,6 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     throw new Error(`Row ${globalIndex + 1}: Missing required fields (id)`);
                 }
 
-                // Normalize grade enum
-                const gradeEnum = row.grade.toUpperCase() === 'EXECUTIVE' ? Grade.EXECUTIVE :
-                    row.grade.toUpperCase() === 'WORKMAN' ? Grade.WORKMAN : undefined;
-
-                if (!gradeEnum) {
-                    throw new Error(`Row ${globalIndex + 1}: Invalid grade (Must be EXECUTIVE or WORKMAN)`);
-                }
 
                 // Helper to parse date strictly
                 const parseDate = (dateStr: string | undefined) => {
