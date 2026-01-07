@@ -64,6 +64,7 @@ model Program {
 }
 
 enum TrainingCategory {
+  FOUNDATIONAL
   FUNCTIONAL
   BEHAVIOURAL
   COMMON
