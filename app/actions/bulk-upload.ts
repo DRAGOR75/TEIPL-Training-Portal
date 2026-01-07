@@ -33,8 +33,8 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             const globalIndex = i + batchIndex;
             try {
                 // Validate basic required fields
-                if (!row.id || !row.name || !row.email || !row.grade) {
-                    throw new Error(`Row ${globalIndex + 1}: Missing required fields (id, name, email, grade)`);
+                if (!row.id) {
+                    throw new Error(`Row ${globalIndex + 1}: Missing required fields (id)`);
                 }
 
                 // Normalize grade enum
