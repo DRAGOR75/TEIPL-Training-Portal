@@ -16,7 +16,7 @@ model Employee {
   id           String        @id @map("emp_id") // Your official Employee ID
   name         String
   email        String        @unique
-  grade        Grade         // EXECUTIVE or WORKMAN
+  grade        Grade?         // EXECUTIVE or WORKMAN
   sectionName  String?       @map("section_name") // Their home department
   location     String?
   manager_name String?

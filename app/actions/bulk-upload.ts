@@ -9,7 +9,7 @@ interface EmployeeImportRow {
     id: string; // emp_id
     name: string;
     email: string;
-    grade: string;
+    grade?: string;
     sectionName?: string;
     location?: string;
     manager_name?: string; // These might be empty in CSV, causing issues if not handled
@@ -44,6 +44,16 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     const d = new Date(dateStr);
                     return isNaN(d.getTime()) ? null : d;
                 };
+
+                // Validate Grade
+                let gradeEnum: Grade | null = null;
+                if (row.grade && row.grade.trim()) {
+                    const normalizedGrade = row.grade.trim().toUpperCase();
+                    if (!Object.values(Grade).includes(normalizedGrade as Grade)) {
+                        throw new Error(`Row ${globalIndex + 1}: Invalid grade '${row.grade}'. Must be one of: ${Object.values(Grade).join(', ')}`);
+                    }
+                    gradeEnum = normalizedGrade as Grade;
+                }
 
                 await db.employee.upsert({
                     where: { id: row.id.toString() },

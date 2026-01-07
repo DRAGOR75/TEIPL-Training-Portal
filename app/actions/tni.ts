@@ -54,7 +54,10 @@ export async function updateEmployeeProfile(empId: string, data: {
             update: {
                 name: data.name,
                 email: data.email,
-                grade: data.grade as any, // Cast to any to avoid lint if enum missing
+                grade: (() => {
+                    if (!data.grade) throw new Error("Grade is required");
+                    return data.grade as any;
+                })(),
                 sectionName: data.sectionName,
                 location: data.location,
                 manager_name: data.manager_name,

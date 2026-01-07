@@ -89,7 +89,11 @@ export async function createEmployee(formData: FormData) {
                 id: empId,
                 name: formData.get('name') as string,
                 email: formData.get('email') as string,
-                grade: formData.get('grade') as Grade,
+                grade: (() => {
+                    const g = formData.get('grade') as string;
+                    if (!g) throw new Error("Grade is required");
+                    return g as Grade;
+                })(),
                 sectionName: formData.get('sectionName') as string,
                 location: formData.get('location') as string,
                 manager_name: formData.get('manager_name') as string,
