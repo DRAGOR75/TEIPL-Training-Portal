@@ -84,8 +84,13 @@ export default function DashboardClient({
         setDate(newDate);
         setIsLoading(true);
         try {
-            // Fetch heavyweight data ONLY for this date
-            const result = await getSessionsForDate(newDate.toISOString());
+            // 🟢 DATE FIX: Send YYYY-MM-DD (Local) to prevent Timezone shift
+            // toISOString() converts 00:00 IST to Previous Day UTC, causing the bug.
+            const offset = newDate.getTimezoneOffset();
+            const localDate = new Date(newDate.getTime() - (offset * 60 * 1000));
+            const dateStr = localDate.toISOString().split('T')[0]; // "2024-01-08"
+
+            const result = await getSessionsForDate(dateStr);
             setSessions(result.sessions as Session[]);
         } catch (error) {
             console.error("Failed to fetch sessions", error);

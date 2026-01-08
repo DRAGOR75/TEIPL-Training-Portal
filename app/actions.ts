@@ -37,10 +37,11 @@ export async function getCalendarMetadata() {
 // 1.b SESSION DETAILS (Heavy - For Selected Date)
 export async function getSessionsForDate(dateStr: string) {
     try {
-        const date = new Date(dateStr);
-        // Set to beginning and end of day to ensuring full coverage
-        const startOfDay = new Date(date); startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date); endOfDay.setHours(23, 59, 59, 999);
+        // 🟢 DATE FIX: input is "YYYY-MM-DD".
+        // incorrectly parsing it could lead to timezone issues.
+        // We act as if this date is UTC Midnight.
+        const startOfDay = new Date(dateStr + "T00:00:00.000Z");
+        const endOfDay = new Date(dateStr + "T23:59:59.999Z");
 
         const sessions = await db.trainingSession.findMany({
             where: {
