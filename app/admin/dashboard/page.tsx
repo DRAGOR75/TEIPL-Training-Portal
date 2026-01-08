@@ -19,7 +19,7 @@ export default async function AdminDashboardPage() {
 
     const [calendarMetadata, todayData, trainersData] = await Promise.all([
         getCalendarMetadata(),
-        getSessionsForDate(today.toISOString()),
+        getSessionsForDate(today.toISOString().split('T')[0]),
         getTrainers()
     ]);
 
