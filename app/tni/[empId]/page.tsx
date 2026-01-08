@@ -9,20 +9,20 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
     // If employee doesn't exist, we might want to show a "Create Profile" UI.
     // For now, let's assume if it returns null, we show basic "Not Found" or "New User"
 
-    if (!employee) {
-        return (
-            <div className="min-h-screen bg-slate-950 p-8 flex flex-col items-center">
-                <div className="max-w-2xl w-full bg-white p-8 rounded shadow text-center">
-                    <h1 className="text-2xl font-bold mb-4">Employee ID: {empId} Not Found</h1>
-                    <p className="mb-6 text-slate-600">This ID does not exist in our system yet.</p>
-                    <Link href="/tni" className="text-blue-600 hover:underline">Go Back</Link>
-                    {/* We'll implement creating a new ONE in the next step/iteration if needed */}
-                </div>
-            </div>
-        );
-    }
+    // 🟢 CREATE BLANK PROFILE FOR FRESH START
+    const currentEmployee = employee || {
+        id: empId,
+        name: '',
+        email: '',
+        grade: '',
+        sectionName: '',
+        location: '',
+        manager_name: '',
+        manager_email: '',
+        nominations: []
+    };
 
-    const nominations = employee.nominations || [];
+    const nominations = currentEmployee.nominations || [];
 
     return (
         <div className="min-h-screen bg-slate-950 p-8">
@@ -32,18 +32,38 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                 <div className="flex justify-between items-center">
                     <div>
                         <h1 className="text-3xl font-bold text-white">Training Portal</h1>
-                        <p className="text-slate-400">Welcome, {employee.name}</p>
+                        <p className="text-slate-400">
+                            {currentEmployee.name ? `Welcome, ${currentEmployee.name}` : `Setup Profile for ID: ${empId}`}
+                        </p>
                     </div>
                     <Link href="/tni" className="text-sm text-slate-400 hover:text-slate-200">Sign Out</Link>
                 </div>
 
                 {/* Profile Section (Interactive) */}
-                <TNIProfile employee={employee} sections={sections} />
+                <TNIProfile employee={currentEmployee} sections={sections} />
+
+                {/* 🟢 LOOKER STUDIO EMBED (PAST RECORDS) */}
+                <div className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
+                    <div className="p-6 border-b border-slate-100">
+                        <h2 className="text-xl font-semibold text-slate-800">Training History (Past Records)</h2>
+                        <p className="text-sm text-slate-500">View your historical training data below.</p>
+                    </div>
+                    <div className="w-full h-[600px] bg-slate-50 flex items-center justify-center">
+                        <iframe
+                            src="https://lookerstudio.google.com/embed/reporting/dbba1f2c-4ff6-4bda-b1ab-f7f96f0a9f90/page/zpm1D"
+                            width="100%"
+                            height="100%"
+                            style={{ border: 0 }}
+                            allowFullScreen
+                            sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+                        ></iframe>
+                    </div>
+                </div>
 
                 {/* Existing TNI Table */}
                 <div className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                        <h2 className="text-xl font-semibold text-slate-800">My Nominations (TNI)</h2>
+                        <h2 className="text-xl font-semibold text-slate-800">Current Nominations (Fresh Start)</h2>
 
                         {/* Start New Nomination Button */}
                         <Link href={`/tni/${empId}/new`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition-colors">
@@ -65,7 +85,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                                 {nominations.length === 0 ? (
                                     <tr>
                                         <td colSpan={4} className="p-8 text-center text-slate-500">
-                                            No nominations found for this year.
+                                            No recent nominations found. Click "Submit New TNI" to start.
                                         </td>
                                     </tr>
                                 ) : (

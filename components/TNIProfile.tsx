@@ -20,7 +20,7 @@ type Section = {
 };
 
 export default function TNIProfile({ employee, sections }: { employee: Employee, sections: Section[] }) {
-    const [isEditing, setIsEditing] = useState(false);
+    const [isEditing, setIsEditing] = useState(!employee.name);
     const [loading, setLoading] = useState(false);
 
     // Form State
