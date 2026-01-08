@@ -45,12 +45,14 @@ export async function getSessionsForDate(dateStr: string) {
         const sessions = await db.trainingSession.findMany({
             where: {
                 OR: [
-                    // 1. Session is ACTIVE on this day (Start <= Date <= End)
+                    // 1. Strict Match: Is this the Session END DATE?
                     {
-                        startDate: { lte: endOfDay },
-                        endDate: { gte: startOfDay }
+                        endDate: {
+                            gte: startOfDay,
+                            lte: endOfDay
+                        }
                     },
-                    // 2. OR it is the Feedback Deadline Day
+                    // 2. Strict Match: Is this the FEEDBACK DEADLINE DATE?
                     {
                         feedbackCreationDate: {
                             gte: startOfDay,
