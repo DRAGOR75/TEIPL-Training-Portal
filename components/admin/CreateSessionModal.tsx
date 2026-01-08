@@ -1,25 +1,8 @@
 'use client'
 
 import { useState } from 'react';
-import { useFormStatus } from 'react-dom'; // Add this import
 import { createTrainingSession } from '@/app/actions';
-
-function SubmitButton() {
-    const { pending } = useFormStatus();
-
-    return (
-        <button
-            type="submit"
-            disabled={pending}
-            className={`px-6 py-2 font-bold rounded-lg text-sm transition-all shadow-sm ${pending
-                ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-md'
-                }`}
-        >
-            {pending ? 'Creating Session...' : 'Create Session'}
-        </button>
-    );
-}
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +94,9 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
 
                     <div className="pt-2 flex justify-end gap-3">
                         <button type="button" onClick={() => setIsOpen(false)} className="px-4 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm font-medium">Cancel</button>
-                        <SubmitButton />
+                        <FormSubmitButton className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-sm transition-all shadow-sm hover:shadow-md">
+                            Create Session
+                        </FormSubmitButton>
                     </div>
 
                 </form>

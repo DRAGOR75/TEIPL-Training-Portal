@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db } from '@/lib/prisma';
 import { sendTrainerReminderEmail } from '@/lib/email';
 
 export const dynamic = 'force-dynamic'; // Ensure this route is never cached

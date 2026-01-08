@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from '@/lib/db';
+import { db } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
 import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail } from '@/lib/email';
 
@@ -12,15 +12,60 @@ export type ParticipantData = {
 };
 
 // 1. DASHBOARD LOGIC (Updated for Start Date)
-// 1. DASHBOARD LOGIC (Updated for Start Date)
-export async function getDashboardData() {
+// 1. CALENDAR METADATA (Lightweight - For Dots)
+export async function getCalendarMetadata() {
     try {
+        // Fetch minimal data for ALL sessions (lightweight)
+        // This allows the calendar to show dots for all past/future events without loading heavy enrollments
+        return await db.trainingSession.findMany({
+            select: {
+                id: true,
+                startDate: true,
+                endDate: true,
+                feedbackCreationDate: true,
+                emailsSent: true,
+                sendFeedbackAutomatically: true
+            },
+            orderBy: { startDate: 'desc' },
+        });
+    } catch (error) {
+        console.error("Metadata Error:", error);
+        return [];
+    }
+}
+
+// 1.b SESSION DETAILS (Heavy - For Selected Date)
+export async function getSessionsForDate(dateStr: string) {
+    try {
+        const date = new Date(dateStr);
+        // Set to beginning and end of day to ensuring full coverage
+        const startOfDay = new Date(date); startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date); endOfDay.setHours(23, 59, 59, 999);
+
         const sessions = await db.trainingSession.findMany({
-            include: { enrollments: true }, // 👈 This fixes the "enrollments missing" error
-            orderBy: { startDate: 'desc' }, // 🟢 Updated from completionDate
+            where: {
+                OR: [
+                    // 1. Strict Match: Is this the Session END DATE?
+                    {
+                        endDate: {
+                            gte: startOfDay,
+                            lte: endOfDay
+                        }
+                    },
+                    // 2. Strict Match: Is this the FEEDBACK DEADLINE DATE?
+                    {
+                        feedbackCreationDate: {
+                            gte: startOfDay,
+                            lte: endOfDay
+                        }
+                    }
+                ]
+            },
+            include: { enrollments: true }, // Heavy data (Enrollments) only for this day
+            orderBy: { startDate: 'desc' },
         });
 
-        // Count pending reviews (Status = 'Pending Manager')
+        // Calculate pending reviews for the badge
         const pendingCount = await db.enrollment.count({
             where: { status: 'Pending Manager' },
         });

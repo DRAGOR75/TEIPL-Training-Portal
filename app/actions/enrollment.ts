@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from "@/lib/db";
+import { db } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { revalidatePath } from "next/cache";
 import { sendFeedbackAcknowledgmentEmail } from "@/lib/email";
@@ -51,8 +51,8 @@ export async function selfEnroll(formData: FormData) {
             create: data
         });
 
-        // 4. 🟢 REVALIDATION: Tell the server the Dashboard is now "Stale"
-        revalidatePath("/admin/dashboard");
+
+        // revalidatePath("/admin/dashboard"); // 🛑 DISABLED for performance. Admin can manual refresh.
 
         // 5. Send Acknowledgment Email (Non-blocking)
         // Fetch session name first if not available efficiently, but here we query it.

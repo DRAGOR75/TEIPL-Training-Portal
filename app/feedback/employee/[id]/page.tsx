@@ -1,6 +1,7 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/prisma';
 import { submitEmployeeFeedback } from '@/app/actions';
 import { redirect } from 'next/navigation';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 
 const RatingQuestion = ({ label, name }: { label: string; name: string }) => (
@@ -60,9 +61,9 @@ export default async function EmployeeFeedbackPage({ params }: { params: Promise
                         <RatingQuestion name="q5" label="Q5. The program has improved my efficiency and productivity." />
                     </div>
 
-                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg shadow transition mt-4">
+                    <FormSubmitButton className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-lg shadow transition mt-4">
                         Submit Effectiveness Rating
-                    </button>
+                    </FormSubmitButton>
                 </form>
             </div>
         </div>

@@ -1,31 +1,7 @@
 'use server'
 
-import { sendApprovalEmail, sendFeedbackRequestEmail } from '@/lib/email';
-import { db } from '@/lib/db';
-
-/**
- * Triggered from the Nominations Dashboard
- */
-export async function notifyManagerAction(nominationId: string) {
-    try {
-        const nomination = await db.nomination.findUnique({
-            where: { id: nominationId },
-        });
-
-        if (!nomination) return { success: false, error: "Nomination not found" };
-
-        return await sendApprovalEmail(
-            nomination.managerEmail,
-            nomination.managerName,
-            nomination.employeeName, // Corrected from nomineeName to employeeName
-            nomination.justification,
-            nomination.id
-        );
-    } catch (error) {
-        console.error("Action Error:", error);
-        return { success: false, error: "Failed to notify manager" };
-    }
-}
+import { sendFeedbackRequestEmail } from '@/lib/email';
+import { db } from '@/lib/prisma';
 
 /**
  * Triggered from the Training Sessions / Enrollments Dashboard

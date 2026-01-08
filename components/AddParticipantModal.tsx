@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Papa from "papaparse";
 import { addParticipants, ParticipantData } from "@/app/actions/addParticipants";
+import { FormSubmitButton } from "./FormSubmitButton";
 
 export function AddParticipantModal({ sessionId }: { sessionId: string }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -126,9 +127,9 @@ export function AddParticipantModal({ sessionId }: { sessionId: string }) {
                             value={manualEntry.managerEmail}
                             onChange={e => setManualEntry({ ...manualEntry, managerEmail: e.target.value })}
                         />
-                        <button disabled={loading} className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
-                            {loading ? "Saving..." : "Save Participant"}
-                        </button>
+                        <FormSubmitButton isLoading={loading} loadingText="Saving..." className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700">
+                            Save Participant
+                        </FormSubmitButton>
                     </form>
                 )}
 

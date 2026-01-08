@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, ShieldCheck, FileText, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Home, ShieldCheck, FileText, LayoutDashboard, ClipboardList } from 'lucide-react';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
 
@@ -54,8 +54,8 @@ export default function Navbar({ session }: { session: Session | null }) {
                     {/* Right Side: Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
-                        <NavLink href="/wip" icon={<FileText size={18} />} text="Nominations" />
-                        <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Hub" />
+                        <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Dashboard" />
+                        <NavLink href="/admin/tni-dashboard" icon={<ClipboardList size={18} />} text="TNI Dashboard" />
 
                         {isLoggedIn && (
                             <div className="ml-4 pl-4 border-l border-slate-200">

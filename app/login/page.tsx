@@ -3,7 +3,8 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
+import { Lock, Mail, ShieldCheck } from "lucide-react";
+import { FormSubmitButton } from "@/components/FormSubmitButton";
 
 export default function LoginPage() {
     const [error, setError] = useState("");
@@ -98,12 +99,13 @@ export default function LoginPage() {
                         )}
 
                         {/* Submit Button */}
-                        <button
-                            disabled={loading}
+                        <FormSubmitButton
+                            isLoading={loading}
+                            loadingText="SIGNING IN..."
                             className="w-full bg-blue-700 hover:bg-blue-800 text-white font-black py-3 rounded-lg shadow-lg flex justify-center items-center gap-3 transition-all active:scale-95 disabled:opacity-70"
                         >
-                            {loading ? <Loader2 className="animate-spin" size={20} /> : "SIGN IN TO DASHBOARD"}
-                        </button>
+                            SIGN IN TO DASHBOARD
+                        </FormSubmitButton>
                     </form>
                 </div>
 

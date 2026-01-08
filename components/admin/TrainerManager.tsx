@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { addTrainer, deleteTrainer } from '@/app/actions/trainers';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     UserPlus,
     Mail,
@@ -90,13 +91,12 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                                     <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                                 <div>
-                                    <button
-                                        disabled={loading}
+                                    <FormSubmitButton
                                         className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
                                     >
                                         <Plus size={18} />
-                                        {loading ? 'Processing...' : 'Add Trainer'}
-                                    </button>
+                                        Add Trainer
+                                    </FormSubmitButton>
                                 </div>
                             </div>
                         </div>

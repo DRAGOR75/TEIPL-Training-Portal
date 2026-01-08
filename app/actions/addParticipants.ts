@@ -1,6 +1,6 @@
 'use server'
 
-import { db } from "@/lib/db"; // Ensure this points to your prisma client
+import { db } from '@/lib/prisma'; // Ensure this points to your prisma client
 import { revalidatePath } from "next/cache";
 
 export type ParticipantData = {

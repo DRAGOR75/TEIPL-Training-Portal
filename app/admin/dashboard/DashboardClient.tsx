@@ -18,7 +18,7 @@ import {
     Download
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { sendFeedbackEmails } from '@/app/actions';
+import { getSessionsForDate, toggleFeedbackAutomation, sendFeedbackEmails } from '@/app/actions';
 
 import TrainerManager from '@/components/admin/TrainerManager';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
@@ -36,6 +36,13 @@ type Session = {
     enrollments: any[];
 };
 
+type SessionMetadata = {
+    id: string;
+    startDate: Date;
+    endDate: Date;
+    feedbackCreationDate: Date | null;
+};
+
 type Trainer = {
     id: string;
     name: string;
@@ -45,6 +52,7 @@ type Trainer = {
 };
 
 type DashboardClientProps = {
+    initialMetadata: SessionMetadata[];
     initialSessions: Session[];
     initialTrainers: Trainer[];
     initialPendingReviews: number;
@@ -53,47 +61,53 @@ type DashboardClientProps = {
 };
 
 export default function DashboardClient({
+    initialMetadata,
     initialSessions,
     initialTrainers,
     initialPendingReviews,
-    currentPage,
-    totalPages,
 }: DashboardClientProps) {
     const [date, setDate] = useState<any>(new Date());
     const [optimisticToggles, setOptimisticToggles] = useState<Record<string, boolean>>({});
-    const [isNavigating, setIsNavigating] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
+    // Sessions is now the "Active List" for the selected date
     const [sessions, setSessions] = useState<Session[]>(initialSessions);
 
+    // Initial Load / Prop updates
     useEffect(() => {
         setSessions(initialSessions);
     }, [initialSessions]);
 
+    // Handle Date Change
+    const handleDateChange = async (newDate: any) => {
+        setDate(newDate);
+        setIsLoading(true);
+        try {
+            // Fetch heavyweight data ONLY for this date
+            const result = await getSessionsForDate(newDate.toISOString());
+            setSessions(result.sessions as Session[]);
+        } catch (error) {
+            console.error("Failed to fetch sessions", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const toggleSessionEmail = async (sessionId: string, currentStatus: boolean, realStatus: boolean) => {
-        // Optimistic Update: Immediately flip the state in local memory
         const nextStatus = !currentStatus;
         setOptimisticToggles(prev => ({ ...prev, [sessionId]: nextStatus }));
 
         try {
-            const { toggleFeedbackAutomation } = await import('@/app/actions');
             await toggleFeedbackAutomation(sessionId, nextStatus);
             router.refresh();
         } catch (error) {
             alert("Failed to update settings");
-            // Revert on failure
             setOptimisticToggles(prev => ({ ...prev, [sessionId]: realStatus }));
         }
     };
 
     const trainers = initialTrainers;
-    const pendingReviews = initialPendingReviews;
-
-    const formatDateRange = (start: Date, end: Date) => {
-        const s = new Date(start);
-        const e = new Date(end);
-        return `${s.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${e.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    };
 
     const isSameDay = (date1: Date, date2: Date) => {
         if (!date1 || !date2) return false;
@@ -105,19 +119,25 @@ export default function DashboardClient({
             d1.getDate() === d2.getDate();
     };
 
+    // Calendar Dots: Use lightweight metadata (ALL sessions)
     const tileContent = ({ date, view }: { date: Date; view: string }) => {
         if (view === 'month') {
             const events: { color: string; title: string }[] = [];
 
-            // Check for PFA Dates
-            const pfaSessions = sessions.filter(s =>
+            // Check Metadata for PFA Dates
+            const pfaSessions = initialMetadata.filter(s =>
                 s.feedbackCreationDate && isSameDay(date, new Date(s.feedbackCreationDate))
             );
             pfaSessions.forEach(() => events.push({ color: 'bg-red-500', title: 'Post training (30 days) performance feedback' }));
 
-            // Check for Session End Dates
-            const endSessions = sessions.filter(s => isSameDay(date, new Date(s.endDate)));
+            // Check Metadata for Session End Dates
+            const endSessions = initialMetadata.filter(s => isSameDay(date, new Date(s.endDate)));
             endSessions.forEach(() => events.push({ color: 'bg-purple-600', title: 'Training End Date' }));
+
+            // OPTIONAL: Check for Active/Start Dates too (if desired)
+            const activeStart = initialMetadata.filter(s => isSameDay(date, new Date(s.startDate)));
+            activeStart.forEach(() => events.push({ color: 'bg-emerald-500', title: 'Training Start Date' }));
+
 
             if (events.length > 0) {
                 return (
@@ -136,11 +156,6 @@ export default function DashboardClient({
         return null;
     };
 
-    const filteredSessions = sessions.filter(s =>
-        (s.feedbackCreationDate && isSameDay(date, s.feedbackCreationDate)) ||
-        isSameDay(date, s.endDate)
-    );
-
     const downloadQRCode = (sessionId: string, programName: string) => {
         const svg = document.getElementById(`qr-${sessionId}`);
         if (!svg) return;
@@ -151,36 +166,30 @@ export default function DashboardClient({
         const img = new Image();
 
         img.onload = () => {
-            const scale = 3; // size of the QR code on Download
-            const padding = 40; // Maintain generous padding
+            const scale = 3;
+            const padding = 40;
 
             canvas.width = (img.width * scale) + (padding * 2);
             canvas.height = (img.height * scale) + (padding * 2);
 
             if (ctx) {
-                ctx.imageSmoothingEnabled = false; // Keep edges sharp
+                ctx.imageSmoothingEnabled = false;
                 ctx.fillStyle = "white";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                // Draw scaled image
                 ctx.drawImage(img, padding, padding, img.width * scale, img.height * scale);
-
                 const pngFile = canvas.toDataURL("image/png");
-
                 const downloadLink = document.createElement("a");
                 downloadLink.download = `${programName}-QR.png`;
                 downloadLink.href = pngFile;
                 downloadLink.click();
             }
         };
-
         img.src = "data:image/svg+xml;base64," + btoa(svgData);
     };
 
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
-            {isNavigating && <LoadingScreen />}
-
+            {isLoading && <LoadingScreen />}
 
             <main className="flex-1 p-6 md:p-8 flex flex-col lg:flex-row gap-8">
                 {/* LEFT COLUMN */}
@@ -193,19 +202,23 @@ export default function DashboardClient({
                         </div>
                         <div className="calendar-wrapper">
                             <Calendar
-                                onChange={setDate}
+                                onChange={handleDateChange}
                                 value={date}
                                 tileContent={tileContent}
                                 className="w-full"
                             />
-                            <div className="flex gap-4 mt-4 text-xs justify-center">
+                            <div className="flex gap-4 mt-4 text-xs justify-center flex-wrap">
                                 <div className="flex items-center gap-1">
-                                    <div className="w-4 h-1 bg-purple-600 rounded-full"></div>
-                                    <span className="text-slate-500">Session End</span>
+                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                                    <span className="text-slate-500">Start</span>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                    <div className="w-4 h-1 bg-red-500 rounded-full"></div>
-                                    <span className="text-slate-500">Post training (30 days) performance feedback Deadline</span>
+                                    <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                                    <span className="text-slate-500">End</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                                    <span className="text-slate-500">Feedback Deadline</span>
                                 </div>
                             </div>
                         </div>
@@ -232,7 +245,7 @@ export default function DashboardClient({
                                     <div>
                                         <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Active</p>
                                         <h3 className="text-4xl font-black">
-                                            {filteredSessions.filter(s => !s.emailsSent).length}
+                                            {sessions.filter(s => !s.emailsSent).length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80">
                                             In Progress
@@ -243,7 +256,7 @@ export default function DashboardClient({
                                     <div className="border-l border-blue-500/30 pl-8">
                                         <p className="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Completed</p>
                                         <h3 className="text-4xl font-black text-emerald-100">
-                                            {filteredSessions.filter(s => s.emailsSent).length}
+                                            {sessions.filter(s => s.emailsSent).length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80 text-emerald-100">
                                             Finished
@@ -277,13 +290,13 @@ export default function DashboardClient({
                             </div>
                         </div>
 
-                        {filteredSessions.length === 0 ? (
+                        {sessions.length === 0 ? (
                             <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
                                 <p className="text-slate-500 font-medium italic">No sessions scheduled for this date.</p>
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                {filteredSessions.map((t) => {
+                                {sessions.map((t) => {
                                     const trainingFeedbackCount = t.enrollments.filter((e: any) => e.trainingRating != null).length;
                                     const postFeedbackCount = t.enrollments.filter((e: any) => e.averageRating != null || e.q1_Relevance != null).length;
 
@@ -294,7 +307,7 @@ export default function DashboardClient({
                                         <div
                                             key={t.id}
                                             onClick={() => {
-                                                setIsNavigating(true);
+                                                // setIsNavigating(true); // Don't trigger loading screen just for navigation for now
                                                 router.push(`/admin/dashboard/session/${t.id}`);
                                             }}
                                             className="p-5 border border-slate-200 rounded-2xl bg-white hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer relative"

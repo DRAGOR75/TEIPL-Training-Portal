@@ -1,4 +1,4 @@
-import { getDashboardData } from '@/app/actions';
+import { getCalendarMetadata, getSessionsForDate } from '@/app/actions';
 import { getTrainers } from '@/app/actions/trainers';
 import DashboardClient from './DashboardClient';
 import { Metadata } from 'next';
@@ -8,19 +8,27 @@ export const metadata: Metadata = {
     description: 'Manage training sessions, trainers, and nominations.',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminDashboardPage() {
-    // Fetch data on the server
-    // This runs on the server, so it's fast and has direct DB access
-    const [dashboardData, trainersData] = await Promise.all([
-        getDashboardData(),
+    // 1. Fetch Metadata (Lightweight spots for calendar)
+    // 2. Fetch TODAY'S Sessions (Detailed cards)
+    // 3. Fetch Trainers
+
+    const today = new Date();
+
+    const [calendarMetadata, todayData, trainersData] = await Promise.all([
+        getCalendarMetadata(),
+        getSessionsForDate(today.toISOString()),
         getTrainers()
     ]);
 
     return (
         <DashboardClient
-            initialSessions={dashboardData.sessions}
+            initialMetadata={calendarMetadata}
+            initialSessions={todayData.sessions}
             initialTrainers={trainersData}
-            initialPendingReviews={dashboardData.pendingCount}
+            initialPendingReviews={todayData.pendingCount}
             currentPage={1}
             totalPages={1}
         />

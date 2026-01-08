@@ -1,118 +1,169 @@
+// --- EXISTING CONFIGURATION ---
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider  = "postgresql"
-  // The Pooled URL (Fast for your app users)
   url       = env("DATABASE_URL")
-  // The Direct URL (Required for migrations to work on Neon)
   directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
+// --- NEW TABLES FOR UPGRADED NOMINATION SYSTEM ---
 
-
-// 1. Training Sessions
-model TrainingSession {
-  id                   String      @id @default(uuid())
-  programName          String      @map("program_name")
-  trainerName          String?     @map("trainer_name")
-  startDate            DateTime    @map("start_date")
-  endDate              DateTime    @map("end_date")
-  feedbackCreationDate DateTime?   @map("feedback_creation_date")
-  templateType         String      @default("Technical") @map("template_type")
-  emailsSent           Boolean     @default(false) @map("emails_sent")
-  feedbackReminderSent Boolean     @default(false) @map("feedback_reminder_sent")
-  sendFeedbackAutomatically Boolean @default(false) @map("send_feedback_automatically")
-
-  createdAt            DateTime    @default(now()) @map("created_at")
+// 1. Master Employee Table (For initial ID verification)
+model Employee {
+  id           String        @id @map("emp_id") // Your official Employee ID
+  name         String
+  email        String        @unique
+  grade        Grade?         // EXECUTIVE or WORKMAN
+  sectionName  String?       @map("section_name") // Their home department
+  location     String?
+  manager_name String?
+  manager_email String?
+  program_name String?
+  start_date DateTime?
+  end_date DateTime?  
   
-  enrollments          Enrollment[]
-
-  @@unique([programName, startDate, endDate, trainerName])
-  @@map("training_sessions")
+  // Relations
+  nominations  Nomination[]  // Links to their training requests
+  
+  @@map("employees")
 }
 
-// 2. Enrollments
-model Enrollment {
-  id             String @id @default(uuid())
-  sessionId      String @map("session_id")
-  employeeName   String @map("employee_name")
-  employeeEmail  String @map("employee_email")
-  managerEmail   String @map("manager_email")
-  empId          String? @map("emp_id")        
-  managerName    String? @map("manager_name") 
-  status         String @default("Pending")
-
-  // --- Feedback (Immediate / Day 0) ---
-  preTrainingRating    Int?    @map("pre_training_rating")
-  postTrainingRating   Int?    @map("post_training_rating") 
-  
-  trainingRating       Int?    @map("training_rating")
-  contentRating        Int?    @map("content_rating")
-  trainerRating        Int?    @map("trainer_rating")
-  materialRating       Int?    @map("material_rating")
-  recommendationRating Boolean?    @map("recommendation_rating")
-
-  topicsLearned        String? @map("topics_learned")
-  actionPlan           String? @map("action_plan")
-  suggestions          String? @map("suggestions")
-
-  // --- Post training (30 days) performance feedback (Post-Training / Day 30) ---
-  q1_Relevance         Int?    @map("q1_relevance")
-  q2_Application       Int?    @map("q2_application")
-  q3_Performance       Int?    @map("q3_performance")
-  q4_Influence         Int?    @map("q4_influence")
-  q5_Efficiency        Int?    @map("q5_efficiency")
-  averageRating        Float?  @map("average_rating")
-
-  managerAgrees        String? @map("manager_agrees")
-  managerComment       String? @map("manager_comment")
-  updatedAt            DateTime @default(now()) @map("updated_at")
-  session              TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-
-  @@unique([sessionId, employeeEmail])
-  @@index([sessionId])
-  @@map("enrollments")
+enum Grade {
+  EXECUTIVE
+  WORKMAN
 }
 
-// 3. Nominations
+// 2. Section Table (The 20+ Departments)
+model Section {
+  id        String    @id @default(uuid())
+  name      String    @unique // e.g., "Mining", "Mechanical"
+  
+  // Many-to-Many: A section has many programs
+  programs  Program[] @relation("ProgramToSection")
+
+  @@map("sections")
+}
+
+// 3. Master Program Catalog (The 140+ Trainings)
+model Program {
+  id            String           @id @default(uuid())
+  name          String           @unique
+  category      TrainingCategory // FUNCTIONAL, BEHAVIOURAL, or COMMON
+  targetGrades  Grade[]          // Array: can be for both [EXECUTIVE, WORKMAN]
+  
+  // Many-to-Many: A program can belong to many sections
+  sections      Section[]        @relation("ProgramToSection")
+  
+  // Relation to nominations
+  nominations   Nomination[]
+
+  @@map("programs")
+}
+
+enum TrainingCategory {
+  FOUNDATIONAL
+  FUNCTIONAL
+  BEHAVIOURAL
+  COMMON
+}
+
+// --- UPDATED EXISTING TABLES ---
+
+// 4. Updated Nomination Table (TNI Table)
 model Nomination {
   id             String   @id @default(uuid())
-  employeeName   String   @map("employee_name")
-  employeeEmail  String   @map("employee_email")
   empId          String   @map("emp_id")
-  site           String   
-  designation    String   
-  mobile         String   
-  experience     String   
-  managerEmail   String   @map("manager_email")
-  managerName    String   @map("manager_name")
-  programName    String   @default("General Nomination") @map("program_name")
-  justification  String   @db.Text 
-  status         String   @default("Pending")
+  programId      String   @map("program_id")
+  
+  // Metadata for the snapshot
+  status         String   @default("Pending") // Pending, Approved, Rejected
+  justification  String?  @db.Text
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  employee       Employee @relation(fields: [empId], references: [id])
+  program        Program  @relation(fields: [programId], references: [id])
 
   @@map("nominations")
 }
 
-// 4. Trainers 
+// --- REST OF YOUR ORIGINAL TABLES (RETAINED) ---
+
+model TrainingSession {
+  id                        String       @id @default(uuid())
+  programName               String       @map("program_name")
+  trainerName               String?      @map("trainer_name")
+  startDate                 DateTime     @map("start_date")
+  endDate                   DateTime     @map("end_date")
+  feedbackCreationDate      DateTime?    @map("feedback_creation_date")
+  templateType              String       @default("Technical") @map("template_type")
+  emailsSent                Boolean      @default(false) @map("emails_sent")
+  feedbackReminderSent      Boolean      @default(false) @map("feedback_reminder_sent")
+  sendFeedbackAutomatically Boolean      @default(false) @map("send_feedback_automatically")
+  createdAt                 DateTime     @default(now()) @map("created_at")
+  enrollments               Enrollment[]
+
+  @@unique([programName, startDate, endDate, trainerName])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([feedbackCreationDate])
+  @@map("training_sessions")
+}
+
+model Enrollment {
+  id                    String          @id @default(uuid())
+  sessionId             String          @map("session_id")
+  employeeName          String          @map("employee_name")
+  employeeEmail         String          @map("employee_email")
+  managerEmail          String          @map("manager_email")
+  empId                 String?         @map("emp_id")
+  managerName           String?         @map("manager_name")
+  status                String          @default("Pending")
+  preTrainingRating     Int?            @map("pre_training_rating")
+  postTrainingRating    Int?            @map("post_training_rating")
+  trainingRating        Int?            @map("training_rating")
+  contentRating         Int?            @map("content_rating")
+  trainerRating         Int?            @map("trainer_rating")
+  materialRating        Int?            @map("material_rating")
+  recommendationRating  Boolean?        @map("recommendation_rating")
+  topicsLearned         String?         @map("topics_learned")
+  actionPlan            String?         @map("action_plan")
+  suggestions           String?         @map("suggestions")
+  q1_Relevance          Int?            @map("q1_relevance")
+  q2_Application        Int?            @map("q2_application")
+  q3_Performance        Int?            @map("q3_performance")
+  q4_Influence          Int?            @map("q4_influence")
+  q5_Efficiency         Int?            @map("q5_efficiency")
+  averageRating         Float?          @map("average_rating")
+  managerAgrees         String?         @map("manager_agrees")
+  managerComment        String?         @map("manager_comment")
+  updatedAt             DateTime        @default(now()) @map("updated_at")
+  session               TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, employeeEmail])
+  @@index([sessionId])
+  @@index([status])
+  @@map("enrollments")
+}
+
 model Trainer {
   id        String   @id @default(uuid())
   name      String   @unique
   email     String?  @unique
-  phone     String?  
+  phone     String?
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("trainers")
 }
 
-// 5. Admin Users 
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
-  password  String   // Hashed password
+  password  String
   name      String?
   createdAt DateTime @default(now()) @map("created_at")
 

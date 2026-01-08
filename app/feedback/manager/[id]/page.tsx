@@ -1,6 +1,7 @@
-import { db } from '@/lib/db';
+import { db } from '@/lib/prisma';
 import { redirect } from 'next/navigation';
 import { submitManagerReview } from '@/app/actions';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 // Update Type to Promise
 export default async function ManagerFeedbackPage({ params }: { params: Promise<{ id: string }> }) {
@@ -87,9 +88,9 @@ export default async function ManagerFeedbackPage({ params }: { params: Promise<
                             ></textarea>
                         </div>
 
-                        <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg">
+                        <FormSubmitButton className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-lg shadow-lg">
                             Submit Final Review
-                        </button>
+                        </FormSubmitButton>
                     </form>
 
                 </div>
