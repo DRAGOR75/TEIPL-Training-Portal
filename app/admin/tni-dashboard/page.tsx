@@ -10,7 +10,15 @@ export const metadata: Metadata = {
 
 export const dynamic = 'force-dynamic';
 
+import { auth } from "@/auth"; // Updated: Import auth
+import { redirect } from "next/navigation"; // Updated: Import redirect
+
 export default async function MasterDataPage() {
+    const session = await auth(); // Updated: Get session
+    if (!session) {
+        redirect("/api/auth/signin"); // Updated: Redirect if not logged in
+    }
+
     // Parallel Fetching for Performance
     const [sections, programs, employees] = await Promise.all([
         // 1. Fetch Sections
@@ -40,13 +48,13 @@ export default async function MasterDataPage() {
     ]);
 
     return (
-        <main className="min-h-screen bg-slate-950 py-10 px-4 md:px-8">
+        <main className="min-h-screen bg-slate-100 py-10 px-4 md:px-8">
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-black text-white">TNI Dashboard</h1>
-                    <p className="text-slate-400 mt-2">Manage essential system data: Sections, Programs, and Employee records.</p>
+                    <h1 className="text-3xl font-black text-slate-900">TNI Dashboard</h1>
+                    <p className="text-slate-500 mt-2">Manage essential system data: Sections, Programs, and Employee records.</p>
                 </div>
 
                 <hr className="border-slate-800" />

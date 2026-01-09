@@ -13,9 +13,9 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 p-4 md:p-8">
+        <div className="min-h-screen bg-slate-100 p-4 md:p-8">
             <div className="max-w-2xl mx-auto">
-                <Link href={`/tni/${empId}`} className="inline-flex items-center text-slate-500 hover:text-slate-800 mb-6 transition-colors font-medium">
+                <Link href={`/tni/${empId}`} className="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6 transition-colors font-medium">
                     <ArrowLeft size={18} className="mr-2" /> Back to Dashboard
                 </Link>
 
@@ -36,7 +36,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                     <div className="font-semibold text-slate-900">{employee.name}</div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Department</label>
+                                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Department</label>
                                     <div className="font-semibold text-slate-900">{employee.sectionName || 'N/A'}</div>
                                 </div>
                                 <div>
@@ -65,7 +65,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                     name="programId"
                                     id="programId"
                                     required
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white"
+                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white text-slate-900"
                                 >
                                     <option value="">-- Choose a Program --</option>
                                     {programs.map(prog => (
@@ -87,7 +87,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                     required
                                     placeholder="Explain why this training is needed..."
                                     rows={4}
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all"
+                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all placeholder-slate-500 text-slate-900"
                                 ></textarea>
                             </div>
 

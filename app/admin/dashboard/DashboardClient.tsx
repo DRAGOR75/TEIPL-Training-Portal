@@ -215,15 +215,15 @@ export default function DashboardClient({
                             <div className="flex gap-4 mt-4 text-xs justify-center flex-wrap">
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                    <span className="text-slate-500">Start</span>
+                                    <span className="text-slate-500">Start Date</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                                    <span className="text-slate-500">End</span>
+                                    <span className="text-slate-500">End Date</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                                    <span className="text-slate-500">Feedback Deadline</span>
+                                    <span className="text-slate-500">Post-Training (30days) Feedback Deadline</span>
                                 </div>
                             </div>
                         </div>

@@ -9,7 +9,6 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
     // If employee doesn't exist, we might want to show a "Create Profile" UI.
     // For now, let's assume if it returns null, we show basic "Not Found" or "New User"
 
-    // 🟢 CREATE BLANK PROFILE FOR FRESH START
     const currentEmployee = employee || {
         id: empId,
         name: '',
@@ -25,28 +24,28 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
     const nominations = currentEmployee.nominations || [];
 
     return (
-        <div className="min-h-screen bg-slate-950 p-8">
+        <div className="min-h-screen bg-slate-100 p-8">
             <div className="max-w-5xl mx-auto space-y-8">
 
                 {/* Header */}
                 <div className="flex justify-between items-center">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">Training Portal</h1>
-                        <p className="text-slate-400">
+                        <h1 className="text-3xl font-bold text-slate-900">Training Portal</h1>
+                        <p className="text-slate-600">
                             {currentEmployee.name ? `Welcome, ${currentEmployee.name}` : `Setup Profile for ID: ${empId}`}
                         </p>
                     </div>
-                    <Link href="/tni" className="text-sm text-slate-400 hover:text-slate-200">Sign Out</Link>
+                    <Link href="/tni" className="text-sm text-slate-600 hover:text-slate-900">Sign Out</Link>
                 </div>
 
                 {/* Profile Section (Interactive) */}
                 <TNIProfile employee={currentEmployee} sections={sections} />
 
-                {/* 🟢 LOOKER STUDIO EMBED (PAST RECORDS) */}
+
                 <div className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100">
                         <h2 className="text-xl font-semibold text-slate-800">Training History (Past Records)</h2>
-                        <p className="text-sm text-slate-500">View your historical training data below.</p>
+                        <p className="text-sm text-red-500 font-italic">View your past training records by selecting your name from the dropdown.</p>
                     </div>
                     <div className="w-full h-[600px] bg-slate-50 flex items-center justify-center">
                         <iframe
@@ -63,7 +62,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                 {/* Existing TNI Table */}
                 <div className="bg-white rounded-lg shadow border border-slate-200 overflow-hidden">
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                        <h2 className="text-xl font-semibold text-slate-800">Current Nominations (Fresh Start)</h2>
+                        <h2 className="text-xl font-semibold text-slate-800">Current Nominations</h2>
 
                         {/* Start New Nomination Button */}
                         <Link href={`/tni/${empId}/new`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition-colors">

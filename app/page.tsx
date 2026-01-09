@@ -32,7 +32,7 @@ export default function Home() {
 
           {/* Card 1: Nominations */}
           <Link
-            href="/wip"
+            href="/tni"
             className="group relative bg-white rounded-3xl p-8 shadow-xl border-2 border-transparent hover:border-blue-600 transition-all duration-500 overflow-hidden"
           >
             {/* Visual Flair */}

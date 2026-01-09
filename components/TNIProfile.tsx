@@ -87,14 +87,15 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Employee ID</label>
-                        <div className="text-lg font-medium text-slate-400 cursor-not-allowed">{employee.id}</div>
+                        <label className="text-xs font-semibold text-slate-900 uppercase  ">Employee ID</label>
+                        <div className="text-lg font-medium text-slate-800 cursor-not-allowed">{employee.id}</div>
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Full Name</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500 text-slate-900"
+                            placeholder="Your Full Name"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
@@ -103,7 +104,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Grade / Level</label>
                         <select
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className={`w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none bg-white ${formData.grade ? 'text-slate-900' : 'text-slate-500'}`}
                             value={formData.grade}
                             onChange={e => setFormData({ ...formData, grade: e.target.value })}
                         >
@@ -116,7 +117,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Department / Section</label>
                         <select
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className={`w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none bg-white ${formData.sectionName ? 'text-slate-900' : 'text-slate-500'}`}
                             value={formData.sectionName}
                             onChange={e => setFormData({ ...formData, sectionName: e.target.value })}
                         >
@@ -130,7 +131,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Email</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500 text-slate-900"
+                            placeholder="Your Email"
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                         />
@@ -139,9 +141,9 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Location</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500 text-slate-900"
                             value={formData.location}
-                            placeholder="e.g. Joda"
+                            placeholder="e.g. TRC"
                             onChange={e => setFormData({ ...formData, location: e.target.value })}
                         />
                     </div>
@@ -149,18 +151,18 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Manager Name</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500 text-slate-900"
                             value={formData.manager_name}
-                            placeholder="e.g. John Doe"
+                            placeholder="Your Manager Name"
                             onChange={e => setFormData({ ...formData, manager_name: e.target.value })}
                         />
                     </div>
                     <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-500 uppercase">Manager Email</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500 text-slate-900"
                             value={formData.manager_email}
-                            placeholder="e.g. manager@thriveni.com"
+                            placeholder="Your Manager Email"
                             onChange={e => setFormData({ ...formData, manager_email: e.target.value })}
                         />
                     </div>
