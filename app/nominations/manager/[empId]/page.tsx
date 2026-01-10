@@ -4,8 +4,8 @@ import { Check, X, ShieldAlert, Award, User, Quote } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
 // Server Component for Manager Approval
-export default async function ManagerApprovalPage({ params }: { params: { empId: string } }) {
-    const { empId } = params;
+export default async function ManagerApprovalPage({ params }: { params: Promise<{ empId: string }> }) {
+    const { empId } = await params;
 
     // Fetch pending nominations for this employee
     const employee = await db.employee.findUnique({
