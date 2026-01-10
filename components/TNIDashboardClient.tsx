@@ -161,7 +161,7 @@ export default function TNIDashboardClient({
                     onClick={() => setView('create')}
                     className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md active:transform active:scale-95"
                 >
-                    <PlusCircle size={18} /> Submit New
+                    <PlusCircle size={18} />Add New
                 </button>
             </div>
 

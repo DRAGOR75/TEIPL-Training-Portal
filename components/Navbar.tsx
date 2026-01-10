@@ -40,7 +40,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                             {/* Lloyds Logo */}
                             <div className="relative w-34 h-10 transition-transform group-hover:scale-105">
                                 <Image
-                                    src="/Loyyds metals logo.png"
+                                    src="/LLoyds_logo.svg"
                                     alt="Lloyds Metals Logo"
                                     fill
                                     className="object-contain"

@@ -157,7 +157,7 @@ export async function submitTNINomination(formData: FormData) {
             }))
         });
 
-        // --- NEW: SEND EMAIL TO MANAGER ---
+
         // 1. Fetch Employee Details to get Manager Email & Name
         const employee = await db.employee.findUnique({
             where: { id: empId },

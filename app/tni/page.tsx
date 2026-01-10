@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { Target, User, ArrowRight } from 'lucide-react';
+import { Target, User, ArrowRight, Info } from 'lucide-react';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 
@@ -28,6 +28,18 @@ export default function TNILoginPage() {
                 </div>
 
                 <div className="p-8 pt-10">
+                    <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-xl flex gap-3 items-start">
+                        <Info className="text-red-600 shrink-0 mt-0.5" size={20} />
+                        <div className="text-sm text-red-700 space-y-2">
+                            <p className="font-bold border-b border-red-200 pb-1 mb-2">Note: Before entering with your Employee ID</p>
+                            <ul className="list-disc pl-4 space-y-1.5 opacity-90">
+                                <li>This TNI Process should be initiated in discussion with your manager.</li>
+                                <li>Once you submit the training need, your manager will receive a mail for approval.</li>
+                                <li>The employee should ensure they get approval from the manager.</li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <form action={handleLogin} className="space-y-6">
                         <div className="space-y-2">
                             <label htmlFor="empId" className="block text-sm font-bold text-slate-700 uppercase tracking-wide">
