@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { updateEmployeeProfile } from '@/app/actions/tni';
+import { User, Mail, MapPin, Briefcase, UserCircle, Edit2, Save, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type Employee = {
     id: string;
@@ -20,6 +22,7 @@ type Section = {
 };
 
 export default function TNIProfile({ employee, sections }: { employee: Employee, sections: Section[] }) {
+    const router = useRouter();
     const [isEditing, setIsEditing] = useState(!employee.name);
     const [loading, setLoading] = useState(false);
 
@@ -57,53 +60,58 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             alert(res.error);
         } else {
             setIsEditing(false);
-            // Optionally update local state with returned data if server normalized it
-            // For now simple binding is fine
+            router.refresh(); // Refresh server data
         }
         setLoading(false);
     }
 
     if (isEditing) {
         return (
-            <div className="bg-white rounded-lg shadow p-6 border border-slate-200">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-xl font-semibold text-slate-800">Edit Profile</h2>
-                    <div className="space-x-2">
+            <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 h-full">
+                <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                            <Edit2 size={20} />
+                        </div>
+                        <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
+                    </div>
+                    <div className="flex gap-2">
                         <button
                             onClick={() => setIsEditing(false)}
-                            className="text-slate-500 text-sm hover:text-slate-800 px-3 py-1"
+                            className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
                         >
-                            Cancel
+                            <X size={16} /> Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={loading}
-                            className="bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded hover:bg-slate-800 disabled:opacity-50"
+                            className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm"
                         >
-                            {loading ? 'Saving...' : 'Save Changes'}
+                            <Save size={16} /> {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Employee ID</label>
-                        <div className="text-lg font-medium text-slate-400 cursor-not-allowed">{employee.id}</div>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Employee ID</label>
+                        <div className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 font-mono text-sm">{employee.id}</div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Full Name</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Full Name</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="Your Full Name"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Grade / Level</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Grade / Level</label>
                         <select
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className={`w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all font-medium ${formData.grade ? 'text-slate-900' : 'text-slate-500'}`}
                             value={formData.grade}
                             onChange={e => setFormData({ ...formData, grade: e.target.value })}
                         >
@@ -113,10 +121,10 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         </select>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Department / Section</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Department</label>
                         <select
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className={`w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all font-medium ${formData.sectionName ? 'text-slate-900' : 'text-slate-500'}`}
                             value={formData.sectionName}
                             onChange={e => setFormData({ ...formData, sectionName: e.target.value })}
                         >
@@ -127,40 +135,41 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         </select>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Email</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Email</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="Your Email"
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Location</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Location</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             value={formData.location}
-                            placeholder="e.g. Joda"
+                            placeholder="e.g. TRC"
                             onChange={e => setFormData({ ...formData, location: e.target.value })}
                         />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Manager Name</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Name</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             value={formData.manager_name}
-                            placeholder="e.g. John Doe"
+                            placeholder="Your Manager Name"
                             onChange={e => setFormData({ ...formData, manager_name: e.target.value })}
                         />
                     </div>
-                    <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500 uppercase">Manager Email</label>
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Email</label>
                         <input
-                            className="w-full text-lg p-2 border border-slate-300 rounded focus:ring-2 focus:ring-slate-900 focus:outline-none placeholder-slate-500"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             value={formData.manager_email}
-                            placeholder="e.g. manager@thriveni.com"
+                            placeholder="Your Manager Email"
                             onChange={e => setFormData({ ...formData, manager_email: e.target.value })}
                         />
                     </div>
@@ -170,50 +179,71 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
     }
 
     return (
-        <div className="bg-white rounded-lg shadow p-6 border border-slate-200">
-            <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-slate-800">My Profile</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden hover:shadow-md transition-shadow duration-300">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">
+                        <UserCircle size={40} strokeWidth={1.5} />
+                    </div>
+                    <div>
+                        <h2 className="text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
+                        <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
+                            <span className="bg-slate-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-slate-600 font-bold border border-slate-200">
+                                {employee.id}
+                            </span>
+                            {employee.grade && (
+                                <span className="bg-blue-50 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-blue-700 font-bold border border-blue-100">
+                                    {employee.grade}
+                                </span>
+                            )}
+                        </p>
+                    </div>
+                </div>
                 <button
                     onClick={() => setIsEditing(true)}
-                    className="text-blue-600 text-sm font-medium hover:underline"
+                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 >
-                    Edit Details
+                    <Edit2 size={18} />
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Employee ID</label>
-                    <div className="text-lg font-medium text-slate-900">{employee.id}</div>
+            <div className="p-6 space-y-5">
+
+                <div className="flex items-start gap-3 group">
+                    <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><Briefcase size={18} /></div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
+                        <div className="text-sm font-semibold text-slate-900">{formData.sectionName || 'Not Set'}</div>
+                    </div>
                 </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Full Name</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.name}</div>
+
+                <div className="flex items-start gap-3 group">
+                    <div className="mt-0.5 text-slate-400 group-hover:text-amber-500 transition-colors"><Mail size={18} /></div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Email</label>
+                        <div className="text-sm font-semibold text-slate-900">{formData.email}</div>
+                    </div>
                 </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Grade / Level</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.grade}</div>
+
+                <div className="flex items-start gap-3 group">
+                    <div className="mt-0.5 text-slate-400 group-hover:text-emerald-500 transition-colors"><MapPin size={18} /></div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Location</label>
+                        <div className="text-sm font-semibold text-slate-900">{formData.location || 'Not Set'}</div>
+                    </div>
                 </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Department / Section</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.sectionName || 'Not Set'}</div>
+
+                <div className="pt-4 border-t border-slate-50">
+                    <div className="flex items-start gap-3 group">
+                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><User size={18} /></div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Manager Details</label>
+                            <div className="text-sm font-semibold text-slate-900">{formData.manager_name || 'Not Set'}</div>
+                            <div className="text-xs text-slate-500">{formData.manager_email || ''}</div>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Email</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.email}</div>
-                </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Location</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.location || 'Not Set'}</div>
-                </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Manager</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.manager_name || 'Not Set'}</div>
-                </div>
-                <div>
-                    <label className="text-xs font-semibold text-slate-400 uppercase">Manager Email</label>
-                    <div className="text-lg font-medium text-slate-900">{formData.manager_email || 'Not Set'}</div>
-                </div>
+
             </div>
         </div>
     );

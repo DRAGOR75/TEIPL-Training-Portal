@@ -13,8 +13,8 @@ export default function Navbar({ session }: { session: Session | null }) {
     const isLoggedIn = !!session?.user;
     const pathname = usePathname();
 
-    // Hide Navbar on Feedback & Join Pages
-    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback')) {
+    // Hide Navbar on Feedback, Join & TNI Pages
+    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni')) {
         return null;
     }
 
@@ -40,7 +40,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                             {/* Lloyds Logo */}
                             <div className="relative w-34 h-10 transition-transform group-hover:scale-105">
                                 <Image
-                                    src="/Loyyds metals logo.png"
+                                    src="/LLoyds_logo.svg"
                                     alt="Lloyds Metals Logo"
                                     fill
                                     className="object-contain"
@@ -55,7 +55,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
                         <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Dashboard" />
-                        <NavLink href="/admin/tni-dashboard" icon={<ClipboardList size={18} />} text="TNI Dashboard" />
+                        <NavLink href="/admin/tni-dashboard" icon={<ClipboardList size={18} />} text="TNI Admin" />
 
                         {isLoggedIn && (
                             <div className="ml-4 pl-4 border-l border-slate-200">

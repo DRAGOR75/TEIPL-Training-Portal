@@ -299,3 +299,49 @@ export async function sendFeedbackReviewRequestEmail(
     html
   });
 }
+
+/**
+ * EMAIL FOR MANAGER (TNI Nomination Approval)
+ */
+export async function sendTNIApprovalEmail(
+  managerEmail: string,
+  managerName: string | null,
+  employeeName: string,
+  programs: string[],
+  justification: string,
+  empId: string
+) {
+  // Hardcoded Production URL
+  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const approvalLink = `${baseUrl}/nominations/manager/${empId}`;
+
+  const programsList = programs.map(p => `<li style="margin-bottom: 5px;">${p}</li>`).join('');
+
+  const html = `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #0056b3;">Action Required: TNI Nomination Approval</h2>
+      <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
+      <p><strong>${employeeName}</strong> has submitted nominations for the following training programs:</p>
+      
+      <ul style="background: #f0f7ff; padding: 15px 15px 15px 30px; border-radius: 6px; color: #333;">
+        ${programsList}
+      </ul>
+
+      <div style="background: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 15px 0;">
+        <strong>Justification:</strong><br/>
+        <em style="color: #555;">"${justification}"</em>
+      </div>
+
+      <p>Please review these requests and provide your approval or rejection.</p>
+      <p><a href="${approvalLink}" style="background: #0056b3; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Review Nominations</a></p>
+      
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from Training Thriveni.</small>
+    </div>`;
+
+  return await sendEmail({
+    to: managerEmail,
+    subject: `Action Required: TNI Nomination Approval for ${employeeName}`,
+    html
+  });
+}
