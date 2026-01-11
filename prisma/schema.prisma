@@ -169,3 +169,103 @@ model User {
 
   @@map("users")
 }
+
+// --- TROUBLESHOOTING LIBRARY SYSTEM ---
+
+// 1. Master Product (Machine) List
+model TroubleshootingProduct {
+  id          Int      @id @default(autoincrement()) // Using Int to match provided data (ProdID)
+  name        String   @unique
+  viewSeq     Int      @default(0) @map("view_seq")
+  userView    Int      @default(0) @map("user_view")
+  keywords    String?
+  imageUrl    String?  @map("image_url")  // Add this field if not present in your earlier plan but good for "grid of Products"
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  productFaults ProductFault[]
+
+  @@map("troubleshooting_products")
+}
+
+// 2. Fault Library (Master Complaint List)
+model FaultLibrary {
+  id          String   @id @default(uuid())
+  faultCode   String?  @unique @map("fault_code") // For "F001" style codes if needed
+  name        String   @unique // "Engine Overheating" - Unique to avoid duplication
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  productMappings ProductFault[]
+
+  @@map("fault_library")
+}
+
+// 3. Product-Fault Bridge (Logic: Which machine has which fault)
+model ProductFault {
+  id          String   @id @default(uuid())
+  productId   Int      @map("product_id")
+  faultId     String   @map("fault_id")
+  
+  viewSeq     Int      @default(0) @map("view_seq")
+  notes       String?  // Machine-specific cautions or notes
+  keywords    String?  // Machine-specific search tags
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  product     TroubleshootingProduct @relation(fields: [productId], references: [id])
+  fault       FaultLibrary           @relation(fields: [faultId], references: [id])
+  
+  // Downstream: The causes for this specific product-fault context
+  causes      FaultCause[]
+
+  @@unique([productId, faultId]) // Prevent duplicate linking
+  @@map("product_faults")
+}
+
+// 4. Cause Library (Master Cause/Remedy List)
+model CauseLibrary {
+  id          String   @id @default(uuid())
+  name        String   @unique // "Low Coolant Level"
+  description String?  @db.Text
+  action      String?  @db.Text // The fix
+  symptoms    String?  @db.Text
+  manualRef   String?  @map("manual_ref")
+  
+  imageUrl    String?  @map("image_url")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  faultMappings FaultCause[]
+
+  @@map("cause_library")
+}
+
+// 5. Fault-Cause Bridge (Logic: Diagnostic Sequence)
+model FaultCause {
+  id             String   @id @default(uuid())
+  productFaultId String   @map("product_fault_id")
+  causeId        String   @map("cause_id")
+  
+  seq            Int      @default(0) // The order of checking (1, 2, 3...)
+  isLikely       Boolean  @default(false) @map("is_likely")
+
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  productFault   ProductFault @relation(fields: [productFaultId], references: [id], onDelete: Cascade)
+  cause          CauseLibrary @relation(fields: [causeId], references: [id])
+
+  @@unique([productFaultId, causeId])
+  @@index([productFaultId, seq])
+  @@map("fault_causes")
+}
