@@ -20,6 +20,7 @@ export default function BulkUploader() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            worker: true, // Use web worker to avoid freezing UI
             complete: async (results) => {
                 const rows = results.data.map((row: any) => ({
                     // Smart Mapping for various CSV styles
@@ -47,14 +48,18 @@ export default function BulkUploader() {
                 }
 
                 const TOTAL_ROWS = rows.length;
-                const CHUNK_SIZE = 200;
+                const CHUNK_SIZE = 10; // Drastically reduced to 10 to avoid Vercel 10s timeout
                 let processedCount = 0;
                 let totalSuccess = 0;
                 let firstError = '';
 
+                console.log(`Starting upload: ${TOTAL_ROWS} rows`);
+
                 // Chunking Loop
                 for (let i = 0; i < TOTAL_ROWS; i += CHUNK_SIZE) {
                     const chunk = rows.slice(i, i + CHUNK_SIZE);
+
+                    console.log(`Processing chunk ${i / CHUNK_SIZE + 1}...`);
 
                     // Send Chunk to Server
                     const res = await bulkUploadTroubleshooting(chunk as BulkUploadRow[]);
@@ -62,11 +67,13 @@ export default function BulkUploader() {
                     if (res.success) {
                         totalSuccess += res.count || 0;
                     } else {
+                        console.error('Chunk error:', res.error);
                         if (!firstError) firstError = res.error || 'Unknown error in batch';
                     }
 
                     processedCount += chunk.length;
-                    setProgress(Math.round((processedCount / TOTAL_ROWS) * 100));
+                    const pct = Math.round((processedCount / TOTAL_ROWS) * 100);
+                    setProgress(pct);
                 }
 
                 if (totalSuccess > 0) {
