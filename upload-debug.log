@@ -1,0 +1,503 @@
+[2026-01-12T05:35:37.106Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"Starting Motor Operating But Not Cranking the Engine.","action":"Remove the starting motor and check for broken teeth on the ring gear or broken starting motor spring.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:37.806Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:39.207Z] Targets Found: 1
+[2026-01-12T05:35:39.871Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"Starting Circuit Connections Loose or Corroded.","action":"Clean and tighten connections.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:40.642Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:42.372Z] Targets Found: 1
+[2026-01-12T05:35:42.553Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"Battery Charge Low.","action":"Check battery voltage, electrolyte & charge if necessary.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:43.407Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:44.737Z] Targets Found: 1
+[2026-01-12T05:35:44.942Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"No Voltage to Starter Solenoid.","action":"Check the connection & rectify the defects.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:45.456Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:47.155Z] Targets Found: 1
+[2026-01-12T05:35:47.388Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"Crankshaft Rotation Restricted.","action":"Establish the causes and rectify the defects.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:48.004Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:49.337Z] Targets Found: 1
+[2026-01-12T05:35:49.620Z] Processing row: {"machineName":"Excavators","faultName":"Engine Will Not Crank Or Cranks Slowly","causeName":"Solenoid or Starting Motor Malfunction.","action":"Find out the cause rectify the defects or replace starter motor if required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:50.449Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:51.426Z] Targets Found: 1
+[2026-01-12T05:35:51.602Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"No Fuel in Supply tank.","action":"Check / replace fuel supply","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:52.028Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:52.872Z] Targets Found: 1
+[2026-01-12T05:35:53.053Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Electrical or Manual Fuel Shut off Not Open.","action":"Check for loose wires and verify that the valve is functioning Check to be sure manual shutoff lever is in the run position.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:53.486Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:54.324Z] Targets Found: 1
+[2026-01-12T05:35:54.501Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Improper Starting Procedure.","action":"Verify proper starting procedure.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:54.931Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:55.812Z] Targets Found: 1
+[2026-01-12T05:35:56.015Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Inspect Fuel Transfer Pump Operation.","action":"Inspect as per specified procedure & take necessary action.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:56.441Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:57.286Z] Targets Found: 1
+[2026-01-12T05:35:57.469Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Fuel Injection Pump Not Getting Fuel or Fuel is Aerated.","action":"Check for any leakages in the return side of F.I.P. Check for condition of fuel filter, replace if nescessary. Bleed the fuel system.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:57.896Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:35:59.258Z] Targets Found: 1
+[2026-01-12T05:35:59.449Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Air Intake or Exhaust System Plugged.","action":"Check for the restrictions in the Air intake circuit including the clogged filters and also the exhaust system including the engine exhaust brake butterfly valve & clogging of silencer & take corrective action.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:35:59.891Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:00.745Z] Targets Found: 1
+[2026-01-12T05:36:00.926Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Fuel Drain Back.","action":"Verify that the return line is plumbed to the bottom of the fuel tank.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:01.428Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:02.555Z] Targets Found: 1
+[2026-01-12T05:36:02.864Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Malfunctioning Fuel Return Overflow Valve.","action":"Check/ replace return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:03.374Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:04.910Z] Targets Found: 1
+[2026-01-12T05:36:05.102Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Worn or Malfunctioning Fuel Injection Pump.","action":"Get Fuel injection pump checked and rectified at authorized Fuel Injection Pump dealer.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:05.627Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:06.754Z] Targets Found: 1
+[2026-01-12T05:36:07.060Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Injection Pump Timing Incorrect.","action":"Verify the Fuel Injection timing and correct the same if found incorrect.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:07.578Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:08.875Z] Targets Found: 1
+[2026-01-12T05:36:09.088Z] Processing row: {"machineName":"Excavators","faultName":"Engine Cranks But will not Start - No smoke Exhaust","causeName":"Engine Camshaft Out of Time.","action":"Check/correct gear train timing alignment.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:09.510Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:10.360Z] Targets Found: 1
+[2026-01-12T05:36:10.535Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Starting Procedure Incorrect.","action":"Refer to the Operation and Maintenance Manual.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:10.956Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:11.800Z] Targets Found: 1
+[2026-01-12T05:36:11.980Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Intake Air Insufficient.","action":"Inspect all passages / tubes with air filter assembly, replace the air filter if required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:12.403Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:13.243Z] Targets Found: 1
+[2026-01-12T05:36:13.615Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Air in the Fuel System or the Fuel Supply Inadequate.","action":"Check all the fuel filters of the system. proper tightening of connections specially of suction side and also for the puncture of the suction tube etc.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:14.210Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:15.438Z] Targets Found: 1
+[2026-01-12T05:36:15.766Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Fuel is Contaminated.","action":"Verify by operating the engine with clean fuel from a temporary tank on No. 2 diesel fuel. Checked the fuel contaminate properly / completely drain out the contaminated fuel from the tank and get the entire fuel system flushed . Use clean uncontaminated f","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:16.277Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:17.403Z] Targets Found: 1
+[2026-01-12T05:36:17.596Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Fuel Drain Back.","action":"Verify fuel return line is plumbed to bottom of fuel tank.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:18.221Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:19.451Z] Targets Found: 1
+[2026-01-12T05:36:19.657Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Malfunctioning Fuel Return Overflow Valve.","action":"Check/replace return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:20.375Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:21.498Z] Targets Found: 1
+[2026-01-12T05:36:21.704Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Fuel Injection Pump Out of Time.","action":"Check/adjust inspection pump timing.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:22.204Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:23.240Z] Targets Found: 1
+[2026-01-12T05:36:23.414Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Valves Incorrectly Adjusted.","action":"Adjust valves.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:23.834Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:24.677Z] Targets Found: 1
+[2026-01-12T05:36:24.855Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"One or More Injectors Worn or Malfunctioning.","action":"Check/replace injectors.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:25.285Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:26.517Z] Targets Found: 1
+[2026-01-12T05:36:26.721Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Engine Compression Low.","action":"Perform a compression check to identify the problem.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:27.336Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:28.494Z] Targets Found: 1
+[2026-01-12T05:36:28.769Z] Processing row: {"machineName":"Excavators","faultName":"Engine Hard to Start or will not start Smoke From","causeName":"Fuel Injection Pump /Delivery Valves Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:29.385Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:30.473Z] Targets Found: 1
+[2026-01-12T05:36:30.717Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Low Fuel Level.","action":"Check/fill fuel tank","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:31.331Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:32.457Z] Targets Found: 1
+[2026-01-12T05:36:32.764Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Engine Starting Under Load.","action":"Disengage driven units.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:33.274Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:34.299Z] Targets Found: 1
+[2026-01-12T05:36:34.503Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Idle Speed Too Low for Accessories.","action":"Adjust the idle speed.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:35.015Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:36.244Z] Targets Found: 1
+[2026-01-12T05:36:36.551Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Intake Air or Exhaust System Restricted.","action":"Visually check for exhaust restriction and inspect the air intake.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:37.168Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:38.034Z] Targets Found: 1
+[2026-01-12T05:36:38.205Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Air in the Fuel System or the Fuel Supply is Inadequate.","action":"Check the flow through the filter and bleed the system. Locate and correct the air source.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:38.663Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:39.520Z] Targets Found: 1
+[2026-01-12T05:36:39.712Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Fuel Waxing Due to Extremely Cold Weather.","action":"Verify by inspecting the fuel filter. Clean the system and use climatized fuel.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:40.364Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:41.615Z] Targets Found: 1
+[2026-01-12T05:36:41.787Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Fuel Contaminated.","action":"Verify by operating the engine with clean fuel from a temporary supply tank. Drain and flush the fuel supply tank.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:42.205Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:43.035Z] Targets Found: 1
+[2026-01-12T05:36:43.206Z] Processing row: {"machineName":"Excavators","faultName":"Engine Starts But Will Not Keep Running","causeName":"Plugged Fuel Filter.","action":"Check/replace filter.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:43.721Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:44.847Z] Targets Found: 1
+[2026-01-12T05:36:45.425Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"Fuel Level Low.","action":"Check/fill fuel tank.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:46.382Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:47.803Z] Targets Found: 1
+[2026-01-12T05:36:48.005Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"The Idle Speed Set Too Low for Accessories.","action":"Adjust the idle.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:48.943Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:50.364Z] Targets Found: 1
+[2026-01-12T05:36:50.711Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"Throttle Linkage Misadjusted or Damaged.","action":"Adjust or repair linkage.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:51.622Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:52.919Z] Targets Found: 1
+[2026-01-12T05:36:53.142Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"High Pressure Fuel Leak.","action":"Inspect/correct leaks in the high pressure lines, fittings, injector sealing washers or delivery valves.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:53.860Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:55.377Z] Targets Found: 1
+[2026-01-12T05:36:55.559Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"Aerated Fuel.","action":"Bleed the fuel system and correct source of the leak.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:56.170Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:57.527Z] Targets Found: 1
+[2026-01-12T05:36:57.702Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"One or More Injectors Worn or Malfunctioning.","action":"Check/replace the injectors.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:58.121Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:36:58.968Z] Targets Found: 1
+[2026-01-12T05:36:59.142Z] Processing row: {"machineName":"Excavators","faultName":"Engine Surging (Speed Change)","causeName":"Fuel Injection Pump /Delivery Valves Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:36:59.559Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:01.213Z] Targets Found: 1
+[2026-01-12T05:37:01.437Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Idle Speed Too Low for the Accessories.","action":"Check/ adjust low idle screw.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:02.052Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:03.459Z] Targets Found: 1
+[2026-01-12T05:37:03.637Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Engine Mounts Over-Tightened, Damaged or Loose.","action":"Verify condition of mounts.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:04.622Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:06.048Z] Targets Found: 1
+[2026-01-12T05:37:06.251Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"High Pressure Fuel Leak.","action":"Inspect/ correct leaks in the high pressure lines, fittings, injection sealing washers or delivery valve seals.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:07.173Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:08.913Z] Targets Found: 1
+[2026-01-12T05:37:09.101Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Air in the Fuel System.","action":"Bleed the fuel system and correct the source of the air.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:09.524Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:10.551Z] Targets Found: 1
+[2026-01-12T05:37:10.740Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Fuel Return Overflow Valve Malfunctioning.","action":"Check/ replace fuel return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:11.347Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:13.212Z] Targets Found: 1
+[2026-01-12T05:37:13.725Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Fuel Supply Restricted.","action":"Clean pre-filters and screens and check fuel line for restriction. Replace fuel filter.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:14.443Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:15.576Z] Targets Found: 1
+[2026-01-12T05:37:16.176Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Injector Needle Valve Sticking.","action":"Check/replace the injector.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:17.119Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:18.213Z] Targets Found: 1
+[2026-01-12T05:37:18.384Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Fuel Injector Pump or Delivery Valve Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:18.816Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:19.650Z] Targets Found: 1
+[2026-01-12T05:37:20.025Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Valves Not Sealing.","action":"Adjust valve and check, if complaint still exist check the valve seats and take corrective action.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:20.483Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:22.122Z] Targets Found: 1
+[2026-01-12T05:37:22.559Z] Processing row: {"machineName":"Excavators","faultName":"Engine Idle Rough Irregularly firing or Engine Shaking","causeName":"Compression in One or More Cylinders Low.","action":"Perform a compression check and repair as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:23.535Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:25.081Z] Targets Found: 1
+[2026-01-12T05:37:25.253Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Condition only Occurs at Idle.","action":"Adjust idle speed.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:25.997Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:27.855Z] Targets Found: 1
+[2026-01-12T05:37:28.062Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Engine is Cold.","action":"Allow engine to warm to operating temperature.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:28.675Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:30.415Z] Targets Found: 1
+[2026-01-12T05:37:30.723Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Fuel Injection Lines Leaking.","action":"Inspect/correct leaks in the high pressure lines, fittings injector sealing washers, or delivery valves.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:31.541Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:33.590Z] Targets Found: 1
+[2026-01-12T05:37:33.999Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Air in the Fuel or the Fuel Supply is Inadequate.","action":"Check the flow through the filter and bleed the system. Locate and correct the air source.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:34.512Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:36.316Z] Targets Found: 1
+[2026-01-12T05:37:36.488Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Malfunctioning Fuel Return Overflow Valve.","action":"Check/replace return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:37.562Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:38.401Z] Targets Found: 1
+[2026-01-12T05:37:38.578Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Fuel Supply Restricted.","action":"Clean pre-filters and screens and check fuel line restriction. Replace fuel filter.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:38.996Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:40.039Z] Targets Found: 1
+[2026-01-12T05:37:40.400Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Fuel Contaminated.","action":"Verify by operating the engine with clean fuel from a temporary tank. Checked the fuel contaminate properly / completely drain out the contaminated fuel from the tank and get the entire fuel system flushed .Use clean uncontaminated fuel only.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:41.065Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:42.471Z] Targets Found: 1
+[2026-01-12T05:37:42.906Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Valve Adjustment Incorrect.","action":"Check for a bent push rod and adjust valves.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:43.419Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:44.546Z] Targets Found: 1
+[2026-01-12T05:37:44.750Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Injection Pump Timing Incorrectly Adjusted.","action":"Check top dead center (TDC) check/adjust injection pump timing. Check/time the fuel injection pump using the spill port timing if equipment is available.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:45.668Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:47.309Z] Targets Found: 1
+[2026-01-12T05:37:47.808Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Compression in One or More Cylinders Low.","action":"Perform a compression and repair as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:48.531Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:50.384Z] Targets Found: 1
+[2026-01-12T05:37:50.585Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Injectors Malfunctioning.","action":"Check/replace injectors.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:51.713Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:52.840Z] Targets Found: 1
+[2026-01-12T05:37:53.045Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Injection Pump (Delivery Valves) Defective.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:53.556Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:55.401Z] Targets Found: 1
+[2026-01-12T05:37:55.706Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Camshaft Out of Time.","action":"Check/correct gear train timing alignment.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:56.425Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:37:57.618Z] Targets Found: 1
+[2026-01-12T05:37:57.936Z] Processing row: {"machineName":"Excavators","faultName":"Engine Runs Rough Or Misfiring","causeName":"Camshaft or Tappets Damaged.","action":"Inspect camshaft and tappets.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:37:59.000Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:00.501Z] Targets Found: 1
+[2026-01-12T05:38:00.827Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Tachometer Malfunctioning.","action":"Verify engine speed with hand tachometer. Correct as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:01.525Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:02.975Z] Targets Found: 1
+[2026-01-12T05:38:03.386Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Engine Overloaded.","action":"Verify high idle speed without load. Investigate operation to be sure correct gear is being used.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:04.119Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:05.231Z] Targets Found: 1
+[2026-01-12T05:38:05.435Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Throttle Linkage Worn or Incorrectly Adjusted.","action":"Adjust linkage for stop-to-stop fuel control lever travel.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:05.947Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:07.485Z] Targets Found: 1
+[2026-01-12T05:38:07.792Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Mechanical Shut off Lever Partially Engaged.","action":"Check/place shutoff lever in run position.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:08.407Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:09.533Z] Targets Found: 1
+[2026-01-12T05:38:09.836Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Fuel Quality Poor.","action":"Verify by operating the engine from a temporary tank of No.2 diesel fuel. Refer to the \" Fuel Recommendations/ Specifications\"","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:10.498Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:12.211Z] Targets Found: 1
+[2026-01-12T05:38:12.521Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Fuel Supply Inadequate.","action":"Check the flow through the filter to locate the source of the restriction.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:13.670Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:15.374Z] Targets Found: 1
+[2026-01-12T05:38:15.782Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Fuel Return Overflow Valve Malfunctioning.","action":"Check/replace fuel return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:16.304Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:18.254Z] Targets Found: 1
+[2026-01-12T05:38:18.760Z] Processing row: {"machineName":"Excavators","faultName":"Engine RPM will not Reach Rated Speed","causeName":"Fuel Injection Pump Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:19.377Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:20.817Z] Targets Found: 1
+[2026-01-12T05:38:21.315Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Engine Overloaded.","action":"Check for added loading from malfunctioning accessories or driven units, brakes dragging and other changes in vehicle loading.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:21.820Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:23.250Z] Targets Found: 1
+[2026-01-12T05:38:23.496Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Fuel Control Lever Misadjusted.","action":"Check/correct for stop-to-stop travel.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:24.063Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:25.018Z] Targets Found: 1
+[2026-01-12T05:38:25.258Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Mechanical/Shutoff Lever Partially Engaged.","action":"Check/replace shutoff lever in run position.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:25.704Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:26.843Z] Targets Found: 1
+[2026-01-12T05:38:27.207Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Fuel Quality Poor.","action":"Verify by operating the engine from a temporary tank of No. 2 diesel fuel.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:28.079Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:29.401Z] Targets Found: 1
+[2026-01-12T05:38:29.810Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"High Pressure Fuel Leak.","action":"Inspect/correct leaks in the high pressure lines, fittings injector sealing washers or delivery valve seals.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:30.633Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:32.452Z] Targets Found: 1
+[2026-01-12T05:38:32.885Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Fuel Supply Inadequate.","action":"Check the flow through the filter to locate the source of the restriction.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:33.809Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:35.561Z] Targets Found: 1
+[2026-01-12T05:38:35.856Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Air in the Fuel System.","action":"Bleed the fuel system and check for suction leaks.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:36.370Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:37.799Z] Targets Found: 1
+[2026-01-12T05:38:38.021Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Malfunctioning Fuel Return Overflow Valve.","action":"Check/ replace return overflow valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:38.844Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:40.462Z] Targets Found: 1
+[2026-01-12T05:38:40.976Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Oil Level Incorrect.","action":"Check/correct oil level.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:41.691Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:43.021Z] Targets Found: 1
+[2026-01-12T05:38:43.399Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Intake Air Inadequate or Overheated.","action":"Inspect/replace air cleaner element Look for other restrictions. Check charge air cooler for internal restriction. Replace restricted cooler.Check/clean debris from front of charge air cooler.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:43.929Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:45.069Z] Targets Found: 1
+[2026-01-12T05:38:45.410Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Exhaust Restriction.","action":"Check/correct exhaust system.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:45.995Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:47.628Z] Targets Found: 1
+[2026-01-12T05:38:47.935Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Exhaust Leak at the Manifold or Turbocharger.","action":"Check/ Correct leaks in the manifold or turbocharger gaskets. Look for a cracked manifold.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:48.448Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:50.292Z] Targets Found: 1
+[2026-01-12T05:38:50.600Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Extra Injector Sealing Washer Installed Under Injector.","action":"Remove extra injector sealing washer.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:51.212Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:52.441Z] Targets Found: 1
+[2026-01-12T05:38:52.750Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Injector Worn or Malfunctioning.","action":"Investigate reasons for engine overheating and rectify the defects.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:53.635Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:54.798Z] Targets Found: 1
+[2026-01-12T05:38:55.169Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Valve Clearances Incorrect.","action":"Check/adjust valves.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:55.719Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:56.946Z] Targets Found: 1
+[2026-01-12T05:38:57.254Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Fuel Injection Pump Timing Incorrect.","action":"Check/time fuel injection pump.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:57.970Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:38:58.996Z] Targets Found: 1
+[2026-01-12T05:38:59.302Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Fuel Injection Pump Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:38:59.817Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:00.939Z] Targets Found: 1
+[2026-01-12T05:39:01.149Z] Processing row: {"machineName":"Excavators","faultName":"Engine Power Output Low","causeName":"Engine Compression Low.","action":"Perform compression check to identify malfunction. Correct as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:01.861Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:02.884Z] Targets Found: 1
+[2026-01-12T05:39:03.191Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Engine Being Lugged Down.","action":"Use lower gear.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:03.712Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:04.932Z] Targets Found: 1
+[2026-01-12T05:39:05.353Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Intake Air Restricted.","action":"Inspect/charge air cleaner. Look for other restrictions.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:05.957Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:07.004Z] Targets Found: 1
+[2026-01-12T05:39:07.191Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Exhaust Restriction.","action":"Check exhaust restriction.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:07.904Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:08.909Z] Targets Found: 1
+[2026-01-12T05:39:09.131Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Turbocharger Malfunctioning.","action":"Inspect/replace turbocharger.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:09.745Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:10.954Z] Targets Found: 1
+[2026-01-12T05:39:11.282Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Injector Installed with more than One Sealing Washer.","action":"Remove extra washer.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:11.793Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:12.817Z] Targets Found: 1
+[2026-01-12T05:39:13.007Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Injectors Malfunctioning.","action":"Replace injectors.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:13.741Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:14.969Z] Targets Found: 1
+[2026-01-12T05:39:15.275Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Fuel Injection Pump Malfunctioning or Over fueled.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:15.787Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:16.912Z] Targets Found: 1
+[2026-01-12T05:39:17.327Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Piston Rings Not Sealing (Blue Smoke).","action":"Perform a compression check. Correct as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:17.835Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:18.841Z] Targets Found: 1
+[2026-01-12T05:39:19.166Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust Black Smoke Excessive","causeName":"Fuel Injection Pump Timing Incorrect.","action":"Check/time fuel injection pump.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:19.679Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:20.907Z] Targets Found: 1
+[2026-01-12T05:39:21.111Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Improper Starting Procedure.","action":"Verify proper starting procedure.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:21.624Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:22.750Z] Targets Found: 1
+[2026-01-12T05:39:23.056Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Coolant Temperature Too Low.","action":"Check/Replace thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:23.569Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:24.592Z] Targets Found: 1
+[2026-01-12T05:39:24.797Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Fuel Quality Poor.","action":"Use recommended fuel.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:25.309Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:26.437Z] Targets Found: 1
+[2026-01-12T05:39:26.641Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Injection Pump Timing Incorrectly Adjusted.","action":"Check top dead center (TDC). Check/adjust injection pump timing. Check/time the fuel injection pump using the spill port timing if equipment is available.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:27.153Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:28.279Z] Targets Found: 1
+[2026-01-12T05:39:28.485Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Injector Installed with more than one sealing washer.","action":"Remove extra washer .","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:29.100Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:30.135Z] Targets Found: 1
+[2026-01-12T05:39:30.415Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Injectors Malfunctioning.","action":"Check/replace injectors.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:30.942Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:31.967Z] Targets Found: 1
+[2026-01-12T05:39:32.170Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Coolant Leaking into Combustion Chamber.","action":"Check Expansion plugs.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:32.682Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:33.706Z] Targets Found: 1
+[2026-01-12T05:39:33.910Z] Processing row: {"machineName":"Excavators","faultName":"Exhaust White Smoke Excessive","causeName":"Fuel Injection Pump / Delivery Valves Malfunctioning.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:34.526Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:35.550Z] Targets Found: 1
+[2026-01-12T05:39:35.859Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Coolant Level Low.","action":"Check/replenish coolant. Locate and correct the source of the coolant leak.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:36.369Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:37.394Z] Targets Found: 1
+[2026-01-12T05:39:37.602Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Radiator Fins Plugged.","action":"Blow debris from fins.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:38.110Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:39.135Z] Targets Found: 1
+[2026-01-12T05:39:39.340Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Water Pump or Fan Drive Belts Loose.","action":"Check/correct belt tension.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:39.952Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:40.945Z] Targets Found: 1
+[2026-01-12T05:39:41.491Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Radiator Hose Collapsed , Restricted or Leaking.","action":"Check/replace hose.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:42.002Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:43.028Z] Targets Found: 1
+[2026-01-12T05:39:43.231Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Lubricating Oil Level High.","action":"Check/drain oil to correct level.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:43.947Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:44.971Z] Targets Found: 1
+[2026-01-12T05:39:45.175Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Cooling Fan Shroud Damaged or Missing.","action":"Inspect shroud, repair/replace or install.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:45.691Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:46.815Z] Targets Found: 1
+[2026-01-12T05:39:47.018Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Pressure Cap Incorrect or Malfunctioning.","action":"Replace cap with the correct rating for the system.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:47.530Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:48.656Z] Targets Found: 1
+[2026-01-12T05:39:48.862Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Over concentration of Anti-Freeze.","action":"Remove part of the coolant from cooling system and replace with water.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:49.375Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:50.401Z] Targets Found: 1
+[2026-01-12T05:39:50.606Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Temperature Sensor or Gauge Malfunctioning.","action":"Verify that the gauge and temperature sensor are accurate.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:51.120Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:52.241Z] Targets Found: 1
+[2026-01-12T05:39:52.549Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Thermostat Malfunctioning, Incorrect or Missing.","action":"Check/replace the thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:53.061Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:54.290Z] Targets Found: 1
+[2026-01-12T05:39:54.495Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Air or Combustion Gases in the Cooling System.","action":"Make sure the fill rate is not being exceeded and the correct vented thermostat is installed. If aeration continued, check for a compression leak through the head gasket.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:55.007Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:56.134Z] Targets Found: 1
+[2026-01-12T05:39:56.338Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Water Pump Malfunctioning.","action":"Check/replace the water pump.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:56.852Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:57.873Z] Targets Found: 1
+[2026-01-12T05:39:58.173Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Cooling Passages in Radiator, Head Gasket or Block Plugged.","action":"Flush the system and fill with clean coolant.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:39:58.693Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:39:59.818Z] Targets Found: 1
+[2026-01-12T05:40:00.024Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Vehicle Cooling System Design.","action":"Confirmation of correct fan, radiator, and other cooling system components.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:00.536Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:01.560Z] Targets Found: 1
+[2026-01-12T05:40:01.766Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Fuel Injection Pump Timing Incorrect.","action":"Verify fuel injection pump timing marks are aligned.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:02.276Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:03.404Z] Targets Found: 1
+[2026-01-12T05:40:03.617Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Fuel Injection Pump Over fueled.","action":"Remove fuel injection pump. Have calibration checked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:04.202Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:05.102Z] Targets Found: 1
+[2026-01-12T05:40:05.276Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above normal- Gradual Overheat","causeName":"Air Flow to the radiator Inadequate or Restricted","action":"Check/repair fan shroud, fan sensors, and fan clutch as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:05.697Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:06.583Z] Targets Found: 1
+[2026-01-12T05:40:06.840Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Coolant Level Low.","action":"Add coolant.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:07.263Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:08.108Z] Targets Found: 1
+[2026-01-12T05:40:08.292Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Temperature Sensor or Gauge Malfunctioning.","action":"Verify that the gauge and temperature sensor are accurate.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:08.832Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:09.981Z] Targets Found: 1
+[2026-01-12T05:40:10.264Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Fan Drive Belt Loose.","action":"Check belt tension.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:10.982Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:12.108Z] Targets Found: 1
+[2026-01-12T05:40:12.311Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Radiator Hose Collapsed, Restricted or Leaking.","action":"Inspect hoses.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:12.825Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:13.950Z] Targets Found: 1
+[2026-01-12T05:40:14.158Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Cap Rated Pressure Too Low.","action":"Check the radiator pressure cap.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:14.668Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:15.897Z] Targets Found: 1
+[2026-01-12T05:40:16.204Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Thermostat Incorrect or Malfunctioning.","action":"Check thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:16.715Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:17.931Z] Targets Found: 1
+[2026-01-12T05:40:18.149Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Air or Combustion Gases in the Cooling System.","action":"Check for air or combustion gases in the cooling system.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:18.639Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:19.471Z] Targets Found: 1
+[2026-01-12T05:40:19.651Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Vent Line From Engine Radiator Plugged/Incorrectly Routed.","action":"Check routing and operation of vent line.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:20.071Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:21.119Z] Targets Found: 1
+[2026-01-12T05:40:21.324Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Water Pump Malfunctioning.","action":"Check water pump operation. Replace the water pump.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:21.837Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:22.974Z] Targets Found: 1
+[2026-01-12T05:40:23.378Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Leak Between the Top Tank and the Auxiliary Tank.","action":"Check for coolant leakage between radiator auxiliary tank and radiator top tank.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:23.973Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:25.216Z] Targets Found: 1
+[2026-01-12T05:40:25.526Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Above Normal - Sudden Overheat","causeName":"Radiator Cap Incorrect or Malfunctioning.","action":"Check the radiator pressure cap.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:26.241Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:27.248Z] Targets Found: 1
+[2026-01-12T05:40:27.435Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Below Normal","causeName":"Air Flow Across the Radiator Excessive.","action":"Check/repair fan clutch, as required.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:27.864Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:30.541Z] Targets Found: 1
+[2026-01-12T05:40:30.949Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Below Normal","causeName":"Thermostat Broken, Damaged, Contaminated or Not Sealing.","action":"Check/replace Thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:31.872Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:33.305Z] Targets Found: 1
+[2026-01-12T05:40:33.508Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Below Normal","causeName":"Temperature Sensor or Gauge Malfunctioning.","action":"Verify that the gauge and sensor are accurate.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:34.132Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:35.147Z] Targets Found: 1
+[2026-01-12T05:40:35.352Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Temperature Below Normal","causeName":"Coolant Not flowing by Temperature Sensor.","action":"Check/clean coolant passages.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:36.044Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:36.975Z] Targets Found: 1
+[2026-01-12T05:40:37.133Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Overfilling up to top in the radiator.","action":"Fill the coolant in the radiator up to correct level.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:37.513Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:38.296Z] Targets Found: 1
+[2026-01-12T05:40:38.481Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"External Engine Oil Leak.","action":"Visually inspect the engine and components for seal, gasket, or drain cock leaks.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:38.940Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:40.067Z] Targets Found: 1
+[2026-01-12T05:40:40.270Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Overheating of Compression Gases Leaking Resulting in Loss.","action":"Review the operation for overheating and low power.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:40.986Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:42.214Z] Targets Found: 1
+[2026-01-12T05:40:42.419Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Lubricating Oil Cooler Leak.","action":"Check/replace the oil cooler. Look for coolant in the oil.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:42.930Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:44.057Z] Targets Found: 1
+[2026-01-12T05:40:44.364Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Cylinder Head Gasket Leak.","action":"Check/replace the head gasket.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:44.875Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:45.899Z] Targets Found: 1
+[2026-01-12T05:40:46.104Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Cylinder Head Cracked or Porous.","action":"Check/replace the head.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:46.617Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:47.614Z] Targets Found: 1
+[2026-01-12T05:40:47.845Z] Processing row: {"machineName":"Excavators","faultName":"Coolant Loss","causeName":"Cylinder Block Coolant Passages Leaking.","action":"Check/replace the cylinder block.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:48.369Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:49.484Z] Targets Found: 1
+[2026-01-12T05:40:49.688Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Lubricating Oil Level Low.","action":"Check / replenish lubricating oil. Check for a severe external oil leak that could reduce the pressure.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:50.200Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:51.327Z] Targets Found: 1
+[2026-01-12T05:40:51.531Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Lubricating Oil Viscosity.Thin,Diluted/Not Meet Specification.","action":"Verify the correct oil is being used. Check for oil dilution.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:52.146Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:53.248Z] Targets Found: 1
+[2026-01-12T05:40:53.486Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Engine Temperature High.","action":"Check Thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:54.001Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:55.003Z] Targets Found: 1
+[2026-01-12T05:40:55.165Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Pressure Switch or Gauge Malfunctioning.","action":"Verify the pressure switch is functioning correctly.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:55.545Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:56.312Z] Targets Found: 1
+[2026-01-12T05:40:56.471Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Pressure Regulator Valve Stuck Open.","action":"Check/replace valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:56.855Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:57.884Z] Targets Found: 1
+[2026-01-12T05:40:58.188Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Lubricating Oil Filter Plugged.","action":"Change lubricating oil filter; review change interval.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:40:58.699Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:40:59.825Z] Targets Found: 1
+[2026-01-12T05:41:00.134Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Lubricating Oil Cooler Plugged.","action":"Replace lubricating oil cooler.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:00.749Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:01.773Z] Targets Found: 1
+[2026-01-12T05:41:01.976Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Cylinder Block or Cylinder Head Plugs Loose or Missing.","action":"Check / replace expansion plugs.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:02.489Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:03.588Z] Targets Found: 1
+[2026-01-12T05:41:03.821Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Lubricating Oil Pump Worn.","action":"Check/replace lubricating oil pump.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:04.333Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:05.360Z] Targets Found: 1
+[2026-01-12T05:41:05.537Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Main Bearing Cap Loose.","action":"Check/install new bearings and tighten cap.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:05.973Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:06.991Z] Targets Found: 1
+[2026-01-12T05:41:07.155Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure Low","causeName":"Bearings Worn.","action":"Inspect/replace bearings.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:07.549Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:08.314Z] Targets Found: 1
+[2026-01-12T05:41:08.476Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure High","causeName":"Pressure Switch or Gauge Malfunctioning.","action":"Verify the pressure switch is functioning correctly.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:08.860Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:10.066Z] Targets Found: 1
+[2026-01-12T05:41:10.271Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure High","causeName":"Engine Running Too Cold.","action":"Check Thermostat.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:10.783Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:11.807Z] Targets Found: 1
+[2026-01-12T05:41:12.012Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure High","causeName":"Lubricating Oil Viscosity Too Thick.","action":"Make sure the correct lubricating oil is being used.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:12.497Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:13.651Z] Targets Found: 1
+[2026-01-12T05:41:13.855Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Pressure High","causeName":"Pressure Regulator Stuck Closed.","action":"Check/replace valve.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:14.367Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:15.467Z] Targets Found: 1
+[2026-01-12T05:41:15.699Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Consumption Excessive","causeName":"External Leaks.","action":"Visually inspect for lubricating oil leaks.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:16.313Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:17.439Z] Targets Found: 1
+[2026-01-12T05:41:17.643Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Consumption Excessive","causeName":"Crankcase Being Overfilled (Dipstick Calibrated Incorrectly).","action":"Verify that the dipstick is correctly marked.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:18.155Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:19.152Z] Targets Found: 1
+[2026-01-12T05:41:19.383Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Consumption Excessive","causeName":"Incorrect Lubricating Oil (Specification or Viscosity).","action":"Make sure the correct lubricating oil is being used. Look for reduced viscosity from dilution with fuel. Fuel dilution in lubricating oil can originate from fuel injection pump driveshaft seal or fuel transfer pump. Review/reduce the lubricating oil chang","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:20.000Z] Product Context: 35 LegacyID Lookup: undefined
+[2026-01-12T05:41:21.023Z] Targets Found: 1
+[2026-01-12T05:41:21.228Z] Processing row: {"machineName":"Excavators","faultName":"Lubricating Oil Consumption Excessive","causeName":"High Blowby forcing Lubricating Oil Out the Breather.","action":"Check the breather tube area for sign of lubricating oil loss. Measure the blowby and perform the required repairs.","symptoms":">>-- Sample Text","manualRef":"Link file"}
+[2026-01-12T05:41:21.740Z] Product Context: 35 LegacyID Lookup: undefined

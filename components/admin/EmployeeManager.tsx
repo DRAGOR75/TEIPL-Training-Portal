@@ -33,7 +33,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     }
 
     // --- BULK UPLOAD ---
-    const [progress, setProgress] = useState<string>('');
+    const [progress, setProgress] = useState(0);
 
     const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -41,7 +41,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
         setUploading(true);
         setUploadStats(null);
-        setProgress('Parsing CSV...');
+        setProgress(0);
 
         Papa.parse(file, {
             header: true,
@@ -57,10 +57,13 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                 try {
                     for (let i = 0; i < TOTAL_RECORDS; i += CHUNK_SIZE) {
                         const chunk = allData.slice(i, i + CHUNK_SIZE);
+
                         const currentBatchNum = Math.floor(i / CHUNK_SIZE) + 1;
                         const totalBatches = Math.ceil(TOTAL_RECORDS / CHUNK_SIZE);
+                        const currentProcessed = Math.min(i + CHUNK_SIZE, TOTAL_RECORDS);
 
-                        setProgress(`Processing batch ${currentBatchNum} of ${totalBatches} (${Math.min(i + CHUNK_SIZE, TOTAL_RECORDS)} / ${TOTAL_RECORDS} records)...`);
+                        // Update Progress Percentage
+                        setProgress(Math.round((currentProcessed / TOTAL_RECORDS) * 100));
 
                         const result = await processEmployeeUpload(chunk);
 
@@ -83,7 +86,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                     setUploadStats({ success: successTotal, errors: [...allErrors, "Process interrupted or failed."] });
                 } finally {
                     setUploading(false);
-                    setProgress('');
+                    setProgress(0);
                     // Reset file input
                     if (fileInputRef.current) fileInputRef.current.value = '';
                 }
@@ -152,9 +155,22 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                             </h4>
                             <div className="bg-slate-50 p-6 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
                                 {uploading ? (
-                                    <div className="text-center">
+                                    <div className="text-center w-full max-w-xs">
                                         <div className="animate-pulse text-purple-600 font-bold text-lg mb-2">Processing CSV Data...</div>
-                                        <div className="text-slate-500 font-medium">{progress}</div>
+
+                                        {/* Progress Bar */}
+                                        <div className="mt-2">
+                                            <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                                                <span>Uploading...</span>
+                                                <span>{progress}%</span>
+                                            </div>
+                                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                                <div
+                                                    className="h-full bg-purple-600 transition-all duration-300 ease-out"
+                                                    style={{ width: `${progress}%` }}
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 ) : (
                                     <>

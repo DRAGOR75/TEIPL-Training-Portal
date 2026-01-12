@@ -54,8 +54,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                     {/* Right Side: Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<Home size={18} />} text="Home" />
-                        <NavLink href="/admin/dashboard" icon={<LayoutDashboard size={18} />} text="Feedback Dashboard" />
-                        <NavLink href="/admin/tni-dashboard" icon={<ClipboardList size={18} />} text="TNI Admin" />
+                        <NavLink href="/admin" icon={<ShieldCheck size={18} />} text="Admin" />
 
                         {isLoggedIn && (
                             <div className="ml-4 pl-4 border-l border-slate-200">
@@ -81,8 +80,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                 <div className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg animate-in slide-in-from-top-5">
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         <MobileNavLink href="/" onClick={() => setIsOpen(false)} text="Home" />
-                        <MobileNavLink href="/wip" onClick={() => setIsOpen(false)} text="Nominations" />
-                        <MobileNavLink href="/admin/dashboard" onClick={() => setIsOpen(false)} text="Feedback Hub" />
+                        <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
 
                         {isLoggedIn && (
                             <div className="pt-4 border-t border-slate-100 mt-2 flex justify-center">
