@@ -179,6 +179,7 @@ model TroubleshootingProduct {
   viewSeq     Int      @default(0) @map("view_seq")
   userView    Int      @default(0) @map("user_view")
   keywords    String?
+  legacyId    String?  @unique @map("legacy_source_id") // For CSV Import mapping
   imageUrl    String?  @map("image_url")  // Add this field if not present in your earlier plan but good for "grid of Products"
 
   createdAt   DateTime @default(now()) @map("created_at")
@@ -195,6 +196,7 @@ model FaultLibrary {
   id          String   @id @default(uuid())
   faultCode   String?  @unique @map("fault_code") // For "F001" style codes if needed
   name        String   @unique // "Engine Overheating" - Unique to avoid duplication
+  legacyId    String?  @unique @map("legacy_source_id") // For CSV Import mapping
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")

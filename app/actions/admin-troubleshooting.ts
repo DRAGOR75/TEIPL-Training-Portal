@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+// Removed logging for performance
 
 const ADMIN_PATH = '/admin/troubleshooting';
 
@@ -205,4 +206,237 @@ export async function getSequence(productFaultId: string) {
         include: { cause: true },
         orderBy: { seq: 'asc' }
     });
+}
+
+// --- 6. Bulk Upload ---
+
+export type BulkUploadRow = {
+    machineName: string;
+    productSeq?: number;
+    keywords?: string;
+
+    faultName?: string;
+    faultId?: string;      // New: Legacy Fault ID (FaultID) from CSV
+    faultCode?: string;
+    faultViewSeq?: number; // New
+    notes?: string;        // New
+
+    productId?: string;    // New: Legacy Product ID (ProdID)
+
+    causeName?: string;
+    action?: string;
+    symptoms?: string;
+    manualRef?: string;
+    seq?: number;
+};
+
+export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
+    try {
+        let count = 0;
+        // Map to track the next sequence number for each ProductFault (Key: ProductFaultID, Value: NextSeq)
+        const sequenceMap = new Map<string, number>();
+
+        // CACHE: Track IDs we've already processed/created in this batch to avoid redundant DB calls
+        const processedProducts = new Map<string, string>(); // Key: Name/LegacyID -> Value: DB_ID
+        const processedFaults = new Map<string, { id: string, legacyId?: string }>(); // Key: Name/LegacyID -> Value: Object
+
+        // OPTIMIZATION: Pre-fetch existing data to minimize DB lookups
+        const [allProducts, allFaults] = await Promise.all([
+            db.troubleshootingProduct.findMany({ select: { id: true, name: true, legacyId: true } }),
+            db.faultLibrary.findMany({ select: { id: true, name: true, legacyId: true } })
+        ]);
+
+        // Populate Cache
+        allProducts.forEach(p => {
+            processedProducts.set(p.name, String(p.id)); // Note: ID is Int, converting to string for map consistency if needed or keep as is?
+            // Actually ID is Int in Schema, let's store as string for Map, but schema says ID is Int. 
+            // The code uses `any` for product, so let's be careful.
+            // Let's rely on the fact that we use `product.id` later.
+            // Let's store the ID directly.
+            processedProducts.set(p.name, String(p.id));
+            if (p.legacyId) processedProducts.set(p.legacyId, String(p.id));
+        });
+
+        allFaults.forEach(f => {
+            const fObj = { id: f.id, legacyId: f.legacyId || undefined };
+            processedFaults.set(f.name, fObj);
+            if (f.legacyId) processedFaults.set(f.legacyId, fObj);
+        });
+
+        for (const row of rows) {
+            // --- Step 1: Determine Target Context (Which Product-Faults?) ---
+            let targetProductFaults: any[] = [];
+            let fault: any = null;
+
+            if (row.machineName || row.productId) {
+                // A. Specific Machine Context
+                let product: any = null;
+                const prodKey = row.productId || row.machineName;
+
+                if (prodKey && processedProducts.has(prodKey)) {
+                    // CACHE HIT: Use existing ID without DB Call
+                    product = { id: processedProducts.get(prodKey) };
+                } else {
+                    // CACHE MISS: Perform DB Upsert/Lookup
+                    if (row.machineName) {
+                        product = await db.troubleshootingProduct.upsert({
+                            where: { name: row.machineName },
+                            update: {
+                                viewSeq: row.productSeq ?? undefined,
+                                keywords: row.keywords && !row.faultName ? row.keywords : undefined,
+                                legacyId: row.productId ? String(row.productId) : undefined
+                            },
+                            create: {
+                                name: row.machineName,
+                                viewSeq: row.productSeq || 99,
+                                keywords: row.keywords,
+                                legacyId: row.productId ? String(row.productId) : undefined
+                            }
+                        });
+                    } else if (row.productId) {
+                        product = await db.troubleshootingProduct.findUnique({ where: { legacyId: String(row.productId) } });
+                    }
+
+                    // Update Cache
+                    if (product) {
+                        if (row.machineName) processedProducts.set(row.machineName, product.id);
+                        if (row.productId) processedProducts.set(row.productId, product.id);
+                    }
+                }
+
+                if (product && (row.faultName || row.faultId)) {
+                    const faultKey = row.faultId || row.faultName;
+
+                    if (faultKey && processedFaults.has(faultKey)) {
+                        // CACHE HIT
+                        fault = processedFaults.get(faultKey);
+                    } else {
+                        // CACHE MISS
+                        // Try finding fault by ID first (more precise), then Name
+                        if (row.faultId) {
+                            fault = await db.faultLibrary.findUnique({ where: { legacyId: String(row.faultId) } });
+                        }
+                        if (!fault && row.faultName) {
+                            fault = await db.faultLibrary.upsert({
+                                where: { name: row.faultName },
+                                update: {
+                                    faultCode: row.faultCode || undefined,
+                                    legacyId: row.faultId ? String(row.faultId) : undefined
+                                },
+                                create: {
+                                    name: row.faultName,
+                                    faultCode: row.faultCode,
+                                    legacyId: row.faultId ? String(row.faultId) : undefined
+                                }
+                            });
+                        }
+
+                        // Update Cache
+                        if (fault) {
+                            const faultObj = { id: fault.id, legacyId: fault.legacyId };
+                            if (row.faultName) processedFaults.set(row.faultName, faultObj);
+                            if (row.faultId) processedFaults.set(row.faultId, faultObj);
+                            if (fault.legacyId) processedFaults.set(fault.legacyId, faultObj);
+                        }
+                    }
+
+                    if (fault) {
+                        // Link Product <-> Fault (Ideally cache this too, but upsert is relatively fast for join table if indexed)
+                        // For now, keeping upsert to ensure 'viewSeq' updates are captured if they change row-to-row
+                        const pf = await db.productFault.upsert({
+                            where: { productId_faultId: { productId: product.id, faultId: fault.id } },
+                            update: {
+                                viewSeq: row.faultViewSeq ?? undefined,
+                                notes: row.notes ?? undefined,
+                                keywords: row.keywords ?? undefined
+                            },
+                            create: {
+                                productId: product.id,
+                                faultId: fault.id,
+                                viewSeq: row.faultViewSeq || 99,
+                                notes: row.notes,
+                                keywords: row.keywords
+                            }
+                        });
+                        targetProductFaults.push(pf);
+                    }
+                }
+            } else if (row.faultId) {
+                // B. Broadcast Context
+                const faultKey = row.faultId;
+                if (processedFaults.has(faultKey)) {
+                    fault = processedFaults.get(faultKey);
+                } else {
+                    fault = await db.faultLibrary.findUnique({ where: { legacyId: String(row.faultId) } });
+                    if (fault) {
+                        const faultObj = { id: fault.id, legacyId: fault.legacyId };
+                        processedFaults.set(row.faultId, faultObj);
+                        if (fault.name) processedFaults.set(fault.name, faultObj);
+                    }
+                }
+
+                if (fault) {
+                    targetProductFaults = await db.productFault.findMany({
+                        where: { faultId: fault.id }
+                    });
+                }
+            }
+
+            // If we found no targets so far, skip
+            if (targetProductFaults.length === 0) {
+                // Try counting it if it was just a Product update
+                if (row.machineName && !row.faultName) count++;
+                continue;
+            }
+
+            // --- Step 2: Ensure Cause Exists (Once) ---
+            if (!row.causeName) {
+                count++; // Valid processing for Product/Fault only rows
+                continue;
+            }
+
+            const cause = await db.causeLibrary.upsert({
+                where: { name: row.causeName },
+                update: {
+                    action: row.action,
+                    symptoms: row.symptoms,
+                    manualRef: row.manualRef
+                },
+                create: {
+                    name: row.causeName,
+                    action: row.action,
+                    symptoms: row.symptoms,
+                    manualRef: row.manualRef
+                }
+            });
+
+            // --- Step 3: Link Cause to ALL Targets ---
+            for (const pf of targetProductFaults) {
+                // Determine sequence: Use explicitly provided seq, or auto-increment based on ProductFault context
+                const nextSeq = sequenceMap.get(pf.id) ?? 1;
+                const finalSeq = row.seq ?? nextSeq;
+
+                // Update map for next time this ProductFault is encountered
+                sequenceMap.set(pf.id, finalSeq + 1);
+
+                await db.faultCause.upsert({
+                    where: { productFaultId_causeId: { productFaultId: pf.id, causeId: cause.id } },
+                    update: { seq: finalSeq },
+                    create: {
+                        productFaultId: pf.id,
+                        causeId: cause.id,
+                        seq: finalSeq
+                    }
+                });
+            }
+
+            count++;
+        }
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true, count };
+    } catch (e) {
+        console.error('Bulk upload error:', e);
+        return { error: 'Failed to process bulk upload. Check server logs.' };
+    }
 }

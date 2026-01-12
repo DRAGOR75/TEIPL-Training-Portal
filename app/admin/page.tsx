@@ -6,7 +6,8 @@ import {
     ChevronRight,
     LayoutDashboard,
     Users,
-    Wrench
+    Wrench,
+    ClipboardList
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -48,7 +49,7 @@ export default async function AdminHubPage() {
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                    <Database size={24} />
+                                    <ClipboardList size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Master Data</span>
                             </div>
