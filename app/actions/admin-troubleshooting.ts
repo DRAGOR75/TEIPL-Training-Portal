@@ -237,7 +237,8 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
         const sequenceMap = new Map<string, number>();
 
         // CACHE: Track IDs we've already processed/created in this batch to avoid redundant DB calls
-        const processedProducts = new Map<string, string>(); // Key: Name/LegacyID -> Value: DB_ID
+        // CACHE: Track IDs we've already processed/created in this batch to avoid redundant DB calls
+        const processedProducts = new Map<string, number>(); // Key: Name/LegacyID -> Value: DB_ID (Int)
         const processedFaults = new Map<string, { id: string, legacyId?: string }>(); // Key: Name/LegacyID -> Value: Object
 
         // OPTIMIZATION: Pre-fetch existing data to minimize DB lookups
@@ -248,13 +249,8 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
 
         // Populate Cache
         allProducts.forEach(p => {
-            processedProducts.set(p.name, String(p.id)); // Note: ID is Int, converting to string for map consistency if needed or keep as is?
-            // Actually ID is Int in Schema, let's store as string for Map, but schema says ID is Int. 
-            // The code uses `any` for product, so let's be careful.
-            // Let's rely on the fact that we use `product.id` later.
-            // Let's store the ID directly.
-            processedProducts.set(p.name, String(p.id));
-            if (p.legacyId) processedProducts.set(p.legacyId, String(p.id));
+            processedProducts.set(p.name, p.id);
+            if (p.legacyId) processedProducts.set(p.legacyId, p.id);
         });
 
         allFaults.forEach(f => {
