@@ -21,6 +21,19 @@ const getGmailClient = () => {
 };
 
 /**
+ * HELPER: Get Base URL dynamically
+ */
+const getBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+  return 'http://localhost:3000';
+};
+
+/**
  * CORE SENDER FUNCTION
  */
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
@@ -76,8 +89,7 @@ export async function sendApprovalEmail(
   justification: string,
   nominationId: string
 ) {
-  // Hardcoded Production URL for reliability
-  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const baseUrl = getBaseUrl();
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
@@ -106,8 +118,7 @@ export async function sendFeedbackRequestEmail(
   programName: string,
   enrollmentId: string
 ) {
-  // Hardcoded Production URL for reliability
-  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const baseUrl = getBaseUrl();
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
@@ -135,6 +146,7 @@ export async function sendTrainerReminderEmail(
 ) {
   const startDateStr = startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const endDateStr = endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const baseUrl = getBaseUrl();
 
   const html = `
     <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
@@ -143,7 +155,7 @@ export async function sendTrainerReminderEmail(
       <p>This is a reminder to please proceed for the Post Training Feedback for <strong>${programName}</strong> conducted on <strong>${startDateStr}</strong> to <strong>${endDateStr}</strong>.</p>
       <p>Please ensure to collect the post training feedback from all the participants within next 5 days.</p>
       <p>You can initiate the feedback collection process by clicking the link below:</p>
-      <p><a href="https://templtrainingportal.vercel.app/admin/dashboard/" style="background: #d32f2f; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Initiate Feedback Collection</a></p>
+      <p><a href="${baseUrl}/admin/dashboard/" style="background: #d32f2f; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Initiate Feedback Collection</a></p>
       <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
       <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
@@ -278,8 +290,7 @@ export async function sendFeedbackReviewRequestEmail(
   programName: string,
   enrollmentId: string
 ) {
-  // Hardcoded Production URL for reliability
-  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const baseUrl = getBaseUrl();
   const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
 
   const html = `
@@ -311,8 +322,7 @@ export async function sendTNIApprovalEmail(
   justification: string,
   empId: string
 ) {
-  // Hardcoded Production URL
-  const baseUrl = 'https://templtrainingportal.vercel.app';
+  const baseUrl = getBaseUrl();
   const approvalLink = `${baseUrl}/nominations/manager/${empId}`;
 
   const programsList = programs.map(p => `<li style="margin-bottom: 5px;">${p}</li>`).join('');

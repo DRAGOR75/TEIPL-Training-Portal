@@ -32,7 +32,7 @@ export default function LoginPage() {
                 setLoading(false);
             } else {
                 // Force full reload to ensure session is picked up by Middleware/Server
-                window.location.href = "/admin/dashboard";
+                window.location.href = "/admin";
             }
         } catch (err) {
             setError("Something went wrong. Please try again.");
