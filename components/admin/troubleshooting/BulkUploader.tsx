@@ -111,21 +111,7 @@ export default function BulkUploader() {
                         <span className="font-bold text-slate-800">1. Full Diagnostic Data:</span><br />
                         Machine Model, Fault Name, Check Description, Remedy Action, Sequence
                     </div>
-                    <div>
-                        <span className="font-bold text-slate-800">2. Products Only (Your Format):</span><br />
-                        ProductName, ProdViewSeq, Key Words to filter
-                    </div>
-                    <div>
-                        <span className="font-bold text-slate-800">3. Faults Only (Your Format):</span><br />
-                        Machine Model*, Fault/Complaint..., FaultViewSeq, Notes
-                    </div>
-                    <div>
-                        <span className="font-bold text-slate-800">4. Causes (Check/Remedy):</span><br />
-                        Machine*, Fault*, Possible Causes, Action/Remedy, CauseViewSeq
-                    </div>
-                    <div className="mt-2 text-[10px] text-slate-800 bg-yellow-50 p-2 rounded border border-yellow-200">
-                        *Note: You can now use <strong>Legacy IDs (FaultID)</strong> from your CSV. The system will automatically link them!
-                    </div>
+
                 </div>
 
                 <div className="pt-4">

@@ -90,7 +90,7 @@ export default function DashboardClient({
         setDate(newDate);
         setIsLoading(true);
         try {
-            // 🟢 DATE FIX: Send YYYY-MM-DD (Local) to prevent Timezone shift
+
             // toISOString() converts 00:00 IST to Previous Day UTC, causing the bug.
             const offset = newDate.getTimezoneOffset();
             const localDate = new Date(newDate.getTime() - (offset * 60 * 1000));
@@ -206,7 +206,7 @@ export default function DashboardClient({
                 {/* LEFT COLUMN */}
                 <div className="w-full lg:w-1/3 space-y-8">
                     {/* Calendar */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <CalendarIcon className="text-blue-700" size={20} />
                             <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>

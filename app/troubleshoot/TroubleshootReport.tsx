@@ -3,6 +3,20 @@
 import { useState } from 'react';
 import { TroubleshootingProduct, ProductFault, FaultLibrary, FaultCause, CauseLibrary } from '@prisma/client';
 import { getFaultsForProduct, getCausesForFault } from '@/app/actions/troubleshooting';
+import {
+    Wrench,
+    Search,
+    AlertCircle,
+    CheckCircle2,
+    ArrowRight,
+    BookOpen,
+    HelpCircle,
+    Info,
+    Settings,
+    Activity,
+    ChevronRight,
+    ClipboardList
+} from 'lucide-react';
 
 type FullProductFault = ProductFault & {
     fault: FaultLibrary;
@@ -83,51 +97,81 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8 max-w-7xl mx-auto">
             {/* Control Panel */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Machine Selector */}
+            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
+                    <div className="bg-orange-50 p-2.5 rounded-xl text-orange-500">
+                        <Settings size={22} className="stroke-[2.5]" />
+                    </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            1. Select Machine
+                        <h2 className="text-xl font-bold text-slate-900">Diagnostic Configuration</h2>
+                        <p className="text-slate-500 text-sm font-medium">Configure parameters to generate troubleshooting steps</p>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Machine Selector */}
+                    <div className="space-y-3">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+                            <Wrench size={16} className="text-slate-400" />
+                            Select Machine Model
                         </label>
-                        <select
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 bg-gray-50 border"
-                            value={selectedProductId?.toString() || ''}
-                            onChange={(e) => handleProductChange(e.target.value)}
-                        >
-                            <option value="">-- Choose a Machine --</option>
-                            {products.map((p) => (
-                                <option key={p.id} value={p.id}>
-                                    {p.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div className="relative group">
+                            <select
+                                className="w-full appearance-none rounded-xl border-slate-200 shadow-sm focus:border-orange-500 focus:ring-orange-500 p-4 pl-12 bg-slate-50 border font-medium text-slate-900 transition-all hover:border-orange-300"
+                                value={selectedProductId?.toString() || ''}
+                                onChange={(e) => handleProductChange(e.target.value)}
+                            >
+                                <option value="">-- Choose a Machine --</option>
+                                {products.map((p) => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-orange-500 transition-colors pointer-events-none">
+                                <Activity size={20} />
+                            </div>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                <ChevronRight size={16} className="rotate-90" />
+                            </div>
+                        </div>
                     </div>
 
                     {/* Issue Selector */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            2. Select Issue
+                    <div className="space-y-3">
+                        <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
+                            <AlertCircle size={16} className="text-slate-400" />
+                            Select Observed Issue
                         </label>
-                        <select
-                            className="w-full rounded-lg border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-2.5 bg-gray-50 border disabled:opacity-50 disabled:bg-gray-100"
-                            value={selectedFaultId || ''}
-                            onChange={(e) => handleFaultChange(e.target.value)}
-                            disabled={!selectedProductId || loadingFaults}
-                        >
-                            <option value="">
-                                {loadingFaults ? 'Loading faults...' : '-- Choose an Issue --'}
-                            </option>
-                            {faults.map((f) => (
-                                <option key={f.id} value={f.id}>
-                                    {f.fault.name} {f.fault.faultCode ? `(${f.fault.faultCode})` : ''}
+                        <div className="relative group">
+                            <select
+                                className="w-full appearance-none rounded-xl border-slate-200 shadow-sm focus:border-orange-500 focus:ring-orange-500 p-4 pl-12 bg-slate-50 border font-medium text-slate-900 disabled:opacity-50 disabled:bg-slate-100 transition-all hover:border-orange-300"
+                                value={selectedFaultId || ''}
+                                onChange={(e) => handleFaultChange(e.target.value)}
+                                disabled={!selectedProductId || loadingFaults}
+                            >
+                                <option value="">
+                                    {loadingFaults ? 'Loading faults...' : '-- Choose an Issue --'}
                                 </option>
-                            ))}
-                        </select>
+                                {faults.map((f) => (
+                                    <option key={f.id} value={f.id}>
+                                        {f.fault.name} {f.fault.faultCode ? `(${f.fault.faultCode})` : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-amber-500 transition-colors pointer-events-none">
+                                <Search size={20} />
+                            </div>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                <ChevronRight size={16} className="rotate-90" />
+                            </div>
+                        </div>
                         {faults.length === 0 && selectedProductId && !loadingFaults && (
-                            <p className="text-xs text-orange-500 mt-1">No reported faults for this machine.</p>
+                            <p className="flex items-center gap-1.5 text-xs text-amber-600 font-medium ml-1 bg-amber-50 w-fit px-2 py-1 rounded-md">
+                                <Info size={12} /> No reported faults for this machine.
+                            </p>
                         )}
                     </div>
                 </div>
@@ -135,111 +179,157 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Diagnostic Report Area */}
             {loadingDiagnosis && (
-                <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="text-gray-500 mt-4">Loading diagnostic data...</p>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+                    <div className="relative w-16 h-16 mx-auto mb-6">
+                        <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
+                        <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-1">Generating Sequence</h3>
+                    <p className="text-slate-500">Retrieving diagnostic data matching your selection...</p>
                 </div>
             )}
 
             {!loadingDiagnosis && diagnosis && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    {/* Report Header */}
-                    <div className="bg-blue-50/50 p-6 border-b border-blue-100">
-                        <div className="flex items-start justify-between">
-                            <div>
-                                <h2 className="text-xl font-bold text-gray-900">
-                                    {diagnosis.context.fault.name}
-                                </h2>
-                                <p className="text-blue-600 font-medium mt-1">
-                                    {diagnosis.context.product.name}
-                                    {diagnosis.context.fault.faultCode && <span className="text-gray-400 ml-2">#{diagnosis.context.fault.faultCode}</span>}
-                                </p>
-                            </div>
-                            <div className="text-right hidden sm:block">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                    Troubleshooting Guide
+                <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+                    {/* Report Header - Professional Variant */}
+                    <div className="bg-white p-8 border-b border-slate-200 relative overflow-hidden">
+                        <div className="relative z-10">
+                            <div className="flex items-center gap-3 mb-4">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
+                                    <Activity size={12} className="mr-1.5" /> Troubleshooting Guide
                                 </span>
+                                {diagnosis.context.fault.faultCode && (
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 border border-slate-200">
+                                        Code: {diagnosis.context.fault.faultCode}
+                                    </span>
+                                )}
+                            </div>
+
+                            <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tight text-slate-900">
+                                {diagnosis.context.fault.name}
+                            </h2>
+                            <div className="flex items-center gap-2 text-slate-500 font-medium text-lg">
+                                <span className="opacity-70">Machine:</span>
+                                <span className="text-slate-900 font-bold">{diagnosis.context.product.name}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Machine Specific Notes */}
+                    {diagnosis.context.notes && (
+                        <div className="p-6 md:p-8 bg-amber-50 border-b border-amber-100">
+                            <div className="flex gap-4">
+                                <div className="shrink-0">
+                                    <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shadow-sm border border-amber-200">
+                                        <AlertCircle size={20} />
+                                    </div>
+                                </div>
+                                <div>
+                                    <h4 className="text-amber-900 font-bold text-sm uppercase tracking-wide mb-1">Important Product Note</h4>
+                                    <p className="text-amber-900/80 leading-relaxed font-medium">
+                                        {diagnosis.context.notes}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Diagnostic Steps */}
+                    <div className="p-6 md:p-8 bg-slate-50/50">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-orange-500">
+                                <ClipboardList size={20} />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-900">Diagnostic Sequence</h3>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Follow steps in order</p>
                             </div>
                         </div>
 
-                        {/* Machine Specific Notes */}
-                        {diagnosis.context.notes && (
-                            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-100 rounded-lg">
-                                <h4 className="flex items-center text-sm font-semibold text-yellow-800 mb-1">
-                                    <svg className="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
-                                    Machine Specific Note:
-                                </h4>
-                                <p className="text-sm text-yellow-800/80 ml-5">
-                                    {diagnosis.context.notes}
-                                </p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Diagnostic Steps */}
-                    <div className="p-6">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-6">Diagnostic Sequence</h3>
-
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                             {diagnosis.sequence.map((step, index) => (
-                                <div key={step.id} className="relative pl-10">
-                                    {/* Step Number Line */}
-                                    <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-200" style={{ display: index === diagnosis.sequence.length - 1 ? 'none' : 'block' }}></div>
-                                    <div className="absolute left-[-11px] top-0 w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold z-10 border-4 border-white">
-                                        {index + 1}
+                                <div key={step.id} className="relative pl-4 md:pl-6 group">
+
+                                    {/* Timeline Connector */}
+                                    <div
+                                        className="absolute left-0 top-8 bottom-[-24px] w-0.5 bg-slate-200 group-last:hidden"
+                                    ></div>
+
+                                    {/* Step Number Badge */}
+                                    <div className="absolute left-[-14px] md:left-[-12px] top-0 shadow-sm">
+                                        <div className="w-8 h-8 rounded-full bg-white border-2 border-orange-500 text-orange-500 flex items-center justify-center text-sm font-bold z-10 transition-transform group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white">
+                                            {index + 1}
+                                        </div>
                                     </div>
 
-                                    {/* Step Content */}
-                                    <div className="bg-gray-50 rounded-lg p-5 border border-gray-100 hover:border-blue-200 transition-colors">
-                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                                            <div className="lg:col-span-2">
-                                                <h4 className="text-base font-bold text-gray-900 mb-2">
-                                                    Check: {step.cause.name}
-                                                </h4>
+                                    {/* Step Content Card */}
+                                    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300">
+                                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                            <div className="lg:col-span-2 space-y-4">
+                                                <div>
+                                                    <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
+                                                        {step.cause.name}
+                                                        {step.isLikely && (
+                                                            <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
+                                                                High Probability
+                                                            </span>
+                                                        )}
+                                                    </h4>
 
-                                                {step.cause.description && (
-                                                    <div className="mb-4 text-sm text-gray-600">
-                                                        {step.cause.description}
-                                                    </div>
-                                                )}
+                                                    {step.cause.description && (
+                                                        <p className="text-slate-600 text-sm leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
+                                                            {step.cause.description}
+                                                        </p>
+                                                    )}
+                                                </div>
 
                                                 <div className="space-y-3">
-                                                    {step.cause.symptoms && (
-                                                        <div className="flex gap-3 text-sm">
-                                                            <span className="font-semibold text-gray-500 w-20 shrink-0">Symptoms:</span>
-                                                            <span className="text-gray-700">{step.cause.symptoms}</span>
-                                                        </div>
-                                                    )}
                                                     {step.cause.action && (
-                                                        <div className="flex gap-3 text-sm bg-green-50/50 p-2 rounded -mx-2">
-                                                            <span className="font-semibold text-green-700 w-20 shrink-0">Remedy:</span>
-                                                            <span className="text-gray-800">{step.cause.action}</span>
+                                                        <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100 flex gap-4">
+                                                            <div className="shrink-0 mt-0.5">
+                                                                <CheckCircle2 size={20} className="text-emerald-600" />
+                                                            </div>
+                                                            <div>
+                                                                <span className="block text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">
+                                                                    Recommended Action
+                                                                </span>
+                                                                <span className="text-slate-900 font-medium text-sm">
+                                                                    {step.cause.action}
+                                                                </span>
+                                                            </div>
                                                         </div>
                                                     )}
+
                                                     {step.cause.manualRef && (
-                                                        <div className="flex gap-3 text-xs mt-2">
-                                                            <span className="font-semibold text-gray-400 w-20 shrink-0">Reference:</span>
-                                                            <span className="text-blue-500 font-mono">{step.cause.manualRef}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <BookOpen size={14} className="text-slate-400" />
+                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Reference:</span>
+                                                            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-mono font-bold border border-slate-200">
+                                                                {step.cause.manualRef}
+                                                            </span>
                                                         </div>
                                                     )}
                                                 </div>
                                             </div>
 
-                                            {/* Step Image */}
+                                            {/* Visual Aid */}
                                             {step.cause.imageUrl && (
                                                 <div className="lg:col-span-1">
-                                                    <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-200 border border-gray-200 shadow-sm group">
-                                                        {/* Placeholder for real image since we just have string URLs in mock data usually */}
+                                                    <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner group-hover:shadow-md transition-shadow">
                                                         <img
                                                             src={step.cause.imageUrl}
                                                             alt={step.cause.name}
-                                                            className="w-full h-full object-cover"
+                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                             onError={(e) => {
-                                                                (e.target as HTMLImageElement).src = 'https://placehold.co/600x400?text=No+Image';
+                                                                (e.target as HTMLImageElement).src = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable';
                                                             }}
                                                         />
+                                                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <span className="text-white text-xs font-medium flex items-center gap-1.5">
+                                                                <Info size={12} /> Reference Image
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             )}
@@ -249,8 +339,10 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             ))}
 
                             {diagnosis.sequence.length === 0 && (
-                                <div className="text-center py-8 text-gray-500 italic border-2 border-dashed border-gray-200 rounded-lg">
-                                    No diagnostic steps documented for this issue yet.
+                                <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50">
+                                    <HelpCircle size={48} className="mx-auto text-slate-300 mb-4" />
+                                    <p className="text-slate-500 font-medium">No specific diagnostic steps documented for this issue yet.</p>
+                                    <p className="text-slate-400 text-sm mt-1">Please consult the master technical manual directly.</p>
                                 </div>
                             )}
                         </div>
@@ -258,19 +350,35 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                 </div>
             )}
 
+            {/* Empty State Instructions */}
             {!diagnosis && !loadingDiagnosis && selectedProductId && selectedFaultId && (
-                <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <p className="text-gray-500">Select an issue above to view diagnosis.</p>
+                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+                    <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
+                        <Search size={32} />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-2">Ready to Troubleshoot</h3>
+                    <p className="text-slate-500 max-w-md mx-auto">
+                        System is ready. Confirm your selection above to load the diagnostic sequence.
+                    </p>
                 </div>
             )}
+
             {!selectedProductId && (
-                <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                    <div className="text-gray-400 mb-2">
-                        <svg className="w-12 h-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-                        </svg>
+                <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
+                    <div className="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-6 transform rotate-3">
+                        <Wrench size={40} />
                     </div>
-                    <p className="text-gray-500 font-medium">Select a machine to start troubleshooting</p>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
+                    <p className="text-slate-500 max-w-sm mx-auto mb-8">
+                        Select a machine model from the dropdown above to identify common faults and solutions.
+                    </p>
+                    <div className="flex justify-center gap-4 text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                        <span className="flex items-center gap-1"><CheckCircle2 size={14} /> Identify</span>
+                        <span className="w-px h-4 bg-slate-300"></span>
+                        <span className="flex items-center gap-1"><Search size={14} /> Diagnose</span>
+                        <span className="w-px h-4 bg-slate-300"></span>
+                        <span className="flex items-center gap-1"><Wrench size={14} /> Resolve</span>
+                    </div>
                 </div>
             )}
         </div>
