@@ -23,6 +23,7 @@ import { getSessionsForDate, toggleFeedbackAutomation, sendFeedbackEmails } from
 import TrainerManager from '@/components/admin/TrainerManager';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import LoadingScreen from '@/app/loading';
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
 type Session = {
     id: string;
@@ -69,7 +70,12 @@ export default function DashboardClient({
     const [date, setDate] = useState<any>(new Date());
     const [optimisticToggles, setOptimisticToggles] = useState<Record<string, boolean>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [origin, setOrigin] = useState('');
     const router = useRouter();
+
+    useEffect(() => {
+        setOrigin(window.location.origin);
+    }, []);
 
     // Sessions is now the "Active List" for the selected date
     const [sessions, setSessions] = useState<Session[]>(initialSessions);
@@ -455,7 +461,7 @@ export default function DashboardClient({
                                                     <div className="bg-white p-2 rounded-lg shadow-sm">
                                                         <QRCode
                                                             id={`qr-${t.id}`}
-                                                            value={`https://templtrainingportal.vercel.app/join/${t.id}`}
+                                                            value={`${origin}/join/${t.id}`}
                                                             size={150}
                                                         />
                                                     </div>
