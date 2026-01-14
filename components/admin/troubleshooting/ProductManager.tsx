@@ -1,14 +1,19 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createTroubleshootingProduct, deleteTroubleshootingProduct } from '@/app/actions/admin-troubleshooting';
+import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton'; // Assuming we have this
-import { Trash2, Plus, Box } from 'lucide-react';
+import { Trash2, Plus, Box, Edit2, Check, X } from 'lucide-react';
 import { TroubleshootingProduct } from '@prisma/client';
 
 export default function ProductManager({ products }: { products: TroubleshootingProduct[] }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [isAdding, setIsAdding] = useState(false);
+
+    // Edit State
+    const [editingId, setEditingId] = useState<number | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editSeq, setEditSeq] = useState(0);
 
     async function handleAdd(formData: FormData) {
         const result = await createTroubleshootingProduct(formData);
@@ -19,6 +24,21 @@ export default function ProductManager({ products }: { products: Troubleshooting
             setIsAdding(false);
         }
     }
+
+    async function handleUpdate(id: number) {
+        const result = await updateTroubleshootingProduct(id, { name: editName, viewSeq: editSeq });
+        if (result?.error) {
+            alert(result.error);
+        } else {
+            setEditingId(null);
+        }
+    }
+
+    const startEdit = (product: TroubleshootingProduct) => {
+        setEditingId(product.id);
+        setEditName(product.name);
+        setEditSeq(product.viewSeq);
+    };
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -57,7 +77,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
                 <table className="w-full text-sm text-left">
                     <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
                         <tr>
-                            <th className="px-4 py-3">Seq</th>
+                            <th className="px-4 py-3 w-20">Seq</th>
                             <th className="px-4 py-3">Machine Name</th>
                             <th className="px-4 py-3 text-right">Actions</th>
                         </tr>
@@ -65,17 +85,68 @@ export default function ProductManager({ products }: { products: Troubleshooting
                     <tbody className="divide-y divide-slate-100">
                         {products.map((p) => (
                             <tr key={p.id} className="hover:bg-slate-50 group transition-colors">
-                                <td className="px-4 py-3 text-slate-400 font-mono text-xs">{p.viewSeq}</td>
-                                <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
-                                <td className="px-4 py-3 text-right">
-                                    <button
-                                        onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteTroubleshootingProduct(p.id) }}
-                                        className="text-slate-300 hover:text-red-600 transition p-1"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </td>
+                                {editingId === p.id ? (
+                                    <>
+                                        <td className="px-4 py-3">
+                                            <input
+                                                type="number"
+                                                value={editSeq}
+                                                onChange={(e) => setEditSeq(parseInt(e.target.value))}
+                                                className="w-16 p-1 border border-blue-300 rounded text-xs"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3 font-medium text-slate-700">
+                                            <input
+                                                type="text"
+                                                value={editName}
+                                                onChange={(e) => setEditName(e.target.value)}
+                                                className="w-full p-1 border border-blue-300 rounded text-sm"
+                                                autoFocus
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex justify-end gap-2">
+                                                <button
+                                                    onClick={() => handleUpdate(p.id)}
+                                                    className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
+                                                    title="Save"
+                                                >
+                                                    <Check size={14} />
+                                                </button>
+                                                <button
+                                                    onClick={() => setEditingId(null)}
+                                                    className="text-slate-500 hover:text-slate-700 p-1"
+                                                    title="Cancel"
+                                                >
+                                                    <X size={14} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">{p.viewSeq}</td>
+                                        <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
+                                        <td className="px-4 py-3 text-right">
+                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button
+                                                    onClick={() => startEdit(p)}
+                                                    className="text-slate-400 hover:text-blue-600 transition p-1"
+                                                    title="Edit"
+                                                >
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteTroubleshootingProduct(p.id) }}
+                                                    className="text-slate-300 hover:text-red-600 transition p-1"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                         {products.length === 0 && (
