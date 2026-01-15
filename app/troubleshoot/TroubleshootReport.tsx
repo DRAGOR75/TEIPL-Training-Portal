@@ -100,7 +100,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     const [showGuide, setShowGuide] = useState(true);
 
     return (
-        <div className="space-y-4 md:space-y-8 max-w-7xl mx-auto px-1 md:px-0">
+        <div className="space-y-4 md:space-y-9 w-full mx-auto px-1 md:px-0">
             {/* Guide Modal Overlay */}
             {showGuide && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
