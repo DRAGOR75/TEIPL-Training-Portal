@@ -20,70 +20,85 @@ export default function BulkUploader() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
-            worker: true, // Use web worker to avoid freezing UI
+            worker: false, // Worker cannot handle functions like transformHeader
+            transformHeader: (h) => h.trim().replace(/^"|"$/g, ''), // Trim and remove surrounding quotes from headers
             complete: async (results) => {
-                const rows = results.data.map((row: any) => ({
-                    // Smart Mapping for various CSV styles
-                    machineName: (row['Machine Model'] || row['ProductName'])?.trim(),
-                    productSeq: parseInt(row['ProdViewSeq']) || undefined,
-                    keywords: row['Key Words to filter']?.trim(),
-                    productId: row['ProdID'], // Map ProdID for legacy lookup
+                try {
+                    const rows = results.data.map((row: any) => ({
+                        // Smart Mapping: Normalize keys to handle case-insensitivity manually if needed, 
+                        // though transformHeader handles spaces. Use multiple aliases.
 
-                    faultName: (row['Fault Name'] || row['Fault/Complaint /Failure/ Fault Code'])?.trim(),
-                    faultId: row['FaultID'], // Ensure this is passed
-                    faultCode: row['Fault Code']?.trim(),
-                    faultViewSeq: parseInt(row['FaultViewSeq']) || undefined,
+                        machineName: (row['Machine Model'] || row['ProductName'] || row['Machine'])?.trim(),
+                        productSeq: parseInt(row['ProdViewSeq']) || undefined,
+                        keywords: row['Key Words to filter']?.trim(),
+                        productId: row['ProdID'],
 
-                    causeName: (row['Check Description'] || row['Possible Causes'])?.trim(),
-                    action: (row['Remedy Action'] || row['Action/Remedy'])?.trim(),
-                    symptoms: row['Symptoms']?.trim(),
-                    manualRef: (row['Reference'] || row['Procedures/References'])?.trim(),
-                    seq: parseInt(row['Sequence']) || parseInt(row['CauseViewSeq']) || undefined
-                })).filter((r: any) => r.machineName || r.faultId || r.productId); // Allow rows with ID context
+                        faultName: (row['Fault Name'] || row['Fault/Complaint /Failure/ Fault Code'] || row['FaultName'])?.trim(),
+                        faultId: row['FaultID'],
+                        faultCode: row['Fault Code']?.trim(),
+                        faultViewSeq: parseInt(row['FaultViewSeq']) || undefined,
 
-                if (rows.length === 0) {
-                    setStats({ error: 'No valid rows found. Check column headers.' });
-                    setIsUploading(false);
-                    return;
-                }
+                        // Cause & Action - Extended aliases based on user issues
+                        causeName: (row['Cause'] || row['"Cause"'] || row['Check Description'] || row['Possible Causes'] || row['Check'])?.trim(),
+                        action: (row['Action'] || row['Remedy Action'] || row['Action/Remedy'] || row['Remedy'])?.trim(),
 
-                const TOTAL_ROWS = rows.length;
-                const CHUNK_SIZE = 10; // Drastically reduced to 10 to avoid Vercel 10s timeout
-                let processedCount = 0;
-                let totalSuccess = 0;
-                let firstError = '';
+                        symptoms: row['Symptoms']?.trim(),
+                        manualRef: (row['Reference'] || row['Procedures/References'])?.trim(),
+                        seq: parseInt(row['Sequence']) || parseInt(row['CauseViewSeq']) || parseInt(row['CauseSeq']) || undefined
+                    })).filter((r: any) => r.machineName || r.faultId || r.productId);
 
-                console.log(`Starting upload: ${TOTAL_ROWS} rows`);
-
-                // Chunking Loop
-                for (let i = 0; i < TOTAL_ROWS; i += CHUNK_SIZE) {
-                    const chunk = rows.slice(i, i + CHUNK_SIZE);
-
-                    console.log(`Processing chunk ${i / CHUNK_SIZE + 1}...`);
-
-                    // Send Chunk to Server
-                    const res = await bulkUploadTroubleshooting(chunk as BulkUploadRow[]);
-
-                    if (res.success) {
-                        totalSuccess += res.count || 0;
-                    } else {
-                        console.error('Chunk error:', res.error);
-                        if (!firstError) firstError = res.error || 'Unknown error in batch';
+                    if (rows.length === 0) {
+                        setStats({ error: 'No valid rows found. Check column headers.' });
+                        return;
                     }
 
-                    processedCount += chunk.length;
-                    const pct = Math.round((processedCount / TOTAL_ROWS) * 100);
-                    setProgress(pct);
-                }
+                    const TOTAL_ROWS = rows.length;
+                    const CHUNK_SIZE = 10; // Drastically reduced to 10 to avoid Vercel 10s timeout
+                    let processedCount = 0;
+                    let totalSuccess = 0;
+                    let firstError = '';
 
-                if (totalSuccess > 0) {
-                    setStats({ count: totalSuccess, error: firstError ? `Partial success. Error: ${firstError}` : undefined });
-                } else {
-                    setStats({ error: firstError || 'Upload failed' });
-                }
+                    console.log(`Starting upload: ${TOTAL_ROWS} rows`);
 
-                setIsUploading(false);
-                setProgress(0);
+                    // Chunking Loop
+                    for (let i = 0; i < TOTAL_ROWS; i += CHUNK_SIZE) {
+                        const chunk = rows.slice(i, i + CHUNK_SIZE);
+
+                        console.log(`Processing chunk ${i / CHUNK_SIZE + 1}...`);
+
+                        try {
+                            // Send Chunk to Server
+                            const res = await bulkUploadTroubleshooting(chunk as BulkUploadRow[]);
+
+                            if (res.success) {
+                                totalSuccess += res.count || 0;
+                            } else {
+                                console.error('Chunk error:', res.error);
+                                if (!firstError) firstError = res.error || 'Unknown error in batch';
+                            }
+                        } catch (err: any) {
+                            console.error('Network/Server error:', err);
+                            if (!firstError) firstError = err.message || 'Network error';
+                        }
+
+                        processedCount += chunk.length;
+                        const pct = Math.round((processedCount / TOTAL_ROWS) * 100);
+                        setProgress(pct);
+                    }
+
+                    if (totalSuccess > 0) {
+                        setStats({ count: totalSuccess, error: firstError ? `Partial success. Error: ${firstError}` : undefined });
+                    } else {
+                        setStats({ error: firstError || 'Upload failed' });
+                    }
+
+                } catch (e: any) {
+                    console.error('Critical upload flow error:', e);
+                    setStats({ error: 'Critical error: ' + e.message });
+                } finally {
+                    setIsUploading(false);
+                    setProgress(0);
+                }
             },
             error: (err) => {
                 setStats({ error: 'CSV Parsing Error: ' + err.message });
@@ -109,7 +124,7 @@ export default function BulkUploader() {
                     <p className="font-bold mb-2 text-slate-500 uppercase">Supported Formats:</p>
                     <div className="mb-2">
                         <span className="font-bold text-slate-800">1. Full Diagnostic Data:</span><br />
-                        Machine Model, Fault Name, Check Description, Remedy Action, Sequence
+                        Machine Model, FaultID, Fault Name, CauseSeq, Cause, Action
                     </div>
 
                 </div>

@@ -75,27 +75,48 @@ export default function SearchableSelect({
 
     return (
         <div className={`relative ${className}`} ref={containerRef}>
-            {/* Trigger Button */}
+            {/* Main Control (Trigger or Input) */}
             <div
                 className={`
-                    w-full rounded-xl border-slate-200 shadow-sm border bg-slate-50 font-medium text-slate-900 
+                    w-full rounded-xl border shadow-sm bg-slate-50 font-medium text-slate-900 
                     transition-all flex items-center justify-between cursor-pointer
-                    ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100' : 'hover:border-orange-300 focus:ring-2 focus:ring-orange-500'}
-                    ${isOpen ? 'border-orange-500 ring-2 ring-orange-200' : ''}
+                    ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-orange-300 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500'}
+                    ${isOpen ? 'border-orange-500 ring-2 ring-orange-200 bg-white' : 'border-slate-200'}
                 `}
-                onClick={() => !disabled && setIsOpen(!isOpen)}
+                onClick={() => {
+                    if (!disabled && !isOpen) {
+                        setIsOpen(true);
+                    }
+                }}
             >
+                {/* Icon (Always visible on left) */}
                 {icon && (
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isOpen ? 'text-orange-500' : 'text-slate-400'}`}>
                         {icon}
                     </div>
                 )}
-                <div className={`flex-1 p-4 ${icon ? 'pl-12' : 'pl-4'} text-left truncate`}>
-                    {selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>}
+
+                <div className={`flex-1 flex items-center ${icon ? 'pl-11' : 'pl-3'}`}>
+                    {isOpen ? (
+                        <input
+                            ref={searchInputRef}
+                            type="text"
+                            className="w-full bg-transparent border-none p-3 text-sm focus:outline-none placeholder:text-slate-400"
+                            placeholder={searchPlaceholder}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking input
+                            autoComplete="off"
+                        />
+                    ) : (
+                        <div className="p-4 w-full text-left truncate select-none">
+                            {selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>}
+                        </div>
+                    )}
                 </div>
 
                 <div className="pr-4 flex items-center gap-2 text-slate-400">
-                    {selectedOption && !disabled && (
+                    {(selectedOption || searchQuery) && !disabled && (
                         <div
                             onClick={handleClear}
                             className="p-1 hover:bg-slate-200 rounded-full cursor-pointer transition-colors"
@@ -103,30 +124,13 @@ export default function SearchableSelect({
                             <X size={14} />
                         </div>
                     )}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-orange-500' : ''}`} />
                 </div>
             </div>
 
             {/* Dropdown Menu */}
             {isOpen && (
                 <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
-                    {/* Search Input */}
-                    <div className="p-3 border-b border-slate-100 bg-slate-50/50">
-                        <div className="relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                            <input
-                                ref={searchInputRef}
-                                type="text"
-                                className="w-full bg-white border border-slate-200 rounded-lg py-2 pl-9 pr-4 text-sm focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
-                                placeholder={searchPlaceholder}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onClick={(e) => e.stopPropagation()}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Options List */}
                     <div className="max-h-60 overflow-y-auto">
                         {filteredOptions.length > 0 ? (
                             <div className="p-1">

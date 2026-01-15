@@ -1,14 +1,155 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct } from '@/app/actions/admin-troubleshooting';
+import { useState, useRef, useEffect } from 'react';
+import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct, reorderProducts } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton'; // Assuming we have this
-import { Trash2, Plus, Box, Edit2, Check, X } from 'lucide-react';
+import { Trash2, Plus, Box, Edit2, Check, X, GripVertical } from 'lucide-react';
 import { TroubleshootingProduct } from '@prisma/client';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEditName, handleUpdate, setEditingId, startEdit, deleteProduct }: any) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: p.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 1,
+        position: isDragging ? 'relative' as const : undefined,
+        backgroundColor: isDragging ? '#f8fafc' : undefined,
+        boxShadow: isDragging ? '0 5px 15px -5px rgba(0, 0, 0, 0.1)' : undefined,
+    };
+
+    return (
+        <tr
+            ref={setNodeRef}
+            style={style}
+            className={`hover:bg-slate-50 group transition-colors border-b border-slate-50 last:border-0 ${isDragging ? 'opacity-80' : ''}`}
+        >
+            {editingId === p.id ? (
+                <>
+                    <td className="px-4 py-3 bg-white">
+                        <input
+                            type="number"
+                            value={editSeq}
+                            onChange={(e) => setEditSeq(parseInt(e.target.value))}
+                            className="w-16 p-1 border border-blue-300 rounded text-xs"
+                        />
+                    </td>
+                    <td className="px-4 py-3 font-medium text-slate-700 bg-white">
+                        <input
+                            type="text"
+                            value={editName}
+                            onChange={(e) => setEditName(e.target.value)}
+                            className="w-full p-1 border border-blue-300 rounded text-sm"
+                            autoFocus
+                        />
+                    </td>
+                    <td className="px-4 py-3 text-right bg-white">
+                        <div className="flex justify-end gap-2">
+                            <button
+                                onClick={() => handleUpdate(p.id)}
+                                className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
+                                title="Save"
+                            >
+                                <Check size={14} />
+                            </button>
+                            <button
+                                onClick={() => setEditingId(null)}
+                                className="text-slate-500 hover:text-slate-700 p-1"
+                                title="Cancel"
+                            >
+                                <X size={14} />
+                            </button>
+                        </div>
+                    </td>
+                </>
+            ) : (
+                <>
+                    <td className="px-4 py-3 text-slate-400 font-mono text-xs">
+                        <div className="flex items-center gap-3">
+                            <button {...attributes} {...listeners} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing">
+                                <GripVertical size={14} />
+                            </button>
+                            {p.viewSeq}
+                        </div>
+                    </td>
+                    <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
+                    <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => startEdit(p)}
+                                className="text-slate-400 hover:text-blue-600 transition p-1"
+                                title="Edit"
+                            >
+                                <Edit2 size={16} />
+                            </button>
+                            <button
+                                onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteProduct(p.id) }}
+                                className="text-slate-300 hover:text-red-600 transition p-1"
+                                title="Delete"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </td>
+                </>
+            )}
+        </tr>
+    );
+}
 
 export default function ProductManager({ products }: { products: TroubleshootingProduct[] }) {
+    // Local state for optimistic updates
+    const [localProducts, setLocalProducts] = useState(products);
+
+    useEffect(() => {
+        setLocalProducts(products);
+    }, [products]);
+
     const formRef = useRef<HTMLFormElement>(null);
     const [isAdding, setIsAdding] = useState(false);
+
+    // -- DnD Sensors --
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    // -- Handle Drag --
+    async function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setLocalProducts((items) => {
+                const oldIndex = items.findIndex((i) => i.id === active.id);
+                const newIndex = items.findIndex((i) => i.id === over.id);
+                const newItems = arrayMove(items, oldIndex, newIndex);
+
+                // Calculate new viewSeqs
+                const updates = newItems.map((item, index) => ({
+                    id: item.id,
+                    viewSeq: index + 1
+                }));
+
+                // Call Server Action
+                reorderProducts(updates);
+
+                // Optimistic Update
+                return newItems.map((item, index) => ({ ...item, viewSeq: index + 1 }));
+            });
+        }
+    }
 
     // Edit State
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -83,73 +224,33 @@ export default function ProductManager({ products }: { products: Troubleshooting
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {products.map((p) => (
-                            <tr key={p.id} className="hover:bg-slate-50 group transition-colors">
-                                {editingId === p.id ? (
-                                    <>
-                                        <td className="px-4 py-3">
-                                            <input
-                                                type="number"
-                                                value={editSeq}
-                                                onChange={(e) => setEditSeq(parseInt(e.target.value))}
-                                                className="w-16 p-1 border border-blue-300 rounded text-xs"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3 font-medium text-slate-700">
-                                            <input
-                                                type="text"
-                                                value={editName}
-                                                onChange={(e) => setEditName(e.target.value)}
-                                                className="w-full p-1 border border-blue-300 rounded text-sm"
-                                                autoFocus
-                                            />
-                                        </td>
-                                        <td className="px-4 py-3 text-right">
-                                            <div className="flex justify-end gap-2">
-                                                <button
-                                                    onClick={() => handleUpdate(p.id)}
-                                                    className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
-                                                    title="Save"
-                                                >
-                                                    <Check size={14} />
-                                                </button>
-                                                <button
-                                                    onClick={() => setEditingId(null)}
-                                                    className="text-slate-500 hover:text-slate-700 p-1"
-                                                    title="Cancel"
-                                                >
-                                                    <X size={14} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </>
-                                ) : (
-                                    <>
-                                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">{p.viewSeq}</td>
-                                        <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
-                                        <td className="px-4 py-3 text-right">
-                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => startEdit(p)}
-                                                    className="text-slate-400 hover:text-blue-600 transition p-1"
-                                                    title="Edit"
-                                                >
-                                                    <Edit2 size={16} />
-                                                </button>
-                                                <button
-                                                    onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteTroubleshootingProduct(p.id) }}
-                                                    className="text-slate-300 hover:text-red-600 transition p-1"
-                                                    title="Delete"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </>
-                                )}
-                            </tr>
-                        ))}
-                        {products.length === 0 && (
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={localProducts.map(p => p.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {localProducts.map((p) => (
+                                    <SortableProductRow
+                                        key={p.id}
+                                        p={p}
+                                        editingId={editingId}
+                                        editSeq={editSeq}
+                                        editName={editName}
+                                        setEditSeq={setEditSeq}
+                                        setEditName={setEditName}
+                                        handleUpdate={handleUpdate}
+                                        setEditingId={setEditingId}
+                                        startEdit={startEdit}
+                                        deleteProduct={deleteTroubleshootingProduct}
+                                    />
+                                ))}
+                            </SortableContext>
+                        </DndContext>
+                        {localProducts.length === 0 && (
                             <tr>
                                 <td colSpan={3} className="px-4 py-8 text-center text-slate-400 italic">No machines found.</td>
                             </tr>

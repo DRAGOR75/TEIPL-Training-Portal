@@ -25,7 +25,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                     <Stethoscope size={18} className="text-green-600" />
-                    Cause & Remedy Library (Checks)
+                    Cause Library
                 </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}

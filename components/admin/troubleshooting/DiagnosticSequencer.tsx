@@ -407,7 +407,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                     <h3 className="font-bold text-slate-700 flex items-center gap-2">
                         <CheckCircle2 size={18} className="text-green-600" />
-                        Diagnostic Sequence
+                        Cause Manager (Sequence)
                     </h3>
                     <button
                         disabled={!selectedProductFaultId}

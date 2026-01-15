@@ -7,14 +7,114 @@ import {
     unlinkFaultFromProduct,
     updateProductFault,
     getProductFaults,
-    updateFaultLibraryItem
+    updateFaultLibraryItem,
+    reorderProductFaults
 } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { Trash2, Plus, AlertTriangle, Edit2, Check, X, Link as LinkIcon, Search } from 'lucide-react';
+import { Trash2, Plus, AlertTriangle, Edit2, Check, X, Link as LinkIcon, Search, GripVertical } from 'lucide-react';
 import { FaultLibrary, TroubleshootingProduct, ProductFault } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 type FullProductFault = ProductFault & { fault: FaultLibrary };
+
+function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, setEditCode, setEditName, handleUpdate, setEditingId, unlinkFault }: any) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: pf.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: isDragging ? 10 : 1,
+        position: isDragging ? 'relative' as const : undefined,
+        backgroundColor: isDragging ? '#f8fafc' : undefined,
+        boxShadow: isDragging ? '0 5px 15px -5px rgba(0, 0, 0, 0.1)' : undefined,
+    };
+
+    return (
+        <tr
+            ref={setNodeRef}
+            style={style}
+            className={`hover:bg-slate-50 group border-b border-slate-50 last:border-0 ${isDragging ? 'opacity-80' : ''}`}
+        >
+            {editingId === pf.id ? (
+                <>
+                    <td className="px-4 py-3 bg-white">
+                        <div className="flex items-center gap-2">
+                            <input type="hidden" value={editSeq} />
+                            <span className="text-xs text-slate-400 font-mono w-6 text-center">{editSeq}</span>
+                        </div>
+                    </td>
+                    <td className="px-4 py-3 bg-white">
+                        <input
+                            value={editCode}
+                            onChange={e => setEditCode(e.target.value)}
+                            className="w-full p-1 border border-blue-300 rounded text-xs"
+                        />
+                    </td>
+                    <td className="px-4 py-3 bg-white">
+                        <input
+                            value={editName}
+                            onChange={e => setEditName(e.target.value)}
+                            className="w-full p-1 border border-blue-300 rounded text-sm"
+                            autoFocus
+                        />
+                    </td>
+                    <td className="px-4 py-3 text-right bg-white">
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => handleUpdate(pf)} className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200"><Check size={14} /></button>
+                            <button onClick={() => setEditingId(null)} className="bg-slate-100 text-slate-600 p-1.5 rounded hover:bg-slate-200"><X size={14} /></button>
+                        </div>
+                    </td>
+                </>
+            ) : (
+                <>
+                    <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                            <button {...attributes} {...listeners} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing">
+                                <GripVertical size={14} />
+                            </button>
+                            <span className="text-slate-400 font-mono text-xs w-6 text-center">{pf.viewSeq}</span>
+                        </div>
+                    </td>
+                    <td className="px-4 py-3 text-slate-400 font-mono text-xs">{pf.fault.faultCode || '-'}</td>
+                    <td className="px-4 py-3 font-medium text-slate-700">{pf.fault.name}</td>
+                    <td className="px-4 py-3 text-right">
+                        <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => {
+                                    setEditingId(pf.id);
+                                    setEditSeq(pf.viewSeq);
+                                    setEditName(pf.fault.name);
+                                    setEditCode(pf.fault.faultCode || '');
+                                }}
+                                className="text-slate-400 hover:text-blue-600 p-1"
+                                title="Edit"
+                            >
+                                <Edit2 size={16} />
+                            </button>
+                            <button
+                                onClick={() => unlinkFault(pf.id)}
+                                className="text-slate-300 hover:text-red-600 p-1"
+                                title="Unlink"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </td>
+                </>
+            )}
+        </tr>
+    );
+}
 
 interface FaultManagerProps {
     faults: FaultLibrary[];      // Global Fault Lib (for linking)
@@ -55,7 +155,39 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
     const [editName, setEditName] = useState('');
     const [editCode, setEditCode] = useState('');
 
+    // -- DnD Sensors --
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
     // -- Actions --
+
+    async function handleDragEnd(event: DragEndEvent) {
+        const { active, over } = event;
+
+        if (over && active.id !== over.id) {
+            setLinkedFaults((items) => {
+                const oldIndex = items.findIndex((i) => i.id === active.id);
+                const newIndex = items.findIndex((i) => i.id === over.id);
+                const newItems = arrayMove(items, oldIndex, newIndex);
+
+                // Calculate new viewSeqs
+                const updates = newItems.map((item, index) => ({
+                    id: item.id,
+                    viewSeq: index + 1
+                }));
+
+                // Call Server Action
+                reorderProductFaults(updates);
+
+                // Optimistic Update
+                return newItems.map((item, index) => ({ ...item, viewSeq: index + 1 }));
+            });
+        }
+    }
 
     async function handleLinkExisting(formData: FormData) {
         if (!selectedProductId) return;
@@ -237,81 +369,39 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100 bg-white">
-                                        {linkedFaults.map((pf) => (
-                                            <tr key={pf.id} className="hover:bg-slate-50 group">
-                                                {editingId === pf.id ? (
-                                                    <>
-                                                        <td className="px-4 py-3">
-                                                            <input
-                                                                type="number"
-                                                                value={editSeq}
-                                                                onChange={e => {
-                                                                    const val = e.target.value;
-                                                                    setEditSeq(val === '' ? '' : parseInt(val));
-                                                                }}
-                                                                className="w-12 p-1 border border-blue-300 rounded text-xs"
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <input
-                                                                value={editCode}
-                                                                onChange={e => setEditCode(e.target.value)}
-                                                                className="w-full p-1 border border-blue-300 rounded text-xs"
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-3">
-                                                            <input
-                                                                value={editName}
-                                                                onChange={e => setEditName(e.target.value)}
-                                                                className="w-full p-1 border border-blue-300 rounded text-sm"
-                                                                autoFocus
-                                                            />
-                                                        </td>
-                                                        <td className="px-4 py-3 text-right">
-                                                            <div className="flex justify-end gap-2">
-                                                                <button onClick={() => handleUpdate(pf)} className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200"><Check size={14} /></button>
-                                                                <button onClick={() => setEditingId(null)} className="bg-slate-100 text-slate-600 p-1.5 rounded hover:bg-slate-200"><X size={14} /></button>
-                                                            </div>
-                                                        </td>
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">{pf.viewSeq}</td>
-                                                        <td className="px-4 py-3 text-slate-400 font-mono text-xs">{pf.fault.faultCode || '-'}</td>
-                                                        <td className="px-4 py-3 font-medium text-slate-700">{pf.fault.name}</td>
-                                                        <td className="px-4 py-3 text-right">
-                                                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                <button
-                                                                    onClick={() => {
-                                                                        setEditingId(pf.id);
-                                                                        setEditSeq(pf.viewSeq);
-                                                                        setEditName(pf.fault.name);
-                                                                        setEditCode(pf.fault.faultCode || '');
-                                                                    }}
-                                                                    className="text-slate-400 hover:text-blue-600 p-1"
-                                                                    title="Edit"
-                                                                >
-                                                                    <Edit2 size={16} />
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => {
-                                                                        if (confirm('Unlink this fault from machine?')) {
-                                                                            unlinkFaultFromProduct(pf.id).then(() => {
-                                                                                getProductFaults(selectedProductId!).then(setLinkedFaults);
-                                                                            });
-                                                                        }
-                                                                    }}
-                                                                    className="text-slate-300 hover:text-red-600 p-1"
-                                                                    title="Unlink"
-                                                                >
-                                                                    <Trash2 size={16} />
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    </>
-                                                )}
-                                            </tr>
-                                        ))}
+                                        <DndContext
+                                            sensors={sensors}
+                                            collisionDetection={closestCenter}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            <SortableContext
+                                                items={linkedFaults.map(f => f.id)}
+                                                strategy={verticalListSortingStrategy}
+                                            >
+                                                {linkedFaults.map((pf) => (
+                                                    <SortableRow
+                                                        key={pf.id}
+                                                        pf={pf}
+                                                        editingId={editingId}
+                                                        editSeq={editSeq}
+                                                        editCode={editCode}
+                                                        editName={editName}
+                                                        setEditSeq={setEditSeq}
+                                                        setEditCode={setEditCode}
+                                                        setEditName={setEditName}
+                                                        setEditingId={setEditingId}
+                                                        handleUpdate={handleUpdate}
+                                                        unlinkFault={(id: string) => {
+                                                            if (confirm('Unlink this fault from machine?')) {
+                                                                unlinkFaultFromProduct(id).then(() => {
+                                                                    getProductFaults(selectedProductId!).then(setLinkedFaults);
+                                                                });
+                                                            }
+                                                        }}
+                                                    />
+                                                ))}
+                                            </SortableContext>
+                                        </DndContext>
                                         {linkedFaults.length === 0 && (
                                             <tr>
                                                 <td colSpan={4} className="px-4 py-12 text-center text-slate-400 italic">

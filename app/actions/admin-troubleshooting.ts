@@ -262,6 +262,42 @@ export async function updateSequenceOrder(items: { id: string; seq: number }[]) 
     }
 }
 
+export async function reorderProductFaults(items: { id: string; viewSeq: number }[]) {
+    try {
+        await db.$transaction(
+            items.map((item) =>
+                db.productFault.update({
+                    where: { id: item.id },
+                    data: { viewSeq: item.viewSeq }
+                })
+            )
+        );
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to reorder faults' };
+    }
+}
+
+export async function reorderProducts(items: { id: number; viewSeq: number }[]) {
+    try {
+        await db.$transaction(
+            items.map((item) =>
+                db.troubleshootingProduct.update({
+                    where: { id: item.id },
+                    data: { viewSeq: item.viewSeq }
+                })
+            )
+        );
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to reorder products' };
+    }
+}
+
 // --- Fetchers for Admin UI ---
 
 export async function getAdminData() {
