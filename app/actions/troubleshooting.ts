@@ -5,6 +5,7 @@ import { db } from '@/lib/prisma';
 export async function getTroubleshootingProducts() {
     try {
         const products = await db.troubleshootingProduct.findMany({
+            where: { userView: 1 },
             orderBy: { viewSeq: 'asc' },
         });
         return { success: true, data: products };

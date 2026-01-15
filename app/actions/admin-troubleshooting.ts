@@ -64,6 +64,21 @@ export async function updateTroubleshootingProduct(id: number, data: { name: str
     }
 }
 
+export async function toggleProductStatus(id: number, currentStatus: number) {
+    try {
+        const newStatus = currentStatus === 1 ? 0 : 1;
+        await db.troubleshootingProduct.update({
+            where: { id },
+            data: { userView: newStatus }
+        });
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update product status' };
+    }
+}
+
 // --- 2. Fault Library Management ---
 
 export async function createFaultLibraryItem(formData: FormData) {

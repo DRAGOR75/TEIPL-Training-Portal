@@ -135,7 +135,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         "Double-check before beginning any disassembly",
                                         "Solve the problem by using the symptom charts and doing the easiest things first",
                                         "Determine the cause of the problem and make a thorough repair",
-                                        "After repairs have been made, operate the genset / engine to make sure the cause of the complaint has been corrected."
+                                        "After repairs have been made, operate the machine to make sure the cause of the complaint has been corrected."
                                     ].map((item, idx) => (
                                         <li key={idx} className="flex gap-2 md:gap-3 text-slate-700 text-sm md:text-base font-medium leading-relaxed bg-slate-50 p-2.5 md:p-3 rounded-lg border border-slate-100">
                                             <span className="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shadow-sm mt-0.5">
@@ -164,13 +164,21 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         <h4 className="flex items-center gap-2 text-blue-800 font-bold text-xs md:text-sm uppercase tracking-wide mb-1">
                                             <HelpCircle size={14} /> User Guide
                                         </h4>
-                                        <p className="text-blue-900/80 text-xs md:text-sm font-medium">
-                                            corrected.
-                                        </p>
+
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">
                                         <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
-                                            <Info size={14} /> User can suggest his ideas corrected.
+                                            <Info size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
+                                        </a>
+                                    </div>
+                                    <div className="pt-3 border-t border-blue-200">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                            <Info size={14} /> Step 2 - Select the fault you are experiencing.
+                                        </a>
+                                    </div>
+                                    <div className="pt-3 border-t border-blue-200">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                            You will get the steps to follow to Troubleshoot the machine.
                                         </a>
                                     </div>
                                 </div>
@@ -207,7 +215,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             onChange={(val) => handleProductChange(val)}
                             placeholder="-- Choose a Machine --"
                             searchPlaceholder="Search machines..."
-                            icon={<Activity size={20} />}
+                            icon={<Search size={20} />}
                         />
                     </div>
 
@@ -215,7 +223,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     <div className="space-y-3">
                         <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
                             <AlertCircle size={16} className="text-slate-400" />
-                            Select Observed Issue
+                            Select Observed  Fault
                         </label>
                         <SearchableSelect
                             options={faults.map(f => ({
@@ -257,7 +265,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     <div className="bg-white p-8 border-b border-slate-200 relative overflow-hidden">
                         <div className="relative z-10">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
                                     <Activity size={12} className="mr-1.5" /> Troubleshooting Guide
                                 </span>
                                 {diagnosis.context.fault.faultCode && (
@@ -330,7 +338,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                             <div className="lg:col-span-2 space-y-4">
                                                 <div>
                                                     <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
-                                                        Check:  {step.cause.name}
+                                                        Cause:  {step.cause.name}
                                                         {step.isLikely && (
                                                             <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
                                                                 High Probability
@@ -347,18 +355,10 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                                                 <div className="space-y-3">
                                                     {step.cause.action && (
-                                                        <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-100 flex gap-4">
-                                                            <div className="shrink-0 mt-0.5">
-                                                                <CheckCircle2 size={20} className="text-emerald-600" />
-                                                            </div>
-                                                            <div>
-                                                                <span className="block text-emerald-800 text-xs font-bold uppercase tracking-wider mb-1">
-                                                                    Recommended Action
-                                                                </span>
-                                                                <span className="text-slate-900 font-medium text-sm">
-                                                                    {step.cause.action}
-                                                                </span>
-                                                            </div>
+                                                        <div className="mt-2">
+                                                            <span className="text-slate-900 font-bold text-sm">
+                                                                Remedie: {step.cause.action}
+                                                            </span>
                                                         </div>
                                                     )}
 
