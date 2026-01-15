@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct, reorderProducts } from '@/app/actions/admin-troubleshooting';
+import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct, reorderProducts, toggleProductStatus } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton'; // Assuming we have this
-import { Trash2, Plus, Box, Edit2, Check, X, GripVertical } from 'lucide-react';
+import { Trash2, Plus, Box, Edit2, Check, X, GripVertical, Eye, EyeOff } from 'lucide-react';
 import { TroubleshootingProduct } from '@prisma/client';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEditName, handleUpdate, setEditingId, startEdit, deleteProduct }: any) {
+function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEditName, handleUpdate, setEditingId, startEdit, deleteProduct, toggleStatus }: any) {
     const {
         attributes,
         listeners,
@@ -32,7 +32,7 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
         <tr
             ref={setNodeRef}
             style={style}
-            className={`hover:bg-slate-50 group transition-colors border-b border-slate-50 last:border-0 ${isDragging ? 'opacity-80' : ''}`}
+            className={`hover:bg-slate-50 group transition-colors border-b border-slate-50 last:border-0 ${isDragging ? 'opacity-80' : ''} ${p.userView === 0 ? 'opacity-50 bg-slate-50' : ''}`}
         >
             {editingId === p.id ? (
                 <>
@@ -85,6 +85,13 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                     <td className="px-4 py-3 font-medium text-slate-700">{p.name}</td>
                     <td className="px-4 py-3 text-right">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                                onClick={() => toggleStatus(p.id, p.userView)}
+                                className={`transition p-1 ${p.userView === 1 ? 'text-blue-400 hover:text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}
+                                title={p.userView === 1 ? 'Disable' : 'Enable'}
+                            >
+                                {p.userView === 1 ? <Eye size={16} /> : <EyeOff size={16} />}
+                            </button>
                             <button
                                 onClick={() => startEdit(p)}
                                 className="text-slate-400 hover:text-blue-600 transition p-1"
@@ -181,6 +188,18 @@ export default function ProductManager({ products }: { products: Troubleshooting
         setEditSeq(product.viewSeq);
     };
 
+    async function toggleStatus(id: number, currentStatus: number) {
+        // Optimistic
+        setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, userView: currentStatus === 1 ? 0 : 1 } : p));
+
+        const result = await toggleProductStatus(id, currentStatus);
+        if (result?.error) {
+            alert(result.error);
+            // Revert
+            setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, userView: currentStatus } : p));
+        }
+    }
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -246,6 +265,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
                                         setEditingId={setEditingId}
                                         startEdit={startEdit}
                                         deleteProduct={deleteTroubleshootingProduct}
+                                        toggleStatus={toggleStatus}
                                     />
                                 ))}
                             </SortableContext>
