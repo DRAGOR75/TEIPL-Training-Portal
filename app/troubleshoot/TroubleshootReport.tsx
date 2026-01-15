@@ -356,8 +356,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                 <div className="space-y-3">
                                                     {step.cause.action && (
                                                         <div className="mt-2">
-                                                            <span className="text-slate-900 font-bold text-sm">
-                                                                Remedie: {step.cause.action}
+                                                            <span className="text-slate-600 font-normal text-lg">
+                                                                Remedy: {step.cause.action}
                                                             </span>
                                                         </div>
                                                     )}
