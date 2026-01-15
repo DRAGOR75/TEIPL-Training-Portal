@@ -97,21 +97,104 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
         }
     };
 
+    const [showGuide, setShowGuide] = useState(true);
+
     return (
-        <div className="space-y-8 max-w-7xl mx-auto">
-            {/* Control Panel */}
-            <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">
-                    <div className="bg-orange-50 p-2.5 rounded-xl text-orange-500">
-                        <Settings size={22} className="stroke-[2.5]" />
-                    </div>
-                    <div>
-                        <h2 className="text-xl font-bold text-slate-900">Diagnostic Configuration</h2>
-                        <p className="text-slate-500 text-sm font-medium">Configure parameters to generate troubleshooting steps</p>
+        <div className="space-y-4 md:space-y-8 max-w-7xl mx-auto px-1 md:px-0">
+            {/* Guide Modal Overlay */}
+            {showGuide && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] md:max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-slate-200 flex flex-col">
+                        {/* Modal Header */}
+                        <div className="sticky top-0 bg-white z-10 px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-orange-100 p-2 md:p-2.5 rounded-lg md:rounded-xl text-orange-600">
+                                    <BookOpen size={20} className="stroke-[2.5]" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Review These Before Proceeding</h2>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Content */}
+                        <div className="p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
+                            {/* 8-Point Checklist */}
+                            <div className="space-y-3 md:space-y-4">
+                                <h3 className="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                                    <ClipboardList size={14} className="text-orange-500" />
+                                    Troubleshooting Guidelines
+                                </h3>
+                                <ol className="space-y-2 md:space-y-3">
+                                    {[
+                                        "Get all the facts concerning the complaint",
+                                        "Analyse the problem thoroughly",
+                                        "Relate the symptoms to the basic engine / genset systems and components",
+                                        "Consider any recent maintenance or repair action that can relate to the complaint",
+                                        "Double-check before beginning any disassembly",
+                                        "Solve the problem by using the symptom charts and doing the easiest things first",
+                                        "Determine the cause of the problem and make a thorough repair",
+                                        "After repairs have been made, operate the genset / engine to make sure the cause of the complaint has been corrected."
+                                    ].map((item, idx) => (
+                                        <li key={idx} className="flex gap-2 md:gap-3 text-slate-700 text-sm md:text-base font-medium leading-relaxed bg-slate-50 p-2.5 md:p-3 rounded-lg border border-slate-100">
+                                            <span className="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shadow-sm mt-0.5">
+                                                {idx + 1}
+                                            </span>
+                                            {item}
+                                        </li>
+                                    ))}
+                                </ol>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                                {/* Disclaimer */}
+                                <div className="bg-amber-50 rounded-xl p-4 md:p-5 border border-amber-100">
+                                    <h4 className="flex items-center gap-2 text-amber-800 font-bold text-xs md:text-sm uppercase tracking-wide mb-1.5 md:mb-2">
+                                        <AlertCircle size={14} /> Disclaimer
+                                    </h4>
+                                    <p className="text-amber-900/80 text-xs md:text-sm font-medium leading-relaxed">
+                                        Experiences of persons corrected.
+                                    </p>
+                                </div>
+
+                                {/* User Guide & Feedback */}
+                                <div className="bg-blue-50 rounded-xl p-4 md:p-5 border border-blue-100 space-y-3 md:space-y-4">
+                                    <div>
+                                        <h4 className="flex items-center gap-2 text-blue-800 font-bold text-xs md:text-sm uppercase tracking-wide mb-1">
+                                            <HelpCircle size={14} /> User Guide
+                                        </h4>
+                                        <p className="text-blue-900/80 text-xs md:text-sm font-medium">
+                                            corrected.
+                                        </p>
+                                    </div>
+                                    <div className="pt-3 border-t border-blue-200">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                            <Info size={14} /> User can suggest his ideas corrected.
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Modal Footer */}
+                        <div className="sticky bottom-0 bg-white px-4 py-4 md:px-8 md:py-5 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-end shrink-0">
+                            <button
+                                onClick={() => setShowGuide(false)}
+                                className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-orange-200 transform transition-all active:scale-95 flex items-center justify-center gap-2"
+                            >
+                                <Wrench size={18} />
+                                Start Troubleshooting
+                            </button>
+                        </div>
                     </div>
                 </div>
+            )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Control Panel */}
+            <div className="bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                     {/* Machine Selector */}
                     <div className="space-y-3">
                         <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">

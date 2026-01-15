@@ -96,12 +96,12 @@ export default function SearchableSelect({
                     </div>
                 )}
 
-                <div className={`flex-1 flex items-center ${icon ? 'pl-11' : 'pl-3'}`}>
+                <div className={`flex-1 flex items-center min-w-0 ${icon ? 'pl-11' : 'pl-3'}`}>
                     {isOpen ? (
                         <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full bg-transparent border-none p-3 text-sm focus:outline-none placeholder:text-slate-400"
+                            className="w-full bg-transparent border-none p-3 text-sm focus:outline-none placeholder:text-slate-400 min-w-0"
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -109,7 +109,7 @@ export default function SearchableSelect({
                             autoComplete="off"
                         />
                     ) : (
-                        <div className="p-4 w-full text-left truncate select-none">
+                        <div className="p-3 w-full text-left break-words text-sm min-w-0 leading-snug">
                             {selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>}
                         </div>
                     )}
@@ -138,8 +138,8 @@ export default function SearchableSelect({
                                     <div
                                         key={option.value}
                                         className={`
-                                            px-4 py-2.5 rounded-lg text-sm cursor-pointer transition-colors
-                                            ${String(option.value) === String(value) ? 'bg-orange-50 text-orange-700 font-semibold' : 'text-slate-700 hover:bg-slate-50'}
+                                            px-4 py-3 rounded-lg text-sm cursor-pointer transition-colors break-words leading-relaxed border-b border-transparent hover:border-slate-100 last:border-0
+                                            ${String(option.value) === String(value) ? 'bg-orange-50 text-orange-900 font-bold' : 'text-slate-700 hover:bg-slate-50'}
                                         `}
                                         onClick={() => handleSelect(option.value)}
                                     >
