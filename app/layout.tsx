@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-    title: "Thriveni Training Portal",
+    title: "Training Thriveni",
     description: "Training Management System for Thriveni Earthmovers & Infra Pvt. Ltd.",
 };
 
