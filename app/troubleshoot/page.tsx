@@ -18,7 +18,7 @@ export default async function TroubleshootingPage() {
     }
 
     return (
-        <div className="container mx-auto p-4 md:p-8 max-w-7xl min-h-screen">
+        <div className="w-full min-h-screen">
             <header className="mb-6 md:mb-10 border-b border-slate-200 pb-4 md:pb-6">
 
 

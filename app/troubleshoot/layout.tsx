@@ -8,7 +8,7 @@ export default function TroubleshootingLayout({
     return (
         <div className="min-h-screen bg-slate-50">
             <TroubleshootNavbar />
-            <main className="container mx-auto px-4 md:px-8 max-w-7xl py-6 md:py-10">
+            <main className="w-full max-w-[95%] mx-auto px-4 md:px-8 py-6 md:py-10">
                 {children}
             </main>
         </div>
