@@ -14,7 +14,7 @@ export default function Navbar({ session }: { session: Session | null }) {
     const pathname = usePathname();
 
     // Hide Navbar on Feedback, Join & TNI Pages
-    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni')) {
+    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni') || pathname?.startsWith('/troubleshoot')) {
         return null;
     }
 
