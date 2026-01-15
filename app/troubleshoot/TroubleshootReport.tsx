@@ -17,6 +17,7 @@ import {
     ChevronRight,
     ClipboardList
 } from 'lucide-react';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 type FullProductFault = ProductFault & {
     fault: FaultLibrary;
@@ -117,26 +118,14 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             <Wrench size={16} className="text-slate-400" />
                             Select Machine Model
                         </label>
-                        <div className="relative group">
-                            <select
-                                className="w-full appearance-none rounded-xl border-slate-200 shadow-sm focus:border-orange-500 focus:ring-orange-500 p-4 pl-12 bg-slate-50 border font-medium text-slate-900 transition-all hover:border-orange-300"
-                                value={selectedProductId?.toString() || ''}
-                                onChange={(e) => handleProductChange(e.target.value)}
-                            >
-                                <option value="">-- Choose a Machine --</option>
-                                {products.map((p) => (
-                                    <option key={p.id} value={p.id}>
-                                        {p.name}
-                                    </option>
-                                ))}
-                            </select>
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-orange-500 transition-colors pointer-events-none">
-                                <Activity size={20} />
-                            </div>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                                <ChevronRight size={16} className="rotate-90" />
-                            </div>
-                        </div>
+                        <SearchableSelect
+                            options={products.map(p => ({ value: p.id, label: p.name }))}
+                            value={selectedProductId}
+                            onChange={(val) => handleProductChange(val)}
+                            placeholder="-- Choose a Machine --"
+                            searchPlaceholder="Search machines..."
+                            icon={<Activity size={20} />}
+                        />
                     </div>
 
                     {/* Issue Selector */}
@@ -145,29 +134,18 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             <AlertCircle size={16} className="text-slate-400" />
                             Select Observed Issue
                         </label>
-                        <div className="relative group">
-                            <select
-                                className="w-full appearance-none rounded-xl border-slate-200 shadow-sm focus:border-orange-500 focus:ring-orange-500 p-4 pl-12 bg-slate-50 border font-medium text-slate-900 disabled:opacity-50 disabled:bg-slate-100 transition-all hover:border-orange-300"
-                                value={selectedFaultId || ''}
-                                onChange={(e) => handleFaultChange(e.target.value)}
-                                disabled={!selectedProductId || loadingFaults}
-                            >
-                                <option value="">
-                                    {loadingFaults ? 'Loading faults...' : '-- Choose an Issue --'}
-                                </option>
-                                {faults.map((f) => (
-                                    <option key={f.id} value={f.id}>
-                                        {f.fault.name} {f.fault.faultCode ? `(${f.fault.faultCode})` : ''}
-                                    </option>
-                                ))}
-                            </select>
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-hover:text-amber-500 transition-colors pointer-events-none">
-                                <Search size={20} />
-                            </div>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                                <ChevronRight size={16} className="rotate-90" />
-                            </div>
-                        </div>
+                        <SearchableSelect
+                            options={faults.map(f => ({
+                                value: f.id,
+                                label: `${f.fault.name} ${f.fault.faultCode ? `(${f.fault.faultCode})` : ''}`
+                            }))}
+                            value={selectedFaultId}
+                            onChange={(val) => handleFaultChange(val)}
+                            placeholder={loadingFaults ? 'Loading faults...' : '-- Choose an Issue --'}
+                            searchPlaceholder="Search issues..."
+                            disabled={!selectedProductId || loadingFaults}
+                            icon={<Search size={20} />}
+                        />
                         {faults.length === 0 && selectedProductId && !loadingFaults && (
                             <p className="flex items-center gap-1.5 text-xs text-amber-600 font-medium ml-1 bg-amber-50 w-fit px-2 py-1 rounded-md">
                                 <Info size={12} /> No reported faults for this machine.
@@ -236,14 +214,14 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {/* Diagnostic Steps */}
-                    <div className="p-6 md:p-8 bg-slate-50/50">
-                        <div className="flex items-center gap-3 mb-8">
+                    <div className="p-3 md:p-6 bg-slate-50/50">
+                        <div className="flex items-left gap-4 mb-8">
                             <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-orange-500">
-                                <ClipboardList size={20} />
+                                <ClipboardList size={30} />
                             </div>
                             <div>
-                                <h3 className="text-lg font-bold text-slate-900">Diagnostic Sequence</h3>
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Follow steps in order</p>
+                                <h3 className="text-lg font-bold uppercase tracking-wider text-slate-900">Possible Causes and Remedies</h3>
+                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Follow the instructions</p>
                             </div>
                         </div>
 
@@ -269,7 +247,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                             <div className="lg:col-span-2 space-y-4">
                                                 <div>
                                                     <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
-                                                        {step.cause.name}
+                                                        Check:  {step.cause.name}
                                                         {step.isLikely && (
                                                             <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
                                                                 High Probability
@@ -304,7 +282,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                     {step.cause.manualRef && (
                                                         <div className="flex items-center gap-2">
                                                             <BookOpen size={14} className="text-slate-400" />
-                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">Reference:</span>
+                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">More Information:</span>
                                                             <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-mono font-bold border border-slate-200">
                                                                 {step.cause.manualRef}
                                                             </span>

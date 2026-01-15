@@ -19,9 +19,9 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
     const [activeTab, setActiveTab] = useState('sequencer');
 
     const tabs = [
-        { id: 'sequencer', label: 'Diagnostic Sequencer', icon: Workflow },
+        { id: 'sequencer', label: 'Cause Manager', icon: Workflow },
         { id: 'products', label: 'Machine Manager', icon: Layers },
-        { id: 'faults', label: 'Fault Library', icon: AlertTriangle },
+        { id: 'faults', label: 'Fault Manager', icon: AlertTriangle },
         { id: 'causes', label: 'Cause Library', icon: Stethoscope },
         { id: 'import', label: 'Bulk Import', icon: UploadCloud },
     ];
@@ -59,7 +59,7 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
                 )}
                 {activeTab === 'faults' && (
                     <div className="max-w-4xl">
-                        <FaultManager faults={faultLib} />
+                        <FaultManager faults={faultLib} products={products} />
                     </div>
                 )}
                 {activeTab === 'causes' && (

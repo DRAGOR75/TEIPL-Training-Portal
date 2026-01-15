@@ -196,6 +196,7 @@ model FaultLibrary {
   id          String   @id @default(uuid())
   faultCode   String?  @unique @map("fault_code") // For "F001" style codes if needed
   name        String   @unique // "Engine Overheating" - Unique to avoid duplication
+  viewSeq     Int      @default(0) @map("view_seq")
   legacyId    String?  @unique @map("legacy_source_id") // For CSV Import mapping
 
   createdAt   DateTime @default(now()) @map("created_at")
@@ -259,6 +260,7 @@ model FaultCause {
   
   seq            Int      @default(0) // The order of checking (1, 2, 3...)
   isLikely       Boolean  @default(false) @map("is_likely")
+  isActive       Boolean  @default(true) @map("is_active")
 
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")

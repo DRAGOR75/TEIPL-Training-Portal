@@ -145,9 +145,7 @@ export default function DashboardClient({
             const endSessions = initialMetadata.filter(s => isSameDay(date, new Date(s.endDate)));
             endSessions.forEach(() => events.push({ color: 'bg-purple-600', title: 'Training End Date' }));
 
-            // OPTIONAL: Check for Active/Start Dates too (if desired)
-            const activeStart = initialMetadata.filter(s => isSameDay(date, new Date(s.startDate)));
-            activeStart.forEach(() => events.push({ color: 'bg-emerald-500', title: 'Training Start Date' }));
+
 
 
             if (events.length > 0) {
@@ -219,13 +217,10 @@ export default function DashboardClient({
                                 className="w-full"
                             />
                             <div className="flex gap-4 mt-4 text-xs justify-center flex-wrap">
-                                <div className="flex items-center gap-1">
-                                    <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                                    <span className="text-slate-500">Start Date</span>
-                                </div>
+
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
-                                    <span className="text-slate-500">End Date</span>
+                                    <span className="text-slate-500">Session End Date</span>
                                 </div>
                                 <div className="flex items-center gap-1">
                                     <div className="w-2 h-2 bg-red-500 rounded-full"></div>

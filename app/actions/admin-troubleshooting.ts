@@ -21,8 +21,11 @@ export async function createTroubleshootingProduct(formData: FormData) {
 
         revalidatePath(ADMIN_PATH);
         return { success: true };
-    } catch (e) {
+    } catch (e: any) {
         console.error(e);
+        if (e.code === 'P2002') {
+            return { error: 'Machine with this name already exists.' };
+        }
         return { error: 'Failed to create product' };
     }
 }
@@ -35,6 +38,29 @@ export async function deleteTroubleshootingProduct(id: number) {
     } catch (e) {
         console.error(e);
         return { error: 'Failed to delete product' };
+    }
+}
+
+export async function updateTroubleshootingProduct(id: number, data: { name: string; viewSeq: number }) {
+    try {
+        if (!data.name) return { error: 'Product Name is required' };
+
+        await db.troubleshootingProduct.update({
+            where: { id },
+            data: {
+                name: data.name,
+                viewSeq: data.viewSeq
+            }
+        });
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e: any) {
+        console.error(e);
+        if (e.code === 'P2002') {
+            return { error: 'Machine with this name already exists.' };
+        }
+        return { error: 'Failed to update product' };
     }
 }
 
@@ -106,6 +132,30 @@ export async function deleteCauseLibraryItem(id: string) {
 
 // --- 4. Product <-> Fault Linking ---
 
+
+export async function updateFaultLibraryItem(id: string, data: { name: string; faultCode: string; viewSeq: number }) {
+    try {
+        if (!data.name) return { error: 'Fault Name is required' };
+
+        await db.faultLibrary.update({
+            where: { id },
+            data: {
+                name: data.name,
+                faultCode: data.faultCode || null,
+                viewSeq: data.viewSeq
+            }
+        });
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update fault' };
+    }
+}
+
+// --- 4. Product <-> Fault Linking ---
+
 export async function linkFaultToProduct(productId: number, faultId: string) {
     try {
         await db.productFault.create({
@@ -130,6 +180,22 @@ export async function unlinkFaultFromProduct(productFaultId: string) {
     } catch (e) {
         console.error(e);
         return { error: 'Failed to unlink fault' };
+    }
+}
+
+export async function updateProductFault(id: string, data: { viewSeq: number }) {
+    try {
+        await db.productFault.update({
+            where: { id },
+            data: {
+                viewSeq: data.viewSeq
+            }
+        });
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update fault sequence' };
     }
 }
 
@@ -163,6 +229,20 @@ export async function removeCauseFromSequence(id: string) {
     }
 }
 
+export async function toggleFaultCauseStatus(id: string, isActive: boolean) {
+    try {
+        await db.faultCause.update({
+            where: { id },
+            data: { isActive }
+        });
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update status' };
+    }
+}
+
 export async function updateSequenceOrder(items: { id: string; seq: number }[]) {
     try {
         // Run in transaction for safety
@@ -182,11 +262,47 @@ export async function updateSequenceOrder(items: { id: string; seq: number }[]) 
     }
 }
 
+export async function reorderProductFaults(items: { id: string; viewSeq: number }[]) {
+    try {
+        await db.$transaction(
+            items.map((item) =>
+                db.productFault.update({
+                    where: { id: item.id },
+                    data: { viewSeq: item.viewSeq }
+                })
+            )
+        );
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to reorder faults' };
+    }
+}
+
+export async function reorderProducts(items: { id: number; viewSeq: number }[]) {
+    try {
+        await db.$transaction(
+            items.map((item) =>
+                db.troubleshootingProduct.update({
+                    where: { id: item.id },
+                    data: { viewSeq: item.viewSeq }
+                })
+            )
+        );
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to reorder products' };
+    }
+}
+
 // --- Fetchers for Admin UI ---
 
 export async function getAdminData() {
     const products = await db.troubleshootingProduct.findMany({ orderBy: { viewSeq: 'asc' } });
-    const faultLib = await db.faultLibrary.findMany({ orderBy: { name: 'asc' } });
+    const faultLib = await db.faultLibrary.findMany({ orderBy: { viewSeq: 'asc' } });
     const causeLib = await db.causeLibrary.findMany({ orderBy: { name: 'asc' } });
 
     return { products, faultLib, causeLib };
