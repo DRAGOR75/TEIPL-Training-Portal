@@ -321,7 +321,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold uppercase tracking-wider text-slate-900">Possible Causes and Remedies</h3>
-                                <p className="text-slate-500 text-xs font-bold uppercase tracking-wider">Follow the instructions</p>
+
                             </div>
                         </div>
 
@@ -350,7 +350,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                     className="cursor-pointer select-none"
                                                 >
                                                     <div className="flex items-center justify-between gap-4">
-                                                        <h4 className="text-base md:text-lg font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-orange-600 transition-colors">
+                                                        <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-orange-600 transition-colors">
                                                             Cause:  {step.cause.name}
                                                             {step.isLikely && (
                                                                 <span className="bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
