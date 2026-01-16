@@ -20,7 +20,7 @@ export async function submitFeedback(data: FeedbackState) {
     if (data.isHelpful === null) {
         return { success: false, error: 'Please select if the information was useful.' };
     }
-    if (!data.name || !data.mobile || !data.email) {
+    if (!data.name || !data.mobile) {
         return { success: false, error: 'Please fill in all contact details.' };
     }
 

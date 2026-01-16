@@ -21,6 +21,7 @@ import {
     MessageSquarePlus
 } from 'lucide-react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import Link from 'next/link';
 
 type FullProductFault = ProductFault & {
     fault: FaultLibrary;
@@ -443,13 +444,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {diagnosis && !loadingDiagnosis && (
                         <div className="text-center mt-8 pb-8">
                             <p className="text-slate-500 mb-2">Did this help you solve the issue?</p>
-                            <a
+                            <Link
                                 href="/troubleshoot/feedback"
                                 className="inline-flex items-center gap-2 text-orange-600 font-bold hover:underline"
                             >
                                 <MessageSquarePlus size={18} />
                                 Give Feedback
-                            </a>
+                            </Link>
                         </div>
                     )}
 
