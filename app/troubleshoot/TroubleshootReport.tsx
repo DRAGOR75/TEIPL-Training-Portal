@@ -165,7 +165,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         <AlertCircle size={14} /> Disclaimer
                                     </h4>
                                     <p className="text-amber-900/80 text-sm font-medium leading-relaxed">
-                                        Experiences of persons corrected.
+                                        The troubleshooting steps provided are for reference only and based on common scenarios..
                                     </p>
                                 </div>
 
@@ -474,7 +474,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
                             <p className="text-slate-500 max-w-sm mx-auto mb-6 text-sm">
-                                Select a machine model from the dropdown (provided below or above) to identify common faults and solutions.
+                                Select a machine model from the dropdown (provided below) to identify common faults and solutions.
                             </p>
                             <div className="flex justify-center gap-3 text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-widest">
                                 <span className="flex items-center gap-1"><CheckCircle2 size={12} /> Identify</span>
