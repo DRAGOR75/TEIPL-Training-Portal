@@ -211,8 +211,11 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
             {/* Main Content Wrapper */}
             <div className="flex flex-col gap-4 md:gap-9">
 
-                {/* Control Panel (Bottom on Mobile, Top on Desktop) */}
-                <div className="order-2 md:order-1 bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 mb-6 md:mb-0">
+                {/* Control Panel (Conditional Order: Bottom on Mobile initially, Top when diagnosis is shown) */}
+                <div className={`
+                    bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 mb-6 md:mb-0
+                    ${diagnosis ? 'order-1' : 'order-2 md:order-1'}
+                `}>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {/* Machine Selector */}
@@ -228,7 +231,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 placeholder="-- Choose a Machine --"
                                 searchPlaceholder="Search machines..."
                                 icon={<Search size={20} />}
-                                direction="responsive-bottom"
+                                direction={diagnosis ? 'down' : 'responsive-bottom'}
                             />
                         </div>
 
@@ -249,7 +252,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 searchPlaceholder="Search issues..."
                                 disabled={!selectedProductId || loadingFaults}
                                 icon={<Search size={20} />}
-                                direction="responsive-bottom"
+                                direction={diagnosis ? 'down' : 'responsive-bottom'}
                             />
                             {faults.length === 0 && selectedProductId && !loadingFaults && (
                                 <p className="flex items-center gap-1.5 text-xs text-amber-600 font-medium ml-1 bg-amber-50 w-fit px-2 py-1 rounded-md">
@@ -260,8 +263,11 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     </div>
                 </div>
 
-                {/* Diagnostic Content (Top on Mobile, Bottom on Desktop) */}
-                <div className="order-1 md:order-2 space-y-4 md:space-y-9">
+                {/* Diagnostic Content (Conditional Order: Top on Mobile initially, Bottom when diagnosis is shown) */}
+                <div className={`
+                    space-y-4 md:space-y-9
+                    ${diagnosis ? 'order-2' : 'order-1 md:order-2'}
+                `}>
 
                     {/* Diagnostic Report Area */}
                     {loadingDiagnosis && (
@@ -328,8 +334,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         <ClipboardList size={30} />
                                     </div>
                                     <div>
-                                        <h3 className="text-base md:text-lg font-bold uppercase tracking-wider text-slate-900">Possible Causes and Remedies</h3>
-
+                                        <h3 className="text-base md:text-lg font-bold uppercase tracking-wider text-slate-900">
+                                            Possible Causes ({diagnosis.sequence.length})
+                                        </h3>
                                     </div>
                                 </div>
 
