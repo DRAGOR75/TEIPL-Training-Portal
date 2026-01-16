@@ -212,7 +212,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
             <div className="flex flex-col gap-4 md:gap-9">
 
                 {/* Control Panel (Bottom on Mobile, Top on Desktop) */}
-                <div className="order-2 md:order-1 bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200">
+                <div className="order-2 md:order-1 bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 mb-6 md:mb-0">
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {/* Machine Selector */}
@@ -445,20 +445,20 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {!selectedProductId && (
-                        <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-8 md:p-16 text-center">
-                            <div className="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-6 transform rotate-3">
-                                <Wrench size={40} />
+                        <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-6 md:p-16 text-center">
+                            <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-4 transform rotate-3">
+                                <Wrench size={28} />
                             </div>
-                            <h3 className="text-xl font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
-                            <p className="text-slate-500 max-w-sm mx-auto mb-8">
+                            <h3 className="text-lg font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
+                            <p className="text-slate-500 max-w-sm mx-auto mb-6 text-sm">
                                 Select a machine model from the dropdown (provided below or above) to identify common faults and solutions.
                             </p>
-                            <div className="flex justify-center gap-4 text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                                <span className="flex items-center gap-1"><CheckCircle2 size={14} /> Identify</span>
-                                <span className="w-px h-4 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><Search size={14} /> Diagnose</span>
-                                <span className="w-px h-4 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><Wrench size={14} /> Resolve</span>
+                            <div className="flex justify-center gap-3 text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-widest">
+                                <span className="flex items-center gap-1"><CheckCircle2 size={12} /> Identify</span>
+                                <span className="w-px h-3 bg-slate-300"></span>
+                                <span className="flex items-center gap-1"><Search size={12} /> Diagnose</span>
+                                <span className="w-px h-3 bg-slate-300"></span>
+                                <span className="flex items-center gap-1"><Wrench size={12} /> Resolve</span>
                             </div>
                         </div>
                     )}
