@@ -284,7 +284,7 @@ model TroubleshootingFeedback {
   // Contact Info
   name      String
   mobile    String
-  email     String
+  email     String?
 
   createdAt DateTime @default(now()) @map("created_at")
 
