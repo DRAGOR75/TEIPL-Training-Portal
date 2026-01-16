@@ -327,16 +327,16 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                         <div className="space-y-6">
                             {diagnosis.sequence.map((step, index) => (
-                                <div key={step.id} className="relative pl-3 md:pl-6 group">
+                                <div key={step.id} className="relative pl-14 md:pl-16 group">
 
                                     {/* Timeline Connector */}
                                     <div
-                                        className="absolute left-0 top-8 bottom-[-24px] w-0.5 bg-slate-200 group-last:hidden"
+                                        className="absolute left-7 top-12 bottom-[-24px] w-0.5 bg-slate-200 group-last:hidden"
                                     ></div>
 
                                     {/* Step Number Badge */}
-                                    <div className="absolute left-[-14px] md:left-[-12px] top-0 shadow-sm">
-                                        <div className="w-8 h-8 rounded-full bg-white border-2 border-orange-500 text-orange-500 flex items-center justify-center text-sm font-bold z-10 transition-transform group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white">
+                                    <div className="absolute left-3 top-4">
+                                        <div className="w-8 h-8 rounded-full bg-white border-2 border-orange-500 text-orange-500 flex items-center justify-center text-sm font-bold z-10 shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white">
                                             {index + 1}
                                         </div>
                                     </div>
@@ -374,9 +374,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                     <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                                                         {step.cause.action && (
                                                             <div className="mt-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                                                                <span className="text-slate-900 font-bold block mb-1 text-xs uppercase tracking-wider">Recommended Action</span>
+
                                                                 <span className="text-slate-700 font-medium text-sm md:text-lg">
-                                                                    {step.cause.action}
+                                                                    Remedy: {step.cause.action}
                                                                 </span>
                                                             </div>
                                                         )}
