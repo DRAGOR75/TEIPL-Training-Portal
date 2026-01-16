@@ -18,6 +18,7 @@ interface SearchableSelectProps {
     searchPlaceholder?: string;
     noResultsText?: string;
     icon?: React.ReactNode;
+    direction?: 'down' | 'up' | 'responsive-bottom';
 }
 
 export default function SearchableSelect({
@@ -29,7 +30,8 @@ export default function SearchableSelect({
     className = '',
     searchPlaceholder = 'Search...',
     noResultsText = 'No results found.',
-    icon
+    icon,
+    direction = 'down'
 }: SearchableSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -130,7 +132,12 @@ export default function SearchableSelect({
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute z-50 w-full mt-2 bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+                <div className={`
+                    absolute z-50 w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-100
+                    ${direction === 'up' ? 'bottom-full mb-2' : ''}
+                    ${direction === 'down' ? 'top-full mt-2' : ''}
+                    ${direction === 'responsive-bottom' ? 'bottom-full mb-2 md:bottom-auto md:top-full md:mt-2 md:mb-0' : ''}
+                `}>
                     <div className="max-h-60 overflow-y-auto">
                         {filteredOptions.length > 0 ? (
                             <div className="p-1">
