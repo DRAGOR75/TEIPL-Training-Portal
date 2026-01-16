@@ -15,6 +15,8 @@ import {
     Settings,
     Activity,
     ChevronRight,
+    ChevronDown,
+    ChevronUp,
     ClipboardList
 } from 'lucide-react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -41,6 +43,16 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
     const [loadingFaults, setLoadingFaults] = useState(false);
     const [loadingDiagnosis, setLoadingDiagnosis] = useState(false);
+
+    // State for collapsible steps
+    const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
+
+    const toggleStep = (index: number) => {
+        setExpandedSteps(prev => ({
+            ...prev,
+            [index]: !prev[index]
+        }));
+    };
 
     const handleProductChange = async (productId: string) => {
         const id = parseInt(productId);
@@ -112,7 +124,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     <BookOpen size={20} className="stroke-[2.5]" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Review These Before Proceeding</h2>
+                                    <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Troubleshooting Guidelines</h2>
 
                                 </div>
                             </div>
@@ -122,10 +134,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <div className="p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
                             {/* 8-Point Checklist */}
                             <div className="space-y-3 md:space-y-4">
-                                <h3 className="text-xs md:text-sm font-bold text-slate-900 uppercase tracking-wider flex items-center gap-2">
-                                    <ClipboardList size={14} className="text-orange-500" />
-                                    Troubleshooting Guidelines
-                                </h3>
+
                                 <ol className="space-y-2 md:space-y-3">
                                     {[
                                         "Get all the facts concerning the complaint",
@@ -138,7 +147,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         "After repairs have been made, operate the machine to make sure the cause of the complaint has been corrected."
                                     ].map((item, idx) => (
                                         <li key={idx} className="flex gap-2 md:gap-3 text-slate-700 text-sm md:text-base font-medium leading-relaxed bg-slate-50 p-2.5 md:p-3 rounded-lg border border-slate-100">
-                                            <span className="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-[10px] md:text-xs font-bold shadow-sm mt-0.5">
+                                            <span className="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-xs font-bold shadow-sm mt-0.5">
                                                 {idx + 1}
                                             </span>
                                             {item}
@@ -150,10 +159,10 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 {/* Disclaimer */}
                                 <div className="bg-amber-50 rounded-xl p-4 md:p-5 border border-amber-100">
-                                    <h4 className="flex items-center gap-2 text-amber-800 font-bold text-xs md:text-sm uppercase tracking-wide mb-1.5 md:mb-2">
+                                    <h4 className="flex items-center gap-2 text-amber-800 font-bold text-sm uppercase tracking-wide mb-1.5 md:mb-2">
                                         <AlertCircle size={14} /> Disclaimer
                                     </h4>
-                                    <p className="text-amber-900/80 text-xs md:text-sm font-medium leading-relaxed">
+                                    <p className="text-amber-900/80 text-sm font-medium leading-relaxed">
                                         Experiences of persons corrected.
                                     </p>
                                 </div>
@@ -161,23 +170,23 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 {/* User Guide & Feedback */}
                                 <div className="bg-blue-50 rounded-xl p-4 md:p-5 border border-blue-100 space-y-3 md:space-y-4">
                                     <div>
-                                        <h4 className="flex items-center gap-2 text-blue-800 font-bold text-xs md:text-sm uppercase tracking-wide mb-1">
+                                        <h4 className="flex items-center gap-2 text-blue-800 font-bold text-sm uppercase tracking-wide mb-1">
                                             <HelpCircle size={14} /> User Guide
                                         </h4>
 
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
                                             <Info size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
                                         </a>
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
                                             <Info size={14} /> Step 2 - Select the fault you are experiencing.
                                         </a>
                                     </div>
                                     <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-xs md:text-sm font-bold transition-colors">
+                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
                                             You will get the steps to follow to Troubleshoot the machine.
                                         </a>
                                     </div>
@@ -248,7 +257,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Diagnostic Report Area */}
             {loadingDiagnosis && (
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-12 text-center">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-12 text-center">
                     <div className="relative w-16 h-16 mx-auto mb-6">
                         <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
                         <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
@@ -262,23 +271,23 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                 <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
 
                     {/* Report Header - Professional Variant */}
-                    <div className="bg-white p-8 border-b border-slate-200 relative overflow-hidden">
+                    <div className="bg-white p-5 md:p-8 border-b border-slate-200 relative overflow-hidden">
                         <div className="relative z-10">
                             <div className="flex items-center gap-3 mb-4">
-                                <span className="inline-flex items-center px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
                                     <Activity size={12} className="mr-1.5" /> Troubleshooting Guide
                                 </span>
                                 {diagnosis.context.fault.faultCode && (
-                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-slate-100 text-slate-600 border border-slate-200">
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-slate-100 text-slate-600 border border-slate-200">
                                         Code: {diagnosis.context.fault.faultCode}
                                     </span>
                                 )}
                             </div>
 
-                            <h2 className="text-3xl md:text-4xl font-black mb-2 tracking-tight text-slate-900">
+                            <h2 className="text-2xl md:text-4xl font-black mb-2 tracking-tight text-slate-900">
                                 {diagnosis.context.fault.name}
                             </h2>
-                            <div className="flex items-center gap-2 text-slate-500 font-medium text-lg">
+                            <div className="flex items-center gap-2 text-slate-500 font-medium text-base md:text-lg">
                                 <span className="opacity-70">Machine:</span>
                                 <span className="text-slate-900 font-bold">{diagnosis.context.product.name}</span>
                             </div>
@@ -287,7 +296,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                     {/* Machine Specific Notes */}
                     {diagnosis.context.notes && (
-                        <div className="p-6 md:p-8 bg-amber-50 border-b border-amber-100">
+                        <div className="p-4 md:p-8 bg-amber-50 border-b border-amber-100">
                             <div className="flex gap-4">
                                 <div className="shrink-0">
                                     <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shadow-sm border border-amber-200">
@@ -305,8 +314,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {/* Diagnostic Steps */}
-                    <div className="p-3 md:p-6 bg-slate-50/50">
-                        <div className="flex items-left gap-4 mb-8">
+                    <div className="p-2 md:p-6 bg-slate-50/50">
+                        <div className="flex items-left gap-3 md:gap-4 mb-6 md:mb-8 pl-2 md:pl-0">
                             <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-orange-500">
                                 <ClipboardList size={30} />
                             </div>
@@ -318,7 +327,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                         <div className="space-y-6">
                             {diagnosis.sequence.map((step, index) => (
-                                <div key={step.id} className="relative pl-4 md:pl-6 group">
+                                <div key={step.id} className="relative pl-3 md:pl-6 group">
 
                                     {/* Timeline Connector */}
                                     <div
@@ -333,55 +342,66 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     </div>
 
                                     {/* Step Content Card */}
-                                    <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300">
+                                    <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300">
                                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                             <div className="lg:col-span-2 space-y-4">
-                                                <div>
-                                                    <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-2">
-                                                        Cause:  {step.cause.name}
-                                                        {step.isLikely && (
-                                                            <span className="bg-rose-100 text-rose-700 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
-                                                                High Probability
-                                                            </span>
-                                                        )}
-                                                    </h4>
+                                                <div
+                                                    onClick={() => toggleStep(index)}
+                                                    className="cursor-pointer select-none"
+                                                >
+                                                    <div className="flex items-center justify-between gap-4">
+                                                        <h4 className="text-base md:text-lg font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-orange-600 transition-colors">
+                                                            Cause:  {step.cause.name}
+                                                            {step.isLikely && (
+                                                                <span className="bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
+                                                                    High Probability
+                                                                </span>
+                                                            )}
+                                                        </h4>
+                                                        <div className={`text-slate-400 transition-transform duration-300 ${expandedSteps[index] ? 'rotate-180' : ''}`}>
+                                                            <ChevronDown size={20} />
+                                                        </div>
+                                                    </div>
 
                                                     {step.cause.description && (
-                                                        <p className="text-slate-600 text-sm leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
+                                                        <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
                                                             {step.cause.description}
                                                         </p>
                                                     )}
                                                 </div>
 
-                                                <div className="space-y-3">
-                                                    {step.cause.action && (
-                                                        <div className="mt-2">
-                                                            <span className="text-slate-600 font-normal text-lg">
-                                                                Remedy: {step.cause.action}
-                                                            </span>
-                                                        </div>
-                                                    )}
+                                                {expandedSteps[index] && (
+                                                    <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        {step.cause.action && (
+                                                            <div className="mt-2 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                                                <span className="text-slate-900 font-bold block mb-1 text-xs uppercase tracking-wider">Recommended Action</span>
+                                                                <span className="text-slate-700 font-medium text-sm md:text-lg">
+                                                                    {step.cause.action}
+                                                                </span>
+                                                            </div>
+                                                        )}
 
-                                                    {step.cause.manualRef && (
-                                                        <div className="flex items-center gap-2">
-                                                            <BookOpen size={14} className="text-slate-400" />
-                                                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">More Information:</span>
-                                                            <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-xs font-mono font-bold border border-slate-200">
-                                                                {step.cause.manualRef}
-                                                            </span>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                        {step.cause.manualRef && (
+                                                            <div className="flex items-center gap-2">
+                                                                <BookOpen size={14} className="text-slate-400" />
+                                                                <span className="text-sm font-bold text-slate-500 uppercase tracking-wide">More Information:</span>
+                                                                <span className="bg-slate-100 text-slate-600 px-2 py-1 rounded-md text-sm font-mono font-bold border border-slate-200">
+                                                                    {step.cause.manualRef}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            {/* Visual Aid */}
-                                            {step.cause.imageUrl && (
-                                                <div className="lg:col-span-1">
+                                            {/* Visual Aid (Wrapped in conditional) */}
+                                            {expandedSteps[index] && step.cause.imageUrl && (
+                                                <div className="lg:col-span-1 animate-in fade-in slide-in-from-top-2 duration-300">
                                                     <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner group-hover:shadow-md transition-shadow">
                                                         <img
                                                             src={step.cause.imageUrl}
                                                             alt={step.cause.name}
-                                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                            className="w-full h-full object-cover"
                                                             onError={(e) => {
                                                                 (e.target as HTMLImageElement).src = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable';
                                                             }}
@@ -413,7 +433,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Empty State Instructions */}
             {!diagnosis && !loadingDiagnosis && selectedProductId && selectedFaultId && (
-                <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-sm">
+                <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-12 text-center shadow-sm">
                     <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
                         <Search size={32} />
                     </div>
@@ -425,7 +445,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
             )}
 
             {!selectedProductId && (
-                <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-16 text-center">
+                <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-8 md:p-16 text-center">
                     <div className="w-20 h-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-6 transform rotate-3">
                         <Wrench size={40} />
                     </div>
