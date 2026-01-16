@@ -273,3 +273,20 @@ model FaultCause {
   @@index([productFaultId, seq])
   @@map("fault_causes")
 }
+
+// 6. Feedback System
+model TroubleshootingFeedback {
+  id        Int      @id @default(autoincrement())
+  rating    Int      // 1-5 Star Rating
+  isHelpful Boolean  @map("is_helpful") // "Was this useful?"
+  comments  String?  @db.Text
+  
+  // Contact Info
+  name      String
+  mobile    String
+  email     String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("troubleshooting_feedback")
+}

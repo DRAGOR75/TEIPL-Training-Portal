@@ -1,6 +1,6 @@
 'use client';
 
-import { Wrench } from 'lucide-react';
+import { Wrench, MessageSquarePlus } from 'lucide-react';
 import Image from 'next/image';
 
 export default function TroubleshootNavbar() {
@@ -34,6 +34,18 @@ export default function TroubleshootNavbar() {
                                 />
                             </div>
                         </div>
+                    </div>
+
+                    {/* Right Side: Feedback Button */}
+                    <div>
+                        <a
+                            href="/troubleshoot/feedback"
+                            className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 px-3 py-2 rounded-lg font-bold text-sm border border-slate-200 transition-colors group animate-pulse hover:animate-none"
+                            title="Give Feedback"
+                        >
+                            <MessageSquarePlus size={18} className="text-orange-500" />
+                            <span className="hidden md:inline">Feedback</span>
+                        </a>
                     </div>
                 </div>
             </div>
