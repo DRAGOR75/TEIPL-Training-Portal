@@ -269,6 +269,7 @@ model FaultCause {
   productFault   ProductFault @relation(fields: [productFaultId], references: [id], onDelete: Cascade)
   cause          CauseLibrary @relation(fields: [causeId], references: [id])
 
+  @@unique([productFaultId, causeId])
   @@index([productFaultId, seq])
   @@map("fault_causes")
 }
