@@ -17,7 +17,8 @@ import {
     ChevronRight,
     ChevronDown,
     ChevronUp,
-    ClipboardList
+    ClipboardList,
+    MessageSquarePlus
 } from 'lucide-react';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 
@@ -435,6 +436,20 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     )}
                                 </div>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Feedback Link */}
+                    {diagnosis && !loadingDiagnosis && (
+                        <div className="text-center mt-8 pb-8">
+                            <p className="text-slate-500 mb-2">Did this help you solve the issue?</p>
+                            <a
+                                href="/troubleshoot/feedback"
+                                className="inline-flex items-center gap-2 text-orange-600 font-bold hover:underline"
+                            >
+                                <MessageSquarePlus size={18} />
+                                Give Feedback
+                            </a>
                         </div>
                     )}
 
