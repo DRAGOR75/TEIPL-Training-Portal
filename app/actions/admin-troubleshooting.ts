@@ -145,6 +145,28 @@ export async function deleteCauseLibraryItem(id: string) {
     }
 }
 
+export async function updateCauseLibraryItem(id: string, data: { name: string; action: string; symptoms: string; manualRef: string }) {
+    try {
+        if (!data.name) return { error: 'Check/Cause Name is required' };
+
+        await db.causeLibrary.update({
+            where: { id },
+            data: {
+                name: data.name,
+                action: data.action,
+                symptoms: data.symptoms,
+                manualRef: data.manualRef
+            }
+        });
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update cause' };
+    }
+}
+
 // --- 4. Product <-> Fault Linking ---
 
 

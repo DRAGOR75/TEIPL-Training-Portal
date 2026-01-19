@@ -111,7 +111,7 @@ export default function LoginPage() {
 
                 <div className="bg-slate-50 p-4 border-t border-slate-200 text-center">
                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                        Secure Environment • Thriveni 2025
+                        Secure Environment • Thriveni 2026
                     </p>
                 </div>
             </div>

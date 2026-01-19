@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createCauseLibraryItem, deleteCauseLibraryItem } from '@/app/actions/admin-troubleshooting';
+import { createCauseLibraryItem, deleteCauseLibraryItem, updateCauseLibraryItem } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import { Trash2, Plus, Stethoscope } from 'lucide-react';
 import { CauseLibrary } from '@prisma/client';
@@ -9,6 +9,7 @@ import { CauseLibrary } from '@prisma/client';
 export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [isAdding, setIsAdding] = useState(false);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     async function handleAdd(formData: FormData) {
         const result = await createCauseLibraryItem(formData);
@@ -17,6 +18,22 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
         } else {
             formRef.current?.reset();
             setIsAdding(false);
+        }
+    }
+
+    async function handleUpdate(id: string, formData: FormData) {
+        const data = {
+            name: formData.get('name') as string,
+            action: formData.get('action') as string,
+            symptoms: formData.get('symptoms') as string,
+            manualRef: formData.get('manualRef') as string,
+        };
+
+        const result = await updateCauseLibraryItem(id, data);
+        if (result?.error) {
+            alert(result.error);
+        } else {
+            setEditingId(null);
         }
     }
 
@@ -80,22 +97,62 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                     <tbody className="divide-y divide-slate-100">
                         {causes.map((c) => (
                             <tr key={c.id} className="hover:bg-slate-50 group transition-colors">
-                                <td className="px-4 py-3 align-top">
-                                    <div className="font-medium text-slate-700">{c.name}</div>
-                                    {c.manualRef && <div className="text-xs text-blue-500 mt-1 font-mono">{c.manualRef}</div>}
-                                </td>
-                                <td className="px-4 py-3 align-top text-slate-600 text-xs">
-                                    {c.action || <span className="text-slate-300 italic">No remedy specified</span>}
-                                </td>
-                                <td className="px-4 py-3 text-right align-top">
-                                    <button
-                                        onClick={() => { if (confirm(`Delete ${c.name}?`)) deleteCauseLibraryItem(c.id) }}
-                                        className="text-slate-300 hover:text-red-600 transition p-1"
-                                        title="Delete"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </td>
+                                {editingId === c.id ? (
+                                    <td colSpan={3} className="px-4 py-3 bg-blue-50/50">
+                                        <form action={(fd) => handleUpdate(c.id, fd)} className="space-y-3">
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
+                                                <input defaultValue={c.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                            </div>
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
+                                                    <textarea defaultValue={c.action || ''} name="action" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                </div>
+                                                <div>
+                                                    <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
+                                                    <textarea defaultValue={c.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
+                                                <input defaultValue={c.manualRef || ''} name="manualRef" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                            </div>
+                                            <div className="flex justify-end gap-2 mt-2">
+                                                <button type="button" onClick={() => setEditingId(null)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
+                                                <FormSubmitButton className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">Save Changes</FormSubmitButton>
+                                            </div>
+                                        </form>
+                                    </td>
+                                ) : (
+                                    <>
+                                        <td className="px-4 py-3 align-top">
+                                            <div className="font-medium text-slate-700">{c.name}</div>
+                                            {c.manualRef && <div className="text-xs text-blue-500 mt-1 font-mono">{c.manualRef}</div>}
+                                        </td>
+                                        <td className="px-4 py-3 align-top text-slate-600 text-xs">
+                                            {c.action || <span className="text-slate-300 italic">No remedy specified</span>}
+                                        </td>
+                                        <td className="px-4 py-3 text-right align-top">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <button
+                                                    onClick={() => setEditingId(c.id)}
+                                                    className="text-slate-400 hover:text-blue-600 transition p-1"
+                                                    title="Edit"
+                                                >
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                                                </button>
+                                                <button
+                                                    onClick={() => { if (confirm(`Delete ${c.name}?`)) deleteCauseLibraryItem(c.id) }}
+                                                    className="text-slate-300 hover:text-red-600 transition p-1"
+                                                    title="Delete"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </>
+                                )}
                             </tr>
                         ))}
                         {causes.length === 0 && (
