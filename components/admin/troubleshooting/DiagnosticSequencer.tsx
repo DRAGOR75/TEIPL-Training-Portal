@@ -27,7 +27,8 @@ import {
     addCauseToSequence,
     removeCauseFromSequence,
     toggleFaultCauseStatus, // New
-    updateSequenceOrder     // New
+    updateSequenceOrder,     // New
+    updateCauseLibraryItem   // New
 } from '@/app/actions/admin-troubleshooting';
 import {
     TroubleshootingProduct,
@@ -50,11 +51,12 @@ interface DiagnosticSequencerProps {
 }
 
 // Helper Component for Sortable Item
-function SortableStep({ step, index, onRemove, onToggle }: {
+function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
     step: FullFaultCause;
     index: number;
     onRemove: (id: string) => void;
     onToggle: (id: string, current: boolean) => void;
+    onUpdate: () => void;
 }) {
     const {
         attributes,
@@ -65,6 +67,8 @@ function SortableStep({ step, index, onRemove, onToggle }: {
         isDragging
     } = useSortable({ id: step.id });
 
+    const [isEditing, setIsEditing] = useState(false);
+
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
@@ -72,6 +76,54 @@ function SortableStep({ step, index, onRemove, onToggle }: {
         zIndex: isDragging ? 999 : 'auto',
         position: 'relative' as const,
     };
+
+    async function handleSave(formData: FormData) {
+        const data = {
+            name: formData.get('name') as string,
+            action: formData.get('action') as string,
+            symptoms: formData.get('symptoms') as string,
+            manualRef: formData.get('manualRef') as string,
+        };
+
+        const result = await updateCauseLibraryItem(step.cause.id, data);
+        if (result?.error) {
+            alert(result.error);
+        } else {
+            setIsEditing(false);
+            onUpdate();
+        }
+    }
+
+    if (isEditing) {
+        return (
+            <div ref={setNodeRef} style={style} className="bg-white p-4 rounded-lg border-2 border-blue-500 shadow-sm">
+                <form action={handleSave} className="space-y-3">
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
+                        <input defaultValue={step.cause.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
+                            <textarea defaultValue={step.cause.action || ''} name="action" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                        </div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
+                            <textarea defaultValue={step.cause.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
+                        <input defaultValue={step.cause.manualRef || ''} name="manualRef" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                    </div>
+                    <div className="flex justify-end gap-2 mt-2">
+                        <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
+                        <FormSubmitButton className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">Save Changes</FormSubmitButton>
+                    </div>
+                </form>
+            </div>
+        );
+    }
 
     return (
         <div ref={setNodeRef} style={style} className={`bg-white p-4 rounded-lg border shadow-sm group hover:border-blue-300 transition-all flex gap-4 ${!step.isActive ? 'opacity-60 grayscale border-slate-100' : 'border-slate-200'}`}>
@@ -94,6 +146,13 @@ function SortableStep({ step, index, onRemove, onToggle }: {
 
             <div className="flex flex-col justify-between items-end pl-2 border-l border-slate-50">
                 <div className="flex gap-1" onPointerDown={e => e.stopPropagation() /* Prevent Drag */}>
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-1.5 rounded text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 transition"
+                        title="Edit Details"
+                    >
+                        <Edit2 size={14} />
+                    </button>
                     <button
                         onClick={() => onToggle(step.id, step.isActive)}
                         className={`p-1.5 rounded transition ${step.isActive ? 'text-slate-300 hover:text-slate-600' : 'text-slate-400 hover:text-green-600 bg-slate-100'}`}
@@ -469,6 +528,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                     index={index}
                                                     onRemove={handleRemoveStep}
                                                     onToggle={handleToggleStep}
+                                                    onUpdate={refreshSequence}
                                                 />
                                             ))}
 

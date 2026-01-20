@@ -233,21 +233,21 @@ export default function ProductManager({ products }: { products: Troubleshooting
                 </div>
             )}
 
-            <div className="max-h-[500px] overflow-y-auto">
-                <table className="w-full text-sm text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
-                        <tr>
-                            <th className="px-4 py-3 w-20">Seq</th>
-                            <th className="px-4 py-3">Machine Name</th>
-                            <th className="px-4 py-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                        >
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+            >
+                <div className="max-h-[500px] overflow-y-auto">
+                    <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 text-slate-500 font-medium border-b border-slate-100">
+                            <tr>
+                                <th className="px-4 py-3 w-20">Seq</th>
+                                <th className="px-4 py-3">Machine Name</th>
+                                <th className="px-4 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
                             <SortableContext
                                 items={localProducts.map(p => p.id)}
                                 strategy={verticalListSortingStrategy}
@@ -269,15 +269,15 @@ export default function ProductManager({ products }: { products: Troubleshooting
                                     />
                                 ))}
                             </SortableContext>
-                        </DndContext>
-                        {localProducts.length === 0 && (
-                            <tr>
-                                <td colSpan={3} className="px-4 py-8 text-center text-slate-400 italic">No machines found.</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                            {localProducts.length === 0 && (
+                                <tr>
+                                    <td colSpan={3} className="px-4 py-8 text-center text-slate-400 italic">No machines found.</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </DndContext>
         </div>
     );
 }

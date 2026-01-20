@@ -355,25 +355,25 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                         )}
 
                         {/* List */}
-                        <div className="flex-1 overflow-y-auto bg-slate-50/50">
-                            {isLoading ? (
-                                <div className="p-8 text-center text-slate-400">Loading faults...</div>
-                            ) : (
-                                <table className="w-full text-sm text-left">
-                                    <thead className="bg-slate-100 text-slate-500 font-medium border-b border-slate-200 sticky top-0">
-                                        <tr>
-                                            <th className="px-4 py-3 w-20">Seq</th>
-                                            <th className="px-4 py-3 w-32">Code</th>
-                                            <th className="px-4 py-3">Fault Name</th>
-                                            <th className="px-4 py-3 text-right">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100 bg-white">
-                                        <DndContext
-                                            sensors={sensors}
-                                            collisionDetection={closestCenter}
-                                            onDragEnd={handleDragEnd}
-                                        >
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <div className="flex-1 overflow-y-auto bg-slate-50/50">
+                                {isLoading ? (
+                                    <div className="p-8 text-center text-slate-400">Loading faults...</div>
+                                ) : (
+                                    <table className="w-full text-sm text-left">
+                                        <thead className="bg-slate-100 text-slate-500 font-medium border-b border-slate-200 sticky top-0">
+                                            <tr>
+                                                <th className="px-4 py-3 w-20">Seq</th>
+                                                <th className="px-4 py-3 w-32">Code</th>
+                                                <th className="px-4 py-3">Fault Name</th>
+                                                <th className="px-4 py-3 text-right">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 bg-white">
                                             <SortableContext
                                                 items={linkedFaults.map(f => f.id)}
                                                 strategy={verticalListSortingStrategy}
@@ -401,19 +401,19 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                                     />
                                                 ))}
                                             </SortableContext>
-                                        </DndContext>
-                                        {linkedFaults.length === 0 && (
-                                            <tr>
-                                                <td colSpan={4} className="px-4 py-12 text-center text-slate-400 italic">
-                                                    No faults linked to this machine.<br />
-                                                    Use "Link Existing" or "Create New" above.
-                                                </td>
-                                            </tr>
-                                        )}
-                                    </tbody>
-                                </table>
-                            )}
-                        </div>
+                                            {linkedFaults.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={4} className="px-4 py-12 text-center text-slate-400 italic">
+                                                        No faults linked to this machine.<br />
+                                                        Use "Link Existing" or "Create New" above.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                )}
+                            </div>
+                        </DndContext>
                     </div>
                 )}
             </div>
