@@ -42,7 +42,7 @@ export default function TroubleshootNavbar() {
 
                     {/* Centered Title */}
                     <div className="flex flex-col items-center  md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
-                        <h1 className="text-lg md:text-2xl font-black text-slate-900 tracking-wide leading-snug md:leading-tight text-center">
+                        <h1 className="text-base md:text-2xl font-black text-slate-900 tracking-wide leading-snug md:leading-tight text-center">
                             Troubleshooting<br className="md:hidden" /> Library
                         </h1>
                     </div>
