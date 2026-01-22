@@ -13,9 +13,9 @@ export default function TroubleshootNavbar() {
                     <div className="flex items-center gap-4">
                         <Link href="/" className="flex items-center gap-2 md:gap-3">
                             {/* Logos Container */}
-                            <div className="flex flex-col md:flex-row items-center justify-center gap-0 md:gap-3">
+                            <div className="flex flex-col md:flex-row items-center justify-center -space-y-1 md:space-y-0 md:gap-3">
                                 {/* Thriveni Logo */}
-                                <div className="relative w-16 h-8 md:w-32 md:h-16">
+                                <div className="relative w-24 h-8 md:w-32 md:h-16">
                                     <Image
                                         src="/thriveny_logo.svg"
                                         alt="Thriveni Logo"
@@ -26,7 +26,7 @@ export default function TroubleshootNavbar() {
                                 </div>
                                 <div className="h-8 w-[1px] bg-slate-300 mx-2 hidden md:block"></div>
                                 {/* Lloyds Logo */}
-                                <div className="relative w-16 h-8 md:w-34 md:h-10">
+                                <div className="relative w-27 h-8 md:w-34 md:h-10">
                                     <Image
                                         src="/LLoyds_logo.svg"
                                         alt="Lloyds Metals Logo"
