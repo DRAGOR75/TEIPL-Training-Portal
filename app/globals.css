@@ -80,6 +80,54 @@ html {
   animation: breathe 4s ease-in-out infinite;
 }
 
+@keyframes cycle-1 {
+
+  0%,
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50%,
+  95% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cycle-2 {
+
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  50%,
+  95% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-cycle-1 {
+  animation: cycle-1 6s ease-in-out infinite;
+}
+
+.animate-cycle-2 {
+  animation: cycle-2 6s ease-in-out infinite;
+}
+
 /* --- Calendar Overrides --- */
 .react-calendar {
   width: 100% !important;

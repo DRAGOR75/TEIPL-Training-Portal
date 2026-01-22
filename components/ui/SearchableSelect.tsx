@@ -80,10 +80,10 @@ export default function SearchableSelect({
             {/* Main Control (Trigger or Input) */}
             <div
                 className={`
-                    w-full rounded-xl border shadow-sm bg-slate-50 font-medium text-slate-900 
+                    w-full rounded-xl border-2 shadow-sm bg-slate-50 font-bold text-slate-900 
                     transition-all flex items-center justify-between cursor-pointer
                     ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-thriveni-blue/30 focus-within:ring-2 focus-within:ring-thriveni-blue/20 focus-within:border-thriveni-blue'}
-                    ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white' : 'border-slate-200'}
+                    ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white' : 'border-slate-300'}
                 `}
                 onClick={() => {
                     if (!disabled && !isOpen) {
