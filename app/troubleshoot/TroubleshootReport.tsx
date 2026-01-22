@@ -133,7 +133,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         {/* Modal Header */}
                         <div className="sticky top-0 bg-white z-10 px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="bg-orange-100 p-2 md:p-2.5 rounded-lg md:rounded-xl text-orange-600">
+                                <div className="bg-thriveni-blue/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-thriveni-blue">
                                     <BookOpen size={20} className="stroke-[2.5]" />
                                 </div>
                                 <div>
@@ -171,35 +171,35 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                                 {/* Disclaimer */}
-                                <div className="bg-amber-50 rounded-xl p-4 md:p-5 border border-amber-100">
-                                    <h4 className="flex items-center gap-2 text-amber-800 font-bold text-sm uppercase tracking-wide mb-1.5 md:mb-2">
+                                <div className="bg-gray-50 rounded-xl p-4 md:p-5 border border-gray-100">
+                                    <h4 className="flex items-center gap-2 text-gray-800 font-bold text-sm uppercase tracking-wide mb-1.5 md:mb-2">
                                         <AlertCircle size={14} /> Disclaimer
                                     </h4>
-                                    <p className="text-amber-900/80 text-sm font-medium leading-relaxed">
+                                    <p className="text-gray-900/80 text-sm font-medium leading-relaxed">
                                         The troubleshooting steps provided are for reference only and based on common scenarios..
                                     </p>
                                 </div>
 
                                 {/* User Guide & Feedback */}
-                                <div className="bg-blue-50 rounded-xl p-4 md:p-5 border border-blue-100 space-y-3 md:space-y-4">
+                                <div className="bg-thriveni-blue/5 rounded-xl p-4 md:p-5 border border-thriveni-blue/10 space-y-3 md:space-y-4">
                                     <div>
-                                        <h4 className="flex items-center gap-2 text-blue-800 font-bold text-sm uppercase tracking-wide mb-1">
+                                        <h4 className="flex items-center gap-2 text-thriveni-blue font-bold text-sm uppercase tracking-wide mb-1">
                                             <HelpCircle size={14} /> User Guide
                                         </h4>
 
                                     </div>
-                                    <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
+                                    <div className="pt-3 border-t border-thriveni-blue/10">
+                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
                                             <Info size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
                                         </a>
                                     </div>
-                                    <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
+                                    <div className="pt-3 border-t border-thriveni-blue/10">
+                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
                                             <Info size={14} /> Step 2 - Select the fault you are experiencing.
                                         </a>
                                     </div>
-                                    <div className="pt-3 border-t border-blue-200">
-                                        <a href="#" className="flex items-center gap-2 text-blue-700 hover:text-blue-800 hover:underline text-sm font-bold transition-colors">
+                                    <div className="pt-3 border-t border-thriveni-blue/10">
+                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
                                             You will get the steps to follow to Troubleshoot the machine.
                                         </a>
                                     </div>
@@ -213,7 +213,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                                 <button
                                     onClick={() => setShowGuide(false)}
-                                    className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-orange-200 transform transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="w-full md:w-auto bg-lloyds-red hover:bg-[#D11F25] text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-lloyds-red/20 transform transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
                                     <Wrench size={18} />
                                     Start Troubleshooting
@@ -271,7 +271,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 direction={diagnosis ? 'down' : 'responsive-bottom'}
                             />
                             {faults.length === 0 && selectedProductId && !loadingFaults && (
-                                <p className="flex items-center gap-1.5 text-xs text-amber-600 font-medium ml-1 bg-amber-50 w-fit px-2 py-1 rounded-md">
+                                <p className="flex items-center gap-1.5 text-xs text-lloyds-red font-medium ml-1 bg-lloyds-red/10 w-fit px-2 py-1 rounded-md">
                                     <Info size={12} /> No reported faults for this machine.
                                 </p>
                             )}
@@ -290,7 +290,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-12 text-center">
                             <div className="relative w-16 h-16 mx-auto mb-6">
                                 <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
-                                <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+                                <div className="absolute inset-0 border-4 border-thriveni-blue rounded-full border-t-transparent animate-spin"></div>
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-1">Generating Sequence</h3>
                             <p className="text-slate-500">Retrieving diagnostic data matching your selection...</p>
@@ -300,42 +300,20 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {!loadingDiagnosis && diagnosis && (
                         <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-                            {/* Report Header - Professional Variant */}
-                            <div className="bg-white p-5 md:p-8 border-b border-slate-200 relative overflow-hidden">
-                                <div className="relative z-10">
-                                    <div className="flex items-center gap-3 mb-4">
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-orange-50 text-orange-700 border border-orange-100">
-                                            <Activity size={12} className="mr-1.5" /> Troubleshooting Guide
-                                        </span>
-                                        {diagnosis.context.fault.faultCode && (
-                                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest bg-slate-100 text-slate-600 border border-slate-200">
-                                                Code: {diagnosis.context.fault.faultCode}
-                                            </span>
-                                        )}
-                                    </div>
 
-                                    <h2 className="text-2xl md:text-4xl font-black mb-2 tracking-tight text-slate-900">
-                                        {diagnosis.context.fault.name}
-                                    </h2>
-                                    <div className="flex items-center gap-2 text-slate-500 font-medium text-base md:text-lg">
-                                        <span className="opacity-70">Machine:</span>
-                                        <span className="text-slate-900 font-bold">{diagnosis.context.product.name}</span>
-                                    </div>
-                                </div>
-                            </div>
 
                             {/* Machine Specific Notes */}
                             {diagnosis.context.notes && (
-                                <div className="p-4 md:p-8 bg-amber-50 border-b border-amber-100">
+                                <div className="p-4 md:p-8 bg-lloyds-red/5 border-b border-lloyds-red/10">
                                     <div className="flex gap-4">
                                         <div className="shrink-0">
-                                            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 shadow-sm border border-amber-200">
+                                            <div className="w-10 h-10 bg-lloyds-red/10 rounded-full flex items-center justify-center text-lloyds-red shadow-sm border border-lloyds-red/20">
                                                 <AlertCircle size={20} />
                                             </div>
                                         </div>
                                         <div>
-                                            <h4 className="text-amber-900 font-bold text-sm uppercase tracking-wide mb-1">Important Product Note</h4>
-                                            <p className="text-amber-900/80 leading-relaxed font-medium">
+                                            <h4 className="text-lloyds-red font-bold text-sm uppercase tracking-wide mb-1">Important Product Note</h4>
+                                            <p className="text-lloyds-red/80 leading-relaxed font-medium">
                                                 {diagnosis.context.notes}
                                             </p>
                                         </div>
@@ -346,7 +324,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             {/* Diagnostic Steps */}
                             <div className="p-2 md:p-6 bg-slate-50/50">
                                 <div className="flex items-left gap-3 md:gap-4 mb-6 md:mb-8 pl-2 md:pl-0">
-                                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-orange-500">
+                                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-thriveni-blue">
                                         <ClipboardList size={30} />
                                     </div>
                                     <div>
@@ -367,13 +345,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                                             {/* Step Number Badge */}
                                             <div className="absolute left-3 top-4">
-                                                <div className="w-8 h-8 rounded-full bg-white border-2 border-orange-500 text-orange-500 flex items-center justify-center text-sm font-bold z-10 shadow-sm transition-transform group-hover:scale-110 group-hover:bg-orange-500 group-hover:text-white">
+                                                <div className="w-8 h-8 rounded-full bg-white border-2 border-thriveni-blue text-thriveni-blue flex items-center justify-center text-sm font-bold z-10 shadow-sm transition-transform group-hover:scale-110 group-hover:bg-thriveni-blue group-hover:text-white">
                                                     {index + 1}
                                                 </div>
                                             </div>
 
                                             {/* Step Content Card */}
-                                            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-orange-200 transition-all duration-300">
+                                            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-thriveni-blue/30 transition-all duration-300">
                                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                                     <div className="lg:col-span-2 space-y-4">
                                                         <div
@@ -381,7 +359,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                             className="cursor-pointer select-none"
                                                         >
                                                             <div className="flex items-center justify-between gap-4">
-                                                                <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-orange-600 transition-colors">
+                                                                <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-thriveni-blue transition-colors">
                                                                     Cause:  {step.cause.name}
                                                                     {step.isLikely && (
                                                                         <span className="bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
@@ -460,7 +438,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             <p className="text-slate-500 mb-2">Did this help you solve the issue?</p>
                             <button
                                 onClick={() => setShowFeedbackModal(true)}
-                                className="inline-flex items-center gap-2 text-orange-600 font-bold hover:underline"
+                                className="inline-flex items-center gap-2 text-lloyds-red font-bold hover:underline"
                             >
                                 <MessageSquarePlus size={18} />
                                 Give Feedback
@@ -471,7 +449,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {/* Empty State Instructions */}
                     {!diagnosis && !loadingDiagnosis && selectedProductId && selectedFaultId && (
                         <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-12 text-center shadow-sm">
-                            <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mx-auto mb-4">
+                            <div className="w-16 h-16 bg-thriveni-blue/5 rounded-full flex items-center justify-center text-thriveni-blue mx-auto mb-4">
                                 <Search size={32} />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Ready to Troubleshoot</h3>

@@ -135,7 +135,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                 <textarea
                                     rows={3}
                                     placeholder="Tell us what we can improve..."
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 transition-all resize-none font-medium"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-lloyds-red/20 focus:border-lloyds-red transition-all resize-none font-medium"
                                     value={form.comments}
                                     onChange={(e) => setForm(prev => ({ ...prev, comments: e.target.value }))}
                                 />
@@ -149,7 +149,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                         type="text"
                                         placeholder="Full Name *"
                                         required
-                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-orange-500 transition-all font-medium"
+                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-lloyds-red transition-all font-medium"
                                         value={form.name}
                                         onChange={(e) => setForm(prev => ({ ...prev, name: e.target.value }))}
                                     />
@@ -157,14 +157,14 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                         type="tel"
                                         placeholder="Mobile Number *"
                                         required
-                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-orange-500 transition-all font-medium"
+                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-lloyds-red transition-all font-medium"
                                         value={form.mobile}
                                         onChange={(e) => setForm(prev => ({ ...prev, mobile: e.target.value }))}
                                     />
                                     <input
                                         type="email"
                                         placeholder="Email Address"
-                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-orange-500 transition-all font-medium"
+                                        className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 focus:outline-none focus:border-lloyds-red transition-all font-medium"
                                         value={form.email}
                                         onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))}
                                     />
@@ -180,7 +180,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-black py-4 rounded-xl shadow-lg shadow-orange-200 transform transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
+                                className="w-full bg-lloyds-red hover:bg-[#D11F25] text-white font-black py-4 rounded-xl shadow-lg shadow-lloyds-red/20 transform transition-all active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-base"
                             >
                                 {loading ? 'Submitting...' : (
                                     <>

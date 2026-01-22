@@ -87,10 +87,10 @@ export default function Home() {
             className="group relative bg-white rounded-3xl p-8 shadow-xl border-2 border-transparent hover:border-indigo-600 transition-all duration-500 overflow-hidden"
           >
             {/* Visual Flair */}
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-orange-50 rounded-full group-hover:scale-150 transition-transform duration-700 opacity-50" />
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-lloyds-red/5 rounded-full group-hover:scale-150 transition-transform duration-700 opacity-50" />
 
             <div className="relative z-10">
-              <div className="w-16 h-16 bg-orange-500 text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-200 group-hover:-rotate-6 transition-transform">
+              <div className="w-16 h-16 bg-lloyds-red text-white rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-lloyds-red/20 group-hover:-rotate-6 transition-transform">
                 <Wrench size={32} strokeWidth={2.5} />
               </div>
 
@@ -101,7 +101,7 @@ export default function Home() {
                 Troubleshoot machine issues and manage diagnostic sequences.
               </p>
 
-              <div className="flex items-center gap-2 text-orange-500 font-black text-xs uppercase tracking-widest">
+              <div className="flex items-center gap-2 text-lloyds-red font-black text-xs uppercase tracking-widest">
                 Access System <ChevronRight size={16} />
               </div>
             </div>

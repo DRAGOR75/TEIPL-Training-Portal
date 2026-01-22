@@ -64,10 +64,10 @@ export default async function AdminHubPage() {
                     </Link>
 
                     {/* Card 3: Troubleshooting Admin */}
-                    <Link href="/admin/troubleshooting" className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 hover:border-orange-500 block">
+                    <Link href="/admin/troubleshooting" className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 hover:border-lloyds-red block">
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
-                                <div className="p-3 bg-orange-50 text-orange-600 rounded-lg group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                                <div className="p-3 bg-lloyds-red/10 text-lloyds-red rounded-lg group-hover:bg-lloyds-red group-hover:text-white transition-colors">
                                     <Wrench size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Diagnostics</span>
@@ -76,7 +76,7 @@ export default async function AdminHubPage() {
                             <p className="text-slate-500 text-sm mb-6">
                                 Configure machines, fault codes, and create step-by-step diagnostic guides.
                             </p>
-                            <div className="flex items-center text-orange-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                            <div className="flex items-center text-lloyds-red font-semibold text-sm group-hover:translate-x-1 transition-transform">
                                 Open Config <ChevronRight size={16} />
                             </div>
                         </div>

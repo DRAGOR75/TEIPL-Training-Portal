@@ -82,8 +82,8 @@ export default function SearchableSelect({
                 className={`
                     w-full rounded-xl border shadow-sm bg-slate-50 font-medium text-slate-900 
                     transition-all flex items-center justify-between cursor-pointer
-                    ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-orange-300 focus-within:ring-2 focus-within:ring-orange-500 focus-within:border-orange-500'}
-                    ${isOpen ? 'border-orange-500 ring-2 ring-orange-200 bg-white' : 'border-slate-200'}
+                    ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-thriveni-blue/30 focus-within:ring-2 focus-within:ring-thriveni-blue/20 focus-within:border-thriveni-blue'}
+                    ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white' : 'border-slate-200'}
                 `}
                 onClick={() => {
                     if (!disabled && !isOpen) {
@@ -93,7 +93,7 @@ export default function SearchableSelect({
             >
                 {/* Icon (Always visible on left) */}
                 {icon && (
-                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isOpen ? 'text-orange-500' : 'text-slate-400'}`}>
+                    <div className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${isOpen ? 'text-thriveni-blue' : 'text-slate-400'}`}>
                         {icon}
                     </div>
                 )}
@@ -126,7 +126,7 @@ export default function SearchableSelect({
                             <X size={14} />
                         </div>
                     )}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-orange-500' : ''}`} />
+                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-thriveni-blue' : ''}`} />
                 </div>
             </div>
 
@@ -146,7 +146,7 @@ export default function SearchableSelect({
                                         key={option.value}
                                         className={`
                                             px-4 py-3 rounded-lg text-sm cursor-pointer transition-colors break-words leading-relaxed border-b border-transparent hover:border-slate-100 last:border-0
-                                            ${String(option.value) === String(value) ? 'bg-orange-50 text-orange-900 font-bold' : 'text-slate-700 hover:bg-slate-50'}
+                                            ${String(option.value) === String(value) ? 'bg-thriveni-blue/5 text-thriveni-blue font-bold' : 'text-slate-700 hover:bg-slate-50'}
                                         `}
                                         onClick={() => handleSelect(option.value)}
                                     >

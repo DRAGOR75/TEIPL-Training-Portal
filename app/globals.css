@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-lloyds-red: #d52b32;
+  --color-thriveni-blue: #0a3292;
+  --color-thriveni-light: #2c54b4;
 }
 
 /* Dark mode preference removed to enforce light theme */
