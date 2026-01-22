@@ -60,19 +60,20 @@ html {
 @keyframes breathe {
 
   0%,
+  20%,
   100% {
     transform: scale(1);
     opacity: 1;
   }
 
-  50% {
+  60% {
     transform: scale(1.05);
     opacity: 0.85;
   }
 }
 
 .animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
+  animation: breathe 4s ease-in-out infinite;
 }
 
 /* --- Calendar Overrides --- */

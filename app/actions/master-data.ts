@@ -96,8 +96,8 @@ export async function createEmployee(formData: FormData) {
                 })(),
                 sectionName: formData.get('sectionName') as string,
                 location: formData.get('location') as string,
-                manager_name: formData.get('manager_name') as string,
-                manager_email: formData.get('manager_email') as string,
+                managerName: formData.get('manager_name') as string,
+                managerEmail: formData.get('manager_email') as string,
             }
         });
         revalidatePath('/admin/tni-dashboard');

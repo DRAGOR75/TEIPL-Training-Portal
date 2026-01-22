@@ -63,11 +63,11 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         grade: gradeEnum,
                         sectionName: row.sectionName || null,
                         location: row.location || null,
-                        manager_name: row.manager_name || null,
-                        manager_email: row.manager_email || null,
-                        program_name: row.program_name || null,
-                        start_date: parseDate(row.start_date),
-                        end_date: parseDate(row.end_date),
+                        managerName: row.manager_name || null,
+                        managerEmail: row.manager_email || null,
+                        programName: row.program_name || null,
+                        startDate: parseDate(row.start_date),
+                        endDate: parseDate(row.end_date),
                     },
                     create: {
                         id: row.id.toString(),
@@ -76,11 +76,11 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         grade: gradeEnum,
                         sectionName: row.sectionName || null,
                         location: row.location || null,
-                        manager_name: row.manager_name || null,
-                        manager_email: row.manager_email || null,
-                        program_name: row.program_name || null,
-                        start_date: parseDate(row.start_date),
-                        end_date: parseDate(row.end_date),
+                        managerName: row.manager_name || null,
+                        managerEmail: row.manager_email || null,
+                        programName: row.program_name || null,
+                        startDate: parseDate(row.start_date),
+                        endDate: parseDate(row.end_date),
                     }
                 });
                 return "success";

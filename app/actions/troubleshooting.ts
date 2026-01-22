@@ -34,6 +34,20 @@ export async function getFaultsForProduct(productId: number) {
     }
 }
 
+export async function logTroubleshootingEvent(type: string) {
+    try {
+        await db.troubleshootingEvent.create({
+            data: {
+                type
+            }
+        });
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to log event:", error);
+        return { success: false, error: "Failed to log event" };
+    }
+}
+
 export async function getCausesForFault(productFaultId: string) {
     try {
         // 1. Get the ProductFault details first (for "Machine Notes")

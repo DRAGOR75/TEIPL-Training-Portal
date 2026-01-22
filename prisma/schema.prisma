@@ -19,11 +19,11 @@ model Employee {
   grade        Grade?         // EXECUTIVE or WORKMAN
   sectionName  String?       @map("section_name") // Their home department
   location     String?
-  manager_name String?
-  manager_email String?
-  program_name String?
-  start_date DateTime?
-  end_date DateTime?  
+  managerName  String?       @map("manager_name")
+  managerEmail String?       @map("manager_email")
+  programName  String?       @map("program_name")
+  startDate    DateTime?     @map("start_date")
+  endDate      DateTime?     @map("end_date")  
   
   // Relations
   nominations  Nomination[]  // Links to their training requests
@@ -289,4 +289,13 @@ model TroubleshootingFeedback {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("troubleshooting_feedback")
+}
+
+// 7. Analytics Events
+model TroubleshootingEvent {
+  id        String   @id @default(uuid())
+  type      String   // e.g. "GUIDE_SKIPPED"
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("troubleshooting_events")
 }

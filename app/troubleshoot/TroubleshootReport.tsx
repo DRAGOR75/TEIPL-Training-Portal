@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { TroubleshootingProduct, ProductFault, FaultLibrary, FaultCause, CauseLibrary } from '@prisma/client';
-import { getFaultsForProduct, getCausesForFault } from '@/app/actions/troubleshooting';
+import { getFaultsForProduct, getCausesForFault, logTroubleshootingEvent } from '@/app/actions/troubleshooting';
 import {
     Wrench,
     Search,
@@ -36,9 +36,12 @@ interface TroubleshootReportProps {
     products: TroubleshootingProduct[];
 }
 
+import TroubleshootingFeedbackModal from '@/components/TroubleshootingFeedbackModal';
+
 export default function TroubleshootReport({ products }: TroubleshootReportProps) {
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
     const [selectedFaultId, setSelectedFaultId] = useState<string | null>(null);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(true);
 
     const [faults, setFaults] = useState<FullProductFault[]>([]);
     const [diagnosis, setDiagnosis] = useState<DiagnosisData | null>(null);
@@ -111,10 +114,18 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
         }
     };
 
-    const [showGuide, setShowGuide] = useState(true);
+    const [showGuide, setShowGuide] = useState(false);
 
     return (
         <div className="space-y-4 md:space-y-9 w-full mx-auto px-1 md:px-0">
+            <TroubleshootingFeedbackModal
+                isOpen={showFeedbackModal}
+                onClose={() => {
+                    setShowFeedbackModal(false);
+                    setShowGuide(true);
+                }}
+            />
+
             {/* Guide Modal Overlay */}
             {showGuide && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
@@ -192,19 +203,22 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                             You will get the steps to follow to Troubleshoot the machine.
                                         </a>
                                     </div>
+
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Modal Footer */}
-                        <div className="sticky bottom-0 bg-white px-4 py-4 md:px-8 md:py-5 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-end shrink-0">
-                            <button
-                                onClick={() => setShowGuide(false)}
-                                className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-orange-200 transform transition-all active:scale-95 flex items-center justify-center gap-2"
-                            >
-                                <Wrench size={18} />
-                                Start Troubleshooting
-                            </button>
+
+                            {/* Modal Footer */}
+                            <div className=" bottom-0 bg-white px-4 py-4 md:px-8 md:py-5 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-end gap-3 shrink-0">
+
+                                <button
+                                    onClick={() => setShowGuide(false)}
+                                    className="w-full md:w-auto bg-orange-500 hover:bg-orange-600 text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-orange-200 transform transition-all active:scale-95 flex items-center justify-center gap-2"
+                                >
+                                    <Wrench size={18} />
+                                    Start Troubleshooting
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -444,13 +458,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {diagnosis && !loadingDiagnosis && (
                         <div className="text-center mt-8 pb-8">
                             <p className="text-slate-500 mb-2">Did this help you solve the issue?</p>
-                            <Link
-                                href="/troubleshoot/feedback"
+                            <button
+                                onClick={() => setShowFeedbackModal(true)}
                                 className="inline-flex items-center gap-2 text-orange-600 font-bold hover:underline"
                             >
                                 <MessageSquarePlus size={18} />
                                 Give Feedback
-                            </Link>
+                            </button>
                         </div>
                     )}
 

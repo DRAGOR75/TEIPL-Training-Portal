@@ -79,7 +79,7 @@ export default function FeedbackPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* 1. Usefulness */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">
+                        <label className="block text-sm font-bold text-slate-900  tracking-wide mb-4">
                             Was the information useful in your troubleshooting experience during your visit?
                         </label>
                         <div className="grid grid-cols-2 gap-4">
@@ -104,7 +104,7 @@ export default function FeedbackPage() {
 
                     {/* 2. Star Rating */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 text-center">
-                        <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">
+                        <label className="block text-sm font-bold text-slate-900  tracking-wide mb-4">
                             Help us improve by rating your experience
                         </label>
                         <div className="flex justify-center gap-2">
@@ -133,7 +133,7 @@ export default function FeedbackPage() {
 
                     {/* 3. Comments */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide mb-3">
+                        <label className="block text-sm font-bold text-slate-900  tracking-wide mb-3">
                             Comments (Optional)
                         </label>
                         <textarea
@@ -147,7 +147,7 @@ export default function FeedbackPage() {
 
                     {/* 4. Contact Details */}
                     <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Your Details</h3>
+                        <h3 className="text-sm font-bold text-slate-900  tracking-wide mb-4">Your Details</h3>
                         <div className="space-y-4">
                             <div>
                                 <input
