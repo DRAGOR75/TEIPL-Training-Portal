@@ -19,18 +19,6 @@ export default async function TroubleshootingPage() {
 
     return (
         <div className="w-full min-h-screen">
-            <header className="mb-6 md:mb-10 border-b border-slate-200 pb-4 md:pb-6">
-
-
-                <div className="flex items-center gap-3 mb-1 md:mb-2">
-                    <div className="w-8 h-8 md:w-10 md:h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white shadow-sm shadow-blue-200 shrink-0">
-                        <Wrench size={18} className="md:w-5 md:h-5" />
-                    </div>
-                    <h1 className="text-xl md:text-3xl font-black text-slate-900 tracking-tight leading-tight">
-                        Troubleshooting Library
-                    </h1>
-                </div>
-            </header>
 
             <TroubleshootReport products={products} />
         </div>

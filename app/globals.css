@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-lloyds-red: #d52b32;
+  --color-thriveni-blue: #0a3292;
+  --color-thriveni-light: #2c54b4;
 }
 
 /* Dark mode preference removed to enforce light theme */
@@ -60,19 +64,68 @@ html {
 @keyframes breathe {
 
   0%,
+  20%,
   100% {
     transform: scale(1);
     opacity: 1;
   }
 
-  50% {
+  60% {
     transform: scale(1.05);
     opacity: 0.85;
   }
 }
 
 .animate-breathe {
-  animation: breathe 3s ease-in-out infinite;
+  animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes cycle-1 {
+
+  0%,
+  45% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50%,
+  95% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes cycle-2 {
+
+  0%,
+  45% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  50%,
+  95% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-cycle-1 {
+  animation: cycle-1 2s ease-in-out infinite;
+}
+
+.animate-cycle-2 {
+  animation: cycle-2 2s ease-in-out infinite;
 }
 
 /* --- Calendar Overrides --- */

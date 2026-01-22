@@ -46,16 +46,16 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manager</label>
-                                    <div className="font-semibold text-slate-900">{employee.manager_name || 'Not Assigned'}</div>
+                                    <div className="font-semibold text-slate-900">{employee.managerName || 'Not Assigned'}</div>
                                 </div>
                                 <div>
                                     <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">Manager Email</label>
-                                    <div className="font-semibold text-slate-900 text-sm overflow-hidden text-ellipsis">{employee.manager_email || 'Not Assigned'}</div>
+                                    <div className="font-semibold text-slate-900 text-sm overflow-hidden text-ellipsis">{employee.managerEmail || 'Not Assigned'}</div>
                                 </div>
                             </div>
 
                             {/* Alert if no manager */}
-                            {!employee.manager_email && (
+                            {!employee.managerEmail && (
                                 <div className="bg-amber-50 text-amber-800 text-sm p-3 rounded-lg border border-amber-200">
                                     ⚠️ <strong>Warning:</strong> No manager email is linked to your profile. Approvals might be delayed. Please update your profile if possible.
                                 </div>

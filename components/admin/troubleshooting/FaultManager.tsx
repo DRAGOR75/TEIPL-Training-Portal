@@ -292,7 +292,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                 </button>
                                 <button
                                     onClick={() => setMode(mode === 'create' ? 'view' : 'create')}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded border flex items-center gap-1 transition ${mode === 'create' ? 'bg-orange-50 border-orange-200 text-orange-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                    className={`px-3 py-1.5 text-xs font-medium rounded border flex items-center gap-1 transition ${mode === 'create' ? 'bg-lloyds-red/10 border-lloyds-red/20 text-lloyds-red' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                                 >
                                     <Plus size={14} /> Create New
                                 </button>
@@ -323,34 +323,34 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                         )}
 
                         {mode === 'create' && (
-                            <div className="p-4 bg-orange-50 border-b border-orange-100 animate-in slide-in-from-top-2">
+                            <div className="p-4 bg-lloyds-red/5 border-b border-lloyds-red/10 animate-in slide-in-from-top-2">
                                 <form action={handleCreateAndLink} className="flex gap-4 items-end">
                                     <div className="w-32">
-                                        <label className="text-xs font-bold text-orange-700 uppercase mb-1 block">Code</label>
+                                        <label className="text-xs font-bold text-lloyds-red uppercase mb-1 block">Code</label>
                                         <input
                                             name="faultCode"
                                             value={newFaultCode}
                                             onChange={e => setNewFaultCode(e.target.value)}
-                                            className="w-full p-2 border border-orange-200 rounded text-sm placeholder-orange-300 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                            className="w-full p-2 border border-lloyds-red/20 rounded text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
                                             placeholder="e.g. F01"
                                         />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="text-xs font-bold text-orange-700 uppercase mb-1 block">New Fault Name</label>
+                                        <label className="text-xs font-bold text-lloyds-red uppercase mb-1 block">New Fault Name</label>
                                         <input
                                             name="name"
                                             value={newFaultName}
                                             onChange={e => setNewFaultName(e.target.value)}
-                                            className="w-full p-2 border border-orange-200 rounded text-sm placeholder-orange-300 focus:outline-none focus:ring-1 focus:ring-orange-500"
+                                            className="w-full p-2 border border-lloyds-red/20 rounded text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
                                             placeholder="e.g. System Failure"
                                             required
                                         />
                                     </div>
-                                    <FormSubmitButton className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded text-sm font-medium">
+                                    <FormSubmitButton className="bg-lloyds-red hover:bg-[#D11F25] text-white px-4 py-2 rounded text-sm font-medium">
                                         Create
                                     </FormSubmitButton>
                                 </form>
-                                <p className="text-[10px] text-orange-600 mt-2">* Creates in Global Lib. You may need to Link it manually after creation.</p>
+                                <p className="text-[10px] text-lloyds-red mt-2">* Creates in Global Lib. You may need to Link it manually after creation.</p>
                             </div>
                         )}
 

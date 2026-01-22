@@ -46,8 +46,8 @@ export async function updateEmployeeProfile(empId: string, data: {
     grade: unknown; // Use unknown or string if Grade enum not picked up
     sectionName: string;
     location: string;
-    manager_name?: string;
-    manager_email?: string;
+    managerName?: string;
+    managerEmail?: string;
 }) {
     try {
         const updated = await db.employee.upsert({
@@ -61,8 +61,8 @@ export async function updateEmployeeProfile(empId: string, data: {
                 })(),
                 sectionName: data.sectionName,
                 location: data.location,
-                manager_name: data.manager_name,
-                manager_email: data.manager_email,
+                managerName: data.managerName,
+                managerEmail: data.managerEmail,
             },
             create: {
                 id: empId,
@@ -71,8 +71,8 @@ export async function updateEmployeeProfile(empId: string, data: {
                 grade: data.grade as any,
                 sectionName: data.sectionName,
                 location: data.location,
-                manager_name: data.manager_name,
-                manager_email: data.manager_email,
+                managerName: data.managerName,
+                managerEmail: data.managerEmail,
             }
         });
         revalidatePath(`/tni/${empId}`);
@@ -161,10 +161,10 @@ export async function submitTNINomination(formData: FormData) {
         // 1. Fetch Employee Details to get Manager Email & Name
         const employee = await db.employee.findUnique({
             where: { id: empId },
-            select: { name: true, manager_email: true, manager_name: true }
+            select: { name: true, managerEmail: true, managerName: true }
         });
 
-        if (employee && employee.manager_email) {
+        if (employee && employee.managerEmail) {
             // 2. Fetch Program Names for the email
             const programs = await db.program.findMany({
                 where: { id: { in: programIds } },
@@ -174,8 +174,8 @@ export async function submitTNINomination(formData: FormData) {
 
             // 3. Send the single consolidated email
             await sendTNIApprovalEmail(
-                employee.manager_email,
-                employee.manager_name || 'Manager',
+                employee.managerEmail,
+                employee.managerName || 'Manager',
                 employee.name,
                 programNames,
                 justification,

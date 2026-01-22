@@ -12,8 +12,8 @@ type Employee = {
     grade: string | null;
     sectionName: string | null;
     location: string | null;
-    manager_name: string | null;
-    manager_email: string | null;
+    managerName: string | null;
+    managerEmail: string | null;
 };
 
 type Section = {
@@ -33,8 +33,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         grade: employee.grade || '',
         sectionName: employee.sectionName || '',
         location: employee.location || '',
-        manager_name: employee.manager_name || '',
-        manager_email: employee.manager_email || ''
+        managerName: employee.managerName || '',
+        managerEmail: employee.managerEmail || ''
     });
 
     async function handleSave() {
@@ -52,8 +52,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             grade: formData.grade as any,
             sectionName: formData.sectionName,
             location: formData.location,
-            manager_name: formData.manager_name,
-            manager_email: formData.manager_email
+            managerName: formData.managerName,
+            managerEmail: formData.managerEmail
         });
 
         if (res.error) {
@@ -159,18 +159,18 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Name</label>
                         <input
                             className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            value={formData.manager_name}
+                            value={formData.managerName}
                             placeholder="Your Manager Name"
-                            onChange={e => setFormData({ ...formData, manager_name: e.target.value })}
+                            onChange={e => setFormData({ ...formData, managerName: e.target.value })}
                         />
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Email</label>
                         <input
                             className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            value={formData.manager_email}
+                            value={formData.managerEmail}
                             placeholder="Your Manager Email"
-                            onChange={e => setFormData({ ...formData, manager_email: e.target.value })}
+                            onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
                         />
                     </div>
                 </div>
@@ -238,8 +238,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><User size={18} /></div>
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Manager Details</label>
-                            <div className="text-sm font-semibold text-slate-900">{formData.manager_name || 'Not Set'}</div>
-                            <div className="text-xs text-slate-500">{formData.manager_email || ''}</div>
+                            <div className="text-sm font-semibold text-slate-900">{formData.managerName || 'Not Set'}</div>
+                            <div className="text-xs text-slate-500">{formData.managerEmail || ''}</div>
                         </div>
                     </div>
                 </div>
