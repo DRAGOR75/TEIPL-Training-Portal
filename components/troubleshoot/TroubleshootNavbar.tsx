@@ -13,7 +13,7 @@ export default function TroubleshootNavbar() {
                     <div className="flex items-center gap-4">
                         <Link href="/" className="flex items-center gap-2 md:gap-3">
                             {/* Logos Container */}
-                            <div className="flex flex-col md:flex-row items-center justify-center md:space-y-0 md:gap-4">
+                            <div className="flex flex-col md:flex-row items-center justify-center -space-y-2 md:space-y-0 md:gap-4">
                                 {/* Thriveni Logo */}
                                 <div className="relative w-24 h-8 md:w-32 md:h-16">
                                     <Image
@@ -41,8 +41,8 @@ export default function TroubleshootNavbar() {
                     </div>
 
                     {/* Centered Title */}
-                    <div className="flex flex-col items-center ml-0.5 md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
-                        <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-snug md:leading-tight text-center">
+                    <div className="flex flex-col items-center  md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
+                        <h1 className="text-lg md:text-2xl font-black text-slate-900 tracking-wide leading-snug md:leading-tight text-center">
                             Troubleshooting<br className="md:hidden" /> Library
                         </h1>
                     </div>

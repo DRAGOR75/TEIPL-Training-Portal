@@ -121,11 +121,11 @@ html {
 }
 
 .animate-cycle-1 {
-  animation: cycle-1 6s ease-in-out infinite;
+  animation: cycle-1 3s ease-in-out infinite;
 }
 
 .animate-cycle-2 {
-  animation: cycle-2 6s ease-in-out infinite;
+  animation: cycle-2 3s ease-in-out infinite;
 }
 
 /* --- Calendar Overrides --- */

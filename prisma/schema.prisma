@@ -236,7 +236,7 @@ model ProductFault {
 model CauseLibrary {
   id          String   @id @default(uuid())
   name        String   @unique // "Low Coolant Level"
-  description String?  @db.Text
+  justification String?  @db.Text
   action      String?  @db.Text // The fix
   symptoms    String?  @db.Text
   manualRef   String?  @map("manual_ref")

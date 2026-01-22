@@ -19,7 +19,7 @@ export default function Loading() {
 
                 {/* Logo 2: Lloyds - Visible Second */}
                 <div className="absolute inset-0 flex items-center justify-center animate-cycle-2">
-                    <div className="relative w-72 h-28">
+                    <div className="relative w-70 h-28">
                         <Image
                             src="/LLoyds_logo.svg"
                             alt="Lloyds"
