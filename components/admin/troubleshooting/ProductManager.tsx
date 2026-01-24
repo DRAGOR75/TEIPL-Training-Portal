@@ -200,6 +200,13 @@ export default function ProductManager({ products }: { products: Troubleshooting
         }
     }
 
+    async function handleDelete(id: number) {
+        const result = await deleteTroubleshootingProduct(id);
+        if (result?.error) {
+            alert(result.error);
+        }
+    }
+
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -264,7 +271,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
                                         handleUpdate={handleUpdate}
                                         setEditingId={setEditingId}
                                         startEdit={startEdit}
-                                        deleteProduct={deleteTroubleshootingProduct}
+                                        deleteProduct={handleDelete}
                                         toggleStatus={toggleStatus}
                                     />
                                 ))}

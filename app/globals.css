@@ -3,6 +3,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --loading-cycle-duration: 2s;
 }
 
 @theme inline {
@@ -80,52 +81,72 @@ html {
   animation: breathe 4s ease-in-out infinite;
 }
 
-@keyframes cycle-1 {
+@keyframes pulseBlur {
 
   0%,
   45% {
+    filter: blur(0px);
     opacity: 1;
     transform: scale(1);
   }
 
   50%,
   95% {
+    filter: blur(12px);
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(1.05);
   }
 
   100% {
+    filter: blur(0px);
     opacity: 1;
     transform: scale(1);
   }
 }
 
-@keyframes cycle-2 {
+@keyframes pulseBlurDelayed {
 
   0%,
   45% {
+    filter: blur(12px);
     opacity: 0;
     transform: scale(0.95);
   }
 
   50%,
   95% {
+    filter: blur(0px);
     opacity: 1;
     transform: scale(1);
   }
 
   100% {
+    filter: blur(12px);
     opacity: 0;
     transform: scale(0.95);
   }
 }
 
-.animate-cycle-1 {
-  animation: cycle-1 2s ease-in-out infinite;
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
 }
 
-.animate-cycle-2 {
-  animation: cycle-2 2s ease-in-out infinite;
+.animate-blur-cycle-1 {
+  animation: pulseBlur var(--loading-cycle-duration) infinite ease-in-out;
+}
+
+.animate-blur-cycle-2 {
+  animation: pulseBlurDelayed var(--loading-cycle-duration) infinite ease-in-out;
+}
+
+.animate-shimmer {
+  animation: shimmer calc(var(--loading-cycle-duration) / 2) ease-in-out infinite;
 }
 
 /* --- Calendar Overrides --- */

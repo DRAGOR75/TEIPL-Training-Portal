@@ -261,6 +261,7 @@ model FaultCause {
   seq            Int      @default(0) // The order of checking (1, 2, 3...)
   isLikely       Boolean  @default(false) @map("is_likely")
   isActive       Boolean  @default(true) @map("is_active")
+  justification  String?  @db.Text
 
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")

@@ -28,7 +28,8 @@ import {
     removeCauseFromSequence,
     toggleFaultCauseStatus, // New
     updateSequenceOrder,     // New
-    updateCauseLibraryItem   // New
+    updateCauseLibraryItem,   // New
+    updateFaultCauseItem // New
 } from '@/app/actions/admin-troubleshooting';
 import {
     TroubleshootingProduct,
@@ -42,7 +43,7 @@ import { FormSubmitButton } from '@/components/FormSubmitButton';
 import { ArrowRight, Plus, Trash2, GripVertical, CheckCircle2, Edit2, Check, X, Eye, EyeOff } from 'lucide-react';
 
 type FullProductFault = ProductFault & { fault: FaultLibrary };
-type FullFaultCause = FaultCause & { cause: CauseLibrary };
+type FullFaultCause = FaultCause & { cause: CauseLibrary; justification?: string | null };
 
 interface DiagnosticSequencerProps {
     products: TroubleshootingProduct[];
@@ -78,16 +79,22 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
     };
 
     async function handleSave(formData: FormData) {
-        const data = {
+        // Shared fields
+        const libraryData = {
             name: formData.get('name') as string,
             action: formData.get('action') as string,
             symptoms: formData.get('symptoms') as string,
             manualRef: formData.get('manualRef') as string,
         };
 
-        const result = await updateCauseLibraryItem(step.cause.id, data);
-        if (result?.error) {
-            alert(result.error);
+        // Context specific field
+        const justification = formData.get('justification') as string;
+
+        const libraryRes = await updateCauseLibraryItem(step.cause.id, libraryData);
+        const faultCauseRes = await updateFaultCauseItem(step.id, { justification });
+
+        if (libraryRes?.error || faultCauseRes?.error) {
+            alert(libraryRes?.error || faultCauseRes?.error);
         } else {
             setIsEditing(false);
             onUpdate();
@@ -101,6 +108,10 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                     <div>
                         <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
                         <input defaultValue={step.cause.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                    </div>
+                    <div>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Justification (Context Specific)</label>
+                        <textarea defaultValue={step.justification || step.cause.justification || ''} name="justification" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -136,7 +147,8 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                     {!step.isActive && <span className="text-[10px] uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">Disabled</span>}
                 </div>
 
-                <p className="text-xs text-slate-500 mt-2 line-clamp-2 pl-8">{step.cause.action}</p>
+                <p className="text-xs text-slate-600 mt-1 font-medium">{step.justification || step.cause.justification}</p>
+                <p className="text-xs text-slate-500 mt-1 line-clamp-2 pl-8">{step.cause.action}</p>
                 {step.cause.manualRef && (
                     <span className="inline-block mt-2 ml-8 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded font-mono">
                         Ref: {step.cause.manualRef}

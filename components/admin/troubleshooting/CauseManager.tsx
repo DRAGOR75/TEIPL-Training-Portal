@@ -24,6 +24,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
     async function handleUpdate(id: string, formData: FormData) {
         const data = {
             name: formData.get('name') as string,
+            justification: formData.get('justification') as string,
             action: formData.get('action') as string,
             symptoms: formData.get('symptoms') as string,
             manualRef: formData.get('manualRef') as string,
@@ -58,6 +59,11 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Check Description (Cause)</label>
                             <input name="name" className="w-full mt-1 p-2 border border-green-200 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none" placeholder="e.g. Check Coolant Level" required />
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Justification (Why?)</label>
+                            <textarea name="justification" rows={2} className="w-full mt-1 p-2 border border-green-200 rounded text-sm" placeholder="e.g. Low coolant leads to overheating..." />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -103,6 +109,10 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                             <div>
                                                 <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
                                                 <input defaultValue={c.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                            </div>
+                                            <div>
+                                                <label className="text-xs font-bold text-slate-500 uppercase">Justification</label>
+                                                <textarea defaultValue={c.justification || ''} name="justification" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
