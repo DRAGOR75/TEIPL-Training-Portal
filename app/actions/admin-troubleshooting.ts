@@ -32,12 +32,27 @@ export async function createTroubleshootingProduct(formData: FormData) {
 
 export async function deleteTroubleshootingProduct(id: number) {
     try {
-        await db.troubleshootingProduct.delete({ where: { id } });
+        // Validation: Verify existence (optional but good)
+        // Manual Cascade: Delete related ProductFaults first
+        // Note: FaultCauses linked to ProductFaults have onDelete: Cascade in schema, so they will auto-delete.
+
+        await db.$transaction(async (tx) => {
+            // 1. Delete mappings
+            await tx.productFault.deleteMany({
+                where: { productId: id }
+            });
+
+            // 2. Delete the product itself
+            await tx.troubleshootingProduct.delete({
+                where: { id }
+            });
+        });
+
         revalidatePath(ADMIN_PATH);
         return { success: true };
     } catch (e) {
-        console.error(e);
-        return { error: 'Failed to delete product' };
+        console.error('Delete product error:', e);
+        return { error: 'Failed to delete product. It may still have dependencies.' };
     }
 }
 
@@ -116,6 +131,7 @@ export async function deleteFaultLibraryItem(id: string) {
 export async function createCauseLibraryItem(formData: FormData) {
     try {
         const name = formData.get('name') as string;
+        const justification = formData.get('justification') as string || '';
         const action = formData.get('action') as string || '';
         const symptoms = formData.get('symptoms') as string || '';
         const manualRef = formData.get('manualRef') as string || '';
@@ -123,7 +139,7 @@ export async function createCauseLibraryItem(formData: FormData) {
         if (!name) return { error: 'Check/Cause Name is required' };
 
         await db.causeLibrary.create({
-            data: { name, action, symptoms, manualRef }
+            data: { name, justification, action, symptoms, manualRef }
         });
 
         revalidatePath(ADMIN_PATH);
@@ -145,7 +161,7 @@ export async function deleteCauseLibraryItem(id: string) {
     }
 }
 
-export async function updateCauseLibraryItem(id: string, data: { name: string; action: string; symptoms: string; manualRef: string }) {
+export async function updateCauseLibraryItem(id: string, data: { name: string; justification?: string; action: string; symptoms: string; manualRef: string }) {
     try {
         if (!data.name) return { error: 'Check/Cause Name is required' };
 
@@ -153,6 +169,7 @@ export async function updateCauseLibraryItem(id: string, data: { name: string; a
             where: { id },
             data: {
                 name: data.name,
+                justification: data.justification,
                 action: data.action,
                 symptoms: data.symptoms,
                 manualRef: data.manualRef
@@ -263,6 +280,20 @@ export async function removeCauseFromSequence(id: string) {
     } catch (e) {
         console.error(e);
         return { error: 'Failed to remove step' };
+    }
+}
+
+export async function updateFaultCauseItem(id: string, data: { justification?: string }) {
+    try {
+        await db.faultCause.update({
+            where: { id },
+            data: { justification: data.justification }
+        });
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update step details' };
     }
 }
 
@@ -378,6 +409,7 @@ export type BulkUploadRow = {
 
     causeName?: string;
     action?: string;
+    justification?: string; // New: Justification / Reason
     symptoms?: string;
     manualRef?: string;
     seq?: number;
@@ -570,11 +602,12 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
 
                 await db.faultCause.upsert({
                     where: { productFaultId_causeId: { productFaultId: pf.id, causeId: cause.id } },
-                    update: { seq: finalSeq },
+                    update: { seq: finalSeq, justification: row.justification },
                     create: {
                         productFaultId: pf.id,
                         causeId: cause.id,
-                        seq: finalSeq
+                        seq: finalSeq,
+                        justification: row.justification
                     }
                 });
             }

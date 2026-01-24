@@ -29,7 +29,7 @@ type FullProductFault = ProductFault & {
 
 type DiagnosisData = {
     context: ProductFault & { product: TroubleshootingProduct; fault: FaultLibrary };
-    sequence: (FaultCause & { cause: CauseLibrary })[];
+    sequence: (FaultCause & { cause: CauseLibrary; justification?: string | null })[];
 };
 
 interface TroubleshootReportProps {
@@ -372,10 +372,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                                 </div>
                                                             </div>
 
-                                                            {step.cause.justification && (
-                                                                <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
-                                                                    {step.cause.justification}
-                                                                </p>
+                                                            {(step.justification || step.cause.justification) && (
+                                                                <div>
+
+                                                                    <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
+                                                                        Justification:{step.justification || step.cause.justification}
+                                                                    </p>
+                                                                </div>
                                                             )}
                                                         </div>
 

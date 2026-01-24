@@ -24,27 +24,50 @@ export default function BulkUploader() {
             transformHeader: (h) => h.trim().replace(/^"|"$/g, ''), // Trim and remove surrounding quotes from headers
             complete: async (results) => {
                 try {
+                    const headers = results.meta.fields || [];
+
+                    // Helper to find the first matching header from a list of aliases
+                    const findHeader = (aliases: string[]) => headers.find(h => aliases.some(alias => h.toLowerCase() === alias.toLowerCase()));
+
+                    const mapHeader = {
+                        machineName: findHeader(['Machine Model', 'ProductName', 'Machine']),
+                        productSeq: findHeader(['ProdViewSeq']),
+                        keywords: findHeader(['Key Words to filter']),
+                        productId: findHeader(['ProdID']),
+
+                        faultName: findHeader(['Fault Name', 'Fault/Complaint /Failure/ Fault Code', 'FaultName']),
+                        faultId: findHeader(['FaultID']),
+                        faultCode: findHeader(['Fault Code']),
+                        faultViewSeq: findHeader(['FaultViewSeq']),
+
+                        causeName: findHeader(['Cause', '"Cause"', 'Check Description', 'Possible Causes', 'Check']),
+                        action: findHeader(['Action', 'Remedy Action', 'Action/Remedy', 'Remedy']),
+                        justification: findHeader(['Justification', 'Why', 'Reason', 'Explanation']),
+
+                        symptoms: findHeader(['Symptoms']),
+                        manualRef: findHeader(['Reference', 'Procedures/References']),
+                        seq: findHeader(['Sequence', 'CauseViewSeq', 'CauseSeq'])
+                    };
+
                     const rows = results.data.map((row: any) => ({
-                        // Smart Mapping: Normalize keys to handle case-insensitivity manually if needed, 
-                        // though transformHeader handles spaces. Use multiple aliases.
+                        machineName: mapHeader.machineName ? row[mapHeader.machineName]?.trim() : undefined,
+                        productSeq: mapHeader.productSeq ? parseInt(row[mapHeader.productSeq]) || undefined : undefined,
+                        keywords: mapHeader.keywords ? row[mapHeader.keywords]?.trim() : undefined,
+                        productId: mapHeader.productId ? row[mapHeader.productId] : undefined,
 
-                        machineName: (row['Machine Model'] || row['ProductName'] || row['Machine'])?.trim(),
-                        productSeq: parseInt(row['ProdViewSeq']) || undefined,
-                        keywords: row['Key Words to filter']?.trim(),
-                        productId: row['ProdID'],
+                        faultName: mapHeader.faultName ? row[mapHeader.faultName]?.trim() : undefined,
+                        faultId: mapHeader.faultId ? row[mapHeader.faultId] : undefined,
+                        faultCode: mapHeader.faultCode ? row[mapHeader.faultCode]?.trim() : undefined,
+                        faultViewSeq: mapHeader.faultViewSeq ? parseInt(row[mapHeader.faultViewSeq]) || undefined : undefined,
 
-                        faultName: (row['Fault Name'] || row['Fault/Complaint /Failure/ Fault Code'] || row['FaultName'])?.trim(),
-                        faultId: row['FaultID'],
-                        faultCode: row['Fault Code']?.trim(),
-                        faultViewSeq: parseInt(row['FaultViewSeq']) || undefined,
+                        // Cause & Action
+                        causeName: mapHeader.causeName ? row[mapHeader.causeName]?.trim() : undefined,
+                        action: mapHeader.action ? row[mapHeader.action]?.trim() : undefined,
+                        justification: mapHeader.justification ? row[mapHeader.justification]?.trim() : undefined,
 
-                        // Cause & Action - Extended aliases based on user issues
-                        causeName: (row['Cause'] || row['"Cause"'] || row['Check Description'] || row['Possible Causes'] || row['Check'])?.trim(),
-                        action: (row['Action'] || row['Remedy Action'] || row['Action/Remedy'] || row['Remedy'])?.trim(),
-
-                        symptoms: row['Symptoms']?.trim(),
-                        manualRef: (row['Reference'] || row['Procedures/References'])?.trim(),
-                        seq: parseInt(row['Sequence']) || parseInt(row['CauseViewSeq']) || parseInt(row['CauseSeq']) || undefined
+                        symptoms: mapHeader.symptoms ? row[mapHeader.symptoms]?.trim() : undefined,
+                        manualRef: mapHeader.manualRef ? row[mapHeader.manualRef]?.trim() : undefined,
+                        seq: mapHeader.seq ? (parseInt(row[mapHeader.seq]) || undefined) : undefined
                     })).filter((r: any) => r.machineName || r.faultId || r.productId);
 
                     if (rows.length === 0) {
@@ -124,7 +147,7 @@ export default function BulkUploader() {
                     <p className="font-bold mb-2 text-slate-500 uppercase">Supported Formats:</p>
                     <div className="mb-2">
                         <span className="font-bold text-slate-800">1. Full Diagnostic Data:</span><br />
-                        Machine Model, FaultID, Fault Name, CauseSeq, Cause, Action
+                        Machine Model, FaultID, Fault Name, CauseSeq, Cause, Justification, Action
                     </div>
 
                 </div>
