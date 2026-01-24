@@ -34,16 +34,8 @@ export default function Loading() {
 
             {/* Optional: Subtle Progress Bar */}
             <div className="mt-8 w-48 h-[2px] bg-gray-100 rounded-full overflow-hidden">
-                <div className="h-full bg-gray-400/50 animate-[loading_2s_ease-in-out_infinite] origin-left"
-                    style={{ width: '100%', animationName: 'shimmer' }} />
+                <div className="h-full bg-gray-400/50 animate-shimmer origin-left w-full" />
             </div>
-
-            <style jsx>{`
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-      `}</style>
         </div>
     );
 }
