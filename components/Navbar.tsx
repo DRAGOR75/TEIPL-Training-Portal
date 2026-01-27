@@ -27,7 +27,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                     <div className="flex items-center gap-4">
                         <Link href="/" className="flex items-center gap-3 group">
                             {/* Thriveni Logo */}
-                            <div className="relative w-32 h-16 transition-transform group-hover:scale-105">
+                            <div className="relative w-24 sm:w-32 h-16 transition-transform group-hover:scale-105">
                                 <Image
                                     src="/thriveny_logo.svg"
                                     alt="Thriveni Logo"
@@ -38,7 +38,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                             </div>
                             <div className="h-8 w-[1px] bg-slate-300 mx-2 hidden sm:block"></div>
                             {/* Lloyds Logo */}
-                            <div className="relative w-34 h-10 transition-transform group-hover:scale-105">
+                            <div className="relative w-24 sm:w-36 h-10 transition-transform group-hover:scale-105">
                                 <Image
                                     src="/LLoyds_logo.svg"
                                     alt="Lloyds Metals Logo"
