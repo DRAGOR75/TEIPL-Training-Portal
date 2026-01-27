@@ -6,7 +6,7 @@ function runTest(name, url, connections, duration, pipelining = 1) {
     console.log(`Connections: ${connections} | Duration: ${duration}s | Pipelining: ${pipelining}`);
 
     try {
-        const cmd = `npx -y autocannon -c ${connections} -d ${duration} -p ${pipelining} --renderStatusCodes ${url} >> load-test-cached.txt`;
+        const cmd = `npx -y autocannon -c ${connections} -d ${duration} -p ${pipelining} --renderStatusCodes ${url} >> load-test-micro.txt`;
         // Execute and append to file
         execSync(cmd);
     } catch (error) {
@@ -16,9 +16,9 @@ function runTest(name, url, connections, duration, pipelining = 1) {
 
 function main() {
     const fs = require('fs');
-    fs.writeFileSync('load-test-cached.txt', '=== CACHED LOAD TEST REPORT ===\n');
+    fs.writeFileSync('load-test-micro.txt', '=== MICRO-CACHING LOAD TEST REPORT ===\n');
 
-    console.log("Starting Performance Stress Tests... writing to load-test-cached.txt");
+    console.log("Starting Performance Stress Tests... writing to load-test-micro.txt");
     console.log("Note: Ensure your local server is running on localhost:3000");
 
     // 1. BASELINE: Static/SSG Page

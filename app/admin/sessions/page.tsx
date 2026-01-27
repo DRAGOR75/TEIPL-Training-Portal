@@ -39,7 +39,11 @@ export default async function SessionsPage() {
                             </div>
 
                             <div>
-                                <h3 className="text-xl font-bold text-slate-900 line-clamp-1">{session.programName}</h3>
+                                <h3 className="text-xl font-bold text-slate-900 line-clamp-1">
+                                    <Link href={`/admin/sessions/${session.id}/manage`} className="hover:text-blue-600 transition-colors">
+                                        {session.programName}
+                                    </Link>
+                                </h3>
                                 <div className="flex items-center gap-2 text-slate-500 text-sm mt-2">
                                     <Calendar className="w-4 h-4" />
                                     <span>{new Date(session.startDate).toLocaleDateString()}</span>

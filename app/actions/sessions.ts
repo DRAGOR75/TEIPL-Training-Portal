@@ -51,6 +51,8 @@ export async function createSession(formData: FormData) {
 }
 
 // CACHED: Session List
+// CACHED: Session List (Micro-Caching: 1 second)
+// This prevents DB floods (1000 reqs -> 1 DB call) while keeping UI "real-time" for admins.
 export const getSessions = unstable_cache(
     async () => {
         return await db.trainingSession.findMany({
@@ -64,11 +66,12 @@ export const getSessions = unstable_cache(
             }
         });
     },
-    ['sessions-list'], // Tag
-    { revalidate: 300, tags: ['sessions-list'] } // Cache for 5 mins
+    ['sessions-list'],
+    { revalidate: 1 }
 );
 
 // CACHED: Single Session
+// CACHED: Single Session (Micro-Caching: 1 second)
 export const getSessionById = unstable_cache(
     async (sessionId: string) => {
         return await db.trainingSession.findUnique({
@@ -86,7 +89,7 @@ export const getSessionById = unstable_cache(
         });
     },
     ['session-details'],
-    { revalidate: 300, tags: ['session-details'] }
+    { revalidate: 1 }
 );
 
 export async function getPendingNominationsForProgram(programId: string) {
