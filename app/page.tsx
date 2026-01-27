@@ -22,27 +22,27 @@ export default function Home() {
         </div>
 
         {/* Asymmetrical Bento Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 w-full h-auto">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 w-full h-auto">
 
-          {/* Card 1: TNI (Wide - Spans 1 Column on Mobile, 2 on Desktop) */}
+          {/* Card 1: TNI (Wide - Spans 1 Column on Mobile, 2 on Desktop) - Blue Theme */}
           <Link href="/tni" className="group col-span-1 md:col-span-2 relative overflow-hidden">
-            <div className="h-full bg-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 hover:border-blue-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8 relative z-10">
+            <div className="h-full bg-blue-50/50 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-blue-100 transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 hover:border-blue-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-8 relative z-10">
 
-              <div className="flex flex-col justify-between h-full space-y-3 md:space-y-6 flex-1">
-                <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ClipboardList className="w-5 h-5 md:w-7 md:h-7" strokeWidth={2} />
+              <div className="flex flex-col justify-between h-full space-y-4 md:space-y-6 flex-1">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                  <ClipboardList className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2} />
                 </div>
                 <div>
-                  <h2 className="text-lg md:text-3xl font-bold tracking-tight text-slate-900 mb-1 md:mb-2 group-hover:text-blue-700 transition-colors">
+                  <h2 className="text-xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2 group-hover:text-blue-700 transition-colors">
                     TNI Hub
                   </h2>
-                  <p className="text-slate-500 font-medium leading-relaxed max-w-sm text-xs md:text-base line-clamp-2 md:line-clamp-none">
+                  <p className="text-slate-600 font-medium leading-relaxed max-w-sm text-sm md:text-base line-clamp-3 md:line-clamp-none">
                     Comprehensive Training Needs Identification. Process nominations and plan batches efficiently.
                   </p>
                 </div>
-                <div className="flex items-center gap-1 md:gap-2 text-blue-600 font-bold text-xs md:text-sm tracking-wide uppercase group-hover:gap-2 md:group-hover:gap-3 transition-all">
+                <div className="flex items-center gap-2 text-blue-700 font-bold text-xs md:text-sm tracking-wide uppercase group-hover:gap-3 transition-all">
                   <span>Open System</span>
-                  <ArrowRight className="w-3 h-3 md:w-4 md:h-4" />
+                  <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
 
@@ -56,58 +56,58 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Card 2: Feedback (Tall/Standard - Spans 1 Column) */}
+          {/* Card 2: Feedback (Tall/Standard - Spans 1 Column) - Indigo Theme */}
           <Link href="/admin/dashboard" className="group col-span-1 relative overflow-hidden">
-            <div className="h-full bg-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 transition-all duration-500 hover:shadow-xl hover:shadow-indigo-900/5 hover:-translate-y-1 hover:border-indigo-200 flex flex-col justify-between relative z-10 min-h-[180px] md:min-h-[320px]">
+            <div className="h-full bg-indigo-50/50 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-indigo-100 transition-all duration-500 hover:shadow-xl hover:shadow-indigo-900/5 hover:-translate-y-1 hover:border-indigo-200 flex flex-col justify-between relative z-10 min-h-[220px] md:min-h-[320px]">
 
-              <div className="space-y-3 md:space-y-6">
-                <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <BarChart3 className="w-5 h-5 md:w-7 md:h-7" strokeWidth={2} />
+              <div className="space-y-4 md:space-y-6">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                  <BarChart3 className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2} />
                 </div>
                 <div>
-                  <h2 className="text-lg md:text-2xl font-bold tracking-tight text-slate-900 mb-1 md:mb-2 group-hover:text-indigo-700 transition-colors">
+                  <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 mb-2 group-hover:text-indigo-700 transition-colors">
                     Feedback
                   </h2>
-                  <p className="text-slate-500 font-medium leading-relaxed text-xs md:text-sm line-clamp-2 md:line-clamp-none">
+                  <p className="text-slate-600 font-medium leading-relaxed text-sm md:text-sm line-clamp-3 md:line-clamp-none">
                     Analyze training metrics and reports.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-auto pt-4 md:pt-6 md:mt-8 border-t border-slate-50">
-                <span className="text-indigo-600 font-bold text-xs md:text-sm uppercase">Admin</span>
-                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-indigo-50 flex items-center justify-center group-hover:rotate-45 transition-transform">
-                  <ArrowRight className="w-3 h-3 md:w-[14px] md:h-[14px] text-indigo-600" />
+              <div className="flex items-center justify-between mt-auto pt-6 border-t border-indigo-100">
+                <span className="text-indigo-700 font-bold text-xs md:text-sm uppercase">Admin</span>
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center group-hover:rotate-45 transition-transform shadow-sm">
+                  <ArrowRight className="w-4 h-4 text-indigo-600" />
                 </div>
               </div>
 
             </div>
           </Link>
 
-          {/* Card 3: Troubleshooting (Full Width - Spans 2 Columns on Mobile, 3 on Desktop) */}
+          {/* Card 3: Troubleshooting (Full Width - Spans 2 Columns on Mobile, 3 on Desktop) - Red Theme */}
           <Link href="/troubleshoot" className="group col-span-2 md:col-span-3 relative overflow-hidden">
-            <div className="h-full bg-white rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-slate-200 transition-all duration-500 hover:shadow-xl hover:shadow-red-900/10 hover:-translate-y-1 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 overflow-hidden">
+            <div className="h-full bg-red-50/50 rounded-3xl md:rounded-[2.5rem] p-5 md:p-8 border border-red-100 transition-all duration-500 hover:shadow-xl hover:shadow-red-900/10 hover:-translate-y-1 relative z-10 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6 overflow-hidden">
 
               {/* Specialized Gradient for both Mobile and Desktop */}
-              <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-white opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-r from-red-50 to-white opacity-0 md:opacity-100 transition-opacity" />
 
               <div className="flex items-center gap-4 md:gap-6 relative z-10 w-full">
-                <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform">
-                  <Wrench className="w-5 h-5 md:w-7 md:h-7" strokeWidth={2} />
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-white text-red-600 flex items-center justify-center shrink-0 group-hover:rotate-12 transition-transform shadow-sm">
+                  <Wrench className="w-6 h-6 md:w-7 md:h-7" strokeWidth={2} />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-lg md:text-2xl font-bold tracking-tight text-slate-900 mb-0.5 md:mb-1">
+                  <h2 className="text-xl md:text-2xl font-bold tracking-tight text-slate-900 mb-1">
                     Troubleshooting Center
                   </h2>
-                  <p className="text-slate-500 font-medium text-xs md:text-sm">
+                  <p className="text-slate-600 font-medium text-sm">
                     Access diagnostic tools and operational guides.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 md:gap-3 relative z-10 px-4 py-2 md:px-6 md:py-3 bg-white rounded-xl border border-slate-100 text-slate-700 font-bold text-xs md:text-sm tracking-wide uppercase transition-colors group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 self-stretch md:self-auto justify-center">
+              <div className="flex items-center gap-2 md:gap-3 relative z-10 px-4 py-2 md:px-6 md:py-3 bg-white rounded-xl border border-red-100 text-slate-700 font-bold text-xs md:text-sm tracking-wide uppercase transition-colors group-hover:bg-red-600 group-hover:text-white group-hover:border-red-600 self-stretch md:self-auto justify-center shadow-sm">
                 <span>Diagnose</span>
-                <ChevronRight className="w-4 h-4 md:w-4 md:h-4" />
+                <ChevronRight className="w-4 h-4" />
               </div>
 
             </div>
