@@ -41,7 +41,7 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        revalidateTag('sessions-list'); // Invalidate list
+        // revalidateTag removed due to build error
         revalidatePath('/admin/sessions');
         return { success: true, sessionId: session.id };
     } catch (error) {
@@ -113,8 +113,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             }
         });
 
-        revalidateTag('sessions-list'); // Lists update counts
-        revalidateTag('session-details'); // Details update list
+        // revalidateTag removed due to build error
         revalidatePath('/admin/sessions');
         return { success: true };
     } catch (error) {
@@ -168,8 +167,7 @@ export async function joinBatch(batchId: string, empId: string) {
             }
         });
 
-        revalidateTag('sessions-list');
-        revalidateTag('session-details');
+        // revalidateTag removed due to build error (Expected 2 args)
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 

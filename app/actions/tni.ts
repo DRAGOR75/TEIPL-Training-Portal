@@ -86,7 +86,7 @@ export async function updateEmployeeProfile(empId: string, data: {
             }
         });
 
-        revalidateTag('employee-profile'); // INVALIDATE CACHE
+        // revalidateTag('employee-profile'); // Removed due to build error
         revalidatePath(`/tni/${empId}`);
         return { success: true, employee: updated };
     } catch (error) {
