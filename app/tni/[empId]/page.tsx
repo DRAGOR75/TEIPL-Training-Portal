@@ -15,6 +15,10 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
         grade: '',
         sectionName: '',
         location: '',
+        mobile: '',
+        designation: '',
+        yearsOfExperience: '',
+        subDepartment: '',
         managerName: '',
         managerEmail: '',
         nominations: []
@@ -73,7 +77,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     {/* Left Column: Profile (4 columns on large screens) */}
                     <div className="lg:col-span-4 space-y-8">
                         <div className="sticky top-24">
-                            <TNIProfile employee={currentEmployee} sections={sections} />
+                            <TNIProfile employee={currentEmployee as any} sections={sections} />
                         </div>
                     </div>
 

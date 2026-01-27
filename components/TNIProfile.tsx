@@ -12,6 +12,10 @@ type Employee = {
     grade: string | null;
     sectionName: string | null;
     location: string | null;
+    mobile: string | null;
+    designation: string | null;
+    yearsOfExperience: string | null;
+    subDepartment: string | null;
     managerName: string | null;
     managerEmail: string | null;
 };
@@ -33,6 +37,10 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         grade: employee.grade || '',
         sectionName: employee.sectionName || '',
         location: employee.location || '',
+        mobile: employee.mobile || '',
+        designation: employee.designation || '',
+        yearsOfExperience: employee.yearsOfExperience || '',
+        subDepartment: employee.subDepartment || '',
         managerName: employee.managerName || '',
         managerEmail: employee.managerEmail || ''
     });
@@ -52,6 +60,10 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             grade: formData.grade as any,
             sectionName: formData.sectionName,
             location: formData.location,
+            mobile: formData.mobile,
+            designation: formData.designation,
+            yearsOfExperience: formData.yearsOfExperience,
+            subDepartment: formData.subDepartment,
             managerName: formData.managerName,
             managerEmail: formData.managerEmail
         });
@@ -109,6 +121,36 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     </div>
 
                     <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Mobile Number</label>
+                        <input
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="+91..."
+                            value={formData.mobile}
+                            onChange={e => setFormData({ ...formData, mobile: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Designation</label>
+                        <input
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="e.g. Senior Engineer"
+                            value={formData.designation}
+                            onChange={e => setFormData({ ...formData, designation: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Years of Exp.</label>
+                        <input
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="e.g. 5 Years"
+                            value={formData.yearsOfExperience}
+                            onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Grade / Level</label>
                         <select
                             className={`w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all font-medium ${formData.grade ? 'text-slate-900' : 'text-slate-500'}`}
@@ -133,6 +175,16 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                                 <option key={sec.id} value={sec.name}>{sec.name}</option>
                             ))}
                         </select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Sub-Department</label>
+                        <input
+                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            placeholder="e.g. Maintenance"
+                            value={formData.subDepartment}
+                            onChange={e => setFormData({ ...formData, subDepartment: e.target.value })}
+                        />
                     </div>
 
                     <div className="space-y-1.5">
@@ -187,16 +239,23 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
-                        <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
-                            <span className="bg-slate-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-slate-600 font-bold border border-slate-200">
-                                {employee.id}
-                            </span>
-                            {employee.grade && (
-                                <span className="bg-blue-50 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-blue-700 font-bold border border-blue-100">
-                                    {employee.grade}
+                        <div className="flex flex-col gap-1 mt-1">
+                            <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
+                                <span className="bg-slate-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-slate-600 font-bold border border-slate-200">
+                                    {employee.id}
                                 </span>
+                                {employee.grade && (
+                                    <span className="bg-blue-50 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-blue-700 font-bold border border-blue-100">
+                                        {employee.grade}
+                                    </span>
+                                )}
+                            </p>
+                            {employee.designation && (
+                                <p className="text-xs font-semibold text-slate-600">
+                                    {employee.designation}
+                                </p>
                             )}
-                        </p>
+                        </div>
                     </div>
                 </div>
                 <button
@@ -213,7 +272,10 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><Briefcase size={18} /></div>
                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
-                        <div className="text-sm font-semibold text-slate-900">{formData.sectionName || 'Not Set'}</div>
+                        <div className="text-sm font-semibold text-slate-900">
+                            {formData.sectionName || 'Not Set'}
+                            {formData.subDepartment && <span className="text-slate-400 font-normal"> • {formData.subDepartment}</span>}
+                        </div>
                     </div>
                 </div>
 
@@ -232,6 +294,27 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <div className="text-sm font-semibold text-slate-900">{formData.location || 'Not Set'}</div>
                     </div>
                 </div>
+
+                {formData.mobile && (
+                    <div className="flex items-start gap-3 group">
+                        <div className="mt-0.5 text-slate-400 group-hover:text-teal-500 transition-colors"><User size={18} /></div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Mobile</label>
+                            <div className="text-sm font-semibold text-slate-900">{formData.mobile}</div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Experience */}
+                {formData.yearsOfExperience && (
+                    <div className="flex items-start gap-3 group">
+                        <div className="mt-0.5 text-slate-400 group-hover:text-orange-500 transition-colors"><Briefcase size={18} /></div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Experience</label>
+                            <div className="text-sm font-semibold text-slate-900">{formData.yearsOfExperience}</div>
+                        </div>
+                    </div>
+                )}
 
                 <div className="pt-4 border-t border-slate-50">
                     <div className="flex items-start gap-3 group">

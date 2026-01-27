@@ -12,21 +12,26 @@ datasource db {
 // --- NEW TABLES FOR UPGRADED NOMINATION SYSTEM ---
 
 // 1. Master Employee Table (For initial ID verification)
+// 1. Master Employee Table (For initial ID verification)
 model Employee {
-  id           String        @id @map("emp_id") // Your official Employee ID
-  name         String
-  email        String        @unique
-  grade        Grade?         // EXECUTIVE or WORKMAN
-  sectionName  String?       @map("section_name") // Their home department
-  location     String?
-  managerName  String?       @map("manager_name")
-  managerEmail String?       @map("manager_email")
-  programName  String?       @map("program_name")
-  startDate    DateTime?     @map("start_date")
-  endDate      DateTime?     @map("end_date")  
+  id                String        @id @map("emp_id") // Your official Employee ID
+  name              String
+  email             String        @unique
+  grade             Grade?         // EXECUTIVE or WORKMAN
+  sectionName       String?       @map("section_name") // Their home department
+  location          String?
+  mobile            String?
+  designation       String?
+  yearsOfExperience String?       @map("years_of_experience")
+  subDepartment     String?       @map("sub_department")
+  managerName       String?       @map("manager_name")
+  managerEmail      String?       @map("manager_email")
+  programName       String?       @map("program_name")
+  startDate         DateTime?     @map("start_date")
+  endDate           DateTime?     @map("end_date")  
   
   // Relations
-  nominations  Nomination[]  // Links to their training requests
+  nominations       Nomination[]  // Links to their training requests
   
   @@map("employees")
 }
@@ -49,16 +54,17 @@ model Section {
 
 // 3. Master Program Catalog (The 140+ Trainings)
 model Program {
-  id            String           @id @default(uuid())
-  name          String           @unique
-  category      TrainingCategory // FUNCTIONAL, BEHAVIOURAL, or COMMON
-  targetGrades  Grade[]          // Array: can be for both [EXECUTIVE, WORKMAN]
+  id             String            @id @default(uuid())
+  name           String            @unique
+  category       TrainingCategory  // FUNCTIONAL, BEHAVIOURAL, or COMMON
+  targetGrades   Grade[]           // Array: can be for both [EXECUTIVE, WORKMAN]
   
   // Many-to-Many: A program can belong to many sections
-  sections      Section[]        @relation("ProgramToSection")
+  sections       Section[]         @relation("ProgramToSection")
   
   // Relation to nominations
-  nominations   Nomination[]
+  nominations    Nomination[]
+  batches        NominationBatch[]
 
   @@map("programs")
 }
@@ -79,16 +85,38 @@ model Nomination {
   programId      String   @map("program_id")
   
   // Metadata for the snapshot
-  status         String   @default("Pending") // Pending, Approved, Rejected
+  status         String   @default("Pending") // Pending, Batched, Completed
+  source         String   @default("MANUAL") // MANUAL (TNI) or QR (Direct)
   justification  String?  @db.Text
+  
+  batchId        String?  @map("batch_id")
+
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   // Relations
-  employee       Employee @relation(fields: [empId], references: [id])
-  program        Program  @relation(fields: [programId], references: [id])
+  employee       Employee         @relation(fields: [empId], references: [id])
+  program        Program          @relation(fields: [programId], references: [id])
+  batch          NominationBatch? @relation(fields: [batchId], references: [id])
 
   @@map("nominations")
+}
+
+// 5. NEW Nomination Batch Table (Groups participants)
+model NominationBatch {
+  id              String           @id @default(uuid())
+  name            String?          // e.g., "Feb 2026 Safety Batch"
+  programId       String           @map("program_id")
+  
+  status          String           @default("Forming") // Forming, Scheduled, Completed
+  createdAt       DateTime         @default(now()) @map("created_at")
+  
+  // Relations
+  program         Program          @relation(fields: [programId], references: [id])
+  nominations     Nomination[]
+  trainingSession TrainingSession?
+
+  @@map("nomination_batches")
 }
 
 // --- REST OF YOUR ORIGINAL TABLES (RETAINED) ---
@@ -104,8 +132,14 @@ model TrainingSession {
   emailsSent                Boolean      @default(false) @map("emails_sent")
   feedbackReminderSent      Boolean      @default(false) @map("feedback_reminder_sent")
   sendFeedbackAutomatically Boolean      @default(false) @map("send_feedback_automatically")
+  
+  nominationBatchId         String?      @unique @map("nomination_batch_id")
+
   createdAt                 DateTime     @default(now()) @map("created_at")
   enrollments               Enrollment[]
+  
+  // Relations
+  nominationBatch           NominationBatch? @relation(fields: [nominationBatchId], references: [id])
 
   @@unique([programName, startDate, endDate, trainerName])
   @@index([startDate])

@@ -6,12 +6,11 @@ import {
     User,
     Briefcase,
     Mail,
-    Star,
+    Circle,
     MessageSquare,
     CheckCircle2,
     Building2,
-    BookOpen,
-    Circle
+    BookOpen
 } from 'lucide-react';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
@@ -35,7 +34,6 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
         <div className="min-h-screen bg-slate-950 py-12 px-4 font-sans text-slate-800">
             <div className="max-w-3xl w-full mx-auto bg-white rounded-2xl shadow-xl shadow-slate-900/50 border border-slate-800 overflow-hidden">
 
-                {/* Header Section */}
                 {/* Header Section */}
                 <div className="bg-slate-900 p-8 md:p-12 text-center text-white relative overflow-hidden">
                     {/* Background Pattern */}
@@ -105,12 +103,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                 icon={<User size={16} />}
                                 placeholder="Your Full Name"
                             />
-                            <InputField
-                                label="Employee ID"
-                                name="empId"
-                                icon={<Building2 size={16} />}
-                                placeholder="Your Employee ID"
-                            />
+                            {/* REMOVED EMPLOYEE ID FIELD AS REQUESTED */}
                             <div className="md:col-span-2">
                                 <InputField
                                     label="Official Email"
@@ -228,7 +221,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                         className="w-full group bg-blue-700 hover:bg-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-blue-200 transition-all transform hover:-translate-y-0.5 mt-8 flex items-center justify-center gap-3"
                     >
                         <CheckCircle2 size={24} className="group-hover:scale-110 transition-transform" />
-                        <span className="text-lg">Submit Feedback & Enroll</span>
+                        <span className="text-lg">Submit Feedback</span>
                     </FormSubmitButton>
                 </form>
 
