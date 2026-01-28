@@ -4,48 +4,50 @@
 import { db } from '@/lib/prisma';
 import { Grade } from '@prisma/client';
 import { redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
 
 export async function checkEmployeeAccess(formData: FormData) {
     const empId = formData.get('empId') as string;
     if (!empId) {
-        // In server actions for forms, throwing error will trigger error boundary or fail request. 
-        // Ideally we'd use useFormState, but for now throwing is better than returning object which breaks type.
         throw new Error('Employee ID is required');
     }
-
-    // Check if employee exists
-    // const employee = await db.employee.findUnique({ where: { id: empId } });
-
-    // Redirect to the dynamic route regardless (creation happens there or next step)
     redirect(`/tni/${empId}`);
 }
 
-export async function getEmployeeProfile(empId: string) {
-    const employee = await db.employee.findUnique({
-        where: { id: empId },
-        include: {
-            nominations: {
-                where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
-                include: { program: true }
+// CACHED: Employee Profile
+export const getEmployeeProfile = unstable_cache(
+    async (empId: string) => {
+        const employee = await db.employee.findUnique({
+            where: { id: empId },
+            include: {
+                nominations: {
+                    where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
+                    include: { program: true }
+                }
             }
-        }
-    });
+        });
 
-    // Fetch sections for the dropdown
-    const sections = await db.section.findMany({
-        orderBy: { name: 'asc' }
-    });
+        // Fetch sections for the dropdown
+        const sections = await db.section.findMany({
+            orderBy: { name: 'asc' }
+        });
 
-    return { employee, sections };
-}
+        return { employee, sections };
+    },
+    ['employee-profile'], // Base tag
+    { revalidate: 3600, tags: ['employee-profile'] } // Revalidate every hour or on tag invalidation
+);
 
 export async function updateEmployeeProfile(empId: string, data: {
     name: string;
     email: string;
-    grade: unknown; // Use unknown or string if Grade enum not picked up
+    grade: unknown;
     sectionName: string;
     location: string;
+    mobile?: string;
+    designation?: string;
+    yearsOfExperience?: string;
+    subDepartment?: string;
     managerName?: string;
     managerEmail?: string;
 }) {
@@ -61,20 +63,30 @@ export async function updateEmployeeProfile(empId: string, data: {
                 })(),
                 sectionName: data.sectionName,
                 location: data.location,
+                mobile: data.mobile,
+                designation: data.designation,
+                yearsOfExperience: data.yearsOfExperience,
+                subDepartment: data.subDepartment,
                 managerName: data.managerName,
                 managerEmail: data.managerEmail,
             },
             create: {
-                id: empId,
+                id: empId, // Ensure ID is used for creation
                 name: data.name,
                 email: data.email,
                 grade: data.grade as any,
                 sectionName: data.sectionName,
                 location: data.location,
+                mobile: data.mobile,
+                designation: data.designation,
+                yearsOfExperience: data.yearsOfExperience,
+                subDepartment: data.subDepartment,
                 managerName: data.managerName,
                 managerEmail: data.managerEmail,
             }
         });
+
+        // revalidateTag('employee-profile'); // Removed due to build error
         revalidatePath(`/tni/${empId}`);
         return { success: true, employee: updated };
     } catch (error) {
@@ -83,42 +95,40 @@ export async function updateEmployeeProfile(empId: string, data: {
     }
 }
 
-export async function getAvailablePrograms(grade?: Grade, sectionName?: string) {
-    const where: any = {
-        AND: []
-    };
+// CACHED: Available Programs
+export const getAvailablePrograms = unstable_cache(
+    async (grade?: Grade, sectionName?: string) => {
+        const where: any = {
+            AND: []
+        };
 
-    // 1. Filter by Grade (Universal)
-    if (grade) {
-        where.AND.push({ targetGrades: { has: grade } });
-    }
+        if (grade) {
+            where.AND.push({ targetGrades: { has: grade } });
+        }
 
-    // 2. Filter Functional Programs by Section
-    // If category is FUNCTIONAL, it must match the section.
-    // Other categories are shown regardless of section (for now).
-    if (sectionName) {
-        where.AND.push({
-            OR: [
-                { category: { not: 'FUNCTIONAL' } }, // Show Non-Functional
-                {
-                    category: 'FUNCTIONAL',
-                    sections: { some: { name: sectionName } } // Only matching Section
-                }
-            ]
+        if (sectionName) {
+            where.AND.push({
+                OR: [
+                    { category: { not: 'FUNCTIONAL' } },
+                    {
+                        category: 'FUNCTIONAL',
+                        sections: { some: { name: sectionName } }
+                    }
+                ]
+            });
+        } else {
+            where.AND.push({ category: { not: 'FUNCTIONAL' } });
+        }
+
+        return await db.program.findMany({
+            where,
+            orderBy: { name: 'asc' },
+            include: { sections: true }
         });
-    } else {
-        // If no section is assigned to employee, maybe hide all Functional? or show none?
-        // Let's hide Functional programs if user has no section to be safe, 
-        // to avoid showing them everything.
-        where.AND.push({ category: { not: 'FUNCTIONAL' } });
-    }
-
-    return await db.program.findMany({
-        where,
-        orderBy: { name: 'asc' },
-        include: { sections: true }
-    });
-}
+    },
+    ['available-programs'],
+    { revalidate: 86400, tags: ['programs'] } // Cache for 24h
+);
 
 import { sendTNIApprovalEmail } from '@/lib/email';
 

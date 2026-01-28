@@ -82,6 +82,25 @@ export default async function AdminHubPage() {
                         </div>
                     </Link>
 
+                    {/* Card 4: Session Management */}
+                    <Link href="/admin/sessions" className="group bg-white rounded-xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 hover:border-emerald-500 block">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                                    <Users size={24} />
+                                </div>
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Batches</span>
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-900 mb-2">Training Sessions</h2>
+                            <p className="text-slate-500 text-sm mb-6">
+                                Schedule trainings, manage batches, and access Enrollment QR codes.
+                            </p>
+                            <div className="flex items-center text-emerald-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                                Manage Sessions <ChevronRight size={16} />
+                            </div>
+                        </div>
+                    </Link>
+
                 </div>
 
                 <div className="mt-12 text-center text-slate-400 text-sm">
