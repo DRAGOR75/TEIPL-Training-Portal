@@ -42,7 +42,7 @@ export default function LoginPage() {
 
     return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
-            <div className="max-w-sm w-full bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
 
                 {/* Header - High Contrast Blue */}
                 <div className="bg-blue-700 p-8 text-center">
@@ -67,7 +67,7 @@ export default function LoginPage() {
                                     type="email"
                                     required
                                     placeholder="Enter your email"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
                                 />
                             </div>
                         </div>
@@ -84,7 +84,7 @@ export default function LoginPage() {
                                     type="password"
                                     required
                                     placeholder="Enter your password"
-                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-slate-900 font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-blue-600 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
                                 />
                             </div>
                         </div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
                         <FormSubmitButton
                             isLoading={loading}
                             loadingText="SIGNING IN..."
-                            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-black py-3 rounded-lg shadow-lg flex justify-center items-center gap-3 transition-all active:scale-95 disabled:opacity-70"
+                            className="w-full bg-blue-700 hover:bg-blue-800 text-white font-black py-3 rounded-xl shadow-lg flex justify-center items-center gap-3 transition-all active:scale-95 disabled:opacity-70"
                         >
                             SIGN IN TO DASHBOARD
                         </FormSubmitButton>

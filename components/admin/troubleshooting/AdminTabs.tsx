@@ -28,17 +28,17 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
 
     return (
         <div>
-            <div className="flex space-x-1 bg-slate-100 p-1 rounded-lg mb-6 w-fit">
+            <div className="flex space-x-1 bg-slate-100 p-1.5 rounded-2xl mb-8 w-fit overflow-x-auto max-w-full">
                 {tabs.map((tab) => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${activeTab === tab.id
+                        className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
                             ? 'bg-white text-blue-600 shadow-sm'
                             : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >
-                        <tab.icon size={16} />
+                        <tab.icon size={18} />
                         {tab.label}
                     </button>
                 ))}

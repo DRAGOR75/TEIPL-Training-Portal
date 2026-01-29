@@ -204,7 +204,7 @@ export default function DashboardClient({
                 {/* LEFT COLUMN */}
                 <div className="w-full lg:w-1/3 space-y-8">
                     {/* Calendar */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 md:p-6">
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <CalendarIcon className="text-blue-700" size={20} />
                             <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
@@ -238,7 +238,7 @@ export default function DashboardClient({
                     {/* Stats & Actions */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Session Overview Card */}
-                        <div className="bg-blue-700 text-white rounded-2xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
+                        <div className="bg-blue-700 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
                             <LayoutDashboard className="absolute -right-8 -bottom-8 text-white/10" size={150} />
 
                             <div className="relative z-10">
@@ -273,7 +273,7 @@ export default function DashboardClient({
                         </div>
 
                         {/* Create Session */}
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
                             <div className="p-3 bg-blue-50 rounded-full text-blue-700">
                                 <PlusCircle size={32} />
                             </div>
@@ -286,7 +286,7 @@ export default function DashboardClient({
                     </div>
 
                     {/* Sessions List */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 justify-between flex-wrap">
                             <div className="flex items-center gap-2">
                                 <QrCode className="text-blue-700" size={20} />
@@ -297,7 +297,7 @@ export default function DashboardClient({
                         </div>
 
                         {sessions.length === 0 ? (
-                            <div className="text-center py-12 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                            <div className="text-center py-12 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
                                 <p className="text-slate-500 font-medium italic">No sessions scheduled for this date.</p>
                             </div>
                         ) : (
@@ -316,7 +316,7 @@ export default function DashboardClient({
                                                 // setIsNavigating(true); // Don't trigger loading screen just for navigation for now
                                                 router.push(`/admin/dashboard/session/${t.id}`);
                                             }}
-                                            className="p-5 border border-slate-200 rounded-2xl bg-white hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer relative"
+                                            className="p-5 border border-slate-200 rounded-3xl bg-white hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer relative"
                                         >
                                             {/* ROW 1: Program Name and Dates - Moved to Top Level */}
                                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
@@ -450,7 +450,7 @@ export default function DashboardClient({
 
                                                 {/* QR Code */}
                                                 <div
-                                                    className="flex flex-col items-center bg-slate-50 p-4 rounded-2xl border border-slate-100 shrink-0"
+                                                    className="flex flex-col items-center bg-slate-50 p-4 rounded-3xl border border-slate-100 shrink-0"
                                                     onClick={(e) => e.stopPropagation()}
                                                 >
                                                     <div className="bg-white p-2 rounded-lg shadow-sm">

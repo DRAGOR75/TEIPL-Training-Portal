@@ -131,7 +131,7 @@ export default function BulkUploader() {
     };
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 max-w-2xl mx-auto">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-4">
                 <div className="bg-blue-50 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
                     <UploadCloud size={32} />
@@ -143,7 +143,7 @@ export default function BulkUploader() {
                 </p>
 
                 {/* Template Info */}
-                <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 text-left text-xs font-mono text-slate-600 overflow-x-auto">
+                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-6 text-left text-xs font-mono text-slate-600 overflow-x-auto">
                     <p className="font-bold mb-2 text-slate-500 uppercase">Supported Formats:</p>
                     <div className="mb-2">
                         <span className="font-bold text-slate-800">1. Full Diagnostic Data:</span><br />
@@ -153,7 +153,7 @@ export default function BulkUploader() {
                 </div>
 
                 <div className="pt-4">
-                    <label className="cursor-pointer inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-6 py-3 rounded-lg font-bold transition-all active:scale-95">
+                    <label className="cursor-pointer inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-slate-200">
                         {isUploading ? <Loader2 className="animate-spin" size={20} /> : <FileSpreadsheet size={20} />}
                         {isUploading ? 'Uploading...' : 'Select CSV File'}
                         <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
@@ -165,7 +165,7 @@ export default function BulkUploader() {
                                 <span>Progress</span>
                                 <span>{progress}%</span>
                             </div>
-                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden mt-2">
                                 <div
                                     className="h-full bg-blue-600 transition-all duration-300 ease-out"
                                     style={{ width: `${progress}%` }}
@@ -176,14 +176,14 @@ export default function BulkUploader() {
                 </div>
 
                 {stats?.count !== undefined && (
-                    <div className="mt-6 p-4 bg-green-50 text-green-700 rounded-lg flex items-center justify-center gap-2 animate-in fade-in zoom-in-95">
+                    <div className="mt-6 p-4 bg-green-50 text-green-700 rounded-2xl flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 border border-green-100">
                         <CheckCircle size={20} />
                         <span className="font-bold">Successfully processed {stats.count} rows!</span>
                     </div>
                 )}
 
                 {stats?.error && (
-                    <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center justify-center gap-2 animate-in fade-in zoom-in-95">
+                    <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-2xl flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 border border-red-100">
                         <AlertCircle size={20} />
                         <span className="font-bold">{stats.error}</span>
                     </div>

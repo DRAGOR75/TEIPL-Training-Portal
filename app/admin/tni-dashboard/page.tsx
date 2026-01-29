@@ -53,8 +53,8 @@ export default async function MasterDataPage() {
 
                 {/* Header */}
                 <div>
-                    <h1 className="text-3xl font-black text-slate-900">TNI Dashboard</h1>
-                    <p className="text-slate-500 mt-2">Manage essential system data: Sections, Programs, and Employee records.</p>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">TNI Dashboard</h1>
+                    <p className="text-slate-500 mt-2 font-medium">Manage essential system data: Sections, Programs, and Employee records.</p>
                 </div>
 
                 <hr className="border-slate-800" />

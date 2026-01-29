@@ -116,3 +116,52 @@ export async function deleteEmployee(id: string) {
         return { error: 'Failed to delete employee' };
     }
 }
+
+// --- FETCH HELPERS (For Searchable Selects) ---
+export async function getSections() {
+    try {
+        const sections = await db.section.findMany({
+            orderBy: { name: 'asc' },
+            select: { name: true }
+        });
+        return sections.map(s => ({ label: s.name, value: s.name }));
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getDesignations() {
+    try {
+        const designations = await db.designation.findMany({
+            select: { name: true },
+            orderBy: { name: 'asc' }
+        });
+        return designations.map(d => ({ label: d.name, value: d.name }));
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getLocations() {
+    try {
+        const locations = await db.location.findMany({
+            select: { name: true },
+            orderBy: { name: 'asc' }
+        });
+        return locations.map(l => ({ label: l.name, value: l.name }));
+    } catch (error) {
+        return [];
+    }
+}
+
+export async function getTrainerOptions() {
+    try {
+        const trainers = await db.trainer.findMany({
+            select: { name: true },
+            orderBy: { name: 'asc' }
+        });
+        return trainers.map(t => ({ label: t.name, value: t.name }));
+    } catch (error) {
+        return [];
+    }
+}

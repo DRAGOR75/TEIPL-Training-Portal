@@ -39,7 +39,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                     <Stethoscope size={18} className="text-green-600" />
@@ -47,7 +47,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                 </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1"
+                    className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1"
                 >
                     <Plus size={14} /> New Check
                 </button>
@@ -58,32 +58,32 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                     <form ref={formRef} action={handleAdd} className="space-y-3">
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Check Description (Cause)</label>
-                            <input name="name" className="w-full mt-1 p-2 border border-green-200 rounded text-sm focus:ring-2 focus:ring-green-500 outline-none" placeholder="e.g. Check Coolant Level" required />
+                            <input name="name" className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm focus:ring-2 focus:ring-green-500 outline-none" placeholder="e.g. Check Coolant Level" required />
                         </div>
 
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Justification (Why?)</label>
-                            <textarea name="justification" rows={2} className="w-full mt-1 p-2 border border-green-200 rounded text-sm" placeholder="e.g. Low coolant leads to overheating..." />
+                            <textarea name="justification" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Low coolant leads to overheating..." />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase">Remedy / Action</label>
-                                <textarea name="action" rows={2} className="w-full mt-1 p-2 border border-green-200 rounded text-sm" placeholder="e.g. Top up coolant..." />
+                                <textarea name="action" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Top up coolant..." />
                             </div>
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase">Symptoms (Optional)</label>
-                                <textarea name="symptoms" rows={2} className="w-full mt-1 p-2 border border-green-200 rounded text-sm" placeholder="e.g. High temp gauge reading..." />
+                                <textarea name="symptoms" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. High temp gauge reading..." />
                             </div>
                         </div>
 
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
-                            <input name="manualRef" className="w-full mt-1 p-2 border border-green-200 rounded text-sm" placeholder="e.g. Page 42, Section 3.1" />
+                            <input name="manualRef" className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Page 42, Section 3.1" />
                         </div>
 
                         <div className="text-right">
-                            <FormSubmitButton className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium">
+                            <FormSubmitButton className="bg-green-600 hover:bg-green-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium">
                                 Save to Library
                             </FormSubmitButton>
                         </div>
@@ -108,25 +108,25 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                         <form action={(fd) => handleUpdate(c.id, fd)} className="space-y-3">
                                             <div>
                                                 <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
-                                                <input defaultValue={c.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+                                                <input defaultValue={c.name} name="name" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
                                             </div>
                                             <div>
                                                 <label className="text-xs font-bold text-slate-500 uppercase">Justification</label>
-                                                <textarea defaultValue={c.justification || ''} name="justification" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                <textarea defaultValue={c.justification || ''} name="justification" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
-                                                    <textarea defaultValue={c.action || ''} name="action" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                    <textarea defaultValue={c.action || ''} name="action" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                                 </div>
                                                 <div>
                                                     <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
-                                                    <textarea defaultValue={c.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                    <textarea defaultValue={c.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                                 </div>
                                             </div>
                                             <div>
                                                 <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
-                                                <input defaultValue={c.manualRef || ''} name="manualRef" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                                                <input defaultValue={c.manualRef || ''} name="manualRef" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                             </div>
                                             <div className="flex justify-end gap-2 mt-2">
                                                 <button type="button" onClick={() => setEditingId(null)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>

@@ -355,3 +355,52 @@ export async function sendTNIApprovalEmail(
     html
   });
 }
+
+/**
+ * EMAIL FOR MANAGER (Training Session Approval)
+ */
+export async function sendManagerSessionApprovalEmail(
+  managerEmail: string,
+  managerName: string | null,
+  employeeName: string,
+  programName: string,
+  startDate: Date,
+  endDate: Date,
+  nominationId: string
+) {
+  const baseUrl = getBaseUrl();
+  const approvalLink = `${baseUrl}/manager/approval/${nominationId}`;
+
+  const startDateStr = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const endDateStr = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
+  const html = `
+    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <h2 style="color: #0056b3;">Training Nomination Approval Required</h2>
+      <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
+      <p>Your team member <strong>${employeeName}</strong> has been selected for the following training session:</p>
+      
+      <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; border-left: 4px solid #0056b3; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #0056b3; margin-bottom: 10px;">${programName}</h3>
+        <p style="margin: 5px 0;"><strong>Start Date:</strong> ${startDateStr}</p>
+        <p style="margin: 5px 0;"><strong>End Date:</strong> ${endDateStr}</p>
+      </div>
+
+      <p>As their manager, please review and approve or reject their participation. If rejecting, you will be required to provide a reason.</p>
+      
+      <div style="margin: 25px 0;">
+        <a href="${approvalLink}" style="background-color: #0056b3; color: white; padding: 12px 25px; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block;">Review Request</a>
+      </div>
+
+      <p style="font-size: 13px; color: #666;">Note: This action is required to finalize their enrollment.</p>
+      
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+    </div>`;
+
+  return await sendEmail({
+    to: managerEmail,
+    subject: `Approval Required: Training Session for ${employeeName}`,
+    html
+  });
+}

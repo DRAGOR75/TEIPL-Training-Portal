@@ -41,7 +41,7 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                             type="number"
                             value={editSeq}
                             onChange={(e) => setEditSeq(parseInt(e.target.value))}
-                            className="w-16 p-1 border border-blue-300 rounded text-xs"
+                            className="w-16 p-2 border border-blue-300 rounded-xl text-xs"
                         />
                     </td>
                     <td className="px-4 py-3 font-medium text-slate-700 bg-white">
@@ -49,7 +49,7 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                             type="text"
                             value={editName}
                             onChange={(e) => setEditName(e.target.value)}
-                            className="w-full p-1 border border-blue-300 rounded text-sm"
+                            className="w-full p-2 border border-blue-300 rounded-xl text-sm"
                             autoFocus
                         />
                     </td>
@@ -57,7 +57,7 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => handleUpdate(p.id)}
-                                className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
+                                className="text-white bg-green-500 hover:bg-green-600 p-2 rounded-lg shadow-sm"
                                 title="Save"
                             >
                                 <Check size={14} />
@@ -208,7 +208,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
                     <Box size={18} className="text-blue-600" />
@@ -216,7 +216,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
                 </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
-                    className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1"
+                    className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1"
                 >
                     <Plus size={14} /> New Machine
                 </button>
@@ -233,7 +233,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
                             <label className="text-xs font-bold text-slate-500 uppercase">Seq</label>
                             <input type="number" name="viewSeq" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" defaultValue={99} />
                         </div>
-                        <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium">
+                        <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-sm font-medium">
                             Save
                         </FormSubmitButton>
                     </form>

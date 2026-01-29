@@ -100,13 +100,13 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     };
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-6">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-6">
             <div
                 className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 rounded-lg text-purple-600">
+                    <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
                         <Users size={20} />
                     </div>
                     <div>
@@ -130,19 +130,19 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                             <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
                                 <Plus size={16} /> Manual Entry
                             </h4>
-                            <form ref={formRef} action={handleAdd} className="bg-slate-50 p-4 rounded-lg space-y-3 border border-slate-200">
+                            <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
                                 <div className="grid grid-cols-2 gap-3">
-                                    <input name="id" required placeholder="Emp ID *" className="p-2 text-sm border border-slate-300 rounded w-full placeholder-slate-500 text-slate-900" />
-                                    <select name="grade" className="p-2 text-sm border border-slate-300 rounded w-full text-slate-900">
+                                    <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                    <select name="grade" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500 bg-white">
                                         <option value="EXECUTIVE">Executive</option>
                                         <option value="WORKMAN">Workman</option>
                                     </select>
                                 </div>
-                                <input name="name" required placeholder="Full Name *" className="p-2 text-sm border border-slate-300 rounded w-full placeholder-slate-500 text-slate-900" />
-                                <input name="email" required type="email" placeholder="Email Address *" className="p-2 text-sm border border-slate-300 rounded w-full placeholder-slate-500 text-slate-900" />
-                                <input name="sectionName" placeholder="Department / Section" className="p-2 text-sm border border-slate-300 rounded w-full placeholder-slate-500 text-slate-900" />
+                                <input name="name" required placeholder="Full Name *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                <input name="email" required type="email" placeholder="Email Address *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
 
-                                <FormSubmitButton className="w-full py-2 bg-purple-600 text-white rounded font-bold hover:bg-purple-700 transition disabled:opacity-50">
+                                <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
                                     Add Employee
                                 </FormSubmitButton>
                             </form>
@@ -153,7 +153,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                             <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
                                 <Upload size={16} /> Bulk Upload (CSV)
                             </h4>
-                            <div className="bg-slate-50 p-6 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
+                            <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
                                 {uploading ? (
                                     <div className="text-center w-full max-w-xs">
                                         <div className="animate-pulse text-purple-600 font-bold text-lg mb-2">Processing CSV Data...</div>
@@ -189,7 +189,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                         />
                                         <label
                                             htmlFor="csvUpload"
-                                            className="cursor-pointer bg-white border border-slate-300 text-slate-700 px-4 py-2 rounded shadow-sm hover:bg-slate-100 font-bold text-sm transition"
+                                            className="cursor-pointer bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-xl shadow-sm hover:bg-slate-100 font-bold text-sm transition"
                                         >
                                             Select CSV File
                                         </label>
@@ -201,7 +201,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                     {/* UPLOAD STATS RESULT */}
                     {uploadStats && (
-                        <div className={`mt-4 p-4 rounded border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                        <div className={`mt-4 p-4 rounded-xl border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
                             <p className="font-bold text-sm">Upload Complete</p>
                             <p className="text-sm mt-1">✅ Successfully Imported: {uploadStats.success} records</p>
                             {uploadStats.errors.length > 0 && (

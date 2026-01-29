@@ -2,7 +2,34 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
-import { redirect } from 'next/navigation';
+import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail } from '@/lib/email';
+
+export async function lockSessionBatch(sessionId: string) {
+    try {
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            select: { nominationBatchId: true }
+        });
+
+        if (!session || !session.nominationBatchId) {
+            return { success: false, error: "Session or Batch not found" };
+        }
+
+        await db.nominationBatch.update({
+            where: { id: session.nominationBatchId },
+            data: { status: 'Confirmed' }
+        });
+
+        revalidatePath(`/admin/dashboard/session/${sessionId}`);
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/sessions');
+        return { success: true };
+    } catch (error) {
+        console.error("Lock Batch Error:", error);
+        return { success: false, error: "Database error" };
+    }
+}
+
 
 export async function createSession(formData: FormData) {
     const programName = formData.get('programName') as string;
@@ -37,6 +64,8 @@ export async function createSession(formData: FormData) {
                 trainerName,
                 startDate,
                 endDate,
+                location: formData.get('location') as string,
+                topics: formData.get('topics') as string,
                 nominationBatchId: batch.id
             }
         });
@@ -92,6 +121,33 @@ export const getSessionById = unstable_cache(
     { revalidate: 1 }
 );
 
+export async function getTrainingSessionsForDate(dateStr: string) {
+    try {
+        const startOfDay = new Date(dateStr + "T00:00:00.000Z");
+        const endOfDay = new Date(dateStr + "T23:59:59.999Z");
+
+        return await db.trainingSession.findMany({
+            where: {
+                startDate: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                }
+            },
+            orderBy: { startDate: 'desc' },
+            include: {
+                nominationBatch: {
+                    include: {
+                        nominations: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Get Training Sessions For Date Error:', error);
+        return [];
+    }
+}
+
 export async function getPendingNominationsForProgram(programId: string) {
     return await db.nomination.findMany({
         where: {
@@ -106,15 +162,50 @@ export async function getPendingNominationsForProgram(programId: string) {
 
 export async function addNominationsToBatch(batchId: string, nominationIds: string[]) {
     try {
+        // 1. Update Database
         await db.nomination.updateMany({
             where: {
                 id: { in: nominationIds }
             },
             data: {
                 batchId,
-                status: 'Batched'
+                status: 'Batched',
+                // managerApprovalStatus: 'Pending' // Explicitly set to Pending if needed, though default handles it
             }
         });
+
+        // 2. Check if this batch is linked to a Scheduled Session
+        const batch = await db.nominationBatch.findUnique({
+            where: { id: batchId },
+            include: {
+                trainingSession: true,
+                program: true
+            }
+        });
+
+        if (batch?.trainingSession) {
+            // 3. Fetch full nomination details (Employee Manager Info)
+            const nominations = await db.nomination.findMany({
+                where: { id: { in: nominationIds } },
+                include: { employee: true }
+            });
+
+            // 4. Send Approval Emails to Managers
+            const { startDate, endDate } = batch.trainingSession;
+            Promise.all(nominations.map(async (nom) => {
+                if (nom.employee.managerEmail) {
+                    await sendManagerSessionApprovalEmail(
+                        nom.employee.managerEmail,
+                        nom.employee.managerName,
+                        nom.employee.name,
+                        batch.program.name,
+                        startDate,
+                        endDate,
+                        nom.id
+                    );
+                }
+            })).catch(err => console.error("Failed to send approval emails", err));
+        }
 
         // revalidateTag removed due to build error
         revalidatePath('/admin/sessions');
@@ -151,7 +242,10 @@ export async function joinBatch(batchId: string, empId: string) {
         // 3. Get Batch to find Program ID (needed for Nomination)
         const batch = await db.nominationBatch.findUnique({
             where: { id: batchId },
-            include: { program: true }
+            include: {
+                program: true,
+                trainingSession: true
+            }
         });
 
         if (!batch) {
@@ -159,7 +253,7 @@ export async function joinBatch(batchId: string, empId: string) {
         }
 
         // 4. Create Nomination
-        await db.nomination.create({
+        const nomination = await db.nomination.create({
             data: {
                 empId,
                 programId: batch.programId,
@@ -169,6 +263,20 @@ export async function joinBatch(batchId: string, empId: string) {
                 justification: 'Self-Enrollment via QR Scan'
             }
         });
+
+        // 5. Send Email if Session exists
+        if (batch.trainingSession && employee.managerEmail) {
+            const { startDate, endDate } = batch.trainingSession;
+            await sendManagerSessionApprovalEmail(
+                employee.managerEmail,
+                employee.managerName,
+                employee.name,
+                batch.program.name,
+                startDate,
+                endDate,
+                nomination.id
+            ).catch(console.error);
+        }
 
         // revalidateTag removed due to build error (Expected 2 args)
         revalidatePath(`/admin/sessions`); // Update admin view
@@ -198,7 +306,10 @@ export async function registerAndJoinBatch(batchId: string, formData: {
         // 1. Double check batch validity
         const batch = await db.nominationBatch.findUnique({
             where: { id: batchId },
-            include: { program: true }
+            include: {
+                program: true,
+                trainingSession: true
+            }
         });
 
         if (!batch) {
@@ -239,7 +350,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
         });
 
         // 3. Create Nomination
-        await db.nomination.create({
+        const nomination = await db.nomination.create({
             data: {
                 empId: employee.id,
                 programId: batch.programId,
@@ -250,11 +361,48 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             }
         });
 
+        // 4. Send Email if Session exists
+        // Note: We use formData.managerEmail because employee object return from upsert might not have it if upsert return behavior varies, 
+        // but robustly we should use employee.managerEmail or formData.managerEmail.
+        if (batch.trainingSession && formData.managerEmail) {
+            const { startDate, endDate } = batch.trainingSession;
+            await sendManagerSessionApprovalEmail(
+                formData.managerEmail,
+                formData.managerName,
+                formData.name,
+                batch.program.name,
+                startDate,
+                endDate,
+                nomination.id
+            ).catch(console.error);
+        }
+
         revalidatePath(`/admin/sessions`);
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
     } catch (error) {
+
         console.error('Register and Join Error:', error);
         return { error: 'Failed to register and enroll. Please try again.' };
+    }
+}
+
+export async function removeNominationFromBatch(nominationId: string) {
+    try {
+        await db.nomination.update({
+            where: { id: nominationId },
+            data: {
+                batchId: null,
+                status: 'Pending',
+                managerApprovalStatus: 'Pending', // Reset approval flow
+                managerRejectionReason: null      // Clean up any old rejection reasons
+            }
+        });
+
+        revalidatePath('/admin/sessions');
+        return { success: true };
+    } catch (error) {
+        console.error('Remove Nomination Error:', error);
+        return { error: 'Failed to remove participant.' };
     }
 }

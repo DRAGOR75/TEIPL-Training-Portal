@@ -103,29 +103,29 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
 
     if (isEditing) {
         return (
-            <div ref={setNodeRef} style={style} className="bg-white p-4 rounded-lg border-2 border-blue-500 shadow-sm">
+            <div ref={setNodeRef} style={style} className="bg-white p-6 rounded-2xl border-2 border-blue-500 shadow-sm">
                 <form action={handleSave} className="space-y-3">
                     <div>
                         <label className="text-xs font-bold text-slate-500 uppercase">Check Description</label>
-                        <input defaultValue={step.cause.name} name="name" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                        <input defaultValue={step.cause.name} name="name" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
                     </div>
                     <div>
                         <label className="text-xs font-bold text-slate-500 uppercase">Justification (Context Specific)</label>
-                        <textarea defaultValue={step.justification || step.cause.justification || ''} name="justification" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                        <textarea defaultValue={step.justification || step.cause.justification || ''} name="justification" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
-                            <textarea defaultValue={step.cause.action || ''} name="action" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                            <textarea defaultValue={step.cause.action || ''} name="action" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                         </div>
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
-                            <textarea defaultValue={step.cause.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                            <textarea defaultValue={step.cause.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                         </div>
                     </div>
                     <div>
                         <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
-                        <input defaultValue={step.cause.manualRef || ''} name="manualRef" className="w-full mt-1 p-2 border border-blue-200 rounded text-sm" />
+                        <input defaultValue={step.cause.manualRef || ''} name="manualRef" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
                         <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
@@ -137,7 +137,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
     }
 
     return (
-        <div ref={setNodeRef} style={style} className={`bg-white p-4 rounded-lg border shadow-sm group hover:border-blue-300 transition-all flex gap-4 ${!step.isActive ? 'opacity-60 grayscale border-slate-100' : 'border-slate-200'}`}>
+        <div ref={setNodeRef} style={style} className={`bg-white p-5 rounded-2xl border shadow-sm group hover:border-blue-300 transition-all flex gap-4 ${!step.isActive ? 'opacity-60 grayscale border-slate-100' : 'border-slate-200'}`}>
             <div className="flex-1">
                 <div className="flex items-center gap-2">
                     <span className={`inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${step.isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-400'}`}>
@@ -339,7 +339,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[700px]">
             {/* LEFT PANE: Machine & Fault Selection */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 space-y-4">
                     <div>
                         <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Select Machine</label>
@@ -474,7 +474,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
             </div>
 
             {/* RIGHT PANE: Diagnostic Sequence */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+            <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                     <h3 className="font-bold text-slate-700 flex items-center gap-2">
                         <CheckCircle2 size={18} className="text-green-600" />
@@ -483,7 +483,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                     <button
                         disabled={!selectedProductFaultId}
                         onClick={() => setIsAddingStep(true)}
-                        className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-md font-medium transition flex items-center gap-1 disabled:opacity-50"
+                        className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1 disabled:opacity-50"
                     >
                         <Plus size={14} /> Add Step
                     </button>
@@ -507,7 +507,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                 <div>
                                     {/* Add Step Form */}
                                     {isAddingStep && (
-                                        <div className="mb-4 p-4 bg-white rounded-lg border border-slate-200 shadow-sm animate-in slide-in-from-top-1">
+                                        <div className="mb-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm animate-in slide-in-from-top-1">
                                             <form action={handleAddStep} className="space-y-3">
                                                 <input type="hidden" name="causeId" value={addStepCauseId} />
                                                 <div>
@@ -523,7 +523,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                 </div>
                                                 <div className="flex justify-end gap-2">
                                                     <button type="button" onClick={() => setIsAddingStep(false)} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700">Cancel</button>
-                                                    <FormSubmitButton className="px-3 py-1.5 bg-green-600 text-white text-xs rounded font-bold">Add Step</FormSubmitButton>
+                                                    <FormSubmitButton className="px-4 py-2 bg-green-600 text-white text-xs rounded-xl font-bold">Add Step</FormSubmitButton>
                                                 </div>
                                             </form>
                                         </div>

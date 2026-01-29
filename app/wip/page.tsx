@@ -3,7 +3,7 @@ import { Construction, ArrowLeft } from 'lucide-react';
 
 export default function WorkInProgressPage() {
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
             <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl text-center max-w-lg w-full border border-slate-200">
                 <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <Construction size={40} />

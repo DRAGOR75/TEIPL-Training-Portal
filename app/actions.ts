@@ -113,7 +113,8 @@ export async function getSessionDetails(sessionId: string) {
             include: {
                 enrollments: {
                     orderBy: { employeeName: 'asc' }
-                }
+                },
+                nominationBatch: true
             }
         });
         return session;
@@ -357,6 +358,16 @@ export async function createTrainingSession(formData: FormData) {
 export async function addParticipants(sessionId: string, participants: ParticipantData[]) {
     try {
         if (!sessionId) return { success: false, error: "Session ID missing" };
+
+        // Check if batch is locked
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: { nominationBatch: true }
+        });
+
+        if (session?.nominationBatch?.status === 'Confirmed' || session?.nominationBatch?.status === 'Completed') {
+            return { success: false, error: "This batch is locked. No new participants can be added." };
+        }
 
         await db.enrollment.createMany({
             data: participants.map((p) => ({

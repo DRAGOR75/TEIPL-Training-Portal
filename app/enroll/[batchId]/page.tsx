@@ -1,10 +1,12 @@
 'use client';
 
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { joinBatch, registerAndJoinBatch } from '@/app/actions/sessions'; // Import both
+import { getSections, getDesignations, getLocations } from '@/app/actions/master-data';
 import { Loader2, CheckCircle2, AlertCircle, UserPlus, User, Mail, Briefcase, MapPin, Phone } from 'lucide-react';
 import { useParams } from 'next/navigation';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 // Using client component for interaction
 export default function JoinPage() {
@@ -15,6 +17,28 @@ export default function JoinPage() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [result, setResult] = useState<{ employeeName?: string, programName?: string, error?: string } | null>(null);
     const [isRegistering, setIsRegistering] = useState(false); // New state for JIT mode
+
+    // Options State
+    const [sectionOptions, setSectionOptions] = useState<{ label: string, value: string }[]>([]);
+    const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
+    const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
+
+
+    useEffect(() => {
+        async function fetchOptions() {
+            const [sections, designations, locations] = await Promise.all([
+                getSections(),
+                getDesignations(),
+                getLocations()
+            ]);
+            setSectionOptions(sections);
+            setDesignationOptions(designations);
+            setLocationOptions(locations);
+        }
+        if (isRegistering) {
+            fetchOptions();
+        }
+    }, [isRegistering]);
 
     // Registration Form State
     const [regData, setRegData] = useState({
@@ -30,6 +54,34 @@ export default function JoinPage() {
         managerName: '',
         managerEmail: ''
     });
+
+    // Helper: CamelCase Converter
+    const toCamelCase = (str: string) => {
+        return str
+            .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
+                return index === 0 ? word.toUpperCase() : word.toLowerCase(); // Wait, user said "Camel Case" for Name usually means Title Case (John Doe). 
+                // "Camel Case" technically is "johnDoe". 
+                // Context: "Name- whatever the name is should be in the camel casing"
+                // Usually for names in forms, users mean "Title Case" (Capitalize First Letter of Each Word). 
+                // Pure camelCase (johnDoe) is weird for names. 
+                // However, I will implement Title Case (John Doe) as it's standard for Names. 
+                // If they strictly meant camelCase (johnDoe), I'll stick to Title Case as it's a "Name".
+                // Actually, let's look at the prompt again: "Name- whatever the name is should be in the camel casing"
+                // I'll implement Title Case (John Doe) because that's human readable. 
+            })
+            .replace(/\s+/g, ' ');
+    };
+
+    // Better Title Case function
+    const toTitleCase = (str: string) => {
+        return str.toLowerCase().split(' ').map(function (word) {
+            return (word.charAt(0).toUpperCase() + word.slice(1));
+        }).join(' ');
+    }
+
+    const handleNameBlur = () => {
+        setRegData(prev => ({ ...prev, name: toTitleCase(prev.name) }));
+    };
 
     async function handleJoinSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -74,8 +126,8 @@ export default function JoinPage() {
 
     if (status === 'success') {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center space-y-4 border border-green-100">
+            <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full text-center space-y-4">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600 mb-4">
                         <CheckCircle2 className="w-8 h-8" />
                     </div>
@@ -97,8 +149,8 @@ export default function JoinPage() {
     // --- REGISTRATION VIEW ---
     if (isRegistering) {
         return (
-            <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 py-12">
-                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full space-y-6">
+            <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 py-12">
+                <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full space-y-6">
                     <div className="text-center space-y-2">
                         <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 mb-2">
                             <UserPlus className="w-6 h-6" />
@@ -122,7 +174,7 @@ export default function JoinPage() {
                             <input
                                 value={empId}
                                 disabled
-                                className="w-full p-3 bg-slate-100 border border-slate-200 rounded-lg text-slate-500 font-mono font-medium"
+                                className="w-full p-4 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 font-mono font-medium"
                             />
                         </div>
 
@@ -135,7 +187,8 @@ export default function JoinPage() {
                                     placeholder="e.g. John Doe"
                                     value={regData.name}
                                     onChange={e => setRegData({ ...regData, name: e.target.value })}
-                                    className="w-full pl-10 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    onBlur={handleNameBlur}
+                                    className="w-full pl-10 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                                 />
                             </div>
                         </div>
@@ -150,7 +203,7 @@ export default function JoinPage() {
                                     placeholder="e.g. john@thriveni.com"
                                     value={regData.email}
                                     onChange={e => setRegData({ ...regData, email: e.target.value })}
-                                    className="w-full pl-10 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full pl-10 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                                 />
                             </div>
                         </div>
@@ -161,10 +214,16 @@ export default function JoinPage() {
                                 <Phone className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
                                 <input
                                     required
-                                    placeholder="+91..."
+                                    type="tel"
+                                    pattern="[0-9]{10}"
+                                    title="Please enter a valid 10-digit mobile number"
+                                    placeholder="e.g. 9876543210"
                                     value={regData.mobile}
-                                    onChange={e => setRegData({ ...regData, mobile: e.target.value })}
-                                    className="w-full pl-10 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    onChange={e => {
+                                        const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                        setRegData({ ...regData, mobile: val });
+                                    }}
+                                    className="w-full pl-10 p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                                 />
                             </div>
                         </div>
@@ -180,7 +239,7 @@ export default function JoinPage() {
                                     required
                                     value={regData.grade}
                                     onChange={e => setRegData({ ...regData, grade: e.target.value })}
-                                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none bg-white"
+                                    className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-medium"
                                 >
                                     <option value="EXECUTIVE">Executive</option>
                                     <option value="WORKMAN">Workman</option>
@@ -189,13 +248,14 @@ export default function JoinPage() {
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase">Location <span className='text-red-500'>*</span></label>
                                 <div className="relative">
-                                    <MapPin className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-                                    <input
-                                        required
-                                        placeholder="Site"
+                                    <SearchableSelect
+                                        options={locationOptions}
                                         value={regData.location}
-                                        onChange={e => setRegData({ ...regData, location: e.target.value })}
-                                        className="w-full pl-10 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        onChange={(val) => setRegData({ ...regData, location: typeof val === 'string' ? val : String(val) })}
+                                        placeholder="Select Site"
+                                        searchPlaceholder="Search locations..."
+                                        icon={<MapPin className="w-5 h-5" />}
+                                        className="w-full"
                                     />
                                 </div>
                             </div>
@@ -205,17 +265,18 @@ export default function JoinPage() {
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase">Department <span className='text-red-500'>*</span></label>
                                 <div className="relative">
-                                    <Briefcase className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
-                                    <input
-                                        required
-                                        placeholder="Dept"
+                                    <SearchableSelect
+                                        options={sectionOptions}
                                         value={regData.sectionName}
-                                        onChange={e => setRegData({ ...regData, sectionName: e.target.value })}
-                                        className="w-full pl-10 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                        onChange={(val) => setRegData({ ...regData, sectionName: typeof val === 'string' ? val : String(val) })}
+                                        placeholder="Select Dept"
+                                        searchPlaceholder="Search departments..."
+                                        icon={<Briefcase className="w-5 h-5" />}
+                                        className="w-full"
                                     />
                                 </div>
                             </div>
-                            <div className="space-y-1.5">
+                            {/* <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase">Sub-Dept</label>
                                 <input
                                     placeholder="e.g. Mines"
@@ -223,19 +284,22 @@ export default function JoinPage() {
                                     onChange={e => setRegData({ ...regData, subDepartment: e.target.value })}
                                     className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                                 />
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase">Designation <span className='text-red-500'>*</span></label>
-                                <input
-                                    required
-                                    placeholder="Role"
-                                    value={regData.designation}
-                                    onChange={e => setRegData({ ...regData, designation: e.target.value })}
-                                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                                />
+                                <div className="relative">
+                                    <SearchableSelect
+                                        options={designationOptions}
+                                        value={regData.designation}
+                                        onChange={(val) => setRegData({ ...regData, designation: typeof val === 'string' ? val : String(val) })}
+                                        placeholder="Select Role"
+                                        searchPlaceholder="Search..."
+                                        className="w-full"
+                                    />
+                                </div>
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-bold text-slate-700 uppercase">Exp (Yrs) <span className='text-red-500'>*</span></label>
@@ -245,7 +309,7 @@ export default function JoinPage() {
                                     placeholder="0"
                                     value={regData.yearsOfExperience}
                                     onChange={e => setRegData({ ...regData, yearsOfExperience: e.target.value })}
-                                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                                 />
                             </div>
                         </div>
@@ -261,7 +325,7 @@ export default function JoinPage() {
                                 placeholder="Manager's Full Name"
                                 value={regData.managerName}
                                 onChange={e => setRegData({ ...regData, managerName: e.target.value })}
-                                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                             />
                         </div>
                         <div className="space-y-1.5">
@@ -272,7 +336,7 @@ export default function JoinPage() {
                                 placeholder="manager@thriveni.com"
                                 value={regData.managerEmail}
                                 onChange={e => setRegData({ ...regData, managerEmail: e.target.value })}
-                                className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                             />
                         </div>
 
@@ -280,7 +344,7 @@ export default function JoinPage() {
                         <button
                             type="submit"
                             disabled={status === 'loading'}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 mt-4"
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-xl transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-blue-200"
                         >
                             {status === 'loading' ? (
                                 <><Loader2 className="w-5 h-5 animate-spin" /> saving...</>
@@ -296,8 +360,8 @@ export default function JoinPage() {
 
     // --- DEFAULT JOIN VIEW ---
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-            <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full space-y-6">
+        <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+            <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full space-y-6">
                 <div className="text-center space-y-2">
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">Quick Join</h1>
                     <p className="text-slate-500">Enter your Employee ID to join the session.</p>

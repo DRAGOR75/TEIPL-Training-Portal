@@ -57,14 +57,14 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                         <input
                             value={editCode}
                             onChange={e => setEditCode(e.target.value)}
-                            className="w-full p-1 border border-blue-300 rounded text-xs"
+                            className="w-full p-2 border border-blue-300 rounded-xl text-xs"
                         />
                     </td>
                     <td className="px-4 py-3 bg-white">
                         <input
                             value={editName}
                             onChange={e => setEditName(e.target.value)}
-                            className="w-full p-1 border border-blue-300 rounded text-sm"
+                            className="w-full p-2 border border-blue-300 rounded-xl text-sm"
                             autoFocus
                         />
                     </td>
@@ -253,7 +253,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden min-h-[600px] flex flex-col">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden min-h-[600px] flex flex-col">
             {/* Header / Machine Selector */}
             <div className="p-4 border-b border-slate-100 bg-slate-50">
                 <label className="text-xs font-bold text-slate-500 uppercase block mb-1">Select Machine to Manage Faults</label>
@@ -286,13 +286,13 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                             <div className="flex gap-2">
                                 <button
                                     onClick={() => setMode(mode === 'link' ? 'view' : 'link')}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded border flex items-center gap-1 transition ${mode === 'link' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                    className={`px-4 py-2 text-xs font-medium rounded-xl border flex items-center gap-1 transition ${mode === 'link' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                                 >
                                     <LinkIcon size={14} /> Link Existing
                                 </button>
                                 <button
                                     onClick={() => setMode(mode === 'create' ? 'view' : 'create')}
-                                    className={`px-3 py-1.5 text-xs font-medium rounded border flex items-center gap-1 transition ${mode === 'create' ? 'bg-lloyds-red/10 border-lloyds-red/20 text-lloyds-red' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
+                                    className={`px-4 py-2 text-xs font-medium rounded-xl border flex items-center gap-1 transition ${mode === 'create' ? 'bg-lloyds-red/10 border-lloyds-red/20 text-lloyds-red' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                                 >
                                     <Plus size={14} /> Create New
                                 </button>
@@ -315,7 +315,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                             className="w-full"
                                         />
                                     </div>
-                                    <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded text-sm font-medium mb-[1px]">
+                                    <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium mb-[1px]">
                                         Link Fault
                                     </FormSubmitButton>
                                 </form>
@@ -331,7 +331,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                             name="faultCode"
                                             value={newFaultCode}
                                             onChange={e => setNewFaultCode(e.target.value)}
-                                            className="w-full p-2 border border-lloyds-red/20 rounded text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
+                                            className="w-full p-3 border border-lloyds-red/20 rounded-xl text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
                                             placeholder="e.g. F01"
                                         />
                                     </div>
@@ -341,12 +341,12 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                             name="name"
                                             value={newFaultName}
                                             onChange={e => setNewFaultName(e.target.value)}
-                                            className="w-full p-2 border border-lloyds-red/20 rounded text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
+                                            className="w-full p-3 border border-lloyds-red/20 rounded-xl text-sm placeholder-lloyds-red/30 focus:outline-none focus:ring-1 focus:ring-lloyds-red"
                                             placeholder="e.g. System Failure"
                                             required
                                         />
                                     </div>
-                                    <FormSubmitButton className="bg-lloyds-red hover:bg-[#D11F25] text-white px-4 py-2 rounded text-sm font-medium">
+                                    <FormSubmitButton className="bg-lloyds-red hover:bg-[#D11F25] text-white px-5 py-3 rounded-xl text-sm font-medium">
                                         Create
                                     </FormSubmitButton>
                                 </form>
