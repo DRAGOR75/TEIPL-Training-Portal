@@ -144,8 +144,14 @@ export async function sendTrainerReminderEmail(
   startDate: Date,
   endDate: Date
 ) {
-  const startDateStr = startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const endDateStr = endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const startDateStr = dateFormatter.format(startDate);
+  const endDateStr = dateFormatter.format(endDate);
   const baseUrl = getBaseUrl();
 
   const html = `
@@ -371,8 +377,14 @@ export async function sendManagerSessionApprovalEmail(
   const baseUrl = getBaseUrl();
   const approvalLink = `${baseUrl}/manager/approval/${nominationId}`;
 
-  const startDateStr = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const endDateStr = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const startDateStr = dateFormatter.format(startDate);
+  const endDateStr = dateFormatter.format(endDate);
 
   const html = `
     <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">

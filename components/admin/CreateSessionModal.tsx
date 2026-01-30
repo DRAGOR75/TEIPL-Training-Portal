@@ -40,6 +40,11 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
                 </div>
 
                 <form action={async (formData) => {
+                    if (!selectedTrainer) {
+                        alert("Please select a trainer.");
+                        return;
+                    }
+
                     // Manually append selected trainer if needed, though hidden input is reliable if inside form
                     // But standard form action might not pick up SearchableSelect state unless we use hidden input
                     formData.set('trainerName', selectedTrainer);

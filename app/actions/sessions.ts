@@ -4,8 +4,13 @@ import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
 import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail } from '@/lib/email';
 import { SessionWithDetails } from '@/types/sessions';
+import { auth } from "@/auth";
 
 export async function lockSessionBatch(sessionId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
     try {
         const session = await db.trainingSession.findUnique({
             where: { id: sessionId },
@@ -16,10 +21,26 @@ export async function lockSessionBatch(sessionId: string) {
             return { success: false, error: "Session or Batch not found" };
         }
 
-        await db.nominationBatch.update({
-            where: { id: session.nominationBatchId },
+        const result = await db.nominationBatch.updateMany({
+            where: {
+                id: session.nominationBatchId,
+                status: 'Forming' // Guard: Only lock if currently Forming
+            },
             data: { status: 'Scheduled' }
         });
+
+        if (result.count === 0) {
+            // Check why it failed (Already Scheduled is fine, Completed is bad to overwrite)
+            const currentBatch = await db.nominationBatch.findUnique({
+                where: { id: session.nominationBatchId },
+                select: { status: true }
+            });
+
+            if (currentBatch?.status === 'Completed') {
+                return { success: false, error: "Cannot lock a Completed batch." };
+            }
+            // If it was already Scheduled, that's fine, treat as success or ignore.
+        }
 
         revalidatePath(`/admin/dashboard/session/${sessionId}`);
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
@@ -33,6 +54,10 @@ export async function lockSessionBatch(sessionId: string) {
 
 
 export async function createSession(formData: FormData) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        throw new Error("Unauthorized");
+    }
     const programName = formData.get('programName') as string;
     const trainerName = formData.get('trainerName') as string;
     const startDate = new Date(formData.get('startDate') as string);
@@ -169,6 +194,10 @@ export async function getPendingNominationsForProgram(programId: string) {
 }
 
 export async function addNominationsToBatch(batchId: string, nominationIds: string[]) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
     try {
         // 0. Check Batch Lock Status
         const preCheckBatch = await db.nominationBatch.findUnique({
@@ -423,6 +452,10 @@ export async function registerAndJoinBatch(batchId: string, formData: {
 }
 
 export async function removeNominationFromBatch(nominationId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
     try {
         // 0. Check Batch Lock via Nomination -> Batch
         const nomination = await db.nomination.findUnique({
