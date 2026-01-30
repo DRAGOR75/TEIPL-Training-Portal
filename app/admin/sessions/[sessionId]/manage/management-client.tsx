@@ -17,6 +17,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const [isAdding, setIsAdding] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
+    const isLocked = session.nominationBatch?.status === 'Confirmed' || session.nominationBatch?.status === 'Completed';
+
     const toggleSelection = (id: string) => {
         const newSet = new Set(selectedNominations);
         if (newSet.has(id)) {
@@ -117,7 +119,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         </div>
                         <button
                             onClick={handleAddToBatch}
-                            disabled={selectedNominations.size === 0 || isAdding}
+                            disabled={selectedNominations.size === 0 || isAdding || isLocked}
+                            title={isLocked ? "Batch is locked" : "Add selected"}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
@@ -144,7 +147,11 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                     {pendingNominations.map((nom) => (
                                         <tr key={nom.id} className="hover:bg-slate-50 transition-colors">
                                             <td className="p-4">
-                                                <button onClick={() => toggleSelection(nom.id)} className="text-slate-400 hover:text-blue-600">
+                                                <button
+                                                    onClick={() => toggleSelection(nom.id)}
+                                                    disabled={isLocked}
+                                                    className="text-slate-400 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
                                                     {selectedNominations.has(nom.id) ?
                                                         <CheckSquare className="w-5 h-5 text-blue-600" /> :
                                                         <Square className="w-5 h-5" />
@@ -206,9 +213,9 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                             <td className="p-4 text-right">
                                                 <button
                                                     onClick={() => handleRemove(nom.id)}
-                                                    disabled={removingId === nom.id}
-                                                    className="text-slate-400 hover:text-red-600 transition-colors p-1"
-                                                    title="Remove from session"
+                                                    disabled={removingId === nom.id || isLocked}
+                                                    className="text-slate-400 hover:text-red-600 transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    title={isLocked ? "Batch is locked" : "Remove from session"}
                                                 >
                                                     {removingId === nom.id ? (
                                                         <Loader2 className="w-4 h-4 animate-spin" />

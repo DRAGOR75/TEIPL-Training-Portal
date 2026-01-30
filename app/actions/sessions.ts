@@ -162,6 +162,27 @@ export async function getPendingNominationsForProgram(programId: string) {
 
 export async function addNominationsToBatch(batchId: string, nominationIds: string[]) {
     try {
+        // 0. Check Batch Lock Status
+        const preCheckBatch = await db.nominationBatch.findUnique({
+            where: { id: batchId },
+            select: { status: true }
+        });
+
+        if (preCheckBatch?.status === 'Confirmed' || preCheckBatch?.status === 'Completed') {
+            // Note: In server actions used by forms or client, it's better to return an object if possible.
+            // But since this void or just revalidates, we might need to change return type or just throw.
+            // The client expects void/promise. Let's throw an error which can be caught or return a structure if client supports it.
+            // Management client uses it but doesn't seem to await a return value structure for error display in the snippet shown.
+            // But let's assume valid error handling or at least blocking it.
+            return { success: false, error: "Batch is locked." }; // Changing return type might break strict TS if it expects void.
+            // Let's see the client usage. It just awaits.
+            // Safest is to throw Error or return a special object.
+            // Looking at other actions in this file, they return { success: boolean, string? }.
+            // addNominationsToBatch seems to not have a return type in the snippet?
+            // Ah, line 163: export async function addNominationsToBatch... no return type check.
+            // Let's return the object pattern used elsewhere.
+        }
+
         // 1. Update Database
         await db.nomination.updateMany({
             where: {
@@ -247,6 +268,14 @@ export async function joinBatch(batchId: string, empId: string) {
                 trainingSession: true
             }
         });
+
+        if (!batch) {
+            return { error: 'Invalid Batch ID.' };
+        }
+
+        if (batch.status === 'Confirmed' || batch.status === 'Completed') {
+            return { error: 'This batch is locked and no longer accepting enrollments.' };
+        }
 
         if (!batch) {
             return { error: 'Invalid Batch ID.' };
@@ -389,6 +418,16 @@ export async function registerAndJoinBatch(batchId: string, formData: {
 
 export async function removeNominationFromBatch(nominationId: string) {
     try {
+        // 0. Check Batch Lock via Nomination -> Batch
+        const nomination = await db.nomination.findUnique({
+            where: { id: nominationId },
+            include: { batch: true }
+        });
+
+        if (nomination?.batch?.status === 'Confirmed' || nomination?.batch?.status === 'Completed') {
+            return { success: false, error: "Batch is locked." };
+        }
+
         await db.nomination.update({
             where: { id: nominationId },
             data: {

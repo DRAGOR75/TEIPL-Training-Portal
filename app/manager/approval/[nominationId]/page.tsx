@@ -22,8 +22,9 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
     if (!nomination) return notFound();
 
     const session = nomination.batch?.trainingSession;
-    const startDate = session?.startDate ? new Date(session.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Date TBD';
-    const endDate = session?.endDate ? new Date(session.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'Date TBD';
+    const hasDates = !!session?.startDate;
+    const startDate = session?.startDate ? new Date(session.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+    const endDate = session?.endDate ? new Date(session.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
@@ -69,9 +70,15 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                             <div>
                                 <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Session Dates</h4>
                                 <div className="mt-1 flex items-center gap-2 text-slate-600">
-                                    <span className="font-medium">{startDate}</span>
-                                    <span className="text-slate-300">to</span>
-                                    <span className="font-medium">{endDate}</span>
+                                    {hasDates ? (
+                                        <>
+                                            <span className="font-medium">{startDate}</span>
+                                            <span className="text-slate-300">to</span>
+                                            <span className="font-medium">{endDate}</span>
+                                        </>
+                                    ) : (
+                                        <span className="text-slate-500 italic bg-slate-100 px-2 py-0.5 rounded text-xs">Waiting for Admin Scheduling</span>
+                                    )}
                                 </div>
                                 {session && (
                                     <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
@@ -82,6 +89,7 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                             </div>
                         </div>
                     </div>
+
 
                     {/* Action Area */}
                     <div className="pt-4 border-t border-slate-100">
