@@ -124,8 +124,15 @@ export const getSessionById = unstable_cache(
 
 export async function getTrainingSessionsForDate(dateStr: string): Promise<SessionWithDetails[]> {
     try {
-        const startOfDay = new Date(dateStr + "T00:00:00.000Z");
-        const endOfDay = new Date(dateStr + "T23:59:59.999Z");
+        // Create dates in local time (assuming server acts as IST or we want full day coverage regardless of UTC shift)
+        // Alternatively, shift UTC to match IST 00:00 to 23:59
+        // IST is UTC+5:30.
+        // 00:00 IST = Prev Day 18:30 UTC.
+        // 23:59 IST = Today 18:29 UTC.
+        // Ideally, we construct the date object using the input string and force it to be start/end of that day.
+
+        const startOfDay = new Date(dateStr + "T00:00:00.000+05:30");
+        const endOfDay = new Date(dateStr + "T23:59:59.999+05:30");
 
         return await db.trainingSession.findMany({
             where: {
@@ -278,13 +285,7 @@ export async function joinBatch(batchId: string, empId: string) {
             return { error: 'Invalid Batch ID.' };
         }
 
-        if (batch.status === 'Confirmed' || batch.status === 'Completed') {
-            return { error: 'This batch is locked and no longer accepting enrollments.' };
-        }
 
-        if (!batch) {
-            return { error: 'Invalid Batch ID.' };
-        }
 
         // 4. Create Nomination
         const nomination = await db.nomination.create({

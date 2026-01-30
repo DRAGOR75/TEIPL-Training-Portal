@@ -23,8 +23,14 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
 
     const session = nomination.batch?.trainingSession;
     const hasDates = !!session?.startDate;
-    const startDate = session?.startDate ? new Date(session.startDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
-    const endDate = session?.endDate ? new Date(session.endDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : null;
+    // Use deterministic formatting to avoid hydration mismatch (if logic were shared) or inconsistencies
+    const formatDate = (d: Date) => {
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+    };
+
+    const startDate = session?.startDate ? formatDate(new Date(session.startDate)) : null;
+    const endDate = session?.endDate ? formatDate(new Date(session.endDate)) : null;
 
     return (
         <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">

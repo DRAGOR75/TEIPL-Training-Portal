@@ -20,9 +20,25 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
     async function handleSubmit(formData: FormData) {
         setIsSubmitting(true);
 
+        // Date Range Validation
+        const start = formData.get('startDate') as string;
+        const end = formData.get('endDate') as string;
+        if (new Date(start) > new Date(end)) {
+            alert('End Date cannot be before Start Date.');
+            setIsSubmitting(false);
+            return;
+        }
+
         // Handle custom location logic
         if (selectedLocation === 'Other') {
-            formData.set('location', customLocation);
+            const customLoc = customLocation.trim();
+            if (customLoc.length > 0) {
+                formData.set('location', customLoc);
+            } else {
+                alert('Please enter a valid custom location.');
+                setIsSubmitting(false);
+                return;
+            }
         } else {
             formData.set('location', selectedLocation);
         }

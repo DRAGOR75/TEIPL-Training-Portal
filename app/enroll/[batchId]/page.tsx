@@ -55,22 +55,7 @@ export default function JoinPage() {
         managerEmail: ''
     });
 
-    // Helper: CamelCase Converter
-    const toCamelCase = (str: string) => {
-        return str
-            .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => {
-                return index === 0 ? word.toUpperCase() : word.toLowerCase(); // Wait, user said "Camel Case" for Name usually means Title Case (John Doe). 
-                // "Camel Case" technically is "johnDoe". 
-                // Context: "Name- whatever the name is should be in the camel casing"
-                // Usually for names in forms, users mean "Title Case" (Capitalize First Letter of Each Word). 
-                // Pure camelCase (johnDoe) is weird for names. 
-                // However, I will implement Title Case (John Doe) as it's standard for Names. 
-                // If they strictly meant camelCase (johnDoe), I'll stick to Title Case as it's a "Name".
-                // Actually, let's look at the prompt again: "Name- whatever the name is should be in the camel casing"
-                // I'll implement Title Case (John Doe) because that's human readable. 
-            })
-            .replace(/\s+/g, ' ');
-    };
+
 
     // Better Title Case function
     const toTitleCase = (str: string) => {

@@ -18,11 +18,16 @@ export default function ApprovalClient({ nomination }: Props) {
     const handleApprove = async () => {
         if (!confirm("Are you sure you want to APPROVE this nomination?")) return;
         setStatus('APPROVING');
-        const res = await submitManagerNominationDecision(nomination.id, 'Approved');
-        if (res.success) {
-            setStatus('SUCCESS');
-            router.refresh(); // Refresh to update server-side view if we stay on page
-        } else {
+        try {
+            const res = await submitManagerNominationDecision(nomination.id, 'Approved');
+            if (res.success) {
+                setStatus('SUCCESS');
+                router.refresh();
+            } else {
+                setStatus('ERROR');
+            }
+        } catch (error) {
+            console.error("Approval error:", error);
             setStatus('ERROR');
         }
     };
@@ -30,11 +35,16 @@ export default function ApprovalClient({ nomination }: Props) {
     const handleReject = async () => {
         if (!rejectionReason.trim()) return;
         setStatus('REJECTING');
-        const res = await submitManagerNominationDecision(nomination.id, 'Rejected', rejectionReason);
-        if (res.success) {
-            setStatus('SUCCESS');
-            router.refresh();
-        } else {
+        try {
+            const res = await submitManagerNominationDecision(nomination.id, 'Rejected', rejectionReason);
+            if (res.success) {
+                setStatus('SUCCESS');
+                router.refresh();
+            } else {
+                setStatus('ERROR');
+            }
+        } catch (error) {
+            console.error("Rejection error:", error);
             setStatus('ERROR');
         }
     };
@@ -59,9 +69,11 @@ export default function ApprovalClient({ nomination }: Props) {
                 </div>
                 <h2 className="text-xl font-bold text-red-800">Nomination Rejected</h2>
                 <p className="text-red-600 mt-2">You have rejected this nomination.</p>
-                <div className="mt-4 bg-white p-4 rounded-lg text-left text-sm text-slate-600 border border-red-100">
-                    <strong>Reason:</strong> {nomination.managerRejectionReason}
-                </div>
+                {nomination.managerRejectionReason && (
+                    <div className="mt-4 bg-white p-4 rounded-lg text-left text-sm text-slate-600 border border-red-100">
+                        <strong>Reason:</strong> {nomination.managerRejectionReason}
+                    </div>
+                )}
             </div>
         );
     }
@@ -82,7 +94,7 @@ export default function ApprovalClient({ nomination }: Props) {
                 <div className="flex gap-4">
                     <button
                         onClick={handleApprove}
-                        disabled={status !== 'IDLE'}
+                        disabled={status === 'APPROVING' || status === 'REJECTING'}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
                         {status === 'APPROVING' ? <Loader2 className="animate-spin" /> : <Check />}
@@ -90,7 +102,7 @@ export default function ApprovalClient({ nomination }: Props) {
                     </button>
                     <button
                         onClick={() => setShowRejectForm(true)}
-                        disabled={status !== 'IDLE'}
+                        disabled={status === 'APPROVING' || status === 'REJECTING'}
                         className="flex-1 bg-white border-2 border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-700 hover:text-red-700 font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                     >
                         <X />

@@ -44,8 +44,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
         setRemovingId(nominationId);
         const result = await removeNominationFromBatch(nominationId);
 
-        if (result.error) {
-            alert(result.error);
+        if (!result.success || result.error) {
+            alert(result.error || 'Failed to remove participant.');
         }
 
         setRemovingId(null);

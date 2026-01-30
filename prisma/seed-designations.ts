@@ -4,8 +4,8 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const designationData = [
-    { name: "Board Director(Executive)", grade: "B2 - Executive" }, // Mapped from "B-Level B2 Executive"
-    { name: "Board Director( Non-Executive)", grade: "B1 - Executive" },
+    { name: "Board Director (Executive)", grade: "B2 - Executive" }, // Mapped from "B-Level B2 Executive"
+    { name: "Board Director (Non-Executive)", grade: "B1 - Executive" },
     { name: "Senior Director", grade: "D2 - Executive" },
     { name: "Director", grade: "D1 - Executive" },
     { name: "Senior Vice President", grade: "V3 - Executive" },
