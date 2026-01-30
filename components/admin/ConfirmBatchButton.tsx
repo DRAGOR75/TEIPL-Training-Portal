@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 
 interface ConfirmBatchButtonProps {
     sessionId: string;
-    initialStatus: string; // 'Forming' | 'Confirmed' | 'Completed'
+    initialStatus: string; // 'Forming' | 'Scheduled' | 'Completed'
 }
 
 export default function ConfirmBatchButton({ sessionId, initialStatus }: ConfirmBatchButtonProps) {
@@ -15,7 +15,7 @@ export default function ConfirmBatchButton({ sessionId, initialStatus }: Confirm
     const [status, setStatus] = useState(initialStatus);
     const router = useRouter();
 
-    const isLocked = status === 'Confirmed' || status === 'Completed';
+    const isLocked = status === 'Scheduled' || status === 'Completed';
 
     const handleLock = async () => {
         if (!confirm('Are you sure you want to lock this batch? No further participants can be added.')) return;
@@ -24,7 +24,7 @@ export default function ConfirmBatchButton({ sessionId, initialStatus }: Confirm
         try {
             const result = await lockSessionBatch(sessionId);
             if (result.success) {
-                setStatus('Confirmed');
+                setStatus('Scheduled');
                 router.refresh();
             } else {
                 alert('Failed to lock batch: ' + result.error);

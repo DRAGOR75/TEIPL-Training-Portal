@@ -57,7 +57,6 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                 <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}</span>
                             </div>
                         </div>
-                        {/* Moved ConfirmBatchButton to bottom */}
                     </div>
                 </div>
 

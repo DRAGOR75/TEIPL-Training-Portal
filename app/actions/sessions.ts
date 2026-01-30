@@ -18,7 +18,7 @@ export async function lockSessionBatch(sessionId: string) {
 
         await db.nominationBatch.update({
             where: { id: session.nominationBatchId },
-            data: { status: 'Confirmed' }
+            data: { status: 'Scheduled' }
         });
 
         revalidatePath(`/admin/dashboard/session/${sessionId}`);
@@ -180,7 +180,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             return { success: false, error: "Batch not found." };
         }
 
-        if (preCheckBatch?.status === 'Confirmed' || preCheckBatch?.status === 'Completed') {
+        if (preCheckBatch?.status === 'Scheduled' || preCheckBatch?.status === 'Completed') {
             // Note: In server actions used by forms or client, it's better to return an object if possible.
             // But since this void or just revalidates, we might need to change return type or just throw.
             // The client expects void/promise. Let's throw an error which can be caught or return a structure if client supports it.

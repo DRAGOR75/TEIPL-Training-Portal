@@ -17,7 +17,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const [isAdding, setIsAdding] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
 
-    const isLocked = session.nominationBatch?.status === 'Confirmed' || session.nominationBatch?.status === 'Completed';
+    const isLocked = session.nominationBatch?.status === 'Scheduled' || session.nominationBatch?.status === 'Completed';
 
     const toggleSelection = (id: string) => {
         const newSet = new Set(selectedNominations);
@@ -77,6 +77,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     <a
                         href={`/enroll/${batchId}`}
                         target="_blank"
+                        rel="noopener noreferrer"
                         className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest mt-4"
                         onClick={(e) => e.stopPropagation()}
                     >
