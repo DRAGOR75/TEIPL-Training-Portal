@@ -89,6 +89,14 @@ export default function JoinPage() {
 
     async function handleRegisterSubmit(e: React.FormEvent) {
         e.preventDefault();
+
+        // Validation for SearchableSelect fields (Location, Department, Designation)
+        if (!regData.location || !regData.sectionName || !regData.designation) {
+            setStatus('error');
+            setResult({ error: "Please select a valid Location, Department, and Designation." });
+            return;
+        }
+
         setStatus('loading');
 
         // Cast grade to literal type safely

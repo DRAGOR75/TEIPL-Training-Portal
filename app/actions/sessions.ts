@@ -430,7 +430,7 @@ export async function removeNominationFromBatch(nominationId: string) {
             include: { batch: true }
         });
 
-        if (nomination?.batch?.status === 'Confirmed' || nomination?.batch?.status === 'Completed') {
+        if (nomination?.batch?.status === 'Scheduled' || nomination?.batch?.status === 'Completed') {
             return { success: false, error: "Batch is locked." };
         }
 

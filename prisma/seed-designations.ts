@@ -18,7 +18,7 @@ const designationData = [
     { name: "Senior Manager", grade: "M4 - Executive" },
     { name: "Manager", grade: "M3 - Executive" },
     { name: "Deputy Manager", grade: "M2 - Executive" },
-    { name: "Assistant manager", grade: "M1 - Executive" },
+    { name: "Assistant Manager", grade: "M1 - Executive" },
     { name: "Senior Engineer", grade: "I3 - Executive" },
     { name: "Engineer", grade: "I2 - Executive" },
     { name: "Deputy Engineer", grade: "I1 - Executive" },

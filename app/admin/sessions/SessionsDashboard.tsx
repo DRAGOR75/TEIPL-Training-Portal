@@ -166,11 +166,11 @@ export default function SessionsDashboard({
 
     // --- Actions ---
 
-    const handleCopyLink = async (id: string) => {
-        const link = `${origin}/join/${id}`;
+    const handleCopyLink = async (sessionId: string, batchId: string | undefined) => {
+        const link = batchId ? `${origin}/enroll/${batchId}` : `${origin}/join/${sessionId}`;
         try {
             await navigator.clipboard.writeText(link);
-            setCopiedLink(id);
+            setCopiedLink(sessionId);
             setTimeout(() => setCopiedLink(null), 2000);
         } catch (err) {
             console.error('Failed to copy link', err);
@@ -373,7 +373,10 @@ export default function SessionsDashboard({
                                             <div className="bg-white p-2 rounded-xl border border-slate-100 shadow-sm">
                                                 <QRCode
                                                     id={`qr-${session.id}`}
-                                                    value={`${origin}/join/${session.id}`}
+                                                    value={session.nominationBatch?.id
+                                                        ? `${origin}/enroll/${session.nominationBatch.id}`
+                                                        : `${origin}/join/${session.id}`
+                                                    }
                                                     size={80}
                                                 />
                                             </div>
@@ -384,7 +387,7 @@ export default function SessionsDashboard({
                                                         <button
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
-                                                                handleCopyLink(session.id);
+                                                                handleCopyLink(session.id, session.nominationBatch?.id);
                                                             }}
                                                             className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-700 rounded-md transition-colors text-white text-[10px] font-bold tracking-wide"
                                                             title="Copy Link"

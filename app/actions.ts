@@ -365,6 +365,10 @@ export async function addParticipants(sessionId: string, participants: Participa
             include: { nominationBatch: true }
         });
 
+        if (!session) {
+            return { success: false, error: "Training session not found" };
+        }
+
         if (session?.nominationBatch?.status === 'Scheduled' || session?.nominationBatch?.status === 'Completed') {
             return { success: false, error: "This batch is locked. No new participants can be added." };
         }
