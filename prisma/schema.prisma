@@ -99,6 +99,10 @@ model Nomination {
   program        Program          @relation(fields: [programId], references: [id])
   batch          NominationBatch? @relation(fields: [batchId], references: [id])
 
+  // Manager Approval Workflow
+  managerApprovalStatus String   @default("Pending") // Pending, Approved, Rejected
+  managerRejectionReason String? @map("manager_rejection_reason")
+
   @@map("nominations")
 }
 
@@ -127,6 +131,8 @@ model TrainingSession {
   trainerName               String?      @map("trainer_name")
   startDate                 DateTime     @map("start_date")
   endDate                   DateTime     @map("end_date")
+  location                  String?
+  topics                    String?      @db.Text
   feedbackCreationDate      DateTime?    @map("feedback_creation_date")
   templateType              String       @default("Technical") @map("template_type")
   emailsSent                Boolean      @default(false) @map("emails_sent")
@@ -192,6 +198,23 @@ model Trainer {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("trainers")
+}
+
+model Designation {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  grade     String?  // Optional grade mapping (e.g., "M3", "Executive")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("designations")
+}
+
+model Location {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("locations")
 }
 
 model User {

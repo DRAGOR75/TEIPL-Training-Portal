@@ -40,7 +40,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
 
     try {
         return (
-            <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+            <div className="min-h-screen bg-slate-100 font-sans text-slate-900">
                 {/* Header Strip */}
                 <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
                     <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
@@ -210,7 +210,8 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                             </table>
                         </div>
                     </div>
-                </div >
+
+                </div>
             </div >
         );
     } catch (error) {

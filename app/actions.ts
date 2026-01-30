@@ -39,9 +39,9 @@ export async function getSessionsForDate(dateStr: string) {
     try {
         // 🟢 DATE FIX: input is "YYYY-MM-DD".
         // incorrectly parsing it could lead to timezone issues.
-        // We act as if this date is UTC Midnight.
-        const startOfDay = new Date(dateStr + "T00:00:00.000Z");
-        const endOfDay = new Date(dateStr + "T23:59:59.999Z");
+        // We act as if this date is IST Midnight.
+        const startOfDay = new Date(dateStr + "T00:00:00.000+05:30");
+        const endOfDay = new Date(dateStr + "T23:59:59.999+05:30");
 
         const sessions = await db.trainingSession.findMany({
             where: {
@@ -113,7 +113,8 @@ export async function getSessionDetails(sessionId: string) {
             include: {
                 enrollments: {
                     orderBy: { employeeName: 'asc' }
-                }
+                },
+                nominationBatch: true
             }
         });
         return session;
@@ -357,6 +358,20 @@ export async function createTrainingSession(formData: FormData) {
 export async function addParticipants(sessionId: string, participants: ParticipantData[]) {
     try {
         if (!sessionId) return { success: false, error: "Session ID missing" };
+
+        // Check if batch is locked
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: { nominationBatch: true }
+        });
+
+        if (!session) {
+            return { success: false, error: "Training session not found" };
+        }
+
+        if (session?.nominationBatch?.status === 'Scheduled' || session?.nominationBatch?.status === 'Completed') {
+            return { success: false, error: "This batch is locked. No new participants can be added." };
+        }
 
         await db.enrollment.createMany({
             data: participants.map((p) => ({

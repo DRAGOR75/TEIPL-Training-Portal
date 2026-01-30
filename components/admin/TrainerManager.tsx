@@ -39,7 +39,7 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
     }
 
     return (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
             {/* Header / Toggle */}
             <div
                 className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors"
@@ -65,7 +65,7 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                 <div className="p-5 pt-0 space-y-6 border-t border-slate-100 animate-in fade-in slide-in-from-top-1 duration-200">
 
                     {/* Professional Add Form */}
-                    <form ref={formRef} action={handleAddTrainer} className="mt-4 p-5 bg-slate-50 rounded-xl border border-slate-200">
+                    <form ref={formRef} action={handleAddTrainer} className="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-200">
                         <div className="flex items-center gap-2 mb-5 text-slate-700">
                             <UserPlus size={16} />
                             <span className="text-sm font-bold">Register New Trainer</span>
@@ -76,11 +76,11 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Full Name</label>
-                                    <input name="name" required placeholder="Your Full Name" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="name" required placeholder="Your Full Name" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Email Address</label>
-                                    <input name="email" type="email" required placeholder="Your Official Email" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="email" type="email" required placeholder="Your Official Email" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                             </div>
 
@@ -88,11 +88,11 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile Number</label>
-                                    <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
                                 <div>
                                     <FormSubmitButton
-                                        className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
+                                        className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
                                     >
                                         <Plus size={18} />
                                         Add Trainer

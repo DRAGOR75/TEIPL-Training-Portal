@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
-import { addNominationsToBatch } from '@/app/actions/sessions';
-import { UserPlus, QrCode, ClipboardList, CheckSquare, Square, Loader2 } from 'lucide-react';
+import { addNominationsToBatch, removeNominationFromBatch } from '@/app/actions/sessions';
+import { UserPlus, QrCode, ClipboardList, CheckSquare, Square, Loader2, ExternalLink, Trash2 } from 'lucide-react';
+import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
 
 interface Props {
     session: any;
@@ -14,6 +15,9 @@ interface Props {
 export default function ManagementClient({ session, pendingNominations, batchId }: Props) {
     const [selectedNominations, setSelectedNominations] = useState<Set<string>>(new Set());
     const [isAdding, setIsAdding] = useState(false);
+    const [removingId, setRemovingId] = useState<string | null>(null);
+
+    const isLocked = session.nominationBatch?.status === 'Scheduled' || session.nominationBatch?.status === 'Completed';
 
     const toggleSelection = (id: string) => {
         const newSet = new Set(selectedNominations);
@@ -34,8 +38,25 @@ export default function ManagementClient({ session, pendingNominations, batchId 
         setSelectedNominations(new Set()); // Reset selection
     };
 
+    const handleRemove = async (nominationId: string) => {
+        if (!confirm('Are you sure you want to remove this participant? They will be returned to the pending list.')) return;
+
+        setRemovingId(nominationId);
+        const result = await removeNominationFromBatch(nominationId);
+
+        if (!result.success || result.error) {
+            alert(result.error || 'Failed to remove participant.');
+        }
+
+        setRemovingId(null);
+    };
+
     // Construct Join URL (using window.location for origin if on client)
-    const joinUrl = typeof window !== 'undefined' ? `${window.location.origin}/enroll/${batchId}` : '';
+    const [joinUrl, setJoinUrl] = useState('');
+
+    useEffect(() => {
+        setJoinUrl(`${window.location.origin}/enroll/${batchId}`);
+    }, [batchId]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -53,9 +74,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         {joinUrl && <QRCode value={joinUrl} size={150} />}
                     </div>
 
-                    <div className="text-xs font-mono bg-slate-50 p-2 rounded text-slate-500 break-all w-full">
-                        {joinUrl || 'Loading...'}
-                    </div>
+                    <a
+                        href={`/enroll/${batchId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest mt-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        Live Link <ExternalLink size={10} />
+                    </a>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -98,7 +125,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         </div>
                         <button
                             onClick={handleAddToBatch}
-                            disabled={selectedNominations.size === 0 || isAdding}
+                            disabled={selectedNominations.size === 0 || isAdding || isLocked}
+                            title={isLocked ? "Batch is locked" : "Add selected"}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
                             {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
@@ -125,7 +153,11 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                     {pendingNominations.map((nom) => (
                                         <tr key={nom.id} className="hover:bg-slate-50 transition-colors">
                                             <td className="p-4">
-                                                <button onClick={() => toggleSelection(nom.id)} className="text-slate-400 hover:text-blue-600">
+                                                <button
+                                                    onClick={() => toggleSelection(nom.id)}
+                                                    disabled={isLocked}
+                                                    className="text-slate-400 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
                                                     {selectedNominations.has(nom.id) ?
                                                         <CheckSquare className="w-5 h-5 text-blue-600" /> :
                                                         <Square className="w-5 h-5" />
@@ -166,6 +198,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                         <th className="p-4">Employee</th>
                                         <th className="p-4">Status</th>
                                         <th className="p-4">Source</th>
+                                        <th className="p-4 text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -183,12 +216,35 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                             <td className="p-4 text-slate-500 text-xs uppercase font-bold tracking-wide">
                                                 {nom.source}
                                             </td>
+                                            <td className="p-4 text-right">
+                                                <button
+                                                    onClick={() => handleRemove(nom.id)}
+                                                    disabled={removingId === nom.id || isLocked}
+                                                    className="text-slate-400 hover:text-red-600 transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
+                                                    title={isLocked ? "Batch is locked" : "Remove from session"}
+                                                >
+                                                    {removingId === nom.id ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        <Trash2 className="w-4 h-4" />
+                                                    )}
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         )}
                     </div>
+                </div>
+
+                <div className="flex justify-end">
+                    {session.nominationBatch && (
+                        <ConfirmBatchButton
+                            sessionId={session.id}
+                            initialStatus={session.nominationBatch.status}
+                        />
+                    )}
                 </div>
 
             </div>

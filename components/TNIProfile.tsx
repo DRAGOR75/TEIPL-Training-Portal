@@ -1,9 +1,10 @@
-'use client';
-
-import { useState } from 'react';
+"use client"
+import { useState, useEffect } from 'react';
 import { updateEmployeeProfile } from '@/app/actions/tni';
 import { User, Mail, MapPin, Briefcase, UserCircle, Edit2, Save, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import SearchableSelect from './ui/SearchableSelect';
+import { getDesignations, getLocations } from '@/app/actions/master-data';
 
 type Employee = {
     id: string;
@@ -29,6 +30,19 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(!employee.name);
     const [loading, setLoading] = useState(false);
+
+    // Options for searchable selects
+    const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
+    const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
+
+    useEffect(() => {
+        if (isEditing) {
+            Promise.all([getDesignations(), getLocations()]).then(([desigs, locs]) => {
+                setDesignationOptions(desigs);
+                setLocationOptions(locs);
+            });
+        }
+    }, [isEditing]);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -132,12 +146,16 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Designation</label>
-                        <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="e.g. Senior Engineer"
-                            value={formData.designation}
-                            onChange={e => setFormData({ ...formData, designation: e.target.value })}
-                        />
+                        <div className="relative">
+                            <SearchableSelect
+                                options={designationOptions}
+                                value={formData.designation}
+                                onChange={(val) => setFormData({ ...formData, designation: typeof val === 'string' ? val : String(val) })}
+                                placeholder="Select Role"
+                                searchPlaceholder="Search..."
+                                className="w-full"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -177,6 +195,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         </select>
                     </div>
 
+                    {/* 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Sub-Department</label>
                         <input
@@ -185,7 +204,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.subDepartment}
                             onChange={e => setFormData({ ...formData, subDepartment: e.target.value })}
                         />
-                    </div>
+                    </div> 
+                    */}
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Email</label>
@@ -199,12 +219,16 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Location</label>
-                        <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            value={formData.location}
-                            placeholder="e.g. TRC"
-                            onChange={e => setFormData({ ...formData, location: e.target.value })}
-                        />
+                        <div className="relative">
+                            <SearchableSelect
+                                options={locationOptions}
+                                value={formData.location}
+                                onChange={(val) => setFormData({ ...formData, location: typeof val === 'string' ? val : String(val) })}
+                                placeholder="Select Site"
+                                searchPlaceholder="Search locations..."
+                                className="w-full"
+                            />
+                        </div>
                     </div>
 
                     <div className="space-y-1.5">
@@ -274,7 +298,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
                         <div className="text-sm font-semibold text-slate-900">
                             {formData.sectionName || 'Not Set'}
-                            {formData.subDepartment && <span className="text-slate-400 font-normal"> • {formData.subDepartment}</span>}
+                            {/* {formData.subDepartment && <span className="text-slate-400 font-normal"> • {formData.subDepartment}</span>} */}
                         </div>
                     </div>
                 </div>

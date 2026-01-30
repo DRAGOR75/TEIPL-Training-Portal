@@ -1,4 +1,5 @@
 import { getCalendarMetadata, getSessionsForDate } from '@/app/actions';
+import { getServerLocalDateString } from '@/lib/date-utils';
 import { getTrainers } from '@/app/actions/trainers';
 import DashboardClient from './DashboardClient';
 import { Metadata } from 'next';
@@ -19,7 +20,7 @@ export default async function AdminDashboardPage() {
 
     const [calendarMetadata, todayData, trainersData] = await Promise.all([
         getCalendarMetadata(),
-        getSessionsForDate(today.toISOString().split('T')[0]),
+        getSessionsForDate(getServerLocalDateString()),
         getTrainers()
     ]);
 

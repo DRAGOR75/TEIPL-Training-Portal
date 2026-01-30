@@ -229,7 +229,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                 {/* Control Panel (Conditional Order: Bottom on Mobile initially, Top when diagnosis is shown) */}
                 <div className={`
-                    bg-white p-4 md:p-8 rounded-xl md:rounded-2xl shadow-sm border border-slate-200 mb-6 md:mb-0
+                    bg-white p-6 md:p-8 rounded-3xl md:rounded-3xl shadow-sm border border-slate-200 mb-6 md:mb-0
                     ${diagnosis ? 'order-1' : 'order-2 md:order-1'}
                 `}>
 
@@ -287,7 +287,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                     {/* Diagnostic Report Area */}
                     {loadingDiagnosis && (
-                        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-12 text-center">
+                        <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-12 text-center">
                             <div className="relative w-16 h-16 mx-auto mb-6">
                                 <div className="absolute inset-0 border-4 border-slate-100 rounded-full"></div>
                                 <div className="absolute inset-0 border-4 border-thriveni-blue rounded-full border-t-transparent animate-spin"></div>
@@ -298,7 +298,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {!loadingDiagnosis && diagnosis && (
-                        <div className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="bg-white rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
 
 
 
@@ -322,9 +322,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             )}
 
                             {/* Diagnostic Steps */}
-                            <div className="p-2 md:p-6 bg-slate-50/50">
+                            <div className="p-2 md:p-8 bg-slate-50/50">
                                 <div className="flex items-left gap-3 md:gap-4 mb-6 md:mb-8 pl-2 md:pl-0">
-                                    <div className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-thriveni-blue">
+                                    <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-thriveni-blue">
                                         <ClipboardList size={30} />
                                     </div>
                                     <div>
@@ -351,7 +351,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                             </div>
 
                                             {/* Step Content Card */}
-                                            <div className="bg-white rounded-xl md:rounded-2xl p-4 md:p-6 border border-slate-200 shadow-sm hover:shadow-md hover:border-thriveni-blue/30 transition-all duration-300">
+                                            <div className="bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-md hover:border-thriveni-blue/30 transition-all duration-300">
                                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                                     <div className="lg:col-span-2 space-y-4">
                                                         <div
@@ -401,7 +401,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                     {/* Visual Aid (Wrapped in conditional) */}
                                                     {expandedSteps[index] && step.cause.imageUrl && (
                                                         <div className="lg:col-span-1 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                            <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner group-hover:shadow-md transition-shadow">
+                                                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner group-hover:shadow-md transition-shadow">
                                                                 <img
                                                                     src={step.cause.imageUrl}
                                                                     alt={step.cause.name}
@@ -424,7 +424,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     ))}
 
                                     {diagnosis.sequence.length === 0 && (
-                                        <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50">
+                                        <div className="text-center py-16 px-4 rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50">
                                             <HelpCircle size={48} className="mx-auto text-slate-300 mb-4" />
                                             <p className="text-slate-500 font-medium">No specific diagnostic steps documented for this issue yet.</p>
                                             <p className="text-slate-400 text-sm mt-1">Please consult the master technical manual directly.</p>
@@ -451,7 +451,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                     {/* Empty State Instructions */}
                     {!diagnosis && !loadingDiagnosis && selectedProductId && selectedFaultId && (
-                        <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-12 text-center shadow-sm">
+                        <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-12 text-center shadow-sm">
                             <div className="w-16 h-16 bg-thriveni-blue/5 rounded-full flex items-center justify-center text-thriveni-blue mx-auto mb-4">
                                 <Search size={32} />
                             </div>
@@ -463,7 +463,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {!selectedProductId && (
-                        <div className="bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200 p-6 md:p-16 text-center">
+                        <div className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
                             <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-4 transform rotate-3">
                                 <Wrench size={28} />
                             </div>
