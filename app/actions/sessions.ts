@@ -3,6 +3,7 @@
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
 import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail } from '@/lib/email';
+import { SessionWithDetails } from '@/types/sessions';
 
 export async function lockSessionBatch(sessionId: string) {
     try {
@@ -121,7 +122,7 @@ export const getSessionById = unstable_cache(
     { revalidate: 1 }
 );
 
-export async function getTrainingSessionsForDate(dateStr: string) {
+export async function getTrainingSessionsForDate(dateStr: string): Promise<SessionWithDetails[]> {
     try {
         const startOfDay = new Date(dateStr + "T00:00:00.000Z");
         const endOfDay = new Date(dateStr + "T23:59:59.999Z");
@@ -168,6 +169,10 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             select: { status: true }
         });
 
+        if (!preCheckBatch) {
+            return { success: false, error: "Batch not found." };
+        }
+
         if (preCheckBatch?.status === 'Confirmed' || preCheckBatch?.status === 'Completed') {
             // Note: In server actions used by forms or client, it's better to return an object if possible.
             // But since this void or just revalidates, we might need to change return type or just throw.
@@ -213,7 +218,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
 
             // 4. Send Approval Emails to Managers
             const { startDate, endDate } = batch.trainingSession;
-            Promise.all(nominations.map(async (nom) => {
+            await Promise.all(nominations.map(async (nom) => {
                 if (nom.employee.managerEmail) {
                     await sendManagerSessionApprovalEmail(
                         nom.employee.managerEmail,

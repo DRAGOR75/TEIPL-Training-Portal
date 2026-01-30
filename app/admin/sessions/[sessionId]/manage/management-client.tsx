@@ -42,7 +42,12 @@ export default function ManagementClient({ session, pendingNominations, batchId 
         if (!confirm('Are you sure you want to remove this participant? They will be returned to the pending list.')) return;
 
         setRemovingId(nominationId);
-        await removeNominationFromBatch(nominationId);
+        const result = await removeNominationFromBatch(nominationId);
+
+        if (result.error) {
+            alert(result.error);
+        }
+
         setRemovingId(null);
     };
 

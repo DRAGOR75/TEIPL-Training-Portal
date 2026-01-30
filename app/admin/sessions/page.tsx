@@ -1,4 +1,5 @@
 import { getCalendarMetadata } from '@/app/actions';
+import { getServerLocalDateString } from '@/lib/date-utils';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
 import { getTrainers } from '@/app/actions/trainers';
 import SessionsDashboard from './SessionsDashboard';
@@ -6,9 +7,8 @@ import SessionsDashboard from './SessionsDashboard';
 export const dynamic = 'force-dynamic';
 
 export default async function SessionsPage() {
-    const today = new Date();
-    // Simple ISO split for server-side initial render
-    const dateStr = today.toISOString().split('T')[0];
+    // Use server-side local date helper to align with client-side IST expectation
+    const dateStr = getServerLocalDateString();
 
     const [calendarMetadata, initialSessions, trainersData] = await Promise.all([
         getCalendarMetadata(),
@@ -18,7 +18,7 @@ export default async function SessionsPage() {
 
     return (
         <SessionsDashboard
-            initialSessions={initialSessions as any}
+            initialSessions={initialSessions}
             initialMetadata={calendarMetadata}
             initialTrainers={trainersData}
         />

@@ -24,21 +24,12 @@ import {
     Check
 } from 'lucide-react';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
+import { SessionWithDetails } from '@/types/sessions';
 import LoadingScreen from '@/app/loading';
 import TrainerManager from '@/components/admin/TrainerManager';
 import { useRouter } from 'next/navigation';
 
-type Session = {
-    id: string;
-    programName: string;
-    trainerName: string | null;
-    startDate: Date;
-    endDate: Date;
-    nominationBatch: {
-        status: string;
-        nominations: any[];
-    } | null;
-};
+
 
 type Trainer = {
     id: string;
@@ -48,7 +39,7 @@ type Trainer = {
 };
 
 type SessionsDashboardProps = {
-    initialSessions: Session[];
+    initialSessions: SessionWithDetails[];
     initialMetadata: any[];
     initialTrainers: Trainer[];
 };
@@ -59,7 +50,7 @@ export default function SessionsDashboard({
     initialTrainers
 }: SessionsDashboardProps) {
     const [date, setDate] = useState<any>(new Date());
-    const [sessions, setSessions] = useState<Session[]>(initialSessions);
+    const [sessions, setSessions] = useState<SessionWithDetails[]>(initialSessions);
     const [isLoading, setIsLoading] = useState(false);
     const [origin, setOrigin] = useState('');
     const [activeShareId, setActiveShareId] = useState<string | null>(null);

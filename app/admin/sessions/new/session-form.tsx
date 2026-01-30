@@ -27,13 +27,19 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
             formData.set('location', selectedLocation);
         }
 
-        const result = await createSession(formData);
+        try {
+            const result = await createSession(formData);
 
-        if (result.success) {
-            router.push(`/admin/sessions/${result.sessionId}/manage`);
-        } else {
-            console.error(result.error);
-            alert('Failed to create session'); // Replace with better error handling if needed
+            if (result.success) {
+                router.push(`/admin/sessions/${result.sessionId}/manage`);
+            } else {
+                console.error(result.error);
+                alert(result.error || 'Failed to create session');
+                setIsSubmitting(false);
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            alert('An unexpected error occurred. Please check the form and try again.');
             setIsSubmitting(false);
         }
     }
