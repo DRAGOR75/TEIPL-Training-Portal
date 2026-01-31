@@ -6,10 +6,10 @@
 
 */
 -- AlterTable
-ALTER TABLE "employees" ADD COLUMN     "designation" TEXT,
-ADD COLUMN     "mobile" TEXT,
-ADD COLUMN     "sub_department" TEXT,
-ADD COLUMN     "years_of_experience" TEXT,
+ALTER TABLE "employees" ADD COLUMN IF NOT EXISTS "designation" TEXT,
+ADD COLUMN IF NOT EXISTS "mobile" TEXT,
+ADD COLUMN IF NOT EXISTS "sub_department" TEXT,
+ADD COLUMN IF NOT EXISTS "years_of_experience" TEXT,
 ALTER COLUMN "grade" DROP NOT NULL;
 
 -- AlterTable
