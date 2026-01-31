@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Layers, AlertTriangle, Stethoscope, Workflow, UploadCloud } from 'lucide-react';
+import {
+    HiOutlineSquare3Stack3D,
+    HiOutlineExclamationTriangle,
+    HiOutlineClipboardDocumentCheck,
+    HiOutlineRectangleGroup,
+    HiOutlineCloudArrowUp
+} from 'react-icons/hi2';
 import ProductManager from './ProductManager';
 import FaultManager from './FaultManager';
 import CauseManager from './CauseManager';
@@ -19,11 +25,11 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
     const [activeTab, setActiveTab] = useState('sequencer');
 
     const tabs = [
-        { id: 'sequencer', label: 'Cause Manager', icon: Workflow },
-        { id: 'products', label: 'Machine Manager', icon: Layers },
-        { id: 'faults', label: 'Fault Manager', icon: AlertTriangle },
-        { id: 'causes', label: 'Cause Library', icon: Stethoscope },
-        { id: 'import', label: 'Bulk Import', icon: UploadCloud },
+        { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
+        { id: 'products', label: 'Machine Manager', icon: HiOutlineSquare3Stack3D },
+        { id: 'faults', label: 'Fault Manager', icon: HiOutlineExclamationTriangle },
+        { id: 'causes', label: 'Cause Library', icon: HiOutlineClipboardDocumentCheck },
+        { id: 'import', label: 'Bulk Import', icon: HiOutlineCloudArrowUp },
     ];
 
     return (

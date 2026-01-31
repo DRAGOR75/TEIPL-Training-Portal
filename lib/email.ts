@@ -1,4 +1,5 @@
 import { google } from 'googleapis';
+import { generateSecureToken } from '@/lib/security';
 
 /**
  * Creates a Gmail API Client using OAuth2.
@@ -144,8 +145,14 @@ export async function sendTrainerReminderEmail(
   startDate: Date,
   endDate: Date
 ) {
-  const startDateStr = startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  const endDateStr = endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const startDateStr = dateFormatter.format(startDate);
+  const endDateStr = dateFormatter.format(endDate);
   const baseUrl = getBaseUrl();
 
   const html = `
@@ -291,7 +298,8 @@ export async function sendFeedbackReviewRequestEmail(
   enrollmentId: string
 ) {
   const baseUrl = getBaseUrl();
-  const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}`;
+  const token = generateSecureToken(enrollmentId);
+  const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}?token=${token}`;
 
   const html = `
     <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
@@ -323,7 +331,8 @@ export async function sendTNIApprovalEmail(
   empId: string
 ) {
   const baseUrl = getBaseUrl();
-  const approvalLink = `${baseUrl}/nominations/manager/${empId}`;
+  const token = generateSecureToken(empId);
+  const approvalLink = `${baseUrl}/nominations/manager/${empId}?token=${token}`;
 
   const programsList = programs.map(p => `<li style="margin-bottom: 5px;">${p}</li>`).join('');
 
@@ -369,10 +378,17 @@ export async function sendManagerSessionApprovalEmail(
   nominationId: string
 ) {
   const baseUrl = getBaseUrl();
-  const approvalLink = `${baseUrl}/manager/approval/${nominationId}`;
+  const token = generateSecureToken(nominationId);
+  const approvalLink = `${baseUrl}/manager/approval/${nominationId}?token=${token}`;
 
-  const startDateStr = startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const endDateStr = endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+  const startDateStr = dateFormatter.format(startDate);
+  const endDateStr = dateFormatter.format(endDate);
 
   const html = `
     <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">

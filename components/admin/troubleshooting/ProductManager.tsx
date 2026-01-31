@@ -3,7 +3,17 @@
 import { useState, useRef, useEffect } from 'react';
 import { createTroubleshootingProduct, deleteTroubleshootingProduct, updateTroubleshootingProduct, reorderProducts, toggleProductStatus } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton'; // Assuming we have this
-import { Trash2, Plus, Box, Edit2, Check, X, GripVertical, Eye, EyeOff } from 'lucide-react';
+import {
+    HiOutlineTrash,
+    HiOutlinePlus,
+    HiOutlineCube,
+    HiOutlinePencil,
+    HiOutlineCheck,
+    HiOutlineXMark,
+    HiOutlineBars3,
+    HiOutlineEye,
+    HiOutlineEyeSlash
+} from 'react-icons/hi2';
 import { TroubleshootingProduct } from '@prisma/client';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -60,14 +70,14 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                                 className="text-white bg-green-500 hover:bg-green-600 p-2 rounded-lg shadow-sm"
                                 title="Save"
                             >
-                                <Check size={14} />
+                                <HiOutlineCheck size={14} />
                             </button>
                             <button
                                 onClick={() => setEditingId(null)}
                                 className="text-slate-500 hover:text-slate-700 p-1"
                                 title="Cancel"
                             >
-                                <X size={14} />
+                                <HiOutlineXMark size={14} />
                             </button>
                         </div>
                     </td>
@@ -77,7 +87,7 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                     <td className="px-4 py-3 text-slate-400 font-mono text-xs">
                         <div className="flex items-center gap-3">
                             <button {...attributes} {...listeners} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing">
-                                <GripVertical size={14} />
+                                <HiOutlineBars3 size={14} />
                             </button>
                             {p.viewSeq}
                         </div>
@@ -90,21 +100,21 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                                 className={`transition p-1 ${p.userView === 1 ? 'text-blue-400 hover:text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}
                                 title={p.userView === 1 ? 'Disable' : 'Enable'}
                             >
-                                {p.userView === 1 ? <Eye size={16} /> : <EyeOff size={16} />}
+                                {p.userView === 1 ? <HiOutlineEye size={16} /> : <HiOutlineEyeSlash size={16} />}
                             </button>
                             <button
                                 onClick={() => startEdit(p)}
                                 className="text-slate-400 hover:text-blue-600 transition p-1"
                                 title="Edit"
                             >
-                                <Edit2 size={16} />
+                                <HiOutlinePencil size={16} />
                             </button>
                             <button
                                 onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteProduct(p.id) }}
                                 className="text-slate-300 hover:text-red-600 transition p-1"
                                 title="Delete"
                             >
-                                <Trash2 size={16} />
+                                <HiOutlineTrash size={16} />
                             </button>
                         </div>
                     </td>
@@ -211,14 +221,14 @@ export default function ProductManager({ products }: { products: Troubleshooting
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <Box size={18} className="text-blue-600" />
+                    <HiOutlineCube size={18} className="text-blue-600" />
                     Machines / Products
                 </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1"
                 >
-                    <Plus size={14} /> New Machine
+                    <HiOutlinePlus size={14} /> New Machine
                 </button>
             </div>
 

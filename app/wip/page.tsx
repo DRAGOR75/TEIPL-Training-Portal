@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { Construction, ArrowLeft } from 'lucide-react';
+import { HiOutlineWrenchScrewdriver, HiOutlineArrowLeft } from 'react-icons/hi2';
 
 export default function WorkInProgressPage() {
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
             <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl text-center max-w-lg w-full border border-slate-200">
                 <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Construction size={40} />
+                    <HiOutlineWrenchScrewdriver size={40} />
                 </div>
 
                 <h1 className="text-3xl font-black text-slate-900 mb-4">
@@ -22,7 +22,7 @@ export default function WorkInProgressPage() {
                         href="/"
                         className="flex items-center justify-center gap-2 w-full py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-300 transform hover:-translate-y-0.5"
                     >
-                        <ArrowLeft size={18} /> Return Home
+                        <HiOutlineArrowLeft size={18} /> Return Home
                     </Link>
                 </div>
             </div>

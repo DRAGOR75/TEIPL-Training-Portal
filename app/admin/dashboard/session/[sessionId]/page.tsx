@@ -1,15 +1,15 @@
 import { getSessionDetails } from '@/app/actions';
 import {
-    Calendar,
-    User,
-    Users,
-    CheckCircle2,
-    ArrowLeft,
-    Clock,
-    AlertCircle,
-    BookOpen,
-    Star
-} from 'lucide-react';
+    HiOutlineCalendar,
+    HiOutlineUser,
+    HiOutlineUsers,
+    HiOutlineCheckCircle,
+    HiOutlineArrowLeft,
+    HiOutlineClock,
+    HiOutlineExclamationCircle,
+    HiOutlineBookOpen,
+    HiOutlineStar
+} from 'react-icons/hi2';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
@@ -45,16 +45,16 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                 <div className="bg-white border-b border-slate-200 sticky top-0 z-10">
                     <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-4">
                         <Link href="/admin/dashboard" className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
-                            <ArrowLeft size={20} />
+                            <HiOutlineArrowLeft size={20} />
                         </Link>
                         <div>
                             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                                <BookOpen size={20} className="text-blue-600" />
+                                <HiOutlineBookOpen size={20} className="text-blue-600" />
                                 {session.programName}
                             </h1>
                             <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
-                                <span className="flex items-center gap-1"><User size={12} /> {session.trainerName}</span>
-                                <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}</span>
+                                <span className="flex items-center gap-1"><HiOutlineUser size={12} /> {session.trainerName}</span>
+                                <span className="flex items-center gap-1"><HiOutlineCalendar size={12} /> {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
@@ -66,21 +66,21 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Participants</h3>
                             <div className="flex items-center gap-3">
-                                <Users size={24} className="text-blue-600" />
+                                <HiOutlineUsers size={24} className="text-blue-600" />
                                 <span className="text-3xl font-black text-slate-800">{enrollments.length}</span>
                             </div>
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Completion Rate</h3>
                             <div className="flex items-center gap-3">
-                                <CheckCircle2 size={24} className="text-emerald-500" />
+                                <HiOutlineCheckCircle size={24} className="text-emerald-500" />
                                 <span className="text-3xl font-black text-slate-800">{completionRate}%</span>
                             </div>
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Training Average</h3>
                             <div className="flex items-center gap-3">
-                                <span className="text-2xl"><Star size={24} className="text-yellow-500" /></span>
+                                <span className="text-2xl"><HiOutlineStar size={24} className="text-yellow-500" /></span>
                                 <span className="text-3xl font-black text-slate-800">{averageRating}</span>
                                 <span className="text-sm font-medium text-slate-400 self-end mb-1">/ 5.0</span>
                             </div>
@@ -132,7 +132,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                 <td className="px-6 py-4">
                                                     {feedbackAverage ? (
                                                         <div className="flex items-center gap-1 font-bold text-slate-700">
-                                                            <span className="text-amber-500"><Star size={12} /></span> {feedbackAverage}/5
+                                                            <span className="text-amber-500"><HiOutlineStar size={12} /></span> {feedbackAverage}/5
                                                         </div>
                                                     ) : (
                                                         <span className="text-slate-400 italic">Pending</span>
@@ -165,9 +165,9 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyles(e.status)}`}>
-                                                        {e.status === 'Completed' ? <CheckCircle2 size={12} /> :
-                                                            e.status === 'Pending Manager' ? <Clock size={12} /> :
-                                                                <AlertCircle size={12} />}
+                                                        {e.status === 'Completed' ? <HiOutlineCheckCircle size={12} /> :
+                                                            e.status === 'Pending Manager' ? <HiOutlineClock size={12} /> :
+                                                                <HiOutlineExclamationCircle size={12} />}
                                                         {e.status}
                                                     </span>
                                                 </td>

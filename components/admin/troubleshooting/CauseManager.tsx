@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createCauseLibraryItem, deleteCauseLibraryItem, updateCauseLibraryItem } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { Trash2, Plus, Stethoscope } from 'lucide-react';
+import { HiOutlineTrash, HiOutlinePlus, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2';
 import { CauseLibrary } from '@prisma/client';
 
 export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
@@ -42,14 +42,14 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
             <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                    <Stethoscope size={18} className="text-green-600" />
+                    <HiOutlineClipboardDocumentCheck size={18} className="text-green-600" />
                     Cause Library
                 </h3>
                 <button
                     onClick={() => setIsAdding(!isAdding)}
                     className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1"
                 >
-                    <Plus size={14} /> New Check
+                    <HiOutlinePlus size={14} /> New Check
                 </button>
             </div>
 
@@ -157,7 +157,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                                     className="text-slate-300 hover:text-red-600 transition p-1"
                                                     title="Delete"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <HiOutlineTrash size={16} />
                                                 </button>
                                             </div>
                                         </td>

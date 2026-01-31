@@ -103,6 +103,7 @@ model Nomination {
   managerApprovalStatus String   @default("Pending") // Pending, Approved, Rejected
   managerRejectionReason String? @map("manager_rejection_reason")
 
+  @@unique([empId, batchId]) // Prevent duplicate nomination for same batch
   @@map("nominations")
 }
 

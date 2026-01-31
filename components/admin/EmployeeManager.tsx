@@ -4,7 +4,15 @@ import { useState, useRef } from 'react';
 import { createEmployee, deleteEmployee } from '@/app/actions/master-data';
 import { processEmployeeUpload } from '@/app/actions/bulk-upload';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { Trash2, Users, Plus, ChevronDown, ChevronUp, Upload, FileSpreadsheet } from 'lucide-react';
+import {
+    HiOutlineTrash,
+    HiOutlineUsers,
+    HiOutlinePlus,
+    HiOutlineChevronDown,
+    HiOutlineChevronUp,
+    HiOutlineArrowUpTray,
+    HiOutlineTableCells
+} from 'react-icons/hi2';
 import Papa from 'papaparse';
 
 interface Employee {
@@ -107,7 +115,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
             >
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
-                        <Users size={20} />
+                        <HiOutlineUsers size={20} />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-slate-800">Employee Directory</h3>
@@ -115,7 +123,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                     </div>
                 </div>
                 <div className="text-blue-600">
-                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {isExpanded ? <HiOutlineChevronUp size={18} /> : <HiOutlineChevronDown size={18} />}
                 </div>
             </div>
 
@@ -128,7 +136,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                         {/* LEFT: Manual Add */}
                         <div className="space-y-4">
                             <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <Plus size={16} /> Manual Entry
+                                <HiOutlinePlus size={16} /> Manual Entry
                             </h4>
                             <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
                                 <div className="grid grid-cols-2 gap-3">
@@ -151,7 +159,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                         {/* RIGHT: Bulk Upload */}
                         <div className="space-y-4">
                             <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <Upload size={16} /> Bulk Upload (CSV)
+                                <HiOutlineArrowUpTray size={16} /> Bulk Upload (CSV)
                             </h4>
                             <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
                                 {uploading ? (
@@ -174,7 +182,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     </div>
                                 ) : (
                                     <>
-                                        <FileSpreadsheet size={32} className="text-slate-400 mb-2" />
+                                        <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
                                         <p className="text-sm text-slate-600 mb-4">
                                             Upload CSV with headers:<br />
                                             <code className="text-xs bg-slate-200 px-1 rounded text-slate-700">id, name, email, grade, sectionName, location, manager_name, manager_email, program_name, start_date, end_date</code>
@@ -242,7 +250,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                                     onClick={() => { if (confirm('Delete employee?')) deleteEmployee(emp.id) }}
                                                     className="text-slate-300 hover:text-red-500 transition"
                                                 >
-                                                    <Trash2 size={16} />
+                                                    <HiOutlineTrash size={16} />
                                                 </button>
                                             </td>
                                         </tr>

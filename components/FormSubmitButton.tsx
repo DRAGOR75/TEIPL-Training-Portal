@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormStatus } from 'react-dom';
-import { Loader2 } from 'lucide-react';
+import { HiOutlineArrowPath } from 'react-icons/hi2';
 import React from 'react';
 
 interface FormSubmitButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -29,7 +29,7 @@ export function FormSubmitButton({
         >
             {isSubmitting ? (
                 <span className="flex items-center justify-center gap-2">
-                    <Loader2 className="animate-spin" size={20} />
+                    <HiOutlineArrowPath className="animate-spin" size={20} />
                     {loadingText}
                 </span>
             ) : (

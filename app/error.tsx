@@ -2,7 +2,7 @@
 'use client'; // Error components must be Client Components
 
 import { useEffect } from 'react';
-import { RotateCcw, AlertTriangle } from 'lucide-react';
+import { HiOutlineArrowPath, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 
 export default function Error({
     error,
@@ -20,7 +20,7 @@ export default function Error({
         <div className="min-h-screen bg-red-50/50 flex flex-col items-center justify-center p-4">
             <div className="max-w-md w-full text-center space-y-6 bg-white p-8 rounded-2xl shadow-xl border border-red-100">
                 <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 anime-bounce">
-                    <AlertTriangle className="w-10 h-10 text-red-500" />
+                    <HiOutlineExclamationTriangle className="w-10 h-10 text-red-500" />
                 </div>
 
                 <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Something went wrong!</h2>
@@ -43,7 +43,7 @@ export default function Error({
                         }
                         className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all shadow-md hover:shadow-lg hover:scale-[1.02]"
                     >
-                        <RotateCcw className="w-4 h-4" />
+                        <HiOutlineArrowPath className="w-4 h-4" />
                         Try Again
                     </button>
 

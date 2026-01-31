@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ShieldCheck } from 'lucide-react';
+import { HiOutlineShieldCheck } from 'react-icons/hi2';
 
 export default function ManagerSuccessPage() {
     return (
@@ -7,7 +7,7 @@ export default function ManagerSuccessPage() {
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center border border-indigo-100">
 
                 <div className="w-16 h-16 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <ShieldCheck size={32} strokeWidth={2.5} />
+                    <HiOutlineShieldCheck size={32} strokeWidth={2.5} />
                 </div>
 
                 <h1 className="text-2xl font-bold text-slate-800 mb-2">Review Completed</h1>

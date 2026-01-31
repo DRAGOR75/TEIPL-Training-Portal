@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { createProgram, deleteProgram } from '@/app/actions/master-data';
-import { Trash2, BookOpen, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
 import { TrainingCategory, Grade } from '@prisma/client';
 
 interface Program {
@@ -60,7 +60,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
             >
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-emerald-50 rounded-xl text-emerald-600">
-                        <BookOpen size={20} />
+                        <HiOutlineBookOpen size={20} />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-slate-800">Training Programs</h3>
@@ -68,7 +68,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                     </div>
                 </div>
                 <div className="text-blue-600">
-                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {isExpanded ? <HiOutlineChevronUp size={18} /> : <HiOutlineChevronDown size={18} />}
                 </div>
             </div>
 
@@ -117,7 +117,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         </div>
 
                         <FormSubmitButton className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200">
-                            <Plus size={16} /> Create Program
+                            <HiOutlinePlus size={16} /> Create Program
                         </FormSubmitButton>
                     </form>
 
@@ -176,7 +176,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                     onClick={() => { if (confirm('Delete program?')) deleteProgram(prog.id) }}
                                     className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
                                 >
-                                    <Trash2 size={18} />
+                                    <HiOutlineTrash size={18} />
                                 </button>
                             </div>
                         ))}

@@ -4,22 +4,22 @@ import { useState } from 'react';
 import { TroubleshootingProduct, ProductFault, FaultLibrary, FaultCause, CauseLibrary } from '@prisma/client';
 import { getFaultsForProduct, getCausesForFault, logTroubleshootingEvent } from '@/app/actions/troubleshooting';
 import {
-    Wrench,
-    Search,
-    AlertCircle,
-    CheckCircle2,
-    ArrowRight,
-    BookOpen,
-    HelpCircle,
-    Info,
-    Settings,
-    Activity,
-    ChevronRight,
-    ChevronDown,
-    ChevronUp,
-    ClipboardList,
-    MessageSquarePlus
-} from 'lucide-react';
+    HiOutlineWrench,
+    HiOutlineMagnifyingGlass,
+    HiOutlineExclamationCircle,
+    HiOutlineCheckCircle,
+    HiOutlineArrowRight,
+    HiOutlineBookOpen,
+    HiOutlineQuestionMarkCircle,
+    HiOutlineInformationCircle,
+    HiOutlineCog6Tooth,
+    HiOutlineBolt,
+    HiOutlineChevronRight,
+    HiOutlineChevronDown,
+    HiOutlineChevronUp,
+    HiOutlineClipboardDocumentList,
+    HiOutlineChatBubbleLeftRight
+} from 'react-icons/hi2';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Link from 'next/link';
 
@@ -134,7 +134,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <div className="sticky top-0 bg-white z-10 px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="bg-thriveni-blue/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-thriveni-blue">
-                                    <BookOpen size={20} className="stroke-[2.5]" />
+                                    <HiOutlineBookOpen size={20} className="stroke-[2.5]" />
                                 </div>
                                 <div>
                                     <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Troubleshooting Guidelines</h2>
@@ -173,7 +173,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 {/* Disclaimer */}
                                 <div className="bg-gray-50 rounded-xl p-4 md:p-5 border border-gray-100">
                                     <h4 className="flex items-center gap-2 text-gray-800 font-bold text-sm uppercase tracking-wide mb-1.5 md:mb-2">
-                                        <AlertCircle size={14} /> Disclaimer
+                                        <HiOutlineExclamationCircle size={14} /> Disclaimer
                                     </h4>
                                     <p className="text-gray-900/80 text-sm font-medium leading-relaxed">
                                         The troubleshooting steps provided are for reference only and based on common scenarios..
@@ -184,18 +184,18 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 <div className="bg-thriveni-blue/5 rounded-xl p-4 md:p-5 border border-thriveni-blue/10 space-y-3 md:space-y-4">
                                     <div>
                                         <h4 className="flex items-center gap-2 text-thriveni-blue font-bold text-sm uppercase tracking-wide mb-1">
-                                            <HelpCircle size={14} /> User Guide
+                                            <HiOutlineQuestionMarkCircle size={14} /> User Guide
                                         </h4>
 
                                     </div>
                                     <div className="pt-3 border-t border-thriveni-blue/10">
                                         <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
-                                            <Info size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
+                                            <HiOutlineInformationCircle size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
                                         </a>
                                     </div>
                                     <div className="pt-3 border-t border-thriveni-blue/10">
                                         <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
-                                            <Info size={14} /> Step 2 - Select the fault you are experiencing.
+                                            <HiOutlineInformationCircle size={14} /> Step 2 - Select the fault you are experiencing.
                                         </a>
                                     </div>
                                     <div className="pt-3 border-t border-thriveni-blue/10">
@@ -215,7 +215,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     onClick={() => setShowGuide(false)}
                                     className="w-full md:w-auto bg-lloyds-red hover:bg-[#D11F25] text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-lloyds-red/20 transform transition-all active:scale-95 flex items-center justify-center gap-2"
                                 >
-                                    <Wrench size={18} />
+                                    <HiOutlineWrench size={18} />
                                     Start Troubleshooting
                                 </button>
                             </div>
@@ -237,7 +237,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         {/* Machine Selector */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
-                                <Wrench size={16} className="text-slate-400" />
+                                <HiOutlineWrench size={16} className="text-slate-400" />
                                 Select Machine Model
                             </label>
                             <SearchableSelect
@@ -246,7 +246,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 onChange={(val) => handleProductChange(val)}
                                 placeholder="-- Choose a Machine --"
                                 searchPlaceholder="Search machines..."
-                                icon={<Search size={20} />}
+                                icon={<HiOutlineMagnifyingGlass size={20} />}
                                 direction={diagnosis ? 'down' : 'responsive-bottom'}
                             />
                         </div>
@@ -254,7 +254,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         {/* Issue Selector */}
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
-                                <AlertCircle size={16} className="text-slate-400" />
+                                <HiOutlineExclamationCircle size={16} className="text-slate-400" />
                                 Select Observed  Fault
                             </label>
                             <SearchableSelect
@@ -267,12 +267,12 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 placeholder={loadingFaults ? 'Loading faults...' : '-- Choose an Issue --'}
                                 searchPlaceholder="Search issues..."
                                 disabled={!selectedProductId || loadingFaults}
-                                icon={<Search size={20} />}
+                                icon={<HiOutlineMagnifyingGlass size={20} />}
                                 direction={diagnosis ? 'down' : 'responsive-bottom'}
                             />
                             {faults.length === 0 && selectedProductId && !loadingFaults && (
                                 <p className="flex items-center gap-1.5 text-xs text-lloyds-red font-medium ml-1 bg-lloyds-red/10 w-fit px-2 py-1 rounded-md">
-                                    <Info size={12} /> No reported faults for this machine.
+                                    <HiOutlineInformationCircle size={12} /> No reported faults for this machine.
                                 </p>
                             )}
                         </div>
@@ -308,7 +308,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     <div className="flex gap-4">
                                         <div className="shrink-0">
                                             <div className="w-10 h-10 bg-lloyds-red/10 rounded-full flex items-center justify-center text-lloyds-red shadow-sm border border-lloyds-red/20">
-                                                <AlertCircle size={20} />
+                                                <HiOutlineExclamationCircle size={20} />
                                             </div>
                                         </div>
                                         <div>
@@ -325,7 +325,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             <div className="p-2 md:p-8 bg-slate-50/50">
                                 <div className="flex items-left gap-3 md:gap-4 mb-6 md:mb-8 pl-2 md:pl-0">
                                     <div className="w-12 h-12 bg-white rounded-2xl shadow-sm border border-slate-200 flex items-center justify-center text-thriveni-blue">
-                                        <ClipboardList size={30} />
+                                        <HiOutlineClipboardDocumentList size={30} />
                                     </div>
                                     <div>
                                         <h3 className="text-base md:text-lg font-bold uppercase tracking-wider text-slate-900">
@@ -368,7 +368,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                                     )}
                                                                 </h4>
                                                                 <div className={`text-slate-400 transition-transform duration-300 ${expandedSteps[index] ? 'rotate-180' : ''}`}>
-                                                                    <ChevronDown size={20} />
+                                                                    <HiOutlineChevronDown size={20} />
                                                                 </div>
                                                             </div>
 
@@ -412,7 +412,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                                 />
                                                                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                                                                     <span className="text-white text-xs font-medium flex items-center gap-1.5">
-                                                                        <Info size={12} /> Reference Image
+                                                                        <HiOutlineInformationCircle size={12} /> Reference Image
                                                                     </span>
                                                                 </div>
                                                             </div>
@@ -425,7 +425,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                                     {diagnosis.sequence.length === 0 && (
                                         <div className="text-center py-16 px-4 rounded-3xl border-2 border-dashed border-slate-300 bg-slate-50">
-                                            <HelpCircle size={48} className="mx-auto text-slate-300 mb-4" />
+                                            <HiOutlineQuestionMarkCircle size={48} className="mx-auto text-slate-300 mb-4" />
                                             <p className="text-slate-500 font-medium">No specific diagnostic steps documented for this issue yet.</p>
                                             <p className="text-slate-400 text-sm mt-1">Please consult the master technical manual directly.</p>
                                         </div>
@@ -443,7 +443,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 onClick={() => setShowFeedbackModal(true)}
                                 className="inline-flex items-center gap-2 text-lloyds-red font-bold hover:underline"
                             >
-                                <MessageSquarePlus size={18} />
+                                <HiOutlineChatBubbleLeftRight size={18} />
                                 Give Feedback
                             </button>
                         </div>
@@ -453,7 +453,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {!diagnosis && !loadingDiagnosis && selectedProductId && selectedFaultId && (
                         <div className="bg-white rounded-3xl border border-slate-200 p-6 md:p-12 text-center shadow-sm">
                             <div className="w-16 h-16 bg-thriveni-blue/5 rounded-full flex items-center justify-center text-thriveni-blue mx-auto mb-4">
-                                <Search size={32} />
+                                <HiOutlineMagnifyingGlass size={32} />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Ready to Troubleshoot</h3>
                             <p className="text-slate-500 max-w-md mx-auto">
@@ -465,18 +465,18 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     {!selectedProductId && (
                         <div className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
                             <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-4 transform rotate-3">
-                                <Wrench size={28} />
+                                <HiOutlineWrench size={28} />
                             </div>
                             <h3 className="text-lg font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
                             <p className="text-slate-500 max-w-sm mx-auto mb-6 text-sm">
                                 Select a machine model from the dropdown (provided below) to identify common faults and solutions.
                             </p>
                             <div className="flex justify-center gap-3 text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                                <span className="flex items-center gap-1"><CheckCircle2 size={12} /> Identify</span>
+                                <span className="flex items-center gap-1"><HiOutlineCheckCircle size={12} /> Identify</span>
                                 <span className="w-px h-3 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><Search size={12} /> Diagnose</span>
+                                <span className="flex items-center gap-1"><HiOutlineMagnifyingGlass size={12} /> Diagnose</span>
                                 <span className="w-px h-3 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><Wrench size={12} /> Resolve</span>
+                                <span className="flex items-center gap-1"><HiOutlineWrench size={12} /> Resolve</span>
                             </div>
                         </div>
                     )}

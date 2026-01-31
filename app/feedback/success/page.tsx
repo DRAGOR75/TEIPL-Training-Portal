@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { CheckCircle } from 'lucide-react';
+import { HiOutlineCheckCircle } from 'react-icons/hi2';
 
 export default function SuccessPage() {
     return (
@@ -7,7 +7,7 @@ export default function SuccessPage() {
             <div className="max-w-md w-full bg-white rounded-xl shadow-lg p-8 text-center border border-green-100">
 
                 <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <CheckCircle size={32} strokeWidth={3} />
+                    <HiOutlineCheckCircle size={32} strokeWidth={3} />
                 </div>
 
                 <h1 className="text-2xl font-bold text-slate-800 mb-2">Feedback Submitted!</h1>

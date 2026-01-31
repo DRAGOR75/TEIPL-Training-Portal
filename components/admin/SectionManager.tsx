@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createSection, deleteSection } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { Trash2, Layers, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { HiOutlineTrash, HiOutlineSquare3Stack3D, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
 
 interface Section {
     id: string;
@@ -34,7 +34,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
             >
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
-                        <Layers size={20} />
+                        <HiOutlineSquare3Stack3D size={20} />
                     </div>
                     <div>
                         <h3 className="text-lg font-bold text-slate-800">Departments / Sections</h3>
@@ -42,7 +42,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                     </div>
                 </div>
                 <div className="text-blue-600">
-                    {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                    {isExpanded ? <HiOutlineChevronUp size={18} /> : <HiOutlineChevronDown size={18} />}
                 </div>
             </div>
 
@@ -54,7 +54,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                             <input name="name" required placeholder="e.g. Mining, IT, HR" className="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500 outline-none text-slate-800 placeholder-slate-500" />
                         </div>
                         <FormSubmitButton className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition disabled:opacity-50 flex items-center gap-2">
-                            <Plus size={16} /> Add
+                            <HiOutlinePlus size={16} /> Add
                         </FormSubmitButton>
                     </form>
 
@@ -68,7 +68,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                                         onClick={() => { if (confirm('Delete section?')) deleteSection(sec.id) }}
                                         className="text-slate-300 hover:text-red-500 transition"
                                     >
-                                        <Trash2 size={16} />
+                                        <HiOutlineTrash size={16} />
                                     </button>
                                 </div>
                             </div>

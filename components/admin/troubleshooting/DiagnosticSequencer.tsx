@@ -40,7 +40,18 @@ import {
 } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { ArrowRight, Plus, Trash2, GripVertical, CheckCircle2, Edit2, Check, X, Eye, EyeOff } from 'lucide-react';
+import {
+    HiOutlineArrowRight,
+    HiOutlinePlus,
+    HiOutlineTrash,
+    HiOutlineBars3,
+    HiOutlineCheckCircle,
+    HiOutlinePencil,
+    HiOutlineCheck,
+    HiOutlineXMark,
+    HiOutlineEye,
+    HiOutlineEyeSlash
+} from 'react-icons/hi2';
 
 type FullProductFault = ProductFault & { fault: FaultLibrary };
 type FullFaultCause = FaultCause & { cause: CauseLibrary; justification?: string | null };
@@ -163,14 +174,14 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                         className="p-1.5 rounded text-slate-400 hover:text-blue-600 bg-slate-50 hover:bg-blue-50 transition"
                         title="Edit Details"
                     >
-                        <Edit2 size={14} />
+                        <HiOutlinePencil size={14} />
                     </button>
                     <button
                         onClick={() => onToggle(step.id, step.isActive)}
                         className={`p-1.5 rounded transition ${step.isActive ? 'text-slate-300 hover:text-slate-600' : 'text-slate-400 hover:text-green-600 bg-slate-100'}`}
                         title={step.isActive ? "Disable Step (Temp)" : "Enable Step"}
                     >
-                        {step.isActive ? <Eye size={14} /> : <EyeOff size={14} />}
+                        {step.isActive ? <HiOutlineEye size={14} /> : <HiOutlineEyeSlash size={14} />}
                     </button>
                     <button
                         onClick={() => {
@@ -179,7 +190,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                         className="text-slate-300 hover:text-red-500 p-1.5"
                         title="Remove Step"
                     >
-                        <Trash2 size={14} />
+                        <HiOutlineTrash size={14} />
                     </button>
                 </div>
 
@@ -190,7 +201,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                     className="text-slate-300 hover:text-blue-500 cursor-move p-1.5"
                     title="Drag to reorder"
                 >
-                    <GripVertical size={16} />
+                    <HiOutlineBars3 size={16} />
                 </div>
             </div>
         </div>
@@ -361,7 +372,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                             <div className="p-3 bg-slate-100 text-xs font-bold text-slate-500 uppercase flex justify-between items-center">
                                 <span>Linked Faults</span>
                                 <button onClick={() => setIsAddingFault(true)} className="text-blue-600 hover:text-blue-700 flex items-center gap-1">
-                                    <Plus size={14} /> Link Fault
+                                    <HiOutlinePlus size={14} /> Link Fault
                                 </button>
                             </div>
 
@@ -411,14 +422,14 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                             className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
                                                             title="Save"
                                                         >
-                                                            <Check size={14} />
+                                                            <HiOutlineCheck size={14} />
                                                         </button>
                                                         <button
                                                             onClick={() => setEditingFaultId(null)}
                                                             className="text-slate-500 hover:text-slate-700 p-1"
                                                             title="Cancel"
                                                         >
-                                                            <X size={14} />
+                                                            <HiOutlineXMark size={14} />
                                                         </button>
                                                     </div>
                                                 </div>
@@ -429,7 +440,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                         <span className="font-medium text-slate-700">{pf.fault.name}</span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
-                                                        {selectedProductFaultId === pf.id && <ArrowRight size={16} className="text-blue-500" />}
+                                                        {selectedProductFaultId === pf.id && <HiOutlineArrowRight size={16} className="text-blue-500" />}
 
                                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button
@@ -441,7 +452,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                                 className="text-slate-400 hover:text-blue-600 p-1"
                                                                 title="Edit Sequence"
                                                             >
-                                                                <Edit2 size={14} />
+                                                                <HiOutlinePencil size={14} />
                                                             </button>
                                                             <button
                                                                 onClick={(e) => {
@@ -455,7 +466,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                                 className="text-slate-300 hover:text-red-500 p-1"
                                                                 title="Unlink"
                                                             >
-                                                                <Trash2 size={14} />
+                                                                <HiOutlineTrash size={14} />
                                                             </button>
                                                         </div>
                                                     </div>
@@ -477,7 +488,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                     <h3 className="font-bold text-slate-700 flex items-center gap-2">
-                        <CheckCircle2 size={18} className="text-green-600" />
+                        <HiOutlineCheckCircle size={18} className="text-green-600" />
                         Cause Manager (Sequence)
                     </h3>
                     <button
@@ -485,7 +496,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                         onClick={() => setIsAddingStep(true)}
                         className="text-xs bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-medium transition flex items-center gap-1 disabled:opacity-50"
                     >
-                        <Plus size={14} /> Add Step
+                        <HiOutlinePlus size={14} /> Add Step
                     </button>
                 </div>
 

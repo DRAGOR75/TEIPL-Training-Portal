@@ -1,6 +1,6 @@
 
 import Link from 'next/link';
-import { Home } from 'lucide-react';
+import { HiOutlineHome } from 'react-icons/hi2';
 
 export default function NotFound() {
     return (
@@ -21,7 +21,7 @@ export default function NotFound() {
                         href="/admin/dashboard"
                         className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:scale-[1.02] shadow-md hover:shadow-lg"
                     >
-                        <Home className="w-4 h-4" />
+                        <HiOutlineHome className="w-4 h-4" />
                         Return to Dashboard
                     </Link>
                 </div>

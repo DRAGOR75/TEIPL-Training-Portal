@@ -1,14 +1,14 @@
 import Link from 'next/link';
 import {
-    BarChart3,
-    Settings,
-    Database,
-    ChevronRight,
-    LayoutDashboard,
-    Users,
-    Wrench,
-    ClipboardList
-} from 'lucide-react';
+    HiOutlineChartBar,
+    HiOutlineCog6Tooth,
+    HiOutlineCircleStack,
+    HiOutlineChevronRight,
+    HiOutlineSquares2X2,
+    HiOutlineUsers,
+    HiOutlineWrench,
+    HiOutlineClipboardDocumentList
+} from 'react-icons/hi2';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,7 +32,7 @@ export default async function AdminHubPage() {
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-blue-50 text-blue-600 rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                    <BarChart3 size={24} />
+                                    <HiOutlineChartBar size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Analytics</span>
                             </div>
@@ -41,7 +41,7 @@ export default async function AdminHubPage() {
                                 View training ratings, read employee feedback, and track program effectiveness.
                             </p>
                             <div className="flex items-center text-blue-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                                Open Dashboard <ChevronRight size={16} />
+                                Open Dashboard <HiOutlineChevronRight size={16} />
                             </div>
                         </div>
                     </Link>
@@ -51,7 +51,7 @@ export default async function AdminHubPage() {
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-indigo-50 text-indigo-600 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                                    <ClipboardList size={24} />
+                                    <HiOutlineClipboardDocumentList size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Master Data</span>
                             </div>
@@ -60,7 +60,7 @@ export default async function AdminHubPage() {
                                 Manage training programs, sections/departments, and employee database.
                             </p>
                             <div className="flex items-center text-indigo-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                                Manage Data <ChevronRight size={16} />
+                                Manage Data <HiOutlineChevronRight size={16} />
                             </div>
                         </div>
                     </Link>
@@ -70,7 +70,7 @@ export default async function AdminHubPage() {
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-lloyds-red/10 text-lloyds-red rounded-lg group-hover:bg-lloyds-red group-hover:text-white transition-colors">
-                                    <Wrench size={24} />
+                                    <HiOutlineWrench size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Diagnostics</span>
                             </div>
@@ -79,7 +79,7 @@ export default async function AdminHubPage() {
                                 Configure machines, fault codes, and create step-by-step diagnostic guides.
                             </p>
                             <div className="flex items-center text-lloyds-red font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                                Open Config <ChevronRight size={16} />
+                                Open Config <HiOutlineChevronRight size={16} />
                             </div>
                         </div>
                     </Link>
@@ -89,7 +89,7 @@ export default async function AdminHubPage() {
                         <div className="p-6">
                             <div className="flex items-center justify-between mb-4">
                                 <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                                    <Users size={24} />
+                                    <HiOutlineUsers size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Batches</span>
                             </div>
@@ -98,7 +98,7 @@ export default async function AdminHubPage() {
                                 Schedule trainings, manage batches, and access Enrollment QR codes.
                             </p>
                             <div className="flex items-center text-emerald-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                                Manage Sessions <ChevronRight size={16} />
+                                Manage Sessions <HiOutlineChevronRight size={16} />
                             </div>
                         </div>
                     </Link>

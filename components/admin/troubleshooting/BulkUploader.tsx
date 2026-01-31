@@ -3,7 +3,13 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
 import { bulkUploadTroubleshooting, BulkUploadRow } from '@/app/actions/admin-troubleshooting';
-import { UploadCloud, FileSpreadsheet, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import {
+    HiOutlineCloudArrowUp,
+    HiOutlineTableCells,
+    HiOutlineCheckCircle,
+    HiOutlineExclamationCircle,
+    HiOutlineArrowPath
+} from 'react-icons/hi2';
 
 export default function BulkUploader() {
     const [isUploading, setIsUploading] = useState(false);
@@ -134,7 +140,7 @@ export default function BulkUploader() {
         <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 max-w-2xl mx-auto">
             <div className="text-center space-y-4">
                 <div className="bg-blue-50 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                    <UploadCloud size={32} />
+                    <HiOutlineCloudArrowUp size={32} />
                 </div>
                 <h3 className="text-lg font-bold text-slate-900">Bulk Import Troubleshooting Data</h3>
                 <p className="text-slate-500 text-sm max-w-md mx-auto">
@@ -154,7 +160,7 @@ export default function BulkUploader() {
 
                 <div className="pt-4">
                     <label className="cursor-pointer inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-bold transition-all active:scale-95 shadow-lg shadow-slate-200">
-                        {isUploading ? <Loader2 className="animate-spin" size={20} /> : <FileSpreadsheet size={20} />}
+                        {isUploading ? <HiOutlineArrowPath className="animate-spin" size={20} /> : <HiOutlineTableCells size={20} />}
                         {isUploading ? 'Uploading...' : 'Select CSV File'}
                         <input type="file" accept=".csv" className="hidden" onChange={handleFileUpload} disabled={isUploading} />
                     </label>
@@ -177,14 +183,14 @@ export default function BulkUploader() {
 
                 {stats?.count !== undefined && (
                     <div className="mt-6 p-4 bg-green-50 text-green-700 rounded-2xl flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 border border-green-100">
-                        <CheckCircle size={20} />
+                        <HiOutlineCheckCircle size={20} />
                         <span className="font-bold">Successfully processed {stats.count} rows!</span>
                     </div>
                 )}
 
                 {stats?.error && (
                     <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-2xl flex items-center justify-center gap-2 animate-in fade-in zoom-in-95 border border-red-100">
-                        <AlertCircle size={20} />
+                        <HiOutlineExclamationCircle size={20} />
                         <span className="font-bold">{stats.error}</span>
                     </div>
                 )}

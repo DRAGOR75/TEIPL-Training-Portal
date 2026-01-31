@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Search, X } from 'lucide-react';
+import { HiOutlineChevronDown, HiOutlineMagnifyingGlass, HiOutlineXMark } from 'react-icons/hi2';
 
 interface Option {
     value: string | number;
@@ -123,10 +123,10 @@ export default function SearchableSelect({
                             onClick={handleClear}
                             className="p-1 hover:bg-slate-200 rounded-full cursor-pointer transition-colors"
                         >
-                            <X size={14} />
+                            <HiOutlineXMark size={14} />
                         </div>
                     )}
-                    <ChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-thriveni-blue' : ''}`} />
+                    <HiOutlineChevronDown size={16} className={`transition-transform duration-200 ${isOpen ? 'rotate-180 text-thriveni-blue' : ''}`} />
                 </div>
             </div>
 

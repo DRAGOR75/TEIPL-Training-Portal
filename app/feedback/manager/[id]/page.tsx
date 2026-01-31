@@ -1,13 +1,34 @@
 import { db } from '@/lib/prisma';
+import { verifySecureToken } from '@/lib/security';
 import { redirect } from 'next/navigation';
 import { submitManagerReview } from '@/app/actions';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 // Update Type to Promise
-export default async function ManagerFeedbackPage({ params }: { params: Promise<{ id: string }> }) {
+// Update Type to Promise
+export default async function ManagerFeedbackPage({
+    params,
+    searchParams
+}: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ token?: string }>;
+}) {
 
     // 1. UNWRAP THE PARAMS
     const { id } = await params;
+    const { token } = await searchParams;
+
+    // SECURITY CHECK
+    if (!token || !verifySecureToken(token, id)) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md border-t-4 border-red-500">
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Access Denied</h1>
+                    <p className="text-slate-600">Invalid or expired security token.</p>
+                </div>
+            </div>
+        );
+    }
 
     // 2. Use unwrapped 'id'
     const enrollment = await db.enrollment.findUnique({
@@ -28,15 +49,16 @@ export default async function ManagerFeedbackPage({ params }: { params: Promise<
 
     return (
         <div className="min-h-screen bg-slate-100 flex justify-center p-8 font-sans">
-            <div className="max-w-4xl w-full bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
 
                 {/* Header */}
-                <div className="bg-indigo-900 p-6 text-white flex justify-between items-center">
-                    <div>
+                <div className="bg-indigo-900 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="relative z-10">
                         <h1 className="text-xl font-bold">Post training (30 days) performance feedback Review</h1>
                         <p className="opacity-80 text-sm">Employee Under Review: <span className="font-bold text-yellow-400">{enrollment.employeeName}</span></p>
                     </div>
-                    <div className="text-right">
+                    <div className="relative z-10 text-right">
                         <div className="text-3xl font-bold">{enrollment.averageRating?.toFixed(1)} <span className="text-sm font-normal opacity-50">/ 5</span></div>
                         <div className="text-xs uppercase tracking-wider opacity-75">Avg Score</div>
                     </div>

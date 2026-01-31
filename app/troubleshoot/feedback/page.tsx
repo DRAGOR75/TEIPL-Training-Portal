@@ -2,7 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Star, ThumbsUp, ThumbsDown, Send, CheckCircle2, ArrowLeft } from 'lucide-react';
+import {
+    HiOutlineStar,
+    HiOutlineHandThumbUp,
+    HiOutlineHandThumbDown,
+    HiOutlinePaperAirplane,
+    HiOutlineCheckCircle,
+    HiOutlineArrowLeft
+} from 'react-icons/hi2';
 import { submitFeedback, FeedbackState } from '@/app/actions/feedback';
 import Link from 'next/link';
 
@@ -45,7 +52,7 @@ export default function FeedbackPage() {
             <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
                 <div className="bg-white max-w-md w-full rounded-2xl p-8 shadow-sm border border-slate-100 text-center animate-in fade-in zoom-in-95 duration-300">
                     <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
-                        <CheckCircle2 size={40} />
+                        <HiOutlineCheckCircle size={40} />
                     </div>
                     <h2 className="text-2xl font-black text-slate-900 mb-2">Thank You!</h2>
                     <p className="text-slate-500 mb-8 leading-relaxed">
@@ -68,7 +75,7 @@ export default function FeedbackPage() {
                 {/* Header */}
                 <div className="flex items-center gap-4 mb-8">
                     <Link href="/troubleshoot" className="w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-900 transition-colors">
-                        <ArrowLeft size={20} />
+                        <HiOutlineArrowLeft size={20} />
                     </Link>
                     <div>
                         <h1 className="text-2xl font-black text-slate-900">Your Feedback</h1>
@@ -88,7 +95,7 @@ export default function FeedbackPage() {
                                 onClick={() => setForm(prev => ({ ...prev, isHelpful: true }))}
                                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${form.isHelpful === true ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}
                             >
-                                <ThumbsUp size={24} className={form.isHelpful === true ? 'fill-current' : ''} />
+                                <HiOutlineHandThumbUp size={24} className={form.isHelpful === true ? 'fill-current' : ''} />
                                 <span className="font-bold text-sm">Yes, it helped</span>
                             </button>
                             <button
@@ -96,7 +103,7 @@ export default function FeedbackPage() {
                                 onClick={() => setForm(prev => ({ ...prev, isHelpful: false }))}
                                 className={`flex flex-col items-center justify-center gap-2 p-4 rounded-xl border-2 transition-all ${form.isHelpful === false ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}
                             >
-                                <ThumbsDown size={24} className={form.isHelpful === false ? 'fill-current' : ''} />
+                                <HiOutlineHandThumbDown size={24} className={form.isHelpful === false ? 'fill-current' : ''} />
                                 <span className="font-bold text-sm">No, it didn't</span>
                             </button>
                         </div>
@@ -115,7 +122,7 @@ export default function FeedbackPage() {
                                     onClick={() => handleRating(star)}
                                     className="group p-1 focus:outline-none transition-transform active:scale-90"
                                 >
-                                    <Star
+                                    <HiOutlineStar
                                         size={32}
                                         className={`transition-colors ${star <= form.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 group-hover:text-amber-200'}`}
                                     />
@@ -196,7 +203,7 @@ export default function FeedbackPage() {
                         {loading ? 'Submitting...' : (
                             <>
                                 <span>Submit Feedback</span>
-                                <Send size={20} />
+                                <HiOutlinePaperAirplane size={20} />
                             </>
                         )}
                     </button>

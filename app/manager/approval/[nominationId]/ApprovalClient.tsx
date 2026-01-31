@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { submitManagerNominationDecision } from '@/app/actions/manager-approval';
-import { Check, X, Loader2, AlertCircle } from 'lucide-react';
+import { HiOutlineCheck, HiOutlineXMark, HiOutlineArrowPath, HiOutlineExclamationCircle } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 
 interface Props {
@@ -53,7 +53,7 @@ export default function ApprovalClient({ nomination }: Props) {
         return (
             <div className="bg-green-50 p-8 rounded-xl border border-green-100 text-center">
                 <div className="bg-green-100 p-3 rounded-full inline-block mb-4">
-                    <Check className="w-8 h-8 text-green-600" />
+                    <HiOutlineCheck className="w-8 h-8 text-green-600" />
                 </div>
                 <h2 className="text-xl font-bold text-green-800">Nomination Approved!</h2>
                 <p className="text-green-600 mt-2">You have approved {nomination.employee.name} for this training.</p>
@@ -65,7 +65,7 @@ export default function ApprovalClient({ nomination }: Props) {
         return (
             <div className="bg-red-50 p-8 rounded-xl border border-red-100 text-center">
                 <div className="bg-red-100 p-3 rounded-full inline-block mb-4">
-                    <X className="w-8 h-8 text-red-600" />
+                    <HiOutlineXMark className="w-8 h-8 text-red-600" />
                 </div>
                 <h2 className="text-xl font-bold text-red-800">Nomination Rejected</h2>
                 <p className="text-red-600 mt-2">You have rejected this nomination.</p>
@@ -97,7 +97,7 @@ export default function ApprovalClient({ nomination }: Props) {
                         disabled={status === 'APPROVING' || status === 'REJECTING'}
                         className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all shadow-md active:scale-95 disabled:opacity-50"
                     >
-                        {status === 'APPROVING' ? <Loader2 className="animate-spin" /> : <Check />}
+                        {status === 'APPROVING' ? <HiOutlineArrowPath className="animate-spin" /> : <HiOutlineCheck />}
                         Approve Nomination
                     </button>
                     <button
@@ -105,7 +105,7 @@ export default function ApprovalClient({ nomination }: Props) {
                         disabled={status === 'APPROVING' || status === 'REJECTING'}
                         className="flex-1 bg-white border-2 border-slate-200 hover:border-red-200 hover:bg-red-50 text-slate-700 hover:text-red-700 font-bold py-3 px-6 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                     >
-                        <X />
+                        <HiOutlineXMark />
                         Reject
                     </button>
                 </div>
@@ -113,11 +113,11 @@ export default function ApprovalClient({ nomination }: Props) {
                 <div className="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-4 animate-in fade-in slide-in-from-top-4">
                     <div className="flex justify-between items-center">
                         <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                            <AlertCircle className="text-red-500 w-5 h-5" />
+                            <HiOutlineExclamationCircle className="text-red-500 w-5 h-5" />
                             Reason for Rejection
                         </h3>
                         <button onClick={() => setShowRejectForm(false)} className="text-slate-400 hover:text-slate-600">
-                            <X size={18} />
+                            <HiOutlineXMark size={18} />
                         </button>
                     </div>
                     <textarea
@@ -132,7 +132,7 @@ export default function ApprovalClient({ nomination }: Props) {
                             disabled={!rejectionReason.trim() || status === 'REJECTING'}
                             className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                            {status === 'REJECTING' ? <Loader2 className="animate-spin w-4 h-4" /> : null}
+                            {status === 'REJECTING' ? <HiOutlineArrowPath className="animate-spin w-4 h-4" /> : null}
                             Confirm Rejection
                         </button>
                         <button
@@ -147,7 +147,7 @@ export default function ApprovalClient({ nomination }: Props) {
 
             {status === 'ERROR' && (
                 <div className="p-3 bg-red-50 text-red-700 text-sm rounded-lg flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4" />
+                    <HiOutlineExclamationCircle className="w-4 h-4" />
                     Something went wrong. Please try again.
                 </div>
             )}

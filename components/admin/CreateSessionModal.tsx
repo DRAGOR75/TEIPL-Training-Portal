@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createTrainingSession } from '@/app/actions';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import { HiOutlineXMark } from 'react-icons/hi2';
 
 export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -36,10 +37,15 @@ export default function CreateSessionModal({ trainers }: { trainers: any[] }) {
 
                 <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center">
                     <h2 className="font-bold text-lg text-slate-800">New Training Session</h2>
-                    <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600">✕</button>
+                    <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600"><HiOutlineXMark size={24} /></button>
                 </div>
 
                 <form action={async (formData) => {
+                    if (!selectedTrainer) {
+                        alert("Please select a trainer.");
+                        return;
+                    }
+
                     // Manually append selected trainer if needed, though hidden input is reliable if inside form
                     // But standard form action might not pick up SearchableSelect state unless we use hidden input
                     formData.set('trainerName', selectedTrainer);

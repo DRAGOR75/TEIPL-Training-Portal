@@ -1,5 +1,6 @@
 import { getAvailablePrograms, submitTNINomination, getEmployeeProfile } from '@/app/actions/tni';
-import { ArrowLeft, Save } from 'lucide-react';
+import { HiOutlineArrowLeft } from 'react-icons/hi2';
+import { HiOutlineBookmarkSquare } from 'react-icons/hi2';
 import Link from 'next/link';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
@@ -21,7 +22,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
         <div className="min-h-screen bg-slate-100 p-4 md:p-8">
             <div className="max-w-2xl mx-auto">
                 <Link href={`/tni/${empId}`} className="inline-flex items-center text-slate-600 hover:text-slate-900 mb-6 transition-colors font-medium">
-                    <ArrowLeft size={18} className="mr-2" /> Back to Dashboard
+                    <HiOutlineArrowLeft size={18} className="mr-2" /> Back to Dashboard
                 </Link>
 
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -143,7 +144,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                             </div>
 
                             <FormSubmitButton className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                <Save size={20} /> Submit Nomination
+                                <HiOutlineBookmarkSquare size={20} /> Submit Nomination
                             </FormSubmitButton>
 
                         </form>

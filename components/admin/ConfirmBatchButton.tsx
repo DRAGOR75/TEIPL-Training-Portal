@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, Unlock, Loader2, CheckCircle2 } from 'lucide-react';
+import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineArrowPath, HiOutlineCheckCircle } from 'react-icons/hi2';
 import { lockSessionBatch } from '@/app/actions/sessions';
 import { useRouter } from 'next/navigation';
 
@@ -40,7 +40,7 @@ export default function ConfirmBatchButton({ sessionId, initialStatus }: Confirm
     if (isLocked) {
         return (
             <div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-200 shadow-sm font-bold text-sm">
-                <CheckCircle2 size={16} />
+                <HiOutlineCheckCircle size={16} />
                 <span>Batch Locked</span>
             </div>
         );
@@ -52,7 +52,7 @@ export default function ConfirmBatchButton({ sessionId, initialStatus }: Confirm
             disabled={isLoading}
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md border border-indigo-500 font-bold text-sm transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
         >
-            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Lock size={16} />}
+            {isLoading ? <HiOutlineArrowPath size={16} className="animate-spin" /> : <HiOutlineLockClosed size={16} />}
             <span>Confirm Batch</span>
         </button>
     );

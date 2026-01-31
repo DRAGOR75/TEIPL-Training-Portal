@@ -206,11 +206,21 @@ export async function submitTNINomination(formData: FormData) {
 
 export async function updateNominationStatus(nominationId: string, status: 'Approved' | 'Rejected') {
     try {
-        await db.nomination.update({
+        const updatedNomination = await db.nomination.update({
             where: { id: nominationId },
-            data: { status }
+            data: { status },
+            select: { empId: true } // Fetch empId to revalidate specific dashboard
         });
-        revalidatePath('/nominations/manager/[empId]');
+
+        // Revalidate the Manager Approval Page (where the action happened)
+        revalidatePath(`/nominations/manager/${updatedNomination.empId}`);
+
+        // Revalidate the Employee's Dashboard (so they see the change)
+        revalidatePath(`/tni/${updatedNomination.empId}`);
+
+        // Invalidate the cache for the profile fetcher
+        revalidateTag('employee-profile', 'default');
+
         return { success: true };
     } catch (error) {
         console.error("Failed to update status:", error);

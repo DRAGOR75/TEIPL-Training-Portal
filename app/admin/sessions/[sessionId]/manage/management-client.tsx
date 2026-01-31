@@ -3,7 +3,16 @@
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
 import { addNominationsToBatch, removeNominationFromBatch } from '@/app/actions/sessions';
-import { UserPlus, QrCode, ClipboardList, CheckSquare, Square, Loader2, ExternalLink, Trash2 } from 'lucide-react';
+import {
+    HiOutlineUserPlus,
+    HiOutlineQrCode,
+    HiOutlineClipboardDocumentList,
+    HiOutlineCheckCircle,
+    HiOutlineMinusCircle,
+    HiOutlineArrowPath,
+    HiOutlineArrowTopRightOnSquare,
+    HiOutlineTrash
+} from 'react-icons/hi2';
 import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
 
 interface Props {
@@ -65,7 +74,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
             <div className="space-y-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center space-y-4">
                     <div className="bg-blue-50 p-2 rounded-xl inline-block">
-                        <QrCode className="w-6 h-6 text-blue-600" />
+                        <HiOutlineQrCode className="w-6 h-6 text-blue-600" />
                     </div>
                     <h3 className="font-bold text-slate-900">Direct Enrollment</h3>
                     <p className="text-sm text-slate-500">Scan to join this batch directly.</p>
@@ -81,13 +90,13 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest mt-4"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        Live Link <ExternalLink size={10} />
+                        Live Link <HiOutlineArrowTopRightOnSquare size={10} />
                     </a>
                 </div>
 
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        <ClipboardList className="w-5 h-5 text-indigo-600" />
+                        <HiOutlineClipboardDocumentList className="w-5 h-5 text-indigo-600" />
                         Batch Stats
                     </h3>
                     <div className="space-y-3">
@@ -129,7 +138,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             title={isLocked ? "Batch is locked" : "Add selected"}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                            {isAdding ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                            {isAdding ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineUserPlus className="w-4 h-4" />}
                             Add Selected ({selectedNominations.size})
                         </button>
                     </div>
@@ -159,8 +168,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                                     className="text-slate-400 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     {selectedNominations.has(nom.id) ?
-                                                        <CheckSquare className="w-5 h-5 text-blue-600" /> :
-                                                        <Square className="w-5 h-5" />
+                                                        <HiOutlineCheckCircle className="w-5 h-5 text-blue-600" /> :
+                                                        <HiOutlineMinusCircle className="w-5 h-5" />
                                                     }
                                                 </button>
                                             </td>
@@ -224,9 +233,9 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                                     title={isLocked ? "Batch is locked" : "Remove from session"}
                                                 >
                                                     {removingId === nom.id ? (
-                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                        <HiOutlineArrowPath className="w-4 h-4 animate-spin" />
                                                     ) : (
-                                                        <Trash2 className="w-4 h-4" />
+                                                        <HiOutlineTrash className="w-4 h-4" />
                                                     )}
                                                 </button>
                                             </td>

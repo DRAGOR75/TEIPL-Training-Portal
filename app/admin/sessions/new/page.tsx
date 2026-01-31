@@ -1,7 +1,7 @@
 import { db } from '@/lib/prisma';
 import SessionForm from './session-form';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { HiOutlineArrowLeft } from 'react-icons/hi2';
 
 export default async function NewSessionPage() {
     const programs = await db.program.findMany({
