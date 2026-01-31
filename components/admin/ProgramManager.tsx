@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { createProgram, deleteProgram } from '@/app/actions/master-data';
+import { createProgram, deleteProgram, updateProgramSections } from '@/app/actions/master-data';
 import { HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
 import { TrainingCategory, Grade } from '@prisma/client';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 interface Program {
     id: string;
@@ -12,11 +13,6 @@ interface Program {
     targetGrades: Grade[];
     sections: { id: string, name: string }[];
 }
-
-
-
-import { updateProgramSections } from '@/app/actions/master-data';
-import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 export default function ProgramManager({ programs, allSections }: { programs: Program[], allSections: { id: string, name: string }[] }) {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -136,7 +132,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                     </div>
 
                                     {editingProgramId === prog.id ? (
-                                        <div className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl animate-in fade-in zoom-in-95">
+                                        <div key="edit-mode" className="mt-4 p-4 bg-slate-50 border border-slate-200 rounded-xl animate-in fade-in zoom-in-95">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-3">Edit Applicable Sections</label>
                                             <div className="flex flex-wrap gap-2 mb-3">
                                                 {allSections.map(sec => (
@@ -160,7 +156,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="mt-1">
+                                        <div key="view-mode" className="mt-1">
                                             <div className="flex flex-wrap gap-2">
                                                 <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-100 text-blue-700 border border-blue-200">{prog.category}</span>
                                                 {prog.targetGrades.map(g => (
