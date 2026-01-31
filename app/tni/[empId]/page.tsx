@@ -34,23 +34,45 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
 
     return (
 
-        <div className="min-h-screen bg-slate-100 pb-12 pt-6">
+        <div className="min-h-screen bg-slate-100 pb-12">
             {/* Top Navigation Bar */}
-            <div className="bg-white rounded-full z-20 shadow-sm  lg:mx-auto max-w-6xl">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
+            <nav className="bg-white shadow-md border-b border-slate-200 sticky top-0 z-50">
+                <div className="w-full px-2 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16 md:h-20">
+                        {/* Left Side: Logos */}
                         <div className="flex items-center gap-2">
-                            <div className="bg-slate-900 p-1.5 rounded-lg">
-                                <HiOutlineClipboardDocumentList className="text-white" size={20} />
-                            </div>
-                            <div className="flex items-center gap-2 text-lg font-medium text-slate-600">
-                                <span className="hover:text-slate-900 transition-colors cursor-default">Nominations</span>
-                                <HiOutlineChevronRight size={14} className="text-slate-400" />
-                                <span className="text-lg text-slate-900 tracking-wide font-bold  px-2 py-0.5 rounded-md">TNI Dashboard</span>
-                            </div>
+                            <Link href="/" className="flex items-center gap-2 md:gap-3">
+                                <div className="flex flex-col md:flex-row items-center justify-center -space-y-1 md:space-y-0 md:gap-4">
+                                    {/* Thriveni Logo */}
+                                    <div className="relative w-20 h-6 md:w-32 md:h-16">
+                                        <img
+                                            src="/thriveny_logo.svg"
+                                            alt="Thriveni Logo"
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                    <div className="h-4 md:h-8 w-[1px] bg-slate-300 hidden md:block"></div>
+                                    {/* Lloyds Logo */}
+                                    <div className="relative w-20 h-6 md:w-34 md:h-10">
+                                        <img
+                                            src="/LLoyds_logo.svg"
+                                            alt="Lloyds Metals Logo"
+                                            className="w-full h-full object-contain"
+                                        />
+                                    </div>
+                                </div>
+                            </Link>
                         </div>
 
-                        <div className="flex items-center gap-4">
+                        {/* Centered Title */}
+                        <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[120px] md:max-w-none pointer-events-none">
+                            <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-tight truncate">
+                                TNI Dashboard
+                            </h1>
+                        </div>
+
+                        {/* Right Side: User Info & Sign Out */}
+                        <div className="flex items-center gap-2 md:gap-4 z-10">
                             <div className="text-right hidden sm:block">
                                 <div className="text-xs font-bold text-slate-400 uppercase tracking-wide">Logged in as</div>
                                 <div className="text-sm font-bold text-slate-900">{currentEmployee.name || empId}</div>
@@ -58,31 +80,31 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                             <div className="h-8 w-px bg-slate-200 hidden sm:block"></div>
                             <Link
                                 href="/tni"
-                                className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-all"
+                                className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 p-2 md:px-3 md:py-2 rounded-lg transition-all"
                             >
-                                <HiOutlineArrowRightOnRectangle size={18} />
+                                <HiOutlineArrowRightOnRectangle size={20} />
                                 <span className="hidden sm:inline">Sign Out</span>
                             </Link>
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+            <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 md:py-8 space-y-4 md:space-y-8">
 
 
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8 items-start">
 
                     {/* Left Column: Profile (4 columns on large screens) */}
-                    <div className="lg:col-span-4 space-y-8">
-                        <div className="sticky top-24">
+                    <div className="lg:col-span-4 space-y-4 md:space-y-8">
+                        <div className="static md:sticky md:top-24">
                             <TNIProfile employee={currentEmployee as any} sections={sections} />
                         </div>
                     </div>
 
                     {/* Right Column: Nomination Form (8 columns) */}
-                    <div className="lg:col-span-8 space-y-8">
+                    <div className="lg:col-span-8 space-y-4 md:space-y-8">
                         <TNIDashboardClient
                             nominations={nominations}
                             programs={programs as any}

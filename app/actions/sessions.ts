@@ -12,18 +12,18 @@ export async function lockSessionBatch(sessionId: string) {
         return { success: false, error: "Unauthorized" };
     }
     try {
-        const session = await db.trainingSession.findUnique({
+        const trainingSession = await db.trainingSession.findUnique({
             where: { id: sessionId },
             select: { nominationBatchId: true }
         });
 
-        if (!session || !session.nominationBatchId) {
+        if (!trainingSession || !trainingSession.nominationBatchId) {
             return { success: false, error: "Session or Batch not found" };
         }
 
         const result = await db.nominationBatch.updateMany({
             where: {
-                id: session.nominationBatchId,
+                id: trainingSession.nominationBatchId,
                 status: 'Forming' // Guard: Only lock if currently Forming
             },
             data: { status: 'Scheduled' }
@@ -32,7 +32,7 @@ export async function lockSessionBatch(sessionId: string) {
         if (result.count === 0) {
             // Check why it failed (Already Scheduled is fine, Completed is bad to overwrite)
             const currentBatch = await db.nominationBatch.findUnique({
-                where: { id: session.nominationBatchId },
+                where: { id: trainingSession.nominationBatchId },
                 select: { status: true }
             });
 
@@ -84,7 +84,7 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        const session = await db.trainingSession.create({
+        const trainingSession = await db.trainingSession.create({
             data: {
                 programName,
                 trainerName,
@@ -96,9 +96,9 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        // revalidateTag removed due to build error
+        revalidateTag('sessions-list', 'default');
         revalidatePath('/admin/sessions');
-        return { success: true, sessionId: session.id };
+        return { success: true, sessionId: trainingSession.id };
     } catch (error) {
         console.error('Create Session Error:', error);
         return { error: 'Failed to create session' };
@@ -269,7 +269,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             })).catch(err => console.error("Failed to send approval emails", err));
         }
 
-        // revalidateTag removed due to build error
+        revalidateTag('sessions-list', 'default');
         revalidatePath('/admin/sessions');
         return { success: true };
     } catch (error) {
@@ -342,7 +342,7 @@ export async function joinBatch(batchId: string, empId: string) {
             ).catch(console.error);
         }
 
-        // revalidateTag removed due to build error (Expected 2 args)
+        revalidateTag('sessions-list', 'default');
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 

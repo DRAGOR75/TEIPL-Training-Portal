@@ -9,7 +9,9 @@ import {
     HiOutlineUserCircle,
     HiOutlinePencil,
     HiOutlineCheck,
-    HiOutlineXMark
+    HiOutlineXMark,
+    HiOutlineChevronUp,
+    HiOutlineChevronDown
 } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import SearchableSelect from './ui/SearchableSelect';
@@ -263,15 +265,18 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         );
     }
 
+    const [showDetails, setShowDetails] = useState(false);
+
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden hover:shadow-md transition-shadow duration-300">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
+            <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
                 <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">
-                        <HiOutlineUserCircle size={40} strokeWidth={1.5} />
+                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">
+                        <HiOutlineUserCircle size={32} className="md:hidden" strokeWidth={1.5} />
+                        <HiOutlineUserCircle size={40} className="hidden md:block" strokeWidth={1.5} />
                     </div>
                     <div>
-                        <h2 className="text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
+                        <h2 className="text-lg md:text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
                         <div className="flex flex-col gap-1 mt-1">
                             <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
                                 <span className="bg-slate-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-slate-600 font-bold border border-slate-200">
@@ -291,15 +296,23 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={() => setIsEditing(true)}
-                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                >
-                    <HiOutlinePencil size={18} />
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setIsEditing(true)}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                        <HiOutlinePencil size={18} />
+                    </button>
+                    <button
+                        onClick={() => setShowDetails(!showDetails)}
+                        className="md:hidden p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                        {showDetails ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
+                    </button>
+                </div>
             </div>
 
-            <div className="p-6 space-y-5">
+            <div className={`p-4 md:p-6 space-y-3 md:space-y-5 ${showDetails ? 'block' : 'hidden md:block'}`}>
 
                 <div className="flex items-start gap-3 group">
                     <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><HiOutlineBriefcase size={18} /></div>
@@ -361,6 +374,12 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 </div>
 
             </div>
+
+            {!showDetails && (
+                <div onClick={() => setShowDetails(true)} className="md:hidden p-3 bg-slate-50 text-center text-xs font-bold text-slate-500 uppercase tracking-wide border-t border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
+                    View More Details
+                </div>
+            )}
         </div>
     );
 }

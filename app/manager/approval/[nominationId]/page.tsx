@@ -1,10 +1,30 @@
 import { db } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
+import { verifySecureToken } from '@/lib/security';
 import ApprovalClient from './ApprovalClient';
 import { HiOutlineCalendar, HiOutlineUser, HiOutlineBookOpen, HiOutlineClock } from 'react-icons/hi2';
 
-export default async function Page({ params }: { params: Promise<{ nominationId: string }> }) {
+export default async function Page({
+    params,
+    searchParams
+}: {
+    params: Promise<{ nominationId: string }>;
+    searchParams: Promise<{ token?: string }>;
+}) {
     const { nominationId } = await params;
+    const { token } = await searchParams;
+
+    // SECURITY CHECK
+    if (!token || !verifySecureToken(token, nominationId)) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md border-t-4 border-red-500">
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Access Denied</h1>
+                    <p className="text-slate-600">Invalid or expired security token.</p>
+                </div>
+            </div>
+        );
+    }
 
     const nomination = await db.nomination.findUnique({
         where: { id: nominationId },
@@ -33,14 +53,17 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
     const endDate = session?.endDate ? formatDate(new Date(session.endDate)) : null;
 
     return (
-        <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6 font-sans">
-            <div className="max-w-xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 font-sans">
+            <div className="max-w-xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
 
                 {/* Header */}
-                <div className="bg-white p-8 text-center border-b border-slate-100 pb-0">
-                    <p className="text-blue-600 text-[10px] font-black uppercase tracking-widest mb-2 bg-blue-50 px-2 py-1 rounded-full w-fit mx-auto">Training Nomination</p>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Manager Approval</h1>
-                    <p className="text-slate-500 mt-2 text-sm">Review request for training enrollment</p>
+                <div className="bg-indigo-900 p-8 text-white relative overflow-hidden text-center">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="relative z-10">
+                        <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-3 bg-indigo-800/50 px-3 py-1 rounded-full w-fit mx-auto border border-indigo-700/50">Training Nomination</p>
+                        <h1 className="text-3xl font-black text-white tracking-tight mb-2">Manager Approval</h1>
+                        <p className="text-indigo-200 font-medium">Review and validate training enrollment request</p>
+                    </div>
                 </div>
 
                 <div className="p-8 space-y-8">

@@ -45,7 +45,7 @@ export default function TNIDashboardClient({
     if (view === 'create') {
         return (
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+                <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
                             <HiOutlinePlusCircle size={20} />
@@ -161,7 +161,7 @@ export default function TNIDashboardClient({
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+            <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
                         <HiOutlineQueueList size={20} />
@@ -172,20 +172,75 @@ export default function TNIDashboardClient({
 
                 <button
                     onClick={() => setView('create')}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md active:transform active:scale-95"
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-5 md:py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md active:transform active:scale-95"
                 >
-                    <HiOutlinePlusCircle size={18} />Add New
+                    <HiOutlinePlusCircle size={18} />
+                    <span className="hidden md:inline">Add New</span>
+                    <span className="md:hidden">Add</span>
                 </button>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider border-b border-slate-200">
+            <div className="overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+
+                {/* Mobile Card View (Visible on small screens) */}
+                <div className="md:hidden space-y-4 p-4">
+                    {nominations.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-100">
+                            <div className="p-4 bg-white rounded-full shadow-sm">
+                                <HiOutlineQueueList size={32} className="text-slate-300" />
+                            </div>
+                            <p>No nominations found.</p>
+                            <button onClick={() => setView('create')} className="text-blue-600 font-medium hover:underline text-sm">
+                                Start your first nomination
+                            </button>
+                        </div>
+                    ) : (
+                        nominations.map((nom: any) => (
+                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
+                                <div>
+                                    <h3 className="font-bold text-slate-900 leading-snug">
+                                        {nom.program?.name || 'Unknown Program'}
+                                    </h3>
+                                </div>
+                                <div className="flex flex-wrap items-center gap-2">
+                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wide">
+                                        {nom.program?.category === 'FOUNDATIONAL' && <HiOutlineBookOpen size={10} />}
+                                        {nom.program?.category === 'FUNCTIONAL' && <HiOutlineBriefcase size={10} />}
+                                        {nom.program?.category === 'BEHAVIOURAL' && <HiOutlineUsers size={10} />}
+                                        {nom.program?.category === 'COMMON' && <HiOutlineGlobeAlt size={10} />}
+                                        {nom.program?.category}
+                                    </span>
+                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${nom.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                                        nom.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
+                                            'bg-amber-50 text-amber-700 border-amber-200'
+                                        }`}>
+                                        {nom.status === 'Approved' ? <HiOutlineCheckCircle size={10} /> :
+                                            nom.status === 'Rejected' ? <HiOutlineExclamationCircle size={10} /> :
+                                                <HiOutlineClock size={10} />}
+                                        {nom.status}
+                                    </span>
+                                </div>
+                                <div className="pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400 font-medium">
+                                    <span>Submitted on</span>
+                                    <span>
+                                        {new Date(nom.createdAt).toLocaleDateString(undefined, {
+                                            month: 'short', day: 'numeric', year: 'numeric'
+                                        })}
+                                    </span>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+
+                {/* Desktop Table View (Hidden on mobile) */}
+                <table className="hidden md:table w-full text-left">
+                    <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10 shadow-sm">
                         <tr>
-                            <th className="p-5">Program Name</th>
-                            <th className="p-5">Category</th>
-                            <th className="p-5">Status</th>
-                            <th className="p-5">Submitted On</th>
+                            <th className="p-5 bg-slate-50">Program Name</th>
+                            <th className="p-5 bg-slate-50">Category</th>
+                            <th className="p-5 bg-slate-50">Status</th>
+                            <th className="p-5 bg-slate-50">Submitted On</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">

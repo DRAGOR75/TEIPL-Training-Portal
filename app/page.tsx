@@ -98,7 +98,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h2 className="text-lg md:text-2xl font-bold tracking-tight text-slate-900 mb-1 md:mb-2 group-hover:text-red-700 transition-colors">
-                    Troubleshoot
+                    Troubleshooting Library
                   </h2>
                   <p className="hidden md:block text-slate-600 font-medium leading-relaxed text-sm line-clamp-3 md:line-clamp-none">
                     Diagnostic tools & guides.
