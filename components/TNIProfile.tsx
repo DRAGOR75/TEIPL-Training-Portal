@@ -70,6 +70,8 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         managerEmail: employee.managerEmail || ''
     });
 
+    const [showDetails, setShowDetails] = useState(false);
+
     async function handleSave() {
         setLoading(true);
         // Basic validation
@@ -265,7 +267,6 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         );
     }
 
-    const [showDetails, setShowDetails] = useState(false);
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
