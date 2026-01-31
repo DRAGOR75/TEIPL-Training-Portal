@@ -11,7 +11,17 @@ import {
     reorderProductFaults
 } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { Trash2, Plus, AlertTriangle, Edit2, Check, X, Link as LinkIcon, Search, GripVertical } from 'lucide-react';
+import {
+    HiOutlineTrash,
+    HiOutlinePlus,
+    HiOutlineExclamationTriangle,
+    HiOutlinePencil,
+    HiOutlineCheck,
+    HiOutlineXMark,
+    HiOutlineLink,
+    HiOutlineMagnifyingGlass,
+    HiOutlineBars3
+} from 'react-icons/hi2';
 import { FaultLibrary, TroubleshootingProduct, ProductFault } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
@@ -70,8 +80,8 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                     </td>
                     <td className="px-4 py-3 text-right bg-white">
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => handleUpdate(pf)} className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200"><Check size={14} /></button>
-                            <button onClick={() => setEditingId(null)} className="bg-slate-100 text-slate-600 p-1.5 rounded hover:bg-slate-200"><X size={14} /></button>
+                            <button onClick={() => handleUpdate(pf)} className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200"><HiOutlineCheck size={14} /></button>
+                            <button onClick={() => setEditingId(null)} className="bg-slate-100 text-slate-600 p-1.5 rounded hover:bg-slate-200"><HiOutlineXMark size={14} /></button>
                         </div>
                     </td>
                 </>
@@ -80,7 +90,7 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                     <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                             <button {...attributes} {...listeners} className="text-slate-300 hover:text-slate-500 cursor-grab active:cursor-grabbing">
-                                <GripVertical size={14} />
+                                <HiOutlineBars3 size={14} />
                             </button>
                             <span className="text-slate-400 font-mono text-xs w-6 text-center">{pf.viewSeq}</span>
                         </div>
@@ -99,14 +109,14 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                                 className="text-slate-400 hover:text-blue-600 p-1"
                                 title="Edit"
                             >
-                                <Edit2 size={16} />
+                                <HiOutlinePencil size={16} />
                             </button>
                             <button
                                 onClick={() => unlinkFault(pf.id)}
                                 className="text-slate-300 hover:text-red-600 p-1"
                                 title="Unlink"
                             >
-                                <Trash2 size={16} />
+                                <HiOutlineTrash size={16} />
                             </button>
                         </div>
                     </td>
@@ -264,7 +274,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                         onChange={(val) => setSelectedProductId(parseInt(val))}
                         placeholder="-- Choose Machine --"
                         searchPlaceholder="Search machines..."
-                        icon={<Search size={16} />}
+                        icon={<HiOutlineMagnifyingGlass size={16} />}
                     />
                 </div>
             </div>
@@ -273,7 +283,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
             <div className="flex-1 p-0">
                 {!selectedProductId ? (
                     <div className="h-full flex flex-col items-center justify-center text-slate-400">
-                        <AlertTriangle size={48} className="mb-4 opacity-20" />
+                        <HiOutlineExclamationTriangle size={48} className="mb-4 opacity-20" />
                         <p>Please select a machine above to view and manage its faults.</p>
                     </div>
                 ) : (
@@ -288,13 +298,13 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                     onClick={() => setMode(mode === 'link' ? 'view' : 'link')}
                                     className={`px-4 py-2 text-xs font-medium rounded-xl border flex items-center gap-1 transition ${mode === 'link' ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                                 >
-                                    <LinkIcon size={14} /> Link Existing
+                                    <HiOutlineLink size={14} /> Link Existing
                                 </button>
                                 <button
                                     onClick={() => setMode(mode === 'create' ? 'view' : 'create')}
                                     className={`px-4 py-2 text-xs font-medium rounded-xl border flex items-center gap-1 transition ${mode === 'create' ? 'bg-lloyds-red/10 border-lloyds-red/20 text-lloyds-red' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'}`}
                                 >
-                                    <Plus size={14} /> Create New
+                                    <HiOutlinePlus size={14} /> Create New
                                 </button>
                             </div>
                         </div>

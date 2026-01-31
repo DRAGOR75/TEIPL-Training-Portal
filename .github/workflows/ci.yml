@@ -9,6 +9,22 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    # Service Container for Database
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: nomination_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
     - uses: actions/checkout@v4
@@ -24,6 +40,18 @@ jobs:
 
     - name: Run Unit & Integration Tests
       run: npm run test
+      env:
+        # Mocked DB in unit tests, but if any test hits real DB logic without mock:
+        DATABASE_URL: postgres://user:password@localhost:5432/nomination_db
+        AUTH_SECRET: super_secret_dummy_key_for_ci_testing_only
+
+    - name: Setup Database (Push Schema & Seed)
+      run: |
+        npx prisma db push
+        npx prisma db seed
+      env:
+        DATABASE_URL: postgres://user:password@localhost:5432/nomination_db
+        DATABASE_URL_UNPOOLED: postgres://user:password@localhost:5432/nomination_db
 
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
@@ -32,3 +60,6 @@ jobs:
       run: npx playwright test
       env:
         CI: true
+        DATABASE_URL: postgres://user:password@localhost:5432/nomination_db
+        DATABASE_URL_UNPOOLED: postgres://user:password@localhost:5432/nomination_db
+        AUTH_SECRET: super_secret_dummy_key_for_ci_testing_only

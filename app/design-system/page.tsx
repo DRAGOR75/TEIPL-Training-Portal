@@ -2,7 +2,7 @@
 // import { Input } from "@/components/ui/input";
 // import { Badge } from "@/components/ui/badge";
 // import { Card } from "@/components/ui/card";
-import { CheckCircle2, AlertCircle, Calendar, LayoutDashboard, User } from 'lucide-react';
+import { HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineCalendar, HiOutlineSquares2X2, HiOutlineUser } from 'react-icons/hi2';
 
 export default function DesignSystemPage() {
     return (

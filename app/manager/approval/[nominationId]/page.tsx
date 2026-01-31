@@ -1,7 +1,7 @@
 import { db } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import ApprovalClient from './ApprovalClient';
-import { Calendar, User, BookOpen, Clock } from 'lucide-react';
+import { HiOutlineCalendar, HiOutlineUser, HiOutlineBookOpen, HiOutlineClock } from 'react-icons/hi2';
 
 export default async function Page({ params }: { params: Promise<{ nominationId: string }> }) {
     const { nominationId } = await params;
@@ -48,7 +48,7 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                     {/* Employee Info */}
                     <div className="flex items-start gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
                         <div className="bg-white p-2 rounded-full shadow-sm text-slate-400">
-                            <User size={24} />
+                            <HiOutlineUser size={24} />
                         </div>
                         <div>
                             <h3 className="font-bold text-slate-800 text-lg">{nomination.employee.name}</h3>
@@ -60,7 +60,7 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                     {/* Program Info */}
                     <div className="space-y-4">
                         <div className="flex gap-3">
-                            <BookOpen className="text-blue-600 shrink-0 mt-1" size={20} />
+                            <HiOutlineBookOpen className="text-blue-600 shrink-0 mt-1" size={20} />
                             <div>
                                 <h3 className="font-bold text-slate-800 text-lg leading-tight">{nomination.program.name}</h3>
                                 <div className="flex items-center gap-2 mt-2 text-sm text-slate-600">
@@ -72,7 +72,7 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                         </div>
 
                         <div className="flex gap-3 items-start border-t border-slate-100 pt-4">
-                            <Calendar className="text-indigo-600 shrink-0 mt-1" size={20} />
+                            <HiOutlineCalendar className="text-indigo-600 shrink-0 mt-1" size={20} />
                             <div>
                                 <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Session Dates</h4>
                                 <div className="mt-1 flex items-center gap-2 text-slate-600">
@@ -88,7 +88,7 @@ export default async function Page({ params }: { params: Promise<{ nominationId:
                                 </div>
                                 {session && (
                                     <div className="flex items-center gap-1.5 mt-2 text-xs text-slate-400">
-                                        <Clock size={12} />
+                                        <HiOutlineClock size={12} />
                                         <span>Trainer: {session.trainerName || 'To be assigned'}</span>
                                     </div>
                                 )}

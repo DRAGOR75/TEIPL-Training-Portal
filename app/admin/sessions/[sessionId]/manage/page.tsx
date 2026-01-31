@@ -2,7 +2,7 @@ import { getSessionById, getPendingNominationsForProgram } from '@/app/actions/s
 import ManagementClient from './management-client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Calendar, User } from 'lucide-react';
+import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineUser } from 'react-icons/hi2';
 
 interface PageProps {
     params: Promise<{ sessionId: string }>;
@@ -34,7 +34,7 @@ export default async function ManageSessionPage({ params }: PageProps) {
                 {/* Header */}
                 <div className="flex flex-col gap-6">
                     <Link href="/admin/sessions" className="flex items-center gap-2 text-slate-500 hover:text-slate-900 transition-colors w-fit">
-                        <ArrowLeft className="w-4 h-4" />
+                        <HiOutlineArrowLeft className="w-4 h-4" />
                         Back to Sessions
                     </Link>
 
@@ -47,11 +47,11 @@ export default async function ManageSessionPage({ params }: PageProps) {
                         </h1>
                         <div className="flex items-center gap-6 mt-4 text-slate-600 font-medium">
                             <div className="flex items-center gap-2">
-                                <Calendar className="w-5 h-5 text-slate-400" />
+                                <HiOutlineCalendar className="w-5 h-5 text-slate-400" />
                                 {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}
                             </div>
                             <div className="flex items-center gap-2">
-                                <User className="w-5 h-5 text-slate-400" />
+                                <HiOutlineUser className="w-5 h-5 text-slate-400" />
                                 {session.trainerName || 'No Trainer Assigned'}
                             </div>
                         </div>

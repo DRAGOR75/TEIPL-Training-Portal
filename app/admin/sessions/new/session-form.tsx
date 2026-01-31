@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSession } from '@/app/actions/sessions';
-import { Loader2, Calendar, BookOpen, MapPin, FileText, User } from 'lucide-react';
+import { HiOutlineArrowPath, HiOutlineCalendar, HiOutlineBookOpen, HiOutlineMapPin, HiOutlineDocumentText, HiOutlineUser } from 'react-icons/hi2';
 
 interface SessionFormProps {
     programs: { id: string; name: string }[];
@@ -65,7 +65,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
             {/* 1. Program & Trainer Section */}
             <div className="space-y-6">
                 <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-4">
-                    <BookOpen className="text-blue-600" size={24} />
+                    <HiOutlineBookOpen className="text-blue-600" size={24} />
                     Core Details
                 </h3>
 
@@ -88,7 +88,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
                     <div className="space-y-2">
                         <label htmlFor="trainerName" className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Trainer Name</label>
                         <div className="relative">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <HiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <select
                                 name="trainerName"
                                 id="trainerName"
@@ -108,7 +108,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
             {/* 2. Schedule Section */}
             <div className="space-y-6">
                 <h3 className="text-xl font-black text-slate-900 flex items-center gap-2 border-b border-slate-100 pb-4">
-                    <Calendar className="text-blue-600" size={24} />
+                    <HiOutlineCalendar className="text-blue-600" size={24} />
                     Schedule
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -139,7 +139,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
             {/* 3. Location & Topics Section (New) */}
             <div className="space-y-6">
                 <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2 border-b border-slate-100 pb-2">
-                    <MapPin className="text-blue-600" size={20} />
+                    <HiOutlineMapPin className="text-blue-600" size={20} />
                     Location & Content
                 </h3>
 
@@ -181,7 +181,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
 
                 <div className="space-y-2">
                     <label htmlFor="topics" className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <FileText size={16} className="text-slate-400" /> Training Topics
+                        <HiOutlineDocumentText size={16} className="text-slate-400" /> Training Topics
                     </label>
                     <textarea
                         name="topics"
@@ -201,7 +201,7 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
                 >
                     {isSubmitting ? (
                         <>
-                            <Loader2 className="animate-spin w-4 h-4" /> Creating...
+                            <HiOutlineArrowPath className="animate-spin w-4 h-4" /> Creating...
                         </>
                     ) : (
                         'Create Session'

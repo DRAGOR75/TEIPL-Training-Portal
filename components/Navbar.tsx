@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, ShieldCheck, FileText, LayoutDashboard, ClipboardList } from 'lucide-react';
+import { HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList } from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
 
@@ -53,8 +53,8 @@ export default function Navbar({ session }: { session: Session | null }) {
 
                     {/* Right Side: Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
-                        <NavLink href="/" icon={<Home size={18} />} text="Home" />
-                        <NavLink href="/admin" icon={<ShieldCheck size={18} />} text="Admin" />
+                        <NavLink href="/" icon={<HiOutlineHome size={18} />} text="Home" />
+                        <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
 
                         {isLoggedIn && (
                             <div className="ml-4 pl-4 border-l border-slate-200">
@@ -69,7 +69,7 @@ export default function Navbar({ session }: { session: Session | null }) {
                             onClick={() => setIsOpen(!isOpen)}
                             className="text-slate-600 hover:text-blue-700 p-2 rounded-md focus:outline-none transition-colors"
                         >
-                            {isOpen ? <X size={28} /> : <Menu size={28} />}
+                            {isOpen ? <HiOutlineXMark size={28} /> : <HiOutlineBars3 size={28} />}
                         </button>
                     </div>
                 </div>

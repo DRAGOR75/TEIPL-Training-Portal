@@ -1,6 +1,6 @@
 import { db } from '@/lib/prisma';
 import { updateNominationStatus } from '@/app/actions/tni';
-import { Check, X, ShieldAlert, Award, User, Quote } from 'lucide-react';
+import { HiOutlineCheck, HiOutlineXMark, HiOutlineShieldExclamation, HiOutlineTrophy, HiOutlineUser, HiOutlineChatBubbleBottomCenterText } from 'react-icons/hi2';
 import { notFound } from 'next/navigation';
 
 // Server Component for Manager Approval
@@ -35,13 +35,13 @@ export default async function ManagerApprovalPage({ params }: { params: Promise<
                     <div className="relative z-10 flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <Award className="text-yellow-400" size={28} />
+                                <HiOutlineTrophy className="text-yellow-400" size={28} />
                                 <h1 className="text-2xl font-bold tracking-tight">Nomination Approval</h1>
                             </div>
                             <p className="text-indigo-200 text-sm">Reviewing training requests for</p>
                             <h2 className="text-3xl font-bold text-white mt-1">{employee.name}</h2>
                             <div className="flex items-center gap-2 mt-2 text-indigo-300 text-sm">
-                                <User size={14} />
+                                <HiOutlineUser size={14} />
                                 <span>{employee.id}</span>
                             </div>
                         </div>
@@ -60,7 +60,7 @@ export default async function ManagerApprovalPage({ params }: { params: Promise<
                     {justification && (
                         <div className="mb-8 relative">
                             <div className="absolute -left-2 -top-2 text-slate-200">
-                                <Quote size={40} />
+                                <HiOutlineChatBubbleBottomCenterText size={40} />
                             </div>
                             <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 relative z-10">
                                 <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
@@ -80,7 +80,7 @@ export default async function ManagerApprovalPage({ params }: { params: Promise<
                         {nominations.length === 0 ? (
                             <div className="py-12 flex flex-col items-center justify-center text-center opacity-70">
                                 <div className="bg-slate-100 p-4 rounded-full mb-4">
-                                    <ShieldAlert className="text-slate-400" size={32} />
+                                    <HiOutlineShieldExclamation className="text-slate-400" size={32} />
                                 </div>
                                 <h4 className="text-slate-900 font-medium text-lg">All caught up!</h4>
                                 <p className="text-slate-500">No pending nominations found for this employee.</p>
@@ -111,7 +111,7 @@ export default async function ManagerApprovalPage({ params }: { params: Promise<
                                                 type="submit"
                                                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-red-50 hover:text-red-700 hover:border-red-200 font-bold text-sm transition-all focus:ring-2 focus:ring-red-200 focus:outline-none"
                                             >
-                                                <X size={16} strokeWidth={3} />
+                                                <HiOutlineXMark size={16} strokeWidth={3} />
                                                 Reject
                                             </button>
                                         </form>
@@ -124,7 +124,7 @@ export default async function ManagerApprovalPage({ params }: { params: Promise<
                                                 type="submit"
                                                 className="flex items-center gap-2 px-6 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-bold text-sm transition-all shadow-md hover:shadow-lg shadow-indigo-600/20 active:scale-95 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
                                             >
-                                                <Check size={16} strokeWidth={3} />
+                                                <HiOutlineCheck size={16} strokeWidth={3} />
                                                 Approve
                                             </button>
                                         </form>

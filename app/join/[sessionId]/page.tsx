@@ -2,16 +2,16 @@ import { db } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { selfEnroll } from '@/app/actions/enrollment';
 import {
-    Calendar,
-    User,
-    Briefcase,
-    Mail,
-    Circle,
-    MessageSquare,
-    CheckCircle2,
-    Building2,
-    BookOpen
-} from 'lucide-react';
+    HiOutlineCalendar,
+    HiOutlineUser,
+    HiOutlineBriefcase,
+    HiOutlineEnvelope,
+    HiOutlineInformationCircle,
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineCheckCircle,
+    HiOutlineBuildingOffice2,
+    HiOutlineBookOpen
+} from 'react-icons/hi2';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 export default async function JoinSessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
@@ -41,7 +41,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
 
                     <div className="relative z-10 max-w-2xl mx-auto">
                         <div className="inline-flex items-center gap-2 bg-blue-500/10 backdrop-blur-sm px-3 py-1 rounded-full border border-blue-500/20 text-blue-200 text-[10px] font-bold uppercase tracking-widest mb-6">
-                            <CheckCircle2 size={12} /> Official Training Record
+                            <HiOutlineCheckCircle size={12} /> Official Training Record
                         </div>
 
                         <h1 className="text-3xl md:text-4xl font-extrabold mb-4 tracking-tight text-white">
@@ -56,7 +56,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <div className="text-center md:text-left">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Program</p>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
-                                    <BookOpen size={14} className="text-blue-400" />
+                                    <HiOutlineBookOpen size={14} className="text-blue-400" />
                                     {session.programName}
                                 </div>
                             </div>
@@ -64,7 +64,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <div className="text-center md:text-right">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Trainer</p>
                                 <div className="flex items-center justify-center md:justify-end gap-2 text-white font-semibold text-sm">
-                                    <User size={14} className="text-blue-400" />
+                                    <HiOutlineUser size={14} className="text-blue-400" />
                                     {session.trainerName}
                                 </div>
                             </div>
@@ -72,7 +72,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <div className="col-span-1 md:col-span-2 text-center pt-4 border-t border-white/10">
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Date</p>
                                 <div className="flex items-center justify-center gap-2 text-white font-semibold text-sm">
-                                    <Calendar size={14} className="text-blue-400" />
+                                    <HiOutlineCalendar size={14} className="text-blue-400" />
                                     {dateStr}
                                 </div>
                             </div>
@@ -88,7 +88,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-6">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                                <User size={20} />
+                                <HiOutlineUser size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Your Details</h3>
@@ -100,7 +100,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <InputField
                                 label="Full Name"
                                 name="name"
-                                icon={<User size={16} />}
+                                icon={<HiOutlineUser size={16} />}
                                 placeholder="Your Full Name"
                             />
                             {/* REMOVED EMPLOYEE ID FIELD AS REQUESTED */}
@@ -109,7 +109,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                                     label="Official Email"
                                     name="email"
                                     type="email"
-                                    icon={<Mail size={16} />}
+                                    icon={<HiOutlineEnvelope size={16} />}
                                     placeholder="e.g. jod@thriveni.com"
                                 />
                             </div>
@@ -120,7 +120,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-6">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
-                                <Briefcase size={20} />
+                                <HiOutlineBriefcase size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Reporting Manager</h3>
@@ -132,14 +132,14 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                             <InputField
                                 label="Manager Name"
                                 name="managerName"
-                                icon={<User size={16} />}
+                                icon={<HiOutlineUser size={16} />}
                                 placeholder="Your Reporting Manager's Name"
                             />
                             <InputField
                                 label="Manager Email"
                                 name="managerEmail"
                                 type="email"
-                                icon={<Mail size={16} />}
+                                icon={<HiOutlineEnvelope size={16} />}
                                 placeholder="Your Reporting Manager's Official Email"
                             />
                         </div>
@@ -149,7 +149,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-8">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
-                                <Circle size={20} />
+                                <HiOutlineInformationCircle size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Feedback Ratings</h3>
@@ -188,7 +188,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <section className="space-y-6">
                         <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                             <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
-                                <MessageSquare size={20} />
+                                <HiOutlineChatBubbleLeftRight size={20} />
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold text-slate-800">Additional Comments</h3>
@@ -220,7 +220,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     <FormSubmitButton
                         className="w-full group bg-blue-700 hover:bg-blue-800 text-white font-bold py-5 rounded-xl shadow-lg hover:shadow-blue-200 transition-all transform hover:-translate-y-0.5 mt-8 flex items-center justify-center gap-3"
                     >
-                        <CheckCircle2 size={24} className="group-hover:scale-110 transition-transform" />
+                        <HiOutlineCheckCircle size={24} className="group-hover:scale-110 transition-transform" />
                         <span className="text-lg">Submit Feedback</span>
                     </FormSubmitButton>
                 </form>

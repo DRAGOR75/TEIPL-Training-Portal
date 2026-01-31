@@ -3,7 +3,7 @@
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Lock, Mail, ShieldCheck } from "lucide-react";
+import { HiOutlineLockClosed, HiOutlineEnvelope, HiOutlineShieldCheck } from "react-icons/hi2";
 import { FormSubmitButton } from "@/components/FormSubmitButton";
 
 export default function LoginPage() {
@@ -47,7 +47,7 @@ export default function LoginPage() {
                 {/* Header - High Contrast Blue */}
                 <div className="bg-blue-700 p-8 text-center">
                     <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
-                        <ShieldCheck className="text-white" size={32} />
+                        <HiOutlineShieldCheck className="text-white" size={32} />
                     </div>
                     <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h1>
                 </div>
@@ -61,7 +61,7 @@ export default function LoginPage() {
                                 Email Address
                             </label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-3 text-slate-500" size={18} />
+                                <HiOutlineEnvelope className="absolute left-3 top-3 text-slate-500" size={18} />
                                 <input
                                     name="email"
                                     type="email"
@@ -78,7 +78,7 @@ export default function LoginPage() {
                                 Password
                             </label>
                             <div className="relative">
-                                <Lock className="absolute left-3 top-3 text-slate-500" size={18} />
+                                <HiOutlineLockClosed className="absolute left-3 top-3 text-slate-500" size={18} />
                                 <input
                                     name="password"
                                     type="password"

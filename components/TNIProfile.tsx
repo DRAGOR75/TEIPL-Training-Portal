@@ -1,7 +1,16 @@
 "use client"
 import { useState, useEffect } from 'react';
 import { updateEmployeeProfile } from '@/app/actions/tni';
-import { User, Mail, MapPin, Briefcase, UserCircle, Edit2, Save, X } from 'lucide-react';
+import {
+    HiOutlineUser,
+    HiOutlineEnvelope,
+    HiOutlineMapPin,
+    HiOutlineBriefcase,
+    HiOutlineUserCircle,
+    HiOutlinePencil,
+    HiOutlineCheck,
+    HiOutlineXMark
+} from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import SearchableSelect from './ui/SearchableSelect';
 import { getDesignations, getLocations } from '@/app/actions/master-data';
@@ -97,7 +106,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <Edit2 size={20} />
+                            <HiOutlinePencil size={20} />
                         </div>
                         <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
                     </div>
@@ -106,14 +115,14 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             onClick={() => setIsEditing(false)}
                             className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
                         >
-                            <X size={16} /> Cancel
+                            <HiOutlineXMark size={16} /> Cancel
                         </button>
                         <button
                             onClick={handleSave}
                             disabled={loading}
                             className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm"
                         >
-                            <Save size={16} /> {loading ? 'Saving...' : 'Save Changes'}
+                            <HiOutlineCheck size={16} /> {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </div>
@@ -259,7 +268,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             <div className="p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
                 <div className="flex items-center gap-4">
                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">
-                        <UserCircle size={40} strokeWidth={1.5} />
+                        <HiOutlineUserCircle size={40} strokeWidth={1.5} />
                     </div>
                     <div>
                         <h2 className="text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
@@ -286,14 +295,14 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     onClick={() => setIsEditing(true)}
                     className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                 >
-                    <Edit2 size={18} />
+                    <HiOutlinePencil size={18} />
                 </button>
             </div>
 
             <div className="p-6 space-y-5">
 
                 <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><Briefcase size={18} /></div>
+                    <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><HiOutlineBriefcase size={18} /></div>
                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
                         <div className="text-sm font-semibold text-slate-900">
@@ -304,7 +313,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 </div>
 
                 <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-amber-500 transition-colors"><Mail size={18} /></div>
+                    <div className="mt-0.5 text-slate-400 group-hover:text-amber-500 transition-colors"><HiOutlineEnvelope size={18} /></div>
                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Email</label>
                         <div className="text-sm font-semibold text-slate-900">{formData.email}</div>
@@ -312,7 +321,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 </div>
 
                 <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-emerald-500 transition-colors"><MapPin size={18} /></div>
+                    <div className="mt-0.5 text-slate-400 group-hover:text-emerald-500 transition-colors"><HiOutlineMapPin size={18} /></div>
                     <div>
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Location</label>
                         <div className="text-sm font-semibold text-slate-900">{formData.location || 'Not Set'}</div>
@@ -321,7 +330,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                 {formData.mobile && (
                     <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-teal-500 transition-colors"><User size={18} /></div>
+                        <div className="mt-0.5 text-slate-400 group-hover:text-teal-500 transition-colors"><HiOutlineUser size={18} /></div>
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Mobile</label>
                             <div className="text-sm font-semibold text-slate-900">{formData.mobile}</div>
@@ -332,7 +341,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 {/* Experience */}
                 {formData.yearsOfExperience && (
                     <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-orange-500 transition-colors"><Briefcase size={18} /></div>
+                        <div className="mt-0.5 text-slate-400 group-hover:text-orange-500 transition-colors"><HiOutlineBriefcase size={18} /></div>
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Experience</label>
                             <div className="text-sm font-semibold text-slate-900">{formData.yearsOfExperience}</div>
@@ -342,7 +351,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                 <div className="pt-4 border-t border-slate-50">
                     <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><User size={18} /></div>
+                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><HiOutlineUser size={18} /></div>
                         <div>
                             <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Manager Details</label>
                             <div className="text-sm font-semibold text-slate-900">{formData.managerName || 'Not Set'}</div>

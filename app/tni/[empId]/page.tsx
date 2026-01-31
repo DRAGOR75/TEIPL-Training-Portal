@@ -2,7 +2,7 @@ import { getEmployeeProfile, getAvailablePrograms } from '@/app/actions/tni';
 import Link from 'next/link';
 import TNIProfile from '@/components/TNIProfile';
 import TNIDashboardClient from '@/components/TNIDashboardClient';
-import { LogOut, ChevronRight, History, Clipboard } from 'lucide-react';
+import { HiOutlineArrowRightOnRectangle, HiOutlineChevronRight, HiOutlineClipboardDocumentList, HiOutlineClock } from 'react-icons/hi2';
 
 export default async function TNIDashboardPage({ params }: { params: Promise<{ empId: string }> }) {
     const { empId } = await params;
@@ -41,11 +41,11 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     <div className="flex justify-between items-center h-16">
                         <div className="flex items-center gap-2">
                             <div className="bg-slate-900 p-1.5 rounded-lg">
-                                <Clipboard className="text-white" size={20} />
+                                <HiOutlineClipboardDocumentList className="text-white" size={20} />
                             </div>
                             <div className="flex items-center gap-2 text-lg font-medium text-slate-600">
                                 <span className="hover:text-slate-900 transition-colors cursor-default">Nominations</span>
-                                <ChevronRight size={14} className="text-slate-400" />
+                                <HiOutlineChevronRight size={14} className="text-slate-400" />
                                 <span className="text-lg text-slate-900 tracking-wide font-bold  px-2 py-0.5 rounded-md">TNI Dashboard</span>
                             </div>
                         </div>
@@ -60,7 +60,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                                 href="/tni"
                                 className="flex items-center gap-2 text-sm font-medium text-red-600 hover:text-red-700 hover:bg-red-50 px-3 py-2 rounded-lg transition-all"
                             >
-                                <LogOut size={18} />
+                                <HiOutlineArrowRightOnRectangle size={18} />
                                 <span className="hidden sm:inline">Sign Out</span>
                             </Link>
                         </div>
@@ -96,7 +96,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
                         <div className="flex items-center gap-3">
                             <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
-                                <History size={20} />
+                                <HiOutlineClock size={20} />
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold text-slate-900">Training History</h2>
@@ -116,7 +116,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     </div>
                     <div className="p-3 bg-red-50 text-center border-t border-red-100">
                         <p className="text-xs text-red-600 font-bold flex items-center justify-center gap-1.5">
-                            <ChevronRight size={12} />
+                            <HiOutlineChevronRight size={12} />
                             <span>Tip: Select your name in the report dropdown to filter your records.</span>
                         </p>
                     </div>

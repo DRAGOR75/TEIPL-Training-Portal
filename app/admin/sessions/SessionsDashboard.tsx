@@ -6,23 +6,23 @@ import 'react-calendar/dist/Calendar.css';
 import QRCode from "react-qr-code";
 import Link from 'next/link';
 import {
-    Calendar as CalendarIcon,
-    Users,
-    ArrowRight,
-    PlusCircle,
-    LayoutDashboard,
-    Clock,
-    UserCheck,
-    CheckCircle2,
-    CalendarDays,
-    ExternalLink,
-    Download,
-    Share2,
-    Link as LinkIcon,
-    Copy,
-    Image as ImageIcon, // Renamed to avoid confusion with next/image or HTML Image
-    Check
-} from 'lucide-react';
+    HiOutlineCalendar,
+    HiOutlineUsers,
+    HiOutlineArrowRight,
+    HiOutlinePlusCircle,
+    HiOutlineSquares2X2,
+    HiOutlineClock,
+    HiOutlineUser,
+    HiOutlineCheckCircle,
+    HiOutlineCalendarDays,
+    HiOutlineArrowTopRightOnSquare,
+    HiOutlineArrowDownTray,
+    HiOutlineShare,
+    HiOutlineLink,
+    HiOutlineClipboard,
+    HiOutlinePhoto,
+    HiOutlineCheck
+} from 'react-icons/hi2';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
 import { SessionWithDetails } from '@/types/sessions';
 import LoadingScreen from '@/app/loading';
@@ -214,7 +214,7 @@ export default function SessionsDashboard({
                 <div className="w-full lg:w-1/3 space-y-8">
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <CalendarIcon className="text-blue-700" size={20} />
+                            <HiOutlineCalendar className="text-blue-700" size={20} />
                             <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
                         </div>
                         <div className="calendar-wrapper">
@@ -239,10 +239,10 @@ export default function SessionsDashboard({
                 <div className="w-full lg:w-2/3 flex flex-col gap-6">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         <div className="bg-blue-700 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
-                            <LayoutDashboard className="absolute -right-8 -bottom-8 text-white/10" size={150} />
+                            <HiOutlineSquares2X2 className="absolute -right-8 -bottom-8 text-white/10" size={150} />
                             <div className="relative z-10">
                                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                    <Clock size={18} /> Session Overview
+                                    <HiOutlineClock size={18} /> Session Overview
                                 </h3>
                                 <div className="grid grid-cols-2 gap-8">
                                     <div>
@@ -265,7 +265,7 @@ export default function SessionsDashboard({
 
                         <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
                             <div className="p-3 bg-blue-50 rounded-full text-blue-700">
-                                <PlusCircle size={32} />
+                                <HiOutlinePlusCircle size={32} />
                             </div>
                             <div>
                                 <h3 className="font-bold text-slate-900">New Training Session</h3>
@@ -283,7 +283,7 @@ export default function SessionsDashboard({
                     <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 justify-between flex-wrap">
                             <div className="flex items-center gap-2">
-                                <CalendarDays className="text-blue-700" size={20} />
+                                <HiOutlineCalendarDays className="text-blue-700" size={20} />
                                 <h2 className="text-lg font-bold text-slate-900">
                                     {date ? `Sessions for ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Active Sessions'}
                                 </h2>
@@ -319,7 +319,7 @@ export default function SessionsDashboard({
                                                             ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
                                                             : 'bg-blue-100 text-blue-700 border-blue-200'
                                                             }`}>
-                                                            {session.nominationBatch?.status === 'Completed' ? <CheckCircle2 size={10} /> : <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
+                                                            {session.nominationBatch?.status === 'Completed' ? <HiOutlineCheckCircle size={10} /> : <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
                                                             {session.nominationBatch?.status || 'Scheduled'}
                                                         </span>
                                                     </div>
@@ -329,7 +329,7 @@ export default function SessionsDashboard({
                                             {/* Details */}
                                             <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500 font-medium">
                                                 <div className="flex items-center gap-2 text-slate-700 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
-                                                    <CalendarIcon size={14} className="text-blue-500" />
+                                                    <HiOutlineCalendar size={14} className="text-blue-500" />
                                                     <span className="font-semibold">
                                                         {new Date(session.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                                         <span className="text-slate-300 mx-1.5">–</span>
@@ -339,7 +339,7 @@ export default function SessionsDashboard({
                                                 <div className="hidden md:block w-px h-5 bg-slate-200"></div>
                                                 <div className="flex items-center gap-2">
                                                     <div className="p-1 bg-blue-50 text-blue-600 rounded-md">
-                                                        <UserCheck size={14} />
+                                                        <HiOutlineUser size={14} />
                                                     </div>
                                                     <span className="text-slate-600">
                                                         Trainer: <span className="font-bold text-slate-900">{session.trainerName || 'Unassigned'}</span>
@@ -348,7 +348,7 @@ export default function SessionsDashboard({
                                                 <div className="hidden md:block w-px h-5 bg-slate-200"></div>
                                                 <div className="flex items-center gap-2">
                                                     <div className="p-1 bg-emerald-50 text-emerald-600 rounded-md">
-                                                        <Users size={14} />
+                                                        <HiOutlineUsers size={14} />
                                                     </div>
                                                     <span className="text-slate-600">
                                                         Participants: <span className="font-bold text-slate-900">{session.nominationBatch?.nominations.length || 0}</span>
@@ -360,7 +360,7 @@ export default function SessionsDashboard({
                                             <div className="pt-2">
                                                 <button className="w-full md:w-auto px-6 mt-auto flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-700 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 group/btn">
                                                     Manage Session
-                                                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                                                    <HiOutlineArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                 </button>
                                             </div>
                                         </div>
@@ -392,7 +392,7 @@ export default function SessionsDashboard({
                                                             className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-700 rounded-md transition-colors text-white text-[10px] font-bold tracking-wide"
                                                             title="Copy Link"
                                                         >
-                                                            {copiedLink === session.id ? <Check size={14} className="text-emerald-400" /> : <LinkIcon size={14} />} Link
+                                                            {copiedLink === session.id ? <HiOutlineCheck size={14} className="text-emerald-400" /> : <HiOutlineLink size={14} />} Link
                                                         </button>
                                                         <div className="w-px h-4 bg-slate-700"></div>
                                                         <button
@@ -403,7 +403,7 @@ export default function SessionsDashboard({
                                                             className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-700 rounded-md transition-colors text-white text-[10px] font-bold tracking-wide"
                                                             title="Copy QR Image"
                                                         >
-                                                            {copiedImage === session.id ? <Check size={14} className="text-emerald-400" /> : <ImageIcon size={14} />} QR
+                                                            {copiedImage === session.id ? <HiOutlineCheck size={14} className="text-emerald-400" /> : <HiOutlinePhoto size={14} />} QR
                                                         </button>
                                                         <div className="w-px h-4 bg-slate-700"></div>
                                                         <button
@@ -414,7 +414,7 @@ export default function SessionsDashboard({
                                                             className="flex items-center gap-1.5 px-2 py-1.5 hover:bg-slate-700 rounded-md transition-colors text-white text-[10px] font-bold tracking-wide"
                                                             title="Download QR"
                                                         >
-                                                            <Download size={14} /> Save
+                                                            <HiOutlineArrowDownTray size={14} /> Save
                                                         </button>
 
                                                         {/* Arrow */}
@@ -429,7 +429,7 @@ export default function SessionsDashboard({
                                                     }}
                                                     className={`flex items-center gap-1.5 text-[10px] font-bold px-3 py-1.5 rounded-full transition-all ${activeShareId === session.id ? 'bg-blue-100 text-blue-700' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'}`}
                                                 >
-                                                    <Share2 size={12} /> Share QR
+                                                    <HiOutlineShare size={12} /> Share QR
                                                 </button>
                                             </div>
                                         </div>

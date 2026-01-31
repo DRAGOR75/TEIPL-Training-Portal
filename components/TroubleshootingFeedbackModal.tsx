@@ -1,7 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Star, ThumbsUp, ThumbsDown, Send, CheckCircle2, X } from 'lucide-react';
+import {
+    HiOutlineStar,
+    HiOutlineHandThumbUp,
+    HiOutlineHandThumbDown,
+    HiOutlinePaperAirplane,
+    HiOutlineCheckCircle,
+    HiOutlineXMark
+} from 'react-icons/hi2';
 import { submitFeedback, FeedbackState } from '@/app/actions/feedback';
 
 interface TroubleshootingFeedbackModalProps {
@@ -53,13 +60,13 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                     onClick={onClose}
                     className="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 rounded-full text-slate-500 hover:text-slate-800 transition-colors z-10"
                 >
-                    <X size={20} />
+                    <HiOutlineXMark size={20} />
                 </button>
 
                 {submitted ? (
                     <div className="p-12 text-center">
                         <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500">
-                            <CheckCircle2 size={40} />
+                            <HiOutlineCheckCircle size={40} />
                         </div>
                         <h2 className="text-2xl font-black text-slate-900 mb-2">Thank You!</h2>
                         <p className="text-slate-500 mb-8 leading-relaxed">
@@ -91,7 +98,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                         onClick={() => setForm(prev => ({ ...prev, isHelpful: true }))}
                                         className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${form.isHelpful === true ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}
                                     >
-                                        <ThumbsUp size={20} className={form.isHelpful === true ? 'fill-current' : ''} />
+                                        <HiOutlineHandThumbUp size={20} className={form.isHelpful === true ? 'fill-current' : ''} />
                                         <span className="font-bold text-xs">Yes</span>
                                     </button>
                                     <button
@@ -99,7 +106,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                         onClick={() => setForm(prev => ({ ...prev, isHelpful: false }))}
                                         className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${form.isHelpful === false ? 'border-amber-500 bg-amber-50 text-amber-700' : 'border-slate-100 bg-slate-50 text-slate-400 hover:border-slate-200'}`}
                                     >
-                                        <ThumbsDown size={20} className={form.isHelpful === false ? 'fill-current' : ''} />
+                                        <HiOutlineHandThumbDown size={20} className={form.isHelpful === false ? 'fill-current' : ''} />
                                         <span className="font-bold text-xs">No</span>
                                     </button>
                                 </div>
@@ -118,7 +125,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                             onClick={() => handleRating(star)}
                                             className="group p-1 focus:outline-none transition-transform active:scale-90"
                                         >
-                                            <Star
+                                            <HiOutlineStar
                                                 size={32}
                                                 className={`transition-colors ${star <= form.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200 group-hover:text-amber-200'}`}
                                             />
@@ -185,7 +192,7 @@ export default function TroubleshootingFeedbackModal({ isOpen, onClose }: Troubl
                                 {loading ? 'Submitting...' : (
                                     <>
                                         <span>Submit Feedback</span>
-                                        <Send size={18} />
+                                        <HiOutlinePaperAirplane size={18} />
                                     </>
                                 )}
                             </button>

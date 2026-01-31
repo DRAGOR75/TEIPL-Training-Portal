@@ -1,7 +1,7 @@
 import { getTroubleshootingProducts } from '@/app/actions/troubleshooting';
 import TroubleshootReport from './TroubleshootReport';
 import Image from 'next/image';
-import { Wrench } from 'lucide-react';
+import { HiOutlineWrench } from 'react-icons/hi2';
 
 export const dynamic = 'force-dynamic';
 

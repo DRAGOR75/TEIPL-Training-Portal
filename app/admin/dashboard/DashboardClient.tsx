@@ -5,18 +5,18 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import QRCode from "react-qr-code";
 import {
-    LayoutDashboard,
-    Calendar as CalendarIcon,
-    Users,
-    Mail,
-    ExternalLink,
-    CheckCircle2,
-    Clock,
-    UserCheck,
-    PlusCircle,
-    QrCode,
-    Download
-} from 'lucide-react';
+    HiOutlineSquares2X2,
+    HiOutlineCalendar,
+    HiOutlineUsers,
+    HiOutlineEnvelope,
+    HiOutlineArrowTopRightOnSquare,
+    HiOutlineCheckCircle,
+    HiOutlineClock,
+    HiOutlineUser,
+    HiOutlinePlusCircle,
+    HiOutlineQrCode,
+    HiOutlineArrowDownTray
+} from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import { getSessionsForDate, toggleFeedbackAutomation, sendFeedbackEmails } from '@/app/actions';
 
@@ -206,7 +206,7 @@ export default function DashboardClient({
                     {/* Calendar */}
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <CalendarIcon className="text-blue-700" size={20} />
+                            <HiOutlineCalendar className="text-blue-700" size={20} />
                             <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
                         </div>
                         <div className="calendar-wrapper">
@@ -239,11 +239,11 @@ export default function DashboardClient({
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         {/* Session Overview Card */}
                         <div className="bg-blue-700 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
-                            <LayoutDashboard className="absolute -right-8 -bottom-8 text-white/10" size={150} />
+                            <HiOutlineSquares2X2 className="absolute -right-8 -bottom-8 text-white/10" size={150} />
 
                             <div className="relative z-10">
                                 <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
-                                    <Clock size={18} /> Session Overview
+                                    <HiOutlineClock size={18} /> Session Overview
                                 </h3>
 
                                 <div className="grid grid-cols-2 gap-8">
@@ -275,7 +275,7 @@ export default function DashboardClient({
                         {/* Create Session */}
                         <div className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
                             <div className="p-3 bg-blue-50 rounded-full text-blue-700">
-                                <PlusCircle size={32} />
+                                <HiOutlinePlusCircle size={32} />
                             </div>
                             <div>
                                 <h3 className="font-bold text-slate-900">New Training Session</h3>
@@ -289,7 +289,7 @@ export default function DashboardClient({
                     <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 justify-between flex-wrap">
                             <div className="flex items-center gap-2">
-                                <QrCode className="text-blue-700" size={20} />
+                                <HiOutlineQrCode className="text-blue-700" size={20} />
                                 <h2 className="text-lg font-bold text-slate-900">
                                     {date ? `Sessions for ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Active Sessions'}
                                 </h2>
@@ -326,7 +326,7 @@ export default function DashboardClient({
                                                     </h3>
                                                     {t.emailsSent ? (
                                                         <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 uppercase tracking-wide flex items-center gap-1">
-                                                            <CheckCircle2 size={10} /> Completed
+                                                            <HiOutlineCheckCircle size={10} /> Completed
                                                         </span>
                                                     ) : (
                                                         <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-1 rounded-full border border-emerald-200 uppercase tracking-wide flex items-center gap-1 animate-pulse">
@@ -336,12 +336,12 @@ export default function DashboardClient({
                                                 </div>
                                                 <div className="flex flex-wrap md:flex-nowrap items-center gap-3 text-xs font-semibold text-slate-600 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 w-full md:w-auto">
                                                     <div className="flex items-center gap-1.5">
-                                                        <CalendarIcon size={14} className="text-blue-500" />
+                                                        <HiOutlineCalendar size={14} className="text-blue-500" />
                                                         <span>StartDate: {new Date(t.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                     </div>
                                                     <div className="hidden md:block w-px h-3 bg-slate-300 mx-1"></div>
                                                     <div className="flex items-center gap-1.5">
-                                                        <CalendarIcon size={14} className="text-emerald-500" />
+                                                        <HiOutlineCalendar size={14} className="text-emerald-500" />
                                                         <span>EndDate: {new Date(t.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                                     </div>
                                                 </div>
@@ -356,7 +356,7 @@ export default function DashboardClient({
                                                         {/* Left Col: Trainer */}
                                                         <div className="flex items-center gap-3 h-full">
                                                             <div className="bg-blue-50 p-2 rounded-lg text-blue-600 shrink-0">
-                                                                <UserCheck size={18} />
+                                                                <HiOutlineUser size={18} />
                                                             </div>
                                                             <div>
                                                                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Trainer</span>
@@ -367,7 +367,7 @@ export default function DashboardClient({
                                                         {/* Right Col: Training Feedback */}
                                                         <div className="flex items-center gap-3 h-full">
                                                             <div className="bg-emerald-50 p-2 rounded-lg text-emerald-600 shrink-0">
-                                                                <CheckCircle2 size={18} />
+                                                                <HiOutlineCheckCircle size={18} />
                                                             </div>
                                                             <div>
                                                                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Training Feedback</span>
@@ -403,7 +403,7 @@ export default function DashboardClient({
                                                                     : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95'
                                                                     }`}
                                                             >
-                                                                <Mail size={12} />
+                                                                <HiOutlineEnvelope size={12} />
                                                                 {t.emailsSent ? 'Sent' : 'Send Manually'}
                                                             </button>
                                                         </div>
@@ -413,7 +413,7 @@ export default function DashboardClient({
                                                             {t.feedbackCreationDate ? (
                                                                 <div className="flex items-center gap-3">
                                                                     <div className="bg-red-50 p-2 rounded-lg text-red-600 shrink-0">
-                                                                        <Clock size={18} />
+                                                                        <HiOutlineClock size={18} />
                                                                     </div>
                                                                     <div>
                                                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"> POST TRAINING (30 DAYS) FEEDBACK DATE</span>
@@ -423,7 +423,7 @@ export default function DashboardClient({
                                                             ) : (
                                                                 <div className="flex items-center gap-3 opacity-50">
                                                                     <div className="bg-slate-100 p-2 rounded-lg text-slate-400 shrink-0">
-                                                                        <Clock size={18} />
+                                                                        <HiOutlineClock size={18} />
                                                                     </div>
                                                                     <div>
                                                                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">30 Days Post Feedback Date</span>
@@ -438,7 +438,7 @@ export default function DashboardClient({
                                                     <div className="pt-2 border-t border-slate-100 mt-1">
                                                         <div className="flex items-center gap-3 p-2 hover:bg-slate-50 rounded-lg transition-colors -ml-2 -mr-2">
                                                             <div className="bg-purple-100 p-2 rounded-lg text-purple-600 shrink-0">
-                                                                <Users size={18} />
+                                                                <HiOutlineUsers size={18} />
                                                             </div>
                                                             <div>
                                                                 <span className="text-[10px] text-slate-500 font-bold uppercase tracking-wider block mb-0.5">POST TRAINING (30 DAYS) PERFORMANCE FEEDBACK</span>
@@ -467,7 +467,7 @@ export default function DashboardClient({
                                                             className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest"
                                                             onClick={(e) => e.stopPropagation()}
                                                         >
-                                                            Live Link <ExternalLink size={10} />
+                                                            Live Link <HiOutlineArrowTopRightOnSquare size={10} />
                                                         </a>
                                                         <button
                                                             onClick={(e) => {
@@ -476,7 +476,7 @@ export default function DashboardClient({
                                                             }}
                                                             className="flex items-center gap-1 text-[10px] font-bold text-slate-400 hover:text-slate-600 transition-colors"
                                                         >
-                                                            <Download size={10} /> Download
+                                                            <HiOutlineArrowDownTray size={10} /> Download
                                                         </button>
                                                     </div>
                                                 </div>

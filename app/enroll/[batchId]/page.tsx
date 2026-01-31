@@ -4,7 +4,17 @@
 import { useState, useEffect } from 'react';
 import { joinBatch, registerAndJoinBatch } from '@/app/actions/sessions'; // Import both
 import { getSections, getDesignations, getLocations } from '@/app/actions/master-data';
-import { Loader2, CheckCircle2, AlertCircle, UserPlus, User, Mail, Briefcase, MapPin, Phone } from 'lucide-react';
+import {
+    HiOutlineArrowPath,
+    HiOutlineCheckCircle,
+    HiOutlineExclamationCircle,
+    HiOutlineUserPlus,
+    HiOutlineUser,
+    HiOutlineEnvelope,
+    HiOutlineBriefcase,
+    HiOutlineMapPin,
+    HiOutlinePhone
+} from 'react-icons/hi2';
 import { useParams } from 'next/navigation';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 
@@ -122,7 +132,7 @@ export default function JoinPage() {
             <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
                 <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full text-center space-y-4">
                     <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto text-green-600 mb-4">
-                        <CheckCircle2 className="w-8 h-8" />
+                        <HiOutlineCheckCircle className="w-8 h-8" />
                     </div>
                     <h1 className="text-2xl font-bold text-slate-900">Registration Confirmed!</h1>
                     <p className="text-slate-600">
@@ -146,7 +156,7 @@ export default function JoinPage() {
                 <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full space-y-6">
                     <div className="text-center space-y-2">
                         <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mx-auto text-blue-600 mb-2">
-                            <UserPlus className="w-6 h-6" />
+                            <HiOutlineUserPlus className="w-6 h-6" />
                         </div>
                         <h1 className="text-2xl font-black text-slate-900 tracking-tight">New Registration</h1>
                         <p className="text-slate-500 text-sm">Please provide your details to update our records.</p>
@@ -154,7 +164,7 @@ export default function JoinPage() {
 
                     {status === 'error' && (
                         <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm flex items-start gap-2">
-                            <AlertCircle className="w-5 h-5 shrink-0" />
+                            <HiOutlineExclamationCircle className="w-5 h-5 shrink-0" />
                             <span>{result?.error || 'Registration failed.'}</span>
                         </div>
                     )}
@@ -174,7 +184,7 @@ export default function JoinPage() {
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-700 uppercase">Full Name <span className='text-red-500'>*</span></label>
                             <div className="relative">
-                                <User className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                                <HiOutlineUser className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
                                 <input
                                     required
                                     placeholder="e.g. John Doe"
@@ -189,7 +199,7 @@ export default function JoinPage() {
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-700 uppercase">Official Email <span className='text-red-500'>*</span></label>
                             <div className="relative">
-                                <Mail className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                                <HiOutlineEnvelope className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
                                 <input
                                     required
                                     type="email"
@@ -204,7 +214,7 @@ export default function JoinPage() {
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-700 uppercase">Mobile Number <span className='text-red-500'>*</span></label>
                             <div className="relative">
-                                <Phone className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
+                                <HiOutlinePhone className="absolute left-3 top-3 text-slate-400 w-5 h-5" />
                                 <input
                                     required
                                     type="tel"
@@ -247,7 +257,7 @@ export default function JoinPage() {
                                         onChange={(val) => setRegData({ ...regData, location: typeof val === 'string' ? val : String(val) })}
                                         placeholder="Select Site"
                                         searchPlaceholder="Search locations..."
-                                        icon={<MapPin className="w-5 h-5" />}
+                                        icon={<HiOutlineMapPin className="w-5 h-5" />}
                                         className="w-full"
                                     />
                                 </div>
@@ -264,7 +274,7 @@ export default function JoinPage() {
                                         onChange={(val) => setRegData({ ...regData, sectionName: typeof val === 'string' ? val : String(val) })}
                                         placeholder="Select Dept"
                                         searchPlaceholder="Search departments..."
-                                        icon={<Briefcase className="w-5 h-5" />}
+                                        icon={<HiOutlineBriefcase className="w-5 h-5" />}
                                         className="w-full"
                                     />
                                 </div>
@@ -340,7 +350,7 @@ export default function JoinPage() {
                             className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-5 rounded-xl transition-all flex items-center justify-center gap-2 mt-6 shadow-lg shadow-blue-200"
                         >
                             {status === 'loading' ? (
-                                <><Loader2 className="w-5 h-5 animate-spin" /> saving...</>
+                                <><HiOutlineArrowPath className="w-5 h-5 animate-spin" /> saving...</>
                             ) : (
                                 'Complete Registration'
                             )}
@@ -362,7 +372,7 @@ export default function JoinPage() {
 
                 {status === 'error' && (
                     <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm flex items-start gap-2">
-                        <AlertCircle className="w-5 h-5 shrink-0" />
+                        <HiOutlineExclamationCircle className="w-5 h-5 shrink-0" />
                         <span>{result?.error || 'Something went wrong.'}</span>
                     </div>
                 )}
@@ -387,7 +397,7 @@ export default function JoinPage() {
                     >
                         {status === 'loading' ? (
                             <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <HiOutlineArrowPath className="w-5 h-5 animate-spin" />
                                 Verifying...
                             </>
                         ) : (
