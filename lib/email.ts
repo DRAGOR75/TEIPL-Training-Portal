@@ -28,10 +28,17 @@ const getBaseUrl = () => {
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL;
   }
+
+  // Explicitly check for Vercel Production Environment
+  if (process.env.VERCEL_ENV === 'production') {
+    return 'https://teipl-training.vercel.app';
+  }
+
   if (process.env.VERCEL_URL) {
     return `https://${process.env.VERCEL_URL}`;
   }
-  return 'https://teipl-training-portal.vercel.app';
+
+  return 'https://teipl-training.vercel.app';
 };
 
 /**
