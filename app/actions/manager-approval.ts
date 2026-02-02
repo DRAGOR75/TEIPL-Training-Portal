@@ -1,3 +1,5 @@
+'use server';
+
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
