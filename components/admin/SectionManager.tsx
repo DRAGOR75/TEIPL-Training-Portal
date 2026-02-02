@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createSection, deleteSection } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlineSquare3Stack3D, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineSquare3Stack3D, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath } from 'react-icons/hi2';
 
 interface Section {
     id: string;
