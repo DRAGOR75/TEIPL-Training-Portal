@@ -10,7 +10,7 @@ export async function createSection(formData: FormData) {
     try {
         await db.section.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('sections', 'max');
+        revalidateTag('sections');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create section' };
@@ -21,7 +21,7 @@ export async function deleteSection(id: string) {
     try {
         await db.section.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('sections', 'max');
+        revalidateTag('sections');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete section' };
@@ -47,8 +47,8 @@ export async function createProgram(formData: FormData) {
             }
         });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('programs', 'max');
-        revalidateTag('available-programs', 'max');
+        revalidateTag('programs');
+        revalidateTag('available-programs');
         return { success: true };
     } catch (error) {
         console.error("Program Create Error", error);
@@ -60,8 +60,8 @@ export async function deleteProgram(id: string) {
     try {
         await db.program.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('programs', 'max');
-        revalidateTag('available-programs', 'max');
+        revalidateTag('programs');
+        revalidateTag('available-programs');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete program' };
@@ -107,7 +107,7 @@ export async function createEmployee(formData: FormData) {
             }
         });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('employee-profile', 'max'); // Invalidate generic profile cache if needed
+        revalidateTag('employee-profile'); // Invalidate generic profile cache if needed
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create employee (ID or Email might exist)' };

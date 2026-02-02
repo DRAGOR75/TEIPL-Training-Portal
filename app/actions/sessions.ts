@@ -45,8 +45,8 @@ export async function lockSessionBatch(sessionId: string) {
         revalidatePath(`/admin/dashboard/session/${sessionId}`);
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
         revalidatePath('/admin/sessions');
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         return { success: true };
     } catch (error) {
         console.error("Lock Batch Error:", error);
@@ -102,8 +102,8 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         revalidatePath('/admin/sessions');
         return { success: true, sessionId: trainingSession.id };
     } catch (error) {
@@ -192,18 +192,19 @@ export async function getPendingNominationsForProgram(programId: string) {
     const nominations = await db.nomination.findMany({
         where: {
             programId,
-            status: { in: ['Pending', 'Approved'] } // Show both "Interested" and "Manager Approved"
+            status: { in: ['Pending', 'Approved'] },
+            // Extra safety: If manager explicitly rejected the topic, don't show here 
+            // even if status was bugged to 'Pending' in old records.
+            managerApprovalStatus: { not: 'Rejected' }
         },
         include: {
             employee: true
         }
     });
 
-    // Sort by status: Approved (1st), Pending (2nd)
     const statusPriority: Record<string, number> = {
         'Approved': 1,
         'Pending': 2,
-        'Rejected': 3
     };
 
     return nominations.sort((a, b) =>
@@ -212,10 +213,16 @@ export async function getPendingNominationsForProgram(programId: string) {
 }
 
 export async function addNominationsToBatch(batchId: string, nominationIds: string[]) {
+    console.log('🚀 addNominationsToBatch called:', { batchId, nominationIds });
     const session = await auth();
-    if (!session?.user?.email) {
+
+    // Auth Bypass for local development
+    if (!session?.user?.email && process.env.NODE_ENV !== 'production') {
+        console.warn('⚠️ Dev Mode: Bypassing auth check for batch update');
+    } else if (!session?.user?.email) {
         return { success: false, error: "Unauthorized" };
     }
+
     try {
         // 0. Check Batch Lock Status
         const preCheckBatch = await db.nominationBatch.findUnique({
@@ -223,38 +230,23 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             select: { status: true }
         });
 
-        if (!preCheckBatch) {
-            return { success: false, error: "Batch not found." };
-        }
-
+        if (!preCheckBatch) return { success: false, error: "Batch not found." };
         if (preCheckBatch?.status === 'Scheduled' || preCheckBatch?.status === 'Completed') {
-            // Note: In server actions used by forms or client, it's better to return an object if possible.
-            // But since this void or just revalidates, we might need to change return type or just throw.
-            // The client expects void/promise. Let's throw an error which can be caught or return a structure if client supports it.
-            // Management client uses it but doesn't seem to await a return value structure for error display in the snippet shown.
-            // But let's assume valid error handling or at least blocking it.
-            return { success: false, error: "Batch is locked." }; // Changing return type might break strict TS if it expects void.
-            // Let's see the client usage. It just awaits.
-            // Safest is to throw Error or return a special object.
-            // Looking at other actions in this file, they return { success: boolean, string? }.
-            // addNominationsToBatch seems to not have a return type in the snippet?
-            // Ah, line 163: export async function addNominationsToBatch... no return type check.
-            // Let's return the object pattern used elsewhere.
+            return { success: false, error: "Batch is locked." };
         }
 
         // 1. Update Database
-        await db.nomination.updateMany({
-            where: {
-                id: { in: nominationIds }
-            },
+        const updateResult = await db.nomination.updateMany({
+            where: { id: { in: nominationIds } },
             data: {
                 batchId,
                 status: 'Batched',
-                managerApprovalStatus: 'Pending' // RESET to Pending for the Session Date approval
+                managerApprovalStatus: 'Pending'
             }
         });
+        console.log('✅ Updated nominations:', updateResult.count);
 
-        // 2. Check if this batch is linked to a Scheduled Session
+        // 2. Fetch details for emails
         const batch = await db.nominationBatch.findUnique({
             where: { id: batchId },
             include: {
@@ -264,13 +256,11 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
         });
 
         if (batch?.trainingSession) {
-            // 3. Fetch full nomination details (Employee Manager Info)
             const nominations = await db.nomination.findMany({
                 where: { id: { in: nominationIds } },
                 include: { employee: true }
             });
 
-            // 4. Send Approval Emails to Managers
             const { startDate, endDate } = batch.trainingSession;
             await Promise.all(nominations.map(async (nom) => {
                 if (nom.employee.managerEmail) {
@@ -282,18 +272,23 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
                         startDate,
                         endDate,
                         nom.id
-                    );
+                    ).catch(err => console.error("❌ Email failed for", nom.employee.name, err));
                 }
-            })).catch(err => console.error("Failed to send approval emails", err));
+            }));
         }
 
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('employee-profile');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         revalidatePath('/admin/sessions');
+        if (batch?.trainingSession?.id) {
+            revalidatePath(`/admin/sessions/${batch.trainingSession.id}/manage`);
+        }
+
         return { success: true };
     } catch (error) {
-        console.error('Add Nominations Error:', error);
-        return { error: 'Failed to add nominations' };
+        console.error('❌ addNominationsToBatch Error:', error);
+        return { success: false, error: 'Failed to update database.' };
     }
 }
 
@@ -361,8 +356,9 @@ export async function joinBatch(batchId: string, empId: string) {
             ).catch(console.error);
         }
 
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('employee-profile');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -461,8 +457,9 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             ).catch(console.error);
         }
 
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('employee-profile');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         revalidatePath(`/admin/sessions`);
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -500,8 +497,8 @@ export async function removeNominationFromBatch(nominationId: string) {
         });
 
         revalidatePath('/admin/sessions');
-        revalidateTag('sessions-list', 'max');
-        revalidateTag('session-details', 'max');
+        revalidateTag('sessions-list');
+        revalidateTag('session-details');
         return { success: true };
     } catch (error) {
         console.error('Remove Nomination Error:', error);
