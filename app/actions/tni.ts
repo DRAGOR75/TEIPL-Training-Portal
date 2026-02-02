@@ -92,7 +92,7 @@ export async function updateEmployeeProfile(empId: string, data: {
             }
         });
 
-        revalidateTag('employee-profile');
+        revalidateTag('employee-profile', 'max');
         revalidatePath(`/tni/${empId}`);
         return { success: true, employee: updated };
     } catch (error) {
@@ -225,8 +225,8 @@ export async function submitTNINomination(formData: FormData) {
             console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
         }
 
-        revalidateTag('employee-profile');
-        revalidateTag('manager-approval');
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('manager-approval', 'max');
     } catch (error) {
         console.error("Failed to submit nominations:", error);
         throw new Error("Failed to submit nominations");
@@ -253,10 +253,10 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
         revalidatePath(`/tni/${updatedNomination.empId}`);
 
         // Invalidate the cache for the profile fetcher
-        revalidateTag('employee-profile');
+        revalidateTag('employee-profile', 'max');
 
         // Invalidate the manager approval cache
-        revalidateTag('manager-approval');
+        revalidateTag('manager-approval', 'max');
 
         return { success: true };
     } catch (error) {

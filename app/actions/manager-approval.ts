@@ -47,10 +47,10 @@ export async function submitManagerNominationDecision(nominationId: string, deci
         revalidatePath('/admin/sessions');
 
         // Revalidate Tags
-        revalidateTag('employee-profile');
-        revalidateTag('manager-approval');
-        revalidateTag('sessions-list');
-        revalidateTag('session-details');
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('manager-approval', 'max');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
 
         return { success: true };
     } catch (error) {
