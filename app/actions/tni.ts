@@ -92,7 +92,7 @@ export async function updateEmployeeProfile(empId: string, data: {
             }
         });
 
-        // revalidateTag('employee-profile'); // Removed due to build error
+        revalidateTag('employee-profile', 'max');
         revalidatePath(`/tni/${empId}`);
         return { success: true, employee: updated };
     } catch (error) {
@@ -225,7 +225,8 @@ export async function submitTNINomination(formData: FormData) {
             console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
         }
 
-        // Revalidate is implicit if we redirect, or we can assume next refresh picks it up
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('manager-approval', 'max');
     } catch (error) {
         console.error("Failed to submit nominations:", error);
         throw new Error("Failed to submit nominations");
@@ -238,7 +239,10 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
     try {
         const updatedNomination = await db.nomination.update({
             where: { id: nominationId },
-            data: { status },
+            data: {
+                status,
+                managerApprovalStatus: status // Sync manager status when admin updates main status
+            },
             select: { empId: true } // Fetch empId to revalidate specific dashboard
         });
 

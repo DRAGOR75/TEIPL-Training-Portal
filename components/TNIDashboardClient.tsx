@@ -42,11 +42,53 @@ export default function TNIDashboardClient({
 }) {
     const [view, setView] = useState<'list' | 'create'>('list');
 
-    // Sort nominations: Approved -> Pending -> Rejected
+    // Sort nominations: Completed -> Approved/Batched -> Pending -> Rejected
     const sortedNominations = [...nominations].sort((a, b) => {
-        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+        const priority: Record<string, number> = {
+            'Completed': 1,
+            'Approved': 2,
+            'Batched': 2,
+            'Pending': 3,
+            'Rejected': 4
+        };
         return (priority[a.status] || 99) - (priority[b.status] || 99);
     });
+
+    const getStatusStyles = (nom: any) => {
+        if (nom.status === 'Approved' || (nom.status === 'Batched' && nom.managerApprovalStatus === 'Approved')) {
+            return {
+                bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                icon: <HiOutlineCheckCircle size={12} />,
+                label: nom.status === 'Batched' ? 'Scheduled (Approved)' : 'Approved'
+            };
+        }
+        if (nom.status === 'Rejected' || nom.managerApprovalStatus === 'Rejected') {
+            return {
+                bg: 'bg-red-50 text-red-700 border-red-200',
+                icon: <HiOutlineExclamationCircle size={12} />,
+                label: 'Rejected'
+            };
+        }
+        if (nom.status === 'Batched') {
+            return {
+                bg: 'bg-blue-50 text-blue-700 border-blue-200',
+                icon: <HiOutlineClock size={12} />,
+                label: 'Scheduled (Waitlist)'
+            };
+        }
+        if (nom.status === 'Completed') {
+            return {
+                bg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                icon: <HiOutlineCheckCircle size={12} />,
+                label: 'Completed'
+            };
+        }
+        return {
+            bg: 'bg-amber-50 text-amber-700 border-amber-200',
+            icon: <HiOutlineClock size={12} />,
+            label: 'Pending'
+        };
+    };
 
     if (view === 'create') {
         return (
@@ -216,14 +258,9 @@ export default function TNIDashboardClient({
                                         {nom.program?.category === 'COMMON' && <HiOutlineGlobeAlt size={10} />}
                                         {nom.program?.category}
                                     </span>
-                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${nom.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                        nom.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                                            'bg-amber-50 text-amber-700 border-amber-200'
-                                        }`}>
-                                        {nom.status === 'Approved' ? <HiOutlineCheckCircle size={10} /> :
-                                            nom.status === 'Rejected' ? <HiOutlineExclamationCircle size={10} /> :
-                                                <HiOutlineClock size={10} />}
-                                        {nom.status}
+                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${getStatusStyles(nom).bg}`}>
+                                        {getStatusStyles(nom).icon}
+                                        {getStatusStyles(nom).label}
                                     </span>
                                 </div>
                                 <div className="pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400 font-medium">
@@ -282,14 +319,9 @@ export default function TNIDashboardClient({
                                         </span>
                                     </td>
                                     <td className="p-5">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${nom.status === 'Approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                                            nom.status === 'Rejected' ? 'bg-red-50 text-red-700 border-red-200' :
-                                                'bg-amber-50 text-amber-700 border-amber-200'
-                                            }`}>
-                                            {nom.status === 'Approved' ? <HiOutlineCheckCircle size={12} /> :
-                                                nom.status === 'Rejected' ? <HiOutlineExclamationCircle size={12} /> :
-                                                    <HiOutlineClock size={12} />}
-                                            {nom.status}
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyles(nom).bg}`}>
+                                            {getStatusStyles(nom).icon}
+                                            {getStatusStyles(nom).label}
                                         </span>
                                     </td>
                                     <td className="p-5 text-slate-500 text-sm font-medium">

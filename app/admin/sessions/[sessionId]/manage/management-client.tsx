@@ -42,9 +42,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
         if (selectedNominations.size === 0) return;
 
         setIsAdding(true);
-        await addNominationsToBatch(batchId, Array.from(selectedNominations));
+        const result = await addNominationsToBatch(batchId, Array.from(selectedNominations));
+
+        if (result.success) {
+            setSelectedNominations(new Set()); // Reset selection only on success
+        } else {
+            alert(result.error || 'Failed to add nominations. Please try again.');
+        }
+
         setIsAdding(false);
-        setSelectedNominations(new Set()); // Reset selection
     };
 
     const handleRemove = async (nominationId: string) => {
@@ -142,10 +148,10 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             onClick={handleAddToBatch}
                             disabled={selectedNominations.size === 0 || isAdding || isLocked}
                             title={isLocked ? "Batch is locked" : "Add selected"}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm active:scale-95"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-lg shadow-blue-100 active:scale-95"
                         >
                             {isAdding ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineUserPlus className="w-4 h-4" />}
-                            {isAdding ? 'Adding...' : `Add Selected (${selectedNominations.size})`}
+                            {isAdding ? 'Adding Participants...' : `Add Selected (${selectedNominations.size})`}
                         </button>
                     </div>
 
@@ -167,31 +173,35 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {pendingNominations.map((nom) => {
-                                        const isApprovedForSession = nom.managerApprovalStatus === 'Approved';
+                                        const isSelected = selectedNominations.has(nom.id);
+                                        const isSelectable = !isLocked;
+
                                         return (
-                                            <tr key={nom.id} className={`transition-colors ${isApprovedForSession ? 'hover:bg-slate-50' : 'bg-slate-50 opacity-60'}`}>
+                                            <tr
+                                                key={nom.id}
+                                                onClick={() => isSelectable && toggleSelection(nom.id)}
+                                                className={`transition-colors group select-none ${isSelectable ? 'cursor-pointer hover:bg-slate-50' : 'cursor-not-allowed opacity-60'} ${isSelected ? 'bg-blue-50/50' : ''}`}
+                                            >
                                                 <td className="p-4 text-center">
-                                                    <button
-                                                        onClick={() => toggleSelection(nom.id)}
-                                                        disabled={isLocked || !isApprovedForSession}
-                                                        title={!isApprovedForSession ? "Manager approval for session pending" : isLocked ? "Batch is locked" : "Select for batch"}
-                                                        className={`transition-all ${isApprovedForSession ? 'text-slate-300 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}`}
+                                                    <div
+                                                        title={isLocked ? "Batch is locked" : "Click to select"}
+                                                        className={`transition-all ${isSelected ? 'text-blue-600 scale-110' : 'text-slate-300 group-hover:text-blue-400'}`}
                                                     >
-                                                        {selectedNominations.has(nom.id) ?
-                                                            <HiOutlineCheckCircle className="w-6 h-6 text-blue-600" /> :
+                                                        {isSelected ?
+                                                            <HiOutlineCheckCircle className="w-6 h-6" /> :
                                                             <HiOutlineMinusCircle className="w-6 h-6" />
                                                         }
-                                                    </button>
+                                                    </div>
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="font-bold text-slate-900">{nom.employee.name}</div>
                                                     <div className="text-[10px] text-slate-500 font-mono tracking-tighter">{nom.employee.id}</div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${isApprovedForSession
+                                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${nom.status === 'Approved'
                                                         ? 'bg-green-50 text-green-700 border-green-100'
                                                         : 'bg-yellow-50 text-yellow-700 border-yellow-100'}`}>
-                                                        {nom.managerApprovalStatus}
+                                                        {nom.status}
                                                     </span>
                                                 </td>
                                                 <td className="p-4 text-slate-600 text-xs font-medium">{nom.employee.sectionName || '-'}</td>
@@ -223,7 +233,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 <thead className="bg-slate-50 text-slate-600 font-medium sticky top-0">
                                     <tr>
                                         <th className="p-4">Employee</th>
-                                        <th className="p-4">Session Approval</th>
+                                        <th className="p-4">Manager Approval</th>
                                         <th className="p-4">Department</th>
                                         <th className="p-4">Status</th>
                                         <th className="p-4">Source</th>
