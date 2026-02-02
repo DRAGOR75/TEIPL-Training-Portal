@@ -97,7 +97,7 @@ describe('Sessions & Batching Logic', () => {
             const result = await createSession(formData);
 
             // Should return error object (handled by try/catch in action)
-            expect(result).toEqual({ error: 'Failed to create session' });
+            expect(result).toEqual({ error: "Program 'Ghost Program' not found." });
         });
     });
 

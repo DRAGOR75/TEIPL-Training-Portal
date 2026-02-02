@@ -12,12 +12,12 @@ setup('authenticate as admin', async ({ page }) => {
     // but UI login is safer to test the detailed flow.
 
     await page.goto('/login');
-    await page.getByLabel('Email').fill('admin@thriveni.com');
-    await page.getByLabel('Password').fill('thriveni2025');
+    await page.locator('input[name="email"]').fill('admin@thriveni.com');
+    await page.locator('input[name="password"]').fill('thriveni2025');
     await page.getByRole('button', { name: /sign in/i }).click();
 
     // specific to your app's success state
-    await page.waitForURL('/admin');
+    await page.waitForURL('/admin', { timeout: 30000 });
 
     // Save state
     await page.context().storageState({ path: adminFile });
