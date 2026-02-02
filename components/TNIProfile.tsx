@@ -114,21 +114,6 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         </div>
                         <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
                     </div>
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => setIsEditing(false)}
-                            className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-slate-800 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
-                        >
-                            <HiOutlineXMark size={16} /> Cancel
-                        </button>
-                        <button
-                            onClick={handleSave}
-                            disabled={loading}
-                            className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm"
-                        >
-                            <HiOutlineCheck size={16} /> {loading ? 'Saving...' : 'Save Changes'}
-                        </button>
-                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -174,10 +159,12 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Years of Exp.</label>
                         <input
+                            type="text"
+                            inputMode="numeric"
                             className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="e.g. 5 Years"
+                            placeholder="e.g. 5"
                             value={formData.yearsOfExperience}
-                            onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value })}
+                            onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value.replace(/[^0-9]/g, '') })}
                         />
                     </div>
 
@@ -263,7 +250,23 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         />
                     </div>
                 </div>
-            </div>
+
+                <div className="mt-8 pt-4 border-t border-slate-100 flex justify-center gap-3  bg-white z-10">
+                    <button
+                        onClick={() => setIsEditing(false)}
+                        className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-slate-800 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                        <HiOutlineXMark size={16} /> Cancel
+                    </button>
+                    <button
+                        onClick={handleSave}
+                        disabled={loading}
+                        className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-6 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm"
+                    >
+                        <HiOutlineCheck size={16} /> {loading ? 'Saving...' : 'Save Changes'}
+                    </button>
+                </div>
+            </div >
         );
     }
 

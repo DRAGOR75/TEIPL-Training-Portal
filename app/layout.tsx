@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
 import { SpeedInsights } from "@vercel/speed-insights/next" // Updated: Import auth
 
-const geistSans = Geist({
-    variable: "--font-geist-sans",
+const inter = Inter({
+    variable: "--font-inter",
     subsets: ["latin"],
 });
 
@@ -31,7 +31,7 @@ export default async function RootLayout({
     return (
         <html lang="en">
             <body
-                className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans text-slate-900`}
+                className={`${inter.variable} ${geistMono.variable} antialiased font-sans text-slate-900`}
                 suppressHydrationWarning={true}
             >
                 {/* Updated: Pass session to Navbar */}

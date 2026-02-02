@@ -13,8 +13,8 @@ export default function Home() {
         <div className="flex flex-col items-start space-y-4">
 
 
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-slate-900">
-            Training <span className="text-thriveni-blue">Thriveni</span>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase">
+            Training <span className="text-thriveni-blue uppercase">Thriveni</span>
           </h1>
 
           <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed">

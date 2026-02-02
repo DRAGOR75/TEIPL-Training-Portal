@@ -32,6 +32,12 @@ export const getEmployeeProfile = unstable_cache(
             orderBy: { name: 'asc' }
         });
 
+        // Sort nominations by status: Approved > Pending > Rejected
+        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+        if (employee) {
+            employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
+        }
+
         return { employee, sections };
     },
     ['employee-profile'], // Base tag
@@ -130,6 +136,30 @@ export const getAvailablePrograms = unstable_cache(
     { revalidate: 86400, tags: ['programs'] } // Cache for 24h
 );
 
+// CACHED: Manager Approval Data
+export const getManagerApprovalData = unstable_cache(
+    async (empId: string) => {
+        const employee = await db.employee.findUnique({
+            where: { id: empId },
+            include: {
+                nominations: {
+                    where: { status: 'Pending' },
+                    include: { program: true }
+                }
+            }
+        });
+
+        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+        if (employee) {
+            employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
+        }
+
+        return employee;
+    },
+    ['manager-approval-data'],
+    { revalidate: 3600, tags: ['manager-approval'] } // Base tag, will be dynamic in usage if needed, but here we can just use a common tag pattern or rely on specific revalidation
+);
+
 import { sendTNIApprovalEmail } from '@/lib/email';
 
 export async function submitTNINomination(formData: FormData) {
@@ -220,6 +250,9 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
 
         // Invalidate the cache for the profile fetcher
         revalidateTag('employee-profile', 'default');
+
+        // Invalidate the manager approval cache
+        revalidateTag('manager-approval', 'default');
 
         return { success: true };
     } catch (error) {

@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createSession } from '@/app/actions/sessions';
-import { HiOutlineArrowPath, HiOutlineCalendar, HiOutlineBookOpen, HiOutlineMapPin, HiOutlineDocumentText, HiOutlineUser } from 'react-icons/hi2';
+import { HiOutlineCalendar, HiOutlineBookOpen, HiOutlineMapPin, HiOutlineDocumentText, HiOutlineUser } from 'react-icons/hi2';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 interface SessionFormProps {
     programs: { id: string; name: string }[];
@@ -194,19 +195,13 @@ export default function SessionForm({ programs, locations, trainers }: SessionFo
             </div>
 
             <div className="pt-4 flex justify-end">
-                <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+                <FormSubmitButton
+                    loadingText="Creating..."
+                    isLoading={isSubmitting}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-bold text-sm transition-all shadow-lg shadow-blue-600/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed"
                 >
-                    {isSubmitting ? (
-                        <>
-                            <HiOutlineArrowPath className="animate-spin w-4 h-4" /> Creating...
-                        </>
-                    ) : (
-                        'Create Session'
-                    )}
-                </button>
+                    Create Session
+                </FormSubmitButton>
             </div>
         </form>
     );

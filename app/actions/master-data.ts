@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { Grade, TrainingCategory } from '@prisma/client';
 
 // --- SECTIONS ---
@@ -10,6 +10,7 @@ export async function createSection(formData: FormData) {
     try {
         await db.section.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('sections', 'default');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create section' };
@@ -20,6 +21,7 @@ export async function deleteSection(id: string) {
     try {
         await db.section.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('sections', 'default');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete section' };
@@ -45,6 +47,8 @@ export async function createProgram(formData: FormData) {
             }
         });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('programs', 'default');
+        revalidateTag('available-programs', 'default');
         return { success: true };
     } catch (error) {
         console.error("Program Create Error", error);
@@ -56,6 +60,8 @@ export async function deleteProgram(id: string) {
     try {
         await db.program.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('programs', 'default');
+        revalidateTag('available-programs', 'default');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete program' };
@@ -101,6 +107,7 @@ export async function createEmployee(formData: FormData) {
             }
         });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('employee-profile', 'default'); // Invalidate generic profile cache if needed
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create employee (ID or Email might exist)' };
@@ -118,50 +125,66 @@ export async function deleteEmployee(id: string) {
 }
 
 // --- FETCH HELPERS (For Searchable Selects) ---
-export async function getSections() {
-    try {
-        const sections = await db.section.findMany({
-            orderBy: { name: 'asc' },
-            select: { name: true }
-        });
-        return sections.map(s => ({ label: s.name, value: s.name }));
-    } catch (error) {
-        return [];
-    }
-}
+export const getSections = unstable_cache(
+    async () => {
+        try {
+            const sections = await db.section.findMany({
+                orderBy: { name: 'asc' },
+                select: { name: true }
+            });
+            return sections.map(s => ({ label: s.name, value: s.name }));
+        } catch (error) {
+            return [];
+        }
+    },
+    ['sections-options'],
+    { revalidate: 86400, tags: ['sections'] }
+);
 
-export async function getDesignations() {
-    try {
-        const designations = await db.designation.findMany({
-            select: { name: true },
-            orderBy: { name: 'asc' }
-        });
-        return designations.map(d => ({ label: d.name, value: d.name }));
-    } catch (error) {
-        return [];
-    }
-}
+export const getDesignations = unstable_cache(
+    async () => {
+        try {
+            const designations = await db.designation.findMany({
+                select: { name: true },
+                orderBy: { name: 'asc' }
+            });
+            return designations.map(d => ({ label: d.name, value: d.name }));
+        } catch (error) {
+            return [];
+        }
+    },
+    ['designations-options'],
+    { revalidate: 86400, tags: ['designations'] }
+);
 
-export async function getLocations() {
-    try {
-        const locations = await db.location.findMany({
-            select: { name: true },
-            orderBy: { name: 'asc' }
-        });
-        return locations.map(l => ({ label: l.name, value: l.name }));
-    } catch (error) {
-        return [];
-    }
-}
+export const getLocations = unstable_cache(
+    async () => {
+        try {
+            const locations = await db.location.findMany({
+                select: { name: true },
+                orderBy: { name: 'asc' }
+            });
+            return locations.map(l => ({ label: l.name, value: l.name }));
+        } catch (error) {
+            return [];
+        }
+    },
+    ['locations-options'],
+    { revalidate: 86400, tags: ['locations'] }
+);
 
-export async function getTrainerOptions() {
-    try {
-        const trainers = await db.trainer.findMany({
-            select: { name: true },
-            orderBy: { name: 'asc' }
-        });
-        return trainers.map(t => ({ label: t.name, value: t.name }));
-    } catch (error) {
-        return [];
-    }
-}
+export const getTrainerOptions = unstable_cache(
+    async () => {
+        try {
+            const trainers = await db.trainer.findMany({
+                select: { name: true },
+                orderBy: { name: 'asc' }
+            });
+            return trainers.map(t => ({ label: t.name, value: t.name }));
+        } catch (error) {
+            return [];
+        }
+    },
+    ['trainers-options'],
+    { revalidate: 86400, tags: ['trainers'] }
+);

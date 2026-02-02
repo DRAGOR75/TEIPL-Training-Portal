@@ -14,6 +14,7 @@ import {
     HiOutlineTrash
 } from 'react-icons/hi2';
 import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 interface Props {
     session: any;
@@ -113,9 +114,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             </span>
                         </div>
                         <div className="flex justify-between text-sm">
-                            <span className="text-slate-500">Pending Requests</span>
+                            <span className="text-slate-500">Waitlist (TNI)</span>
                             <span className="font-medium text-slate-900">
                                 {pendingNominations.length}
+                            </span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                            <span className="text-slate-500">Approved for Batching</span>
+                            <span className="font-medium text-green-600">
+                                {pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length}
                             </span>
                         </div>
                     </div>
@@ -127,20 +134,22 @@ export default function ManagementClient({ session, pendingNominations, batchId 
 
                 {/* 1. Add Candidates from pending list */}
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                    <div className="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                         <div>
-                            <h3 className="font-bold text-slate-900 text-lg">Pending Nominations</h3>
-                            <p className="text-sm text-slate-500">Employees nominated for {session.programName} via TNI.</p>
+                            <h3 className="font-bold text-slate-900 text-lg">Waitlist (Topic Approved)</h3>
+                            <p className="text-sm text-slate-500">Employees whose managers approved the need for {session.programName}.</p>
                         </div>
-                        <button
+                        <FormSubmitButton
                             onClick={handleAddToBatch}
                             disabled={selectedNominations.size === 0 || isAdding || isLocked}
+                            isLoading={isAdding}
+                            loadingText="Adding..."
                             title={isLocked ? "Batch is locked" : "Add selected"}
                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
-                            {isAdding ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineUserPlus className="w-4 h-4" />}
+                            <HiOutlineUserPlus className="w-4 h-4" />
                             Add Selected ({selectedNominations.size})
-                        </button>
+                        </FormSubmitButton>
                     </div>
 
                     <div className="max-h-[300px] overflow-y-auto">
@@ -154,35 +163,47 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                     <tr>
                                         <th className="p-4 w-10">Select</th>
                                         <th className="p-4">Employee</th>
+                                        <th className="p-4">TNI Status</th>
                                         <th className="p-4">Department</th>
-                                        <th className="p-4">Justification</th>
+                                        <th className="p-4 text-right">Justification</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {pendingNominations.map((nom) => (
-                                        <tr key={nom.id} className="hover:bg-slate-50 transition-colors">
-                                            <td className="p-4">
-                                                <button
-                                                    onClick={() => toggleSelection(nom.id)}
-                                                    disabled={isLocked}
-                                                    className="text-slate-400 hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                >
-                                                    {selectedNominations.has(nom.id) ?
-                                                        <HiOutlineCheckCircle className="w-5 h-5 text-blue-600" /> :
-                                                        <HiOutlineMinusCircle className="w-5 h-5" />
-                                                    }
-                                                </button>
-                                            </td>
-                                            <td className="p-4 font-medium text-slate-900">
-                                                {nom.employee.name}
-                                                <div className="text-xs text-slate-400">{nom.employee.email}</div>
-                                            </td>
-                                            <td className="p-4 text-slate-600">{nom.employee.sectionName || '-'}</td>
-                                            <td className="p-4 text-slate-500 italic truncate max-w-[200px]">
-                                                {nom.justification}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {pendingNominations.map((nom) => {
+                                        const isApprovedTopic = nom.status === 'Approved';
+                                        return (
+                                            <tr key={nom.id} className={`transition-colors ${isApprovedTopic ? 'hover:bg-slate-50' : 'bg-slate-50 opacity-60'}`}>
+                                                <td className="p-4 text-center">
+                                                    <button
+                                                        onClick={() => toggleSelection(nom.id)}
+                                                        disabled={isLocked || !isApprovedTopic}
+                                                        title={!isApprovedTopic ? "TNI approval pending from manager" : isLocked ? "Batch is locked" : "Select for batch"}
+                                                        className={`transition-all ${isApprovedTopic ? 'text-slate-300 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}`}
+                                                    >
+                                                        {selectedNominations.has(nom.id) ?
+                                                            <HiOutlineCheckCircle className="w-6 h-6 text-blue-600" /> :
+                                                            <HiOutlineMinusCircle className="w-6 h-6" />
+                                                        }
+                                                    </button>
+                                                </td>
+                                                <td className="p-4">
+                                                    <div className="font-bold text-slate-900">{nom.employee.name}</div>
+                                                    <div className="text-[10px] text-slate-500 font-mono tracking-tighter">{nom.employee.id}</div>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${isApprovedTopic
+                                                        ? 'bg-green-50 text-green-700 border-green-100'
+                                                        : 'bg-yellow-50 text-yellow-700 border-yellow-100'}`}>
+                                                        {nom.status}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-slate-600 text-xs font-medium">{nom.employee.sectionName || '-'}</td>
+                                                <td className="p-4 text-slate-500 text-xs italic truncate max-w-[150px] text-right">
+                                                    {nom.justification || 'No justification provided'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         )}
@@ -205,20 +226,36 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 <thead className="bg-slate-50 text-slate-600 font-medium sticky top-0">
                                     <tr>
                                         <th className="p-4">Employee</th>
+                                        <th className="p-4">Session Approval</th>
+                                        <th className="p-4">Department</th>
                                         <th className="p-4">Status</th>
                                         <th className="p-4">Source</th>
-                                        <th className="p-4 text-right">Action</th>
+                                        <th className="p-4 text-right">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {session.nominationBatch.nominations.map((nom: any) => (
+                                    {([...session.nominationBatch.nominations].sort((a, b) => {
+                                        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+                                        return (priority[a.managerApprovalStatus] || 99) - (priority[b.managerApprovalStatus] || 99);
+                                    })).map((nom: any) => (
                                         <tr key={nom.id} className="hover:bg-slate-50">
                                             <td className="p-4 font-medium text-slate-900">
                                                 {nom.employee.name}
                                                 <div className="text-xs text-slate-400">{nom.employee.email}</div>
                                             </td>
                                             <td className="p-4">
-                                                <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold">
+                                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${nom.managerApprovalStatus === 'Approved'
+                                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                                    : nom.managerApprovalStatus === 'Rejected'
+                                                        ? 'bg-red-50 text-red-700 border-red-100'
+                                                        : 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                                    }`}>
+                                                    {nom.managerApprovalStatus}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-slate-600 font-medium">{nom.employee.sectionName || '-'}</td>
+                                            <td className="p-4">
+                                                <span className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs font-bold font-mono">
                                                     {nom.status}
                                                 </span>
                                             </td>
@@ -226,18 +263,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                                 {nom.source}
                                             </td>
                                             <td className="p-4 text-right">
-                                                <button
-                                                    onClick={() => handleRemove(nom.id)}
-                                                    disabled={removingId === nom.id || isLocked}
-                                                    className="text-slate-400 hover:text-red-600 transition-colors p-1 disabled:opacity-30 disabled:cursor-not-allowed"
-                                                    title={isLocked ? "Batch is locked" : "Remove from session"}
-                                                >
-                                                    {removingId === nom.id ? (
-                                                        <HiOutlineArrowPath className="w-4 h-4 animate-spin" />
-                                                    ) : (
-                                                        <HiOutlineTrash className="w-4 h-4" />
-                                                    )}
-                                                </button>
+                                                {!isLocked && (
+                                                    <button
+                                                        onClick={() => handleRemove(nom.id)}
+                                                        className="text-slate-300 hover:text-red-500 p-2 transition-colors"
+                                                        title="Remove from batch"
+                                                    >
+                                                        <HiOutlineTrash size={18} />
+                                                    </button>
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -256,7 +290,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     )}
                 </div>
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

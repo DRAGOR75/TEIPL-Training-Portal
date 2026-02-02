@@ -1,6 +1,6 @@
 import { db } from '@/lib/prisma';
-import { updateNominationStatus } from '@/app/actions/tni';
-import { HiOutlineShieldExclamation, HiOutlineTrophy, HiOutlineUser, HiOutlineChatBubbleBottomCenterText } from 'react-icons/hi2';
+import { updateNominationStatus, getManagerApprovalData } from '@/app/actions/tni';
+import { HiOutlineShieldExclamation, HiOutlineUser, HiOutlineChatBubbleBottomCenterText, HiClipboard } from 'react-icons/hi2';
 import { verifySecureToken } from '@/lib/security';
 import ManagerApprovalButtons from '@/components/admin/tni/ManagerApprovalButtons';
 import { notFound, redirect } from 'next/navigation';
@@ -28,16 +28,8 @@ export default async function ManagerApprovalPage({
         );
     }
 
-    // Fetch pending nominations for this employee
-    const employee = await db.employee.findUnique({
-        where: { id: empId },
-        include: {
-            nominations: {
-                where: { status: 'Pending' },
-                include: { program: true }
-            }
-        }
-    });
+    // Fetch pending nominations for this employee (CACHED)
+    const employee = await getManagerApprovalData(empId);
 
     if (!employee) {
         return notFound();
@@ -52,16 +44,16 @@ export default async function ManagerApprovalPage({
     const globalJustification = hasConsistentJustification ? uniqueJustifications[0] : null;
 
     return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 md:p-12 font-sans">
-            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-3 md:p-12 font-sans">
+            <div className="max-w-4xl w-full bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-slate-200">
 
                 {/* Header Section */}
-                <div className="bg-indigo-900 p-8 text-white relative overflow-hidden">
+                <div className="bg-indigo-900 p-6 md:p-8 text-white relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
-                    <div className="relative z-10 flex justify-between items-start md:items-center flex-col md:flex-row gap-4">
+                    <div className="relative z-10 flex justify-between items-start md:items-center flex-col md:flex-row gap-6 md:gap-4">
                         <div>
                             <div className="flex items-center gap-3 mb-2">
-                                <HiOutlineTrophy className="text-yellow-400" size={28} />
+                                <HiClipboard className="text-yellow-400" size={28} />
                                 <h1 className="text-2xl font-bold tracking-tight">Nomination Approval</h1>
                             </div>
                             <p className="text-indigo-200 text-sm">Reviewing training requests for</p>
@@ -81,7 +73,7 @@ export default async function ManagerApprovalPage({
                     </div>
                 </div>
 
-                <div className="p-8">
+                <div className="p-4 md:p-8">
                     {/* GLOBAL Justification Section (Only if consistent) */}
                     {hasConsistentJustification && globalJustification && (
                         <div className="mb-10 relative group">

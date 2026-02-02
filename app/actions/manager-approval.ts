@@ -10,9 +10,10 @@ export async function submitManagerNominationDecision(nominationId: string, deci
             managerRejectionReason: reason || null,
         };
 
-        // If Rejected, remove from batch and return to TNI pool
+        // If Rejected for a session, remove from batch but keep 'Approved' status 
+        // (Stage 1 remains approved, so they return to the Admin Waitlist)
         if (decision === 'Rejected') {
-            updateData.status = 'Pending';
+            updateData.status = 'Approved';
             updateData.batchId = null;
         }
 
