@@ -45,8 +45,8 @@ export async function lockSessionBatch(sessionId: string) {
         revalidatePath(`/admin/dashboard/session/${sessionId}`);
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
         revalidatePath('/admin/sessions');
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error("Lock Batch Error:", error);
@@ -98,8 +98,8 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
         return { success: true, sessionId: trainingSession.id };
     } catch (error) {
@@ -283,8 +283,8 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             })).catch(err => console.error("Failed to send approval emails", err));
         }
 
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
         return { success: true };
     } catch (error) {
@@ -357,8 +357,8 @@ export async function joinBatch(batchId: string, empId: string) {
             ).catch(console.error);
         }
 
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -457,8 +457,8 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             ).catch(console.error);
         }
 
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath(`/admin/sessions`);
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -496,8 +496,8 @@ export async function removeNominationFromBatch(nominationId: string) {
         });
 
         revalidatePath('/admin/sessions');
-        revalidateTag('sessions-list', 'default');
-        revalidateTag('session-details', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error('Remove Nomination Error:', error);

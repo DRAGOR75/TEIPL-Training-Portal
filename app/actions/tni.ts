@@ -249,10 +249,10 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
         revalidatePath(`/tni/${updatedNomination.empId}`);
 
         // Invalidate the cache for the profile fetcher
-        revalidateTag('employee-profile', 'default');
+        revalidateTag('employee-profile', 'max');
 
         // Invalidate the manager approval cache
-        revalidateTag('manager-approval', 'default');
+        revalidateTag('manager-approval', 'max');
 
         return { success: true };
     } catch (error) {
