@@ -12,14 +12,15 @@ import {
     HiOutlineXMark,
     HiOutlineBars3,
     HiOutlineEye,
-    HiOutlineEyeSlash
+    HiOutlineEyeSlash,
+    HiOutlineArrowPath
 } from 'react-icons/hi2';
 import { TroubleshootingProduct } from '@prisma/client';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEditName, handleUpdate, setEditingId, startEdit, deleteProduct, toggleStatus }: any) {
+function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEditName, handleUpdate, setEditingId, startEdit, deleteProduct, toggleStatus, isUpdating, deletingId, togglingId }: any) {
     const {
         attributes,
         listeners,
@@ -67,10 +68,11 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                         <div className="flex justify-end gap-2">
                             <button
                                 onClick={() => handleUpdate(p.id)}
-                                className="text-white bg-green-500 hover:bg-green-600 p-2 rounded-lg shadow-sm"
+                                disabled={isUpdating}
+                                className="text-white bg-green-500 hover:bg-green-600 p-2 rounded-lg shadow-sm disabled:opacity-50"
                                 title="Save"
                             >
-                                <HiOutlineCheck size={14} />
+                                {isUpdating ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineCheck size={14} />}
                             </button>
                             <button
                                 onClick={() => setEditingId(null)}
@@ -97,10 +99,15 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button
                                 onClick={() => toggleStatus(p.id, p.userView)}
-                                className={`transition p-1 ${p.userView === 1 ? 'text-blue-400 hover:text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}
+                                disabled={togglingId === p.id}
+                                className={`transition p-1 disabled:opacity-50 ${p.userView === 1 ? 'text-blue-400 hover:text-blue-600' : 'text-slate-300 hover:text-slate-500'}`}
                                 title={p.userView === 1 ? 'Disable' : 'Enable'}
                             >
-                                {p.userView === 1 ? <HiOutlineEye size={16} /> : <HiOutlineEyeSlash size={16} />}
+                                {togglingId === p.id ? (
+                                    <HiOutlineArrowPath className="animate-spin" size={16} />
+                                ) : (
+                                    p.userView === 1 ? <HiOutlineEye size={16} /> : <HiOutlineEyeSlash size={16} />
+                                )}
                             </button>
                             <button
                                 onClick={() => startEdit(p)}
@@ -110,11 +117,16 @@ function SortableProductRow({ p, editingId, editSeq, editName, setEditSeq, setEd
                                 <HiOutlinePencil size={16} />
                             </button>
                             <button
-                                onClick={() => { if (confirm(`Delete ${p.name}?`)) deleteProduct(p.id) }}
-                                className="text-slate-300 hover:text-red-600 transition p-1"
+                                onClick={() => deleteProduct(p.id)}
+                                disabled={deletingId === p.id}
+                                className="text-slate-300 hover:text-red-600 transition p-1 disabled:opacity-50"
                                 title="Delete"
                             >
-                                <HiOutlineTrash size={16} />
+                                {deletingId === p.id ? (
+                                    <HiOutlineArrowPath className="animate-spin" size={16} />
+                                ) : (
+                                    <HiOutlineTrash size={16} />
+                                )}
                             </button>
                         </div>
                     </td>
@@ -131,6 +143,10 @@ export default function ProductManager({ products }: { products: Troubleshooting
     useEffect(() => {
         setLocalProducts(products);
     }, [products]);
+
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [togglingId, setTogglingId] = useState<number | null>(null);
 
     const formRef = useRef<HTMLFormElement>(null);
     const [isAdding, setIsAdding] = useState(false);
@@ -184,12 +200,14 @@ export default function ProductManager({ products }: { products: Troubleshooting
     }
 
     async function handleUpdate(id: number) {
+        setIsUpdating(true);
         const result = await updateTroubleshootingProduct(id, { name: editName, viewSeq: editSeq });
         if (result?.error) {
             alert(result.error);
         } else {
             setEditingId(null);
         }
+        setIsUpdating(false);
     }
 
     const startEdit = (product: TroubleshootingProduct) => {
@@ -199,6 +217,7 @@ export default function ProductManager({ products }: { products: Troubleshooting
     };
 
     async function toggleStatus(id: number, currentStatus: number) {
+        setTogglingId(id);
         // Optimistic
         setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, userView: currentStatus === 1 ? 0 : 1 } : p));
 
@@ -208,13 +227,18 @@ export default function ProductManager({ products }: { products: Troubleshooting
             // Revert
             setLocalProducts(prev => prev.map(p => p.id === id ? { ...p, userView: currentStatus } : p));
         }
+        setTogglingId(null);
     }
 
     async function handleDelete(id: number) {
+        const product = localProducts.find(p => p.id === id);
+        if (!confirm(`Delete ${product?.name}?`)) return;
+        setDeletingId(id);
         const result = await deleteTroubleshootingProduct(id);
         if (result?.error) {
             alert(result.error);
         }
+        setDeletingId(null);
     }
 
     return (
@@ -283,6 +307,9 @@ export default function ProductManager({ products }: { products: Troubleshooting
                                         startEdit={startEdit}
                                         deleteProduct={handleDelete}
                                         toggleStatus={toggleStatus}
+                                        isUpdating={isUpdating}
+                                        deletingId={deletingId}
+                                        togglingId={togglingId}
                                     />
                                 ))}
                             </SortableContext>

@@ -48,23 +48,23 @@ export default async function ManagerFeedbackPage({
     }
 
     return (
-        <div className="min-h-screen bg-slate-100 flex justify-center p-8 font-sans">
-            <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+        <div className="min-h-screen bg-slate-100 flex justify-center p-3 md:p-8 font-sans">
+            <div className="max-w-4xl w-full bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl border border-slate-200 overflow-hidden">
 
                 {/* Header */}
-                <div className="bg-indigo-900 p-6 text-white flex justify-between items-center relative overflow-hidden">
+                <div className="bg-indigo-900 p-6 text-white flex flex-col md:flex-row justify-between items-start md:items-center relative overflow-hidden gap-4">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
                     <div className="relative z-10">
-                        <h1 className="text-xl font-bold">Post training (30 days) performance feedback Review</h1>
-                        <p className="opacity-80 text-sm">Employee Under Review: <span className="font-bold text-yellow-400">{enrollment.employeeName}</span></p>
+                        <h1 className="text-xl font-bold leading-tight">Post training (30 days) performance feedback Review</h1>
+                        <p className="opacity-80 text-sm mt-1">Employee Under Review: <span className="font-bold text-yellow-400">{enrollment.employeeName}</span></p>
                     </div>
-                    <div className="relative z-10 text-right">
-                        <div className="text-3xl font-bold">{enrollment.averageRating?.toFixed(1)} <span className="text-sm font-normal opacity-50">/ 5</span></div>
-                        <div className="text-xs uppercase tracking-wider opacity-75">Avg Score</div>
+                    <div className="relative z-10 text-left md:text-right w-full md:w-auto flex flex-row md:flex-col justify-between md:justify-start items-center md:items-end bg-indigo-800/30 md:bg-transparent p-3 md:p-0 rounded-lg md:rounded-none border border-indigo-700/30 md:border-none">
+                        <div className="text-xs uppercase tracking-wider opacity-75 md:order-2">Avg Score</div>
+                        <div className="text-3xl font-bold md:order-1">{enrollment.averageRating?.toFixed(1)} <span className="text-sm font-normal opacity-50">/ 5</span></div>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 p-4 md:p-8">
 
                     {/* LEFT: Employee's Answers (ReadOnly) - FOCUS ON VISIBILITY */}
                     <div className="space-y-4 bg-slate-50 p-4 rounded-lg border border-slate-200">

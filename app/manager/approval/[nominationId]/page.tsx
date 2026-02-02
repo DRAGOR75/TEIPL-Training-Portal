@@ -53,11 +53,11 @@ export default async function Page({
     const endDate = session?.endDate ? formatDate(new Date(session.endDate)) : null;
 
     return (
-        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-6 font-sans">
-            <div className="max-w-xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden border border-slate-200">
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-3 md:p-6 font-sans">
+            <div className="max-w-xl w-full bg-white rounded-2xl md:rounded-3xl shadow-xl md:shadow-2xl overflow-hidden border border-slate-200">
 
                 {/* Header */}
-                <div className="bg-indigo-900 p-8 text-white relative overflow-hidden text-center">
+                <div className="bg-indigo-900 p-6 md:p-8 text-white relative overflow-hidden text-center">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-800 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/2"></div>
                     <div className="relative z-10">
                         <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-3 bg-indigo-800/50 px-3 py-1 rounded-full w-fit mx-auto border border-indigo-700/50">Training Nomination</p>

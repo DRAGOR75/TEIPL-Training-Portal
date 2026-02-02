@@ -2,7 +2,7 @@
 
 import { useState, useRef } from 'react';
 import { createProgram, deleteProgram, updateProgramSections } from '@/app/actions/master-data';
-import { HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath } from 'react-icons/hi2';
 import { TrainingCategory, Grade } from '@prisma/client';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 
@@ -17,6 +17,7 @@ interface Program {
 export default function ProgramManager({ programs, allSections }: { programs: Program[], allSections: { id: string, name: string }[] }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [editingProgramId, setEditingProgramId] = useState<string | null>(null);
     const [editSectionIds, setEditSectionIds] = useState<string[]>([]);
 
@@ -40,6 +41,13 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
         } else {
             setEditingProgramId(null);
         }
+    }
+
+    async function handleDelete(id: string) {
+        if (!confirm('Delete program?')) return;
+        setDeletingId(id);
+        await deleteProgram(id);
+        setDeletingId(null);
     }
 
     function startEditing(prog: Program) {
@@ -169,10 +177,15 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                 </div>
 
                                 <button
-                                    onClick={() => { if (confirm('Delete program?')) deleteProgram(prog.id) }}
-                                    className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition"
+                                    onClick={() => handleDelete(prog.id)}
+                                    disabled={deletingId === prog.id}
+                                    className="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition disabled:opacity-50"
                                 >
-                                    <HiOutlineTrash size={18} />
+                                    {deletingId === prog.id ? (
+                                        <HiOutlineArrowPath className="animate-spin w-4 h-4" />
+                                    ) : (
+                                        <HiOutlineTrash size={18} />
+                                    )}
                                 </button>
                             </div>
                         ))}

@@ -4,7 +4,7 @@ import { SiLooker } from 'react-icons/si';
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4 md:p-12 font-sans text-slate-900">
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4 md:p-12 font-sans text-slate-900">
 
       {/* Main Container */}
       <div className="max-w-6xl w-full flex flex-col gap-12">
@@ -13,8 +13,8 @@ export default function Home() {
         <div className="flex flex-col items-start space-y-4">
 
 
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-slate-900">
-            Training <span className="text-thriveni-blue">Thriveni</span>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter text-slate-900 uppercase">
+            Training <span className="text-thriveni-blue uppercase">Thriveni</span>
           </h1>
 
           <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed">
@@ -27,7 +27,7 @@ export default function Home() {
 
           {/* Card 1: TNI (Wide - Full Width Mobile, Wide Desktop) - Amber Theme */}
           <Link href="/tni" className="group col-span-2 relative">
-            <div className="h-full bg-amber-100/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-amber-100 transition-all duration-500 hover:shadow-xl hover:shadow-amber-900/5 hover:-translate-y-1 hover:border-amber-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
+            <div className="h-full bg-amber-100/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-amber-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-amber-900/5 hover:-translate-y-1 hover:border-amber-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
 
               {/* Decorative Gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-amber-50 to-white opacity-0 md:opacity-100 transition-opacity" />
@@ -62,7 +62,7 @@ export default function Home() {
 
           {/* Card 2: Feedback (Compact Widget Mobile, Standard Desktop) - Indigo Theme */}
           <Link href="/admin/dashboard" className="group col-span-1 relative">
-            <div className="h-full bg-indigo-100/50 rounded-3xl md:rounded-[2.5rem] p-4 md:p-8 border border-indigo-100 transition-all duration-500 hover:shadow-xl hover:shadow-indigo-900/5 hover:-translate-y-1 hover:border-indigo-200 flex flex-col justify-between relative z-10 min-h-[160px] md:min-h-[320px]">
+            <div className="h-full bg-indigo-100/50 rounded-3xl md:rounded-[2.5rem] p-4 md:p-8 border border-indigo-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-indigo-900/5 hover:-translate-y-1 hover:border-indigo-200 flex flex-col justify-between relative z-10 min-h-[160px] md:min-h-[320px]">
 
               <div className="space-y-3 md:space-y-6">
                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white text-indigo-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
@@ -90,7 +90,7 @@ export default function Home() {
 
           {/* Card 3: Troubleshooting (Compact Widget Mobile, Standard Desktop) - Red Theme */}
           <Link href="/troubleshoot" className="group col-span-1 relative">
-            <div className="h-full bg-red-50/50 rounded-3xl md:rounded-[2.5rem] p-4 md:p-8 border border-red-100 transition-all duration-500 hover:shadow-xl hover:shadow-red-900/10 hover:-translate-y-1 hover:border-red-200 flex flex-col justify-between relative z-10 min-h-[160px] md:min-h-[320px]">
+            <div className="h-full bg-red-50/50 rounded-3xl md:rounded-[2.5rem] p-4 md:p-8 border border-red-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-red-900/10 hover:-translate-y-1 hover:border-red-200 flex flex-col justify-between relative z-10 min-h-[160px] md:min-h-[320px]">
 
               <div className="space-y-3 md:space-y-6">
                 <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white text-red-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
@@ -118,7 +118,7 @@ export default function Home() {
 
           {/* Card 4: Training Sessions (Wide - Full Width Mobile, Wide Desktop) - Emerald Theme */}
           <Link href="/admin/sessions" className="group col-span-2 relative">
-            <div className="h-full bg-emerald-50/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-emerald-100 transition-all duration-500 hover:shadow-xl hover:shadow-emerald-900/5 hover:-translate-y-1 hover:border-emerald-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
+            <div className="h-full bg-emerald-50/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-emerald-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-emerald-900/5 hover:-translate-y-1 hover:border-emerald-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
 
               {/* Decorative Gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-50 to-white opacity-0 md:opacity-100 transition-opacity" />
@@ -153,7 +153,7 @@ export default function Home() {
 
           {/* Card 5: Looker Studio (Wide - Full Width Mobile, Wide Desktop) - Blue Theme */}
           <Link href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd" className="group col-span-2 relative" target="_blank" rel="noopener noreferrer">
-            <div className="h-full bg-blue-100/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-blue-100 transition-all duration-500 hover:shadow-xl hover:shadow-blue-900/5 hover:-translate-y-1 hover:border-blue-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
+            <div className="h-full bg-blue-100/50 rounded-3xl md:rounded-[2.5rem] p-6 md:p-8 border border-blue-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-blue-900/5 hover:-translate-y-1 hover:border-blue-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 md:gap-8 relative z-10 overflow-hidden">
 
               {/* Decorative Gradient */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-75 to-white opacity-0 md:opacity-100 transition-opacity" />

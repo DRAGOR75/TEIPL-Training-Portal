@@ -45,6 +45,8 @@ export async function lockSessionBatch(sessionId: string) {
         revalidatePath(`/admin/dashboard/session/${sessionId}`);
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
         revalidatePath('/admin/sessions');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error("Lock Batch Error:", error);
@@ -55,17 +57,21 @@ export async function lockSessionBatch(sessionId: string) {
 
 export async function createSession(formData: FormData) {
     const session = await auth();
-    if (!session?.user?.email) {
-        throw new Error("Unauthorized");
+    // Align with auth.ts middleware bypass in development
+    if (!session?.user?.email && process.env.NODE_ENV !== 'development') {
+        return { error: "Unauthorized" };
     }
     const programName = formData.get('programName') as string;
     const trainerName = formData.get('trainerName') as string;
-    const startDate = new Date(formData.get('startDate') as string);
-    const endDate = new Date(formData.get('endDate') as string);
+    const startDateRaw = formData.get('startDate') as string;
+    const endDateRaw = formData.get('endDate') as string;
 
-    if (!programName || !startDate || !endDate) {
-        throw new Error('Missing required fields');
+    if (!programName || !startDateRaw || !endDateRaw) {
+        return { error: 'Missing required fields' };
     }
+
+    const startDate = new Date(startDateRaw);
+    const endDate = new Date(endDateRaw);
 
     try {
         const program = await db.program.findUnique({
@@ -73,7 +79,7 @@ export async function createSession(formData: FormData) {
         });
 
         if (!program) {
-            throw new Error(`Program '${programName}' not found.`);
+            return { error: `Program '${programName}' not found.` };
         }
 
         const batch = await db.nominationBatch.create({
@@ -96,7 +102,8 @@ export async function createSession(formData: FormData) {
             }
         });
 
-        revalidateTag('sessions-list', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
         return { success: true, sessionId: trainingSession.id };
     } catch (error) {
@@ -106,7 +113,7 @@ export async function createSession(formData: FormData) {
 }
 
 // CACHED: Session List
-// CACHED: Session List (Micro-Caching: 1 second)
+// CACHED: Session List (Micro-Caching: 1 hour)
 // This prevents DB floods (1000 reqs -> 1 DB call) while keeping UI "real-time" for admins.
 export const getSessions = unstable_cache(
     async () => {
@@ -122,11 +129,11 @@ export const getSessions = unstable_cache(
         });
     },
     ['sessions-list'],
-    { revalidate: 1 }
+    { revalidate: 3600, tags: ['sessions-list'] } // 1 hour cache
 );
 
 // CACHED: Single Session
-// CACHED: Single Session (Micro-Caching: 1 second)
+// CACHED: Single Session (Micro-Caching: 1 hour)
 export const getSessionById = unstable_cache(
     async (sessionId: string) => {
         return await db.trainingSession.findUnique({
@@ -144,7 +151,7 @@ export const getSessionById = unstable_cache(
         });
     },
     ['session-details'],
-    { revalidate: 1 }
+    { revalidate: 3600, tags: ['session-details'] } // 1 hour cache
 );
 
 export async function getTrainingSessionsForDate(dateStr: string): Promise<SessionWithDetails[]> {
@@ -182,15 +189,26 @@ export async function getTrainingSessionsForDate(dateStr: string): Promise<Sessi
 }
 
 export async function getPendingNominationsForProgram(programId: string) {
-    return await db.nomination.findMany({
+    const nominations = await db.nomination.findMany({
         where: {
             programId,
-            status: 'Pending'
+            status: { in: ['Pending', 'Approved'] } // Show both "Interested" and "Manager Approved"
         },
         include: {
             employee: true
         }
     });
+
+    // Sort by status: Approved (1st), Pending (2nd)
+    const statusPriority: Record<string, number> = {
+        'Approved': 1,
+        'Pending': 2,
+        'Rejected': 3
+    };
+
+    return nominations.sort((a, b) =>
+        (statusPriority[a.status] || 99) - (statusPriority[b.status] || 99)
+    );
 }
 
 export async function addNominationsToBatch(batchId: string, nominationIds: string[]) {
@@ -232,7 +250,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             data: {
                 batchId,
                 status: 'Batched',
-                // managerApprovalStatus: 'Pending' // Explicitly set to Pending if needed, though default handles it
+                managerApprovalStatus: 'Pending' // RESET to Pending for the Session Date approval
             }
         });
 
@@ -269,7 +287,8 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             })).catch(err => console.error("Failed to send approval emails", err));
         }
 
-        revalidateTag('sessions-list', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
         return { success: true };
     } catch (error) {
@@ -342,7 +361,8 @@ export async function joinBatch(batchId: string, empId: string) {
             ).catch(console.error);
         }
 
-        revalidateTag('sessions-list', 'default');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -441,6 +461,8 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             ).catch(console.error);
         }
 
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         revalidatePath(`/admin/sessions`);
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -478,6 +500,8 @@ export async function removeNominationFromBatch(nominationId: string) {
         });
 
         revalidatePath('/admin/sessions');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error('Remove Nomination Error:', error);

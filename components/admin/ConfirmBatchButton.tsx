@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { HiOutlineLockClosed, HiOutlineLockOpen, HiOutlineArrowPath, HiOutlineCheckCircle } from 'react-icons/hi2';
 import { lockSessionBatch } from '@/app/actions/sessions';
 import { useRouter } from 'next/navigation';
+import { FormSubmitButton } from '../FormSubmitButton';
 
 interface ConfirmBatchButtonProps {
     sessionId: string;
@@ -47,13 +48,15 @@ export default function ConfirmBatchButton({ sessionId, initialStatus }: Confirm
     }
 
     return (
-        <button
+        <FormSubmitButton
             onClick={handleLock}
             disabled={isLoading}
+            isLoading={isLoading}
+            loadingText="Confirming..."
             className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md border border-indigo-500 font-bold text-sm transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
         >
-            {isLoading ? <HiOutlineArrowPath size={16} className="animate-spin" /> : <HiOutlineLockClosed size={16} />}
+            <HiOutlineLockClosed size={16} />
             <span>Confirm Batch</span>
-        </button>
+        </FormSubmitButton>
     );
 }

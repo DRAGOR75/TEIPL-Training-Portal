@@ -19,7 +19,7 @@ export default function Navbar({ session }: { session: Session | null }) {
     }
 
     return (
-        <nav className="bg-white shadow-md border-b border-slate-200 sticky top-0 z-50">
+        <nav className="glass shadow-air border-b border-white/20 sticky top-0 z-50">
             <div className="w-full px-2 sm:px-4 lg:px-6">
                 <div className="flex justify-between items-center h-20">
 
@@ -99,7 +99,7 @@ function NavLink({ href, icon, text }: { href: string; icon: React.ReactNode; te
     return (
         <Link
             href={href}
-            className="flex items-center gap-2 text-slate-600 hover:text-blue-700 font-bold text-sm transition-colors py-2 px-3 rounded-lg hover:bg-slate-50"
+            className="flex items-center gap-2 text-slate-600 hover:text-blue-700 font-medium text-sm transition-colors py-2 px-3 rounded-lg hover:bg-white/50"
         >
             {icon}
             <span>{text}</span>

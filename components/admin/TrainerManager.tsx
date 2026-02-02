@@ -11,7 +11,8 @@ import {
     HiOutlineUsers,
     HiOutlineChevronDown,
     HiOutlineChevronUp,
-    HiOutlinePlus
+    HiOutlinePlus,
+    HiOutlineArrowPath
 } from 'react-icons/hi2';
 
 type Trainer = {
@@ -23,6 +24,7 @@ type Trainer = {
 
 export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
 
@@ -36,6 +38,13 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
         } else {
             formRef.current?.reset();
         }
+    }
+
+    async function handleDeleteTrainer(id: string) {
+        if (!confirm('Delete this trainer?')) return;
+        setDeletingId(id);
+        await deleteTrainer(id);
+        setDeletingId(null);
     }
 
     return (
@@ -130,11 +139,16 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
 
                                 {/* Delete Button */}
                                 <button
-                                    onClick={() => { if (confirm('Delete this trainer?')) deleteTrainer(t.id) }}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0"
+                                    onClick={() => handleDeleteTrainer(t.id)}
+                                    disabled={deletingId === t.id}
+                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0 disabled:opacity-50"
                                     title="Delete Trainer"
                                 >
-                                    <HiOutlineTrash size={16} />
+                                    {deletingId === t.id ? (
+                                        <HiOutlineArrowPath className="animate-spin" size={16} />
+                                    ) : (
+                                        <HiOutlineTrash size={16} />
+                                    )}
                                 </button>
                             </div>
                         ))}

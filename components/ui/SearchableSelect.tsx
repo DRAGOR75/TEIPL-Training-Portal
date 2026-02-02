@@ -111,7 +111,7 @@ export default function SearchableSelect({
                             autoComplete="off"
                         />
                     ) : (
-                        <div className="p-3 w-full text-left break-words text-sm min-w-0 leading-snug">
+                        <div className="p-3 w-full text-left truncate text-sm min-w-0 leading-snug">
                             {selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>}
                         </div>
                     )}

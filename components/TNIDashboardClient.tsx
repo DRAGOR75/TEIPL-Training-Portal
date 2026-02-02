@@ -42,9 +42,15 @@ export default function TNIDashboardClient({
 }) {
     const [view, setView] = useState<'list' | 'create'>('list');
 
+    // Sort nominations: Approved -> Pending -> Rejected
+    const sortedNominations = [...nominations].sort((a, b) => {
+        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+        return (priority[a.status] || 99) - (priority[b.status] || 99);
+    });
+
     if (view === 'create') {
         return (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300">
+            <div className="bg-white rounded-xl shadow-air-md border border-slate-100 overflow-hidden transition-all duration-300">
                 <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
@@ -160,7 +166,7 @@ export default function TNIDashboardClient({
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-air border border-slate-100 overflow-hidden">
             <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
@@ -184,7 +190,7 @@ export default function TNIDashboardClient({
 
                 {/* Mobile Card View (Visible on small screens) */}
                 <div className="md:hidden space-y-4 p-4">
-                    {nominations.length === 0 ? (
+                    {sortedNominations.length === 0 ? (
                         <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-100">
                             <div className="p-4 bg-white rounded-full shadow-sm">
                                 <HiOutlineQueueList size={32} className="text-slate-300" />
@@ -195,8 +201,8 @@ export default function TNIDashboardClient({
                             </button>
                         </div>
                     ) : (
-                        nominations.map((nom: any) => (
-                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
+                        sortedNominations.map((nom: any) => (
+                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-air flex flex-col gap-3">
                                 <div>
                                     <h3 className="font-bold text-slate-900 leading-snug">
                                         {nom.program?.name || 'Unknown Program'}
@@ -244,7 +250,7 @@ export default function TNIDashboardClient({
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {nominations.length === 0 ? (
+                        {sortedNominations.length === 0 ? (
                             <tr>
                                 <td colSpan={4} className="p-12 text-center text-slate-500">
                                     <div className="flex flex-col items-center justify-center gap-3">
@@ -259,7 +265,7 @@ export default function TNIDashboardClient({
                                 </td>
                             </tr>
                         ) : (
-                            nominations.map((nom: any) => (
+                            sortedNominations.map((nom: any) => (
                                 <tr key={nom.id} className="group hover:bg-slate-50/80 transition-colors">
                                     <td className="p-5">
                                         <div className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
