@@ -11,7 +11,8 @@ import {
     HiOutlineChevronDown,
     HiOutlineChevronUp,
     HiOutlineArrowUpTray,
-    HiOutlineTableCells
+    HiOutlineTableCells,
+    HiOutlineArrowPath
 } from 'react-icons/hi2';
 import Papa from 'papaparse';
 
@@ -31,6 +32,8 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     const formRef = useRef<HTMLFormElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
     // --- MANUAL ADD ---
     async function handleAdd(formData: FormData) {
         setLoading(true);
@@ -38,6 +41,14 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
         setLoading(false);
         if (result?.error) alert(result.error);
         else formRef.current?.reset();
+    }
+
+    async function handleDelete(id: string) {
+        if (!confirm('Delete employee?')) return;
+        setDeletingId(id);
+        const result = await deleteEmployee(id);
+        if (result?.error) alert(result.error);
+        setDeletingId(null);
     }
 
     // --- BULK UPLOAD ---
@@ -247,10 +258,15 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                             <td className="p-3 text-slate-500">{emp.sectionName || '-'}</td>
                                             <td className="p-3">
                                                 <button
-                                                    onClick={() => { if (confirm('Delete employee?')) deleteEmployee(emp.id) }}
-                                                    className="text-slate-300 hover:text-red-500 transition"
+                                                    onClick={() => handleDelete(emp.id)}
+                                                    disabled={deletingId === emp.id}
+                                                    className="text-slate-300 hover:text-red-500 transition disabled:opacity-50"
                                                 >
-                                                    <HiOutlineTrash size={16} />
+                                                    {deletingId === emp.id ? (
+                                                        <HiOutlineArrowPath className="animate-spin" size={16} />
+                                                    ) : (
+                                                        <HiOutlineTrash size={16} />
+                                                    )}
                                                 </button>
                                             </td>
                                         </tr>

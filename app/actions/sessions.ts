@@ -57,17 +57,21 @@ export async function lockSessionBatch(sessionId: string) {
 
 export async function createSession(formData: FormData) {
     const session = await auth();
-    if (!session?.user?.email) {
-        throw new Error("Unauthorized");
+    // Align with auth.ts middleware bypass in development
+    if (!session?.user?.email && process.env.NODE_ENV !== 'development') {
+        return { error: "Unauthorized" };
     }
     const programName = formData.get('programName') as string;
     const trainerName = formData.get('trainerName') as string;
-    const startDate = new Date(formData.get('startDate') as string);
-    const endDate = new Date(formData.get('endDate') as string);
+    const startDateRaw = formData.get('startDate') as string;
+    const endDateRaw = formData.get('endDate') as string;
 
-    if (!programName || !startDate || !endDate) {
-        throw new Error('Missing required fields');
+    if (!programName || !startDateRaw || !endDateRaw) {
+        return { error: 'Missing required fields' };
     }
+
+    const startDate = new Date(startDateRaw);
+    const endDate = new Date(endDateRaw);
 
     try {
         const program = await db.program.findUnique({
@@ -75,7 +79,7 @@ export async function createSession(formData: FormData) {
         });
 
         if (!program) {
-            throw new Error(`Program '${programName}' not found.`);
+            return { error: `Program '${programName}' not found.` };
         }
 
         const batch = await db.nominationBatch.create({

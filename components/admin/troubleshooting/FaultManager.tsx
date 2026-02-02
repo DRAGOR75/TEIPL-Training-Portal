@@ -20,7 +20,8 @@ import {
     HiOutlineXMark,
     HiOutlineLink,
     HiOutlineMagnifyingGlass,
-    HiOutlineBars3
+    HiOutlineBars3,
+    HiOutlineArrowPath
 } from 'react-icons/hi2';
 import { FaultLibrary, TroubleshootingProduct, ProductFault } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -30,7 +31,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 type FullProductFault = ProductFault & { fault: FaultLibrary };
 
-function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, setEditCode, setEditName, handleUpdate, setEditingId, unlinkFault }: any) {
+function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, setEditCode, setEditName, handleUpdate, setEditingId, unlinkFault, unlinkingId, isUpdating }: any) {
     const {
         attributes,
         listeners,
@@ -80,7 +81,13 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                     </td>
                     <td className="px-4 py-3 text-right bg-white">
                         <div className="flex justify-end gap-2">
-                            <button onClick={() => handleUpdate(pf)} className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200"><HiOutlineCheck size={14} /></button>
+                            <button
+                                onClick={() => handleUpdate(pf)}
+                                disabled={isUpdating}
+                                className="bg-green-100 text-green-700 p-1.5 rounded hover:bg-green-200 disabled:opacity-50"
+                            >
+                                {isUpdating ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineCheck size={14} />}
+                            </button>
                             <button onClick={() => setEditingId(null)} className="bg-slate-100 text-slate-600 p-1.5 rounded hover:bg-slate-200"><HiOutlineXMark size={14} /></button>
                         </div>
                     </td>
@@ -113,10 +120,15 @@ function SortableRow({ pf, editingId, editSeq, editCode, editName, setEditSeq, s
                             </button>
                             <button
                                 onClick={() => unlinkFault(pf.id)}
-                                className="text-slate-300 hover:text-red-600 p-1"
+                                disabled={unlinkingId === pf.id}
+                                className="text-slate-300 hover:text-red-600 p-1 disabled:opacity-50"
                                 title="Unlink"
                             >
-                                <HiOutlineTrash size={16} />
+                                {unlinkingId === pf.id ? (
+                                    <HiOutlineArrowPath className="animate-spin" size={16} />
+                                ) : (
+                                    <HiOutlineTrash size={16} />
+                                )}
                             </button>
                         </div>
                     </td>
@@ -135,6 +147,8 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
     const [linkedFaults, setLinkedFaults] = useState<FullProductFault[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [unlinkingId, setUnlinkingId] = useState<string | null>(null);
 
     // Filter Global Faults for "Link Existing" (exclude already linked)
     const linkedFaultIds = new Set(linkedFaults.map(pf => pf.faultId));
@@ -204,12 +218,14 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
         const fid = formData.get('faultId') as string;
         if (!fid) return;
 
+        setIsUpdating(true);
         await linkFaultToProduct(selectedProductId, fid);
         // Refresh
         const updated = await getProductFaults(selectedProductId);
         setLinkedFaults(updated);
         setMode('view');
         setLinkFaultId('');
+        setIsUpdating(false);
     }
 
     async function handleCreateAndLink(formData: FormData) {
@@ -245,6 +261,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
     }
 
     async function handleUpdate(pf: FullProductFault) {
+        setIsUpdating(true);
         // 1. Update Sequence (ProductFault)
         await updateProductFault(pf.id, { viewSeq: Number(editSeq) || 0 });
 
@@ -260,6 +277,7 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
             const updated = await getProductFaults(selectedProductId);
             setLinkedFaults(updated);
         }
+        setIsUpdating(false);
     }
 
     return (
@@ -401,10 +419,16 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
                                                         setEditName={setEditName}
                                                         setEditingId={setEditingId}
                                                         handleUpdate={handleUpdate}
+                                                        isUpdating={isUpdating}
+                                                        unlinkingId={unlinkingId}
                                                         unlinkFault={(id: string) => {
                                                             if (confirm('Unlink this fault from machine?')) {
+                                                                setUnlinkingId(id);
                                                                 unlinkFaultFromProduct(id).then(() => {
-                                                                    getProductFaults(selectedProductId!).then(setLinkedFaults);
+                                                                    getProductFaults(selectedProductId!).then((data) => {
+                                                                        setLinkedFaults(data);
+                                                                        setUnlinkingId(null);
+                                                                    });
                                                                 });
                                                             }
                                                         }}

@@ -50,7 +50,7 @@ export default function TNIDashboardClient({
 
     if (view === 'create') {
         return (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300">
+            <div className="bg-white rounded-xl shadow-air-md border border-slate-100 overflow-hidden transition-all duration-300">
                 <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
                     <div className="flex items-center gap-2">
                         <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
@@ -166,7 +166,7 @@ export default function TNIDashboardClient({
     }
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-air border border-slate-100 overflow-hidden">
             <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
                 <div className="flex items-center gap-3">
                     <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
@@ -202,7 +202,7 @@ export default function TNIDashboardClient({
                         </div>
                     ) : (
                         sortedNominations.map((nom: any) => (
-                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm flex flex-col gap-3">
+                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-air flex flex-col gap-3">
                                 <div>
                                     <h3 className="font-bold text-slate-900 leading-snug">
                                         {nom.program?.name || 'Unknown Program'}

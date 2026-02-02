@@ -14,7 +14,6 @@ import {
     HiOutlineTrash
 } from 'react-icons/hi2';
 import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
-import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 interface Props {
     session: any;
@@ -139,17 +138,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             <h3 className="font-bold text-slate-900 text-lg">Waitlist (Topic Approved)</h3>
                             <p className="text-sm text-slate-500">Employees whose managers approved the need for {session.programName}.</p>
                         </div>
-                        <FormSubmitButton
+                        <button
                             onClick={handleAddToBatch}
                             disabled={selectedNominations.size === 0 || isAdding || isLocked}
-                            isLoading={isAdding}
-                            loadingText="Adding..."
                             title={isLocked ? "Batch is locked" : "Add selected"}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm active:scale-95"
                         >
-                            <HiOutlineUserPlus className="w-4 h-4" />
-                            Add Selected ({selectedNominations.size})
-                        </FormSubmitButton>
+                            {isAdding ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineUserPlus className="w-4 h-4" />}
+                            {isAdding ? 'Adding...' : `Add Selected (${selectedNominations.size})`}
+                        </button>
                     </div>
 
                     <div className="max-h-[300px] overflow-y-auto">
@@ -170,15 +167,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {pendingNominations.map((nom) => {
-                                        const isApprovedTopic = nom.status === 'Approved';
+                                        const isApprovedForSession = nom.managerApprovalStatus === 'Approved';
                                         return (
-                                            <tr key={nom.id} className={`transition-colors ${isApprovedTopic ? 'hover:bg-slate-50' : 'bg-slate-50 opacity-60'}`}>
+                                            <tr key={nom.id} className={`transition-colors ${isApprovedForSession ? 'hover:bg-slate-50' : 'bg-slate-50 opacity-60'}`}>
                                                 <td className="p-4 text-center">
                                                     <button
                                                         onClick={() => toggleSelection(nom.id)}
-                                                        disabled={isLocked || !isApprovedTopic}
-                                                        title={!isApprovedTopic ? "TNI approval pending from manager" : isLocked ? "Batch is locked" : "Select for batch"}
-                                                        className={`transition-all ${isApprovedTopic ? 'text-slate-300 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}`}
+                                                        disabled={isLocked || !isApprovedForSession}
+                                                        title={!isApprovedForSession ? "Manager approval for session pending" : isLocked ? "Batch is locked" : "Select for batch"}
+                                                        className={`transition-all ${isApprovedForSession ? 'text-slate-300 hover:text-blue-600' : 'text-slate-200 cursor-not-allowed'}`}
                                                     >
                                                         {selectedNominations.has(nom.id) ?
                                                             <HiOutlineCheckCircle className="w-6 h-6 text-blue-600" /> :
@@ -191,10 +188,10 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                                     <div className="text-[10px] text-slate-500 font-mono tracking-tighter">{nom.employee.id}</div>
                                                 </td>
                                                 <td className="p-4">
-                                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${isApprovedTopic
+                                                    <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${isApprovedForSession
                                                         ? 'bg-green-50 text-green-700 border-green-100'
                                                         : 'bg-yellow-50 text-yellow-700 border-yellow-100'}`}>
-                                                        {nom.status}
+                                                        {nom.managerApprovalStatus}
                                                     </span>
                                                 </td>
                                                 <td className="p-4 text-slate-600 text-xs font-medium">{nom.employee.sectionName || '-'}</td>
@@ -266,10 +263,15 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                                 {!isLocked && (
                                                     <button
                                                         onClick={() => handleRemove(nom.id)}
-                                                        className="text-slate-300 hover:text-red-500 p-2 transition-colors"
+                                                        disabled={removingId === nom.id}
+                                                        className="text-slate-300 hover:text-red-500 p-2 transition-colors disabled:opacity-50"
                                                         title="Remove from batch"
                                                     >
-                                                        <HiOutlineTrash size={18} />
+                                                        {removingId === nom.id ? (
+                                                            <HiOutlineArrowPath className="animate-spin" size={18} />
+                                                        ) : (
+                                                            <HiOutlineTrash size={18} />
+                                                        )}
                                                     </button>
                                                 )}
                                             </td>

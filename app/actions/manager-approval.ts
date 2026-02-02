@@ -10,10 +10,10 @@ export async function submitManagerNominationDecision(nominationId: string, deci
             managerRejectionReason: reason || null,
         };
 
-        // If Rejected for a session, remove from batch but keep 'Approved' status 
-        // (Stage 1 remains approved, so they return to the Admin Waitlist)
+        // If Rejected for a session, remove from batch and reset to 'Pending'
+        // (This moves them out of the ready-to-batch waitlist for fresh review)
         if (decision === 'Rejected') {
-            updateData.status = 'Approved';
+            updateData.status = 'Pending';
             updateData.batchId = null;
         }
 

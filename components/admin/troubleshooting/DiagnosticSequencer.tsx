@@ -50,7 +50,8 @@ import {
     HiOutlineCheck,
     HiOutlineXMark,
     HiOutlineEye,
-    HiOutlineEyeSlash
+    HiOutlineEyeSlash,
+    HiOutlineArrowPath
 } from 'react-icons/hi2';
 
 type FullProductFault = ProductFault & { fault: FaultLibrary };
@@ -63,12 +64,14 @@ interface DiagnosticSequencerProps {
 }
 
 // Helper Component for Sortable Item
-function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
+function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, togglingId }: {
     step: FullFaultCause;
     index: number;
     onRemove: (id: string) => void;
     onToggle: (id: string, current: boolean) => void;
     onUpdate: () => void;
+    removingId: string | null;
+    togglingId: string | null;
 }) {
     const {
         attributes,
@@ -80,6 +83,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
     } = useSortable({ id: step.id });
 
     const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -90,6 +94,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
     };
 
     async function handleSave(formData: FormData) {
+        setIsSaving(true);
         // Shared fields
         const libraryData = {
             name: formData.get('name') as string,
@@ -110,6 +115,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
             setIsEditing(false);
             onUpdate();
         }
+        setIsSaving(false);
     }
 
     if (isEditing) {
@@ -140,7 +146,12 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                     </div>
                     <div className="flex justify-end gap-2 mt-2">
                         <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
-                        <FormSubmitButton className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">Save Changes</FormSubmitButton>
+                        <FormSubmitButton
+                            isLoading={isSaving}
+                            className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs hover:bg-blue-700"
+                        >
+                            Save Changes
+                        </FormSubmitButton>
                     </div>
                 </form>
             </div>
@@ -178,19 +189,21 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate }: {
                     </button>
                     <button
                         onClick={() => onToggle(step.id, step.isActive)}
-                        className={`p-1.5 rounded transition ${step.isActive ? 'text-slate-300 hover:text-slate-600' : 'text-slate-400 hover:text-green-600 bg-slate-100'}`}
+                        disabled={togglingId === step.id}
+                        className={`p-1.5 rounded transition disabled:opacity-50 ${step.isActive ? 'text-slate-300 hover:text-slate-600' : 'text-slate-400 hover:text-green-600 bg-slate-100'}`}
                         title={step.isActive ? "Disable Step (Temp)" : "Enable Step"}
                     >
-                        {step.isActive ? <HiOutlineEye size={14} /> : <HiOutlineEyeSlash size={14} />}
+                        {togglingId === step.id ? <HiOutlineArrowPath className="animate-spin" size={14} /> : (step.isActive ? <HiOutlineEye size={14} /> : <HiOutlineEyeSlash size={14} />)}
                     </button>
                     <button
                         onClick={() => {
                             if (confirm('Remove this step permanently?')) onRemove(step.id);
                         }}
-                        className="text-slate-300 hover:text-red-500 p-1.5"
+                        disabled={removingId === step.id}
+                        className="text-slate-300 hover:text-red-500 p-1.5 disabled:opacity-50"
                         title="Remove Step"
                     >
-                        <HiOutlineTrash size={14} />
+                        {removingId === step.id ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineTrash size={14} />}
                     </button>
                 </div>
 
@@ -221,6 +234,12 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
     const [sequence, setSequence] = useState<FullFaultCause[]>([]);
     const [loadingSequence, setLoadingSequence] = useState(false);
 
+    // Click Protection States
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [removingId, setRemovingId] = useState<string | null>(null);
+    const [unlinkingFaultId, setUnlinkingFaultId] = useState<string | null>(null);
+
     // DnD Sensors
     const sensors = useSensors(
         useSensor(PointerSensor),
@@ -237,6 +256,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
 
     // Update Fault
     async function handleUpdateFault(id: string) {
+        setIsUpdating(true);
         const result = await updateProductFault(id, { viewSeq: editFaultSeq });
         if (result?.error) {
             alert(result.error);
@@ -248,6 +268,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                 setLinkedFaults(updated);
             }
         }
+        setIsUpdating(false);
     }
 
     useEffect(() => {
@@ -310,14 +331,18 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
     }
 
     async function handleRemoveStep(id: string) {
+        setRemovingId(id);
         await removeCauseFromSequence(id);
         await refreshSequence();
+        setRemovingId(null);
     }
 
     async function handleToggleStep(id: string, current: boolean) {
+        setTogglingId(id);
         // Optimistic Update
         setSequence(prev => prev.map(s => s.id === id ? { ...s, isActive: !current } : s));
         await toggleFaultCauseStatus(id, !current); // Server action
+        setTogglingId(null);
         // No hard refresh needed if successful
     }
 
@@ -419,10 +444,11 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                     <div className="flex gap-1">
                                                         <button
                                                             onClick={() => handleUpdateFault(pf.id)}
-                                                            className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm"
+                                                            disabled={isUpdating}
+                                                            className="text-white bg-green-500 hover:bg-green-600 p-1 rounded shadow-sm disabled:opacity-50"
                                                             title="Save"
                                                         >
-                                                            <HiOutlineCheck size={14} />
+                                                            {isUpdating ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineCheck size={14} />}
                                                         </button>
                                                         <button
                                                             onClick={() => setEditingFaultId(null)}
@@ -458,15 +484,20 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     if (confirm('Unlink this fault?')) {
+                                                                        setUnlinkingFaultId(pf.id);
                                                                         unlinkFaultFromProduct(pf.id).then(() => {
-                                                                            getProductFaults(selectedProductId!).then(setLinkedFaults);
+                                                                            getProductFaults(selectedProductId!).then(data => {
+                                                                                setLinkedFaults(data);
+                                                                                setUnlinkingFaultId(null);
+                                                                            });
                                                                         })
                                                                     }
                                                                 }}
-                                                                className="text-slate-300 hover:text-red-500 p-1"
+                                                                disabled={unlinkingFaultId === pf.id}
+                                                                className="text-slate-300 hover:text-red-500 p-1 disabled:opacity-50"
                                                                 title="Unlink"
                                                             >
-                                                                <HiOutlineTrash size={14} />
+                                                                {unlinkingFaultId === pf.id ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineTrash size={14} />}
                                                             </button>
                                                         </div>
                                                     </div>
@@ -552,6 +583,8 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                     onRemove={handleRemoveStep}
                                                     onToggle={handleToggleStep}
                                                     onUpdate={refreshSequence}
+                                                    removingId={removingId}
+                                                    togglingId={togglingId}
                                                 />
                                             ))}
 

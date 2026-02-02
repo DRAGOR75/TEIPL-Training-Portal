@@ -206,13 +206,13 @@ export default function SessionsDashboard({
     };
 
     return (
-        <div className="min-h-screen bg-slate-100 flex flex-col font-sans text-slate-900">
+        <div className="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-900">
             {isLoading && <LoadingScreen />}
 
             <main className="flex-1 p-6 md:p-8 flex flex-col lg:flex-row gap-8">
                 {/* LEFT COLUMN */}
                 <div className="w-full lg:w-1/3 space-y-8">
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
+                    <div className="bg-white rounded-3xl shadow-air border border-slate-100 p-4 md:p-6">
                         <div className="flex items-center gap-2 mb-4">
                             <HiOutlineCalendar className="text-blue-700" size={20} />
                             <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
@@ -263,7 +263,7 @@ export default function SessionsDashboard({
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col items-center justify-center text-center space-y-4">
+                        <div className="bg-white rounded-2xl p-6 shadow-air border border-slate-100 flex flex-col items-center justify-center text-center space-y-4">
                             <div className="p-3 bg-blue-50 rounded-full text-blue-700">
                                 <HiOutlinePlusCircle size={32} />
                             </div>
@@ -280,7 +280,7 @@ export default function SessionsDashboard({
                         </div>
                     </div>
 
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+                    <div className="bg-white rounded-2xl shadow-air border border-slate-100 p-6">
                         <div className="flex items-center gap-2 mb-6 border-b border-slate-100 pb-4 justify-between flex-wrap">
                             <div className="flex items-center gap-2">
                                 <HiOutlineCalendarDays className="text-blue-700" size={20} />
@@ -302,7 +302,7 @@ export default function SessionsDashboard({
                                 {sessions.map((session) => (
                                     <div
                                         key={session.id}
-                                        className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-blue-300 hover:shadow-md transition-all group cursor-pointer flex flex-col md:flex-row gap-6 items-center"
+                                        className="bg-white border border-slate-100 rounded-2xl p-5 hover:border-blue-300 hover:shadow-air-md transition-all group cursor-pointer flex flex-col md:flex-row gap-6 items-center"
                                         onClick={() => router.push(`/admin/sessions/${session.id}/manage`)}
                                     >
                                         {/* LEFT SIDE: Main Info & Details */}

@@ -18,12 +18,21 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
     const [loading, setLoading] = useState(false);
     const formRef = useRef<HTMLFormElement>(null);
 
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
     async function handleAdd(formData: FormData) {
         setLoading(true);
         const result = await createSection(formData);
         setLoading(false);
         if (result?.error) alert(result.error);
         else formRef.current?.reset();
+    }
+
+    async function handleDelete(id: string) {
+        if (!confirm('Delete section?')) return;
+        setDeletingId(id);
+        await deleteSection(id);
+        setDeletingId(null);
     }
 
     return (
@@ -65,10 +74,15 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs text-slate-400 bg-slate-100 px-2 py-1 rounded-full">{sec._count?.programs || 0} Programs</span>
                                     <button
-                                        onClick={() => { if (confirm('Delete section?')) deleteSection(sec.id) }}
-                                        className="text-slate-300 hover:text-red-500 transition"
+                                        onClick={() => handleDelete(sec.id)}
+                                        disabled={deletingId === sec.id}
+                                        className="text-slate-300 hover:text-red-500 transition disabled:opacity-50"
                                     >
-                                        <HiOutlineTrash size={16} />
+                                        {deletingId === sec.id ? (
+                                            <HiOutlineArrowPath className="animate-spin" size={16} />
+                                        ) : (
+                                            <HiOutlineTrash size={16} />
+                                        )}
                                     </button>
                                 </div>
                             </div>

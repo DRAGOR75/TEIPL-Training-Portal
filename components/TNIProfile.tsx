@@ -106,7 +106,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
     if (isEditing) {
         return (
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 h-full">
+            <div className="bg-white rounded-xl shadow-air-md p-6 border border-slate-100 h-full">
                 <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
                     <div className="flex items-center gap-3">
                         <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
@@ -272,7 +272,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
 
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 h-full overflow-hidden hover:shadow-md transition-shadow duration-300 flex flex-col">
+        <div className="bg-white rounded-xl shadow-air border border-slate-100 h-full overflow-hidden hover:shadow-air-md transition-shadow duration-300 flex flex-col">
             <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
                 <div className="flex items-center gap-4">
                     <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">

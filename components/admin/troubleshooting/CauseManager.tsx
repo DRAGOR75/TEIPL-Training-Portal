@@ -3,13 +3,15 @@
 import { useState, useRef } from 'react';
 import { createCauseLibraryItem, deleteCauseLibraryItem, updateCauseLibraryItem } from '@/app/actions/admin-troubleshooting';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlinePlus, HiOutlineClipboardDocumentCheck } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlinePlus, HiOutlineClipboardDocumentCheck, HiOutlineArrowPath } from 'react-icons/hi2';
 import { CauseLibrary } from '@prisma/client';
 
 export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     async function handleAdd(formData: FormData) {
         const result = await createCauseLibraryItem(formData);
@@ -36,6 +38,15 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
         } else {
             setEditingId(null);
         }
+    }
+
+    async function handleDelete(id: string) {
+        const cause = causes.find(c => c.id === id);
+        if (!confirm(`Delete ${cause?.name}?`)) return;
+        setDeletingId(id);
+        const result = await deleteCauseLibraryItem(id);
+        if (result?.error) alert(result.error);
+        setDeletingId(null);
     }
 
     return (
@@ -153,11 +164,16 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
                                                 </button>
                                                 <button
-                                                    onClick={() => { if (confirm(`Delete ${c.name}?`)) deleteCauseLibraryItem(c.id) }}
-                                                    className="text-slate-300 hover:text-red-600 transition p-1"
+                                                    onClick={() => handleDelete(c.id)}
+                                                    disabled={deletingId === c.id}
+                                                    className="text-slate-300 hover:text-red-600 transition p-1 disabled:opacity-50"
                                                     title="Delete"
                                                 >
-                                                    <HiOutlineTrash size={16} />
+                                                    {deletingId === c.id ? (
+                                                        <HiOutlineArrowPath className="animate-spin" size={16} />
+                                                    ) : (
+                                                        <HiOutlineTrash size={16} />
+                                                    )}
                                                 </button>
                                             </div>
                                         </td>
