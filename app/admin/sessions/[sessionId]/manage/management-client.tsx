@@ -14,6 +14,7 @@ import {
     HiOutlineTrash
 } from 'react-icons/hi2';
 import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
+import SendInvitationButton from '@/components/admin/SendInvitationButton';
 
 interface Props {
     session: any;
@@ -141,7 +142,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                     <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
                         <div>
-                            <h3 className="font-bold text-slate-900 text-lg">Waitlist (Topic Approved)</h3>
+                            <h3 className="font-bold text-slate-900 text-lg">Waitlist (TNI)</h3>
                             <p className="text-sm text-slate-500">Employees whose managers approved the need for {session.programName}.</p>
                         </div>
                         <button
@@ -293,12 +294,19 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
                     {session.nominationBatch && (
-                        <ConfirmBatchButton
-                            sessionId={session.id}
-                            initialStatus={session.nominationBatch.status}
-                        />
+                        <>
+                            <SendInvitationButton
+                                sessionId={session.id}
+                                emailsSent={session.emailsSent}
+                                participantCount={session.nominationBatch.nominations.length}
+                            />
+                            <ConfirmBatchButton
+                                sessionId={session.id}
+                                initialStatus={session.nominationBatch.status}
+                            />
+                        </>
                     )}
                 </div>
 

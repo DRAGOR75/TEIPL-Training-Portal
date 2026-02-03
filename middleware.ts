@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
-import { auth } from "@/auth";
+import { authConfig } from "./auth.config";
 
-export default auth;
+export default NextAuth(authConfig).auth;
 
 export const config = {
     // Apply middleware to all routes EXCEPT static files (images, css) and api

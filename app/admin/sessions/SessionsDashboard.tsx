@@ -28,6 +28,7 @@ import { SessionWithDetails } from '@/types/sessions';
 import LoadingScreen from '@/app/loading';
 import TrainerManager from '@/components/admin/TrainerManager';
 import { useRouter } from 'next/navigation';
+import CreateSessionModal from '@/components/admin/CreateSessionModal';
 
 
 
@@ -42,12 +43,16 @@ type SessionsDashboardProps = {
     initialSessions: SessionWithDetails[];
     initialMetadata: any[];
     initialTrainers: Trainer[];
+    programs: any[];
+    locations: any[];
 };
 
 export default function SessionsDashboard({
     initialSessions,
     initialMetadata,
-    initialTrainers
+    initialTrainers,
+    programs,
+    locations
 }: SessionsDashboardProps) {
     const [date, setDate] = useState<any>(new Date());
     const [sessions, setSessions] = useState<SessionWithDetails[]>(initialSessions);
@@ -271,12 +276,7 @@ export default function SessionsDashboard({
                                 <h3 className="font-bold text-slate-900">New Training Session</h3>
                                 <p className="text-xs text-slate-500 mt-1">Configure dates and assign a trainer.</p>
                             </div>
-                            <Link
-                                href="/admin/sessions/new"
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition-colors shadow-sm"
-                            >
-                                Create Session
-                            </Link>
+                            <CreateSessionModal trainers={initialTrainers} programs={programs} locations={locations} />
                         </div>
                     </div>
 
