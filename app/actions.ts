@@ -311,6 +311,10 @@ export async function createTrainingSession(formData: FormData) {
     const endDateStr = formData.get('endDate') as string;
     const feedbackDateStr = formData.get('feedbackCreationDate') as string;
 
+    // New Time Fields
+    const startTime = formData.get('startTime') as string;
+    const endTime = formData.get('endTime') as string;
+
     if (!programName || !startDateStr || !endDateStr) {
         return { success: false, message: "Missing required fields" };
     }
@@ -339,6 +343,8 @@ export async function createTrainingSession(formData: FormData) {
                 trainerName,
                 startDate,
                 endDate,
+                startTime: startTime || "10:00 am",
+                endTime: endTime || "1:00 pm",
                 // Only set this if the user provided it, otherwise it can be null or handled by logic
                 feedbackCreationDate: feedbackDateStr ? new Date(feedbackDateStr) : null,
                 templateType: 'Technical',

@@ -132,6 +132,8 @@ model TrainingSession {
   trainerName               String?      @map("trainer_name")
   startDate                 DateTime     @map("start_date")
   endDate                   DateTime     @map("end_date")
+  startTime                 String?      @map("start_time") // e.g. "10:00 am"
+  endTime                   String?      @map("end_time")   // e.g. "5:00 pm"
   location                  String?
   topics                    String?      @db.Text
   feedbackCreationDate      DateTime?    @map("feedback_creation_date")

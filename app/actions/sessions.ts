@@ -2,9 +2,152 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
-import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail } from '@/lib/email';
+import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail, sendBatchInvitationEmail, generateBatchInvitationHtml } from '@/lib/email';
 import { SessionWithDetails } from '@/types/sessions';
 import { auth } from "@/auth";
+
+export async function getBatchInvitationPreview(sessionId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+        const trainingSession = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: {
+                nominationBatch: {
+                    include: {
+                        nominations: {
+                            where: { status: 'Batched' },
+                            include: { employee: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!trainingSession || !trainingSession.nominationBatch) {
+            return { success: false, error: "Session not found." };
+        }
+
+        const nominations = trainingSession.nominationBatch.nominations;
+
+        const toEmails = nominations.map(nom => nom.employee.email).filter(Boolean);
+        const managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(Boolean))] as string[];
+
+        // Generate Preview HTML
+        // Participants are needed for the table
+        const participants = nominations.map(nom => ({
+            empId: nom.employee.id,
+            name: nom.employee.name,
+            designation: nom.employee.designation
+        }));
+
+        const html = generateBatchInvitationHtml(
+            trainingSession.programName,
+            trainingSession.startDate,
+            trainingSession.endDate,
+            trainingSession.startTime || "8:30 am",
+            trainingSession.endTime || "6:00 pm",
+            trainingSession.location || "Training classroom, TRC",
+            trainingSession.trainerName || "Internal/External",
+            participants,
+            trainingSession.topics || undefined
+        );
+
+        return { success: true, to: toEmails, cc: managerEmails, html };
+    } catch (error) {
+        console.error("Preview Error:", error);
+        return { success: false, error: "Failed to load recipient preview." };
+    }
+}
+
+export async function sendBatchInvitation(sessionId: string, customTo?: string[], customCc?: string[], customHtml?: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+        const trainingSession = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: {
+                nominationBatch: {
+                    include: {
+                        nominations: {
+                            where: { status: 'Batched' }, // Only currently enrolled
+                            include: { employee: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        if (!trainingSession || !trainingSession.nominationBatch) {
+            return { success: false, error: "Session not found." };
+        }
+
+        const nominations = trainingSession.nominationBatch.nominations;
+        // Even if sending to custom list, we typically want the participant TABLE to be accurate to the batch.
+        // So we still gather participants from the DB.
+        if (nominations.length === 0) {
+            return { success: false, error: "No participants in this batch." };
+        }
+
+        // Collect Participant Details
+        const participants = nominations.map(nom => ({
+            empId: nom.employee.id,
+            name: nom.employee.name,
+            designation: nom.employee.designation
+        }));
+
+        // Determine Recipients
+        let toEmails: string[];
+        let managerEmails: string[];
+
+        if (customTo && customCc) {
+            // Use custom provided lists
+            toEmails = customTo;
+            managerEmails = customCc;
+        } else {
+            // Fallback to default logic
+            toEmails = nominations.map(nom => nom.employee.email);
+            managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(email => email !== null))] as string[];
+        }
+
+        // Send Email
+        const result = await sendBatchInvitationEmail(
+            toEmails,
+            managerEmails,
+            trainingSession.programName,
+            trainingSession.startDate,
+            trainingSession.endDate,
+            trainingSession.startTime || "10:00 am",
+            trainingSession.endTime || "1:00 pm",
+            trainingSession.location || "Training classroom, TRC",
+            trainingSession.trainerName || "Internal/External",
+            participants,
+            customHtml,
+            trainingSession.topics || undefined
+        );
+
+        if (result.success) {
+            await db.trainingSession.update({
+                where: { id: sessionId },
+                data: { emailsSent: true } // Mark as sent
+            });
+            revalidatePath(`/admin/sessions/${sessionId}/manage`);
+            return { success: true };
+        } else {
+            return { success: false, error: result.error || "Failed to send email." };
+        }
+
+    } catch (error) {
+        console.error("Send Invitation Error:", error);
+        return { success: false, error: "System error while sending invitation." };
+    }
+}
 
 export async function lockSessionBatch(sessionId: string) {
     const session = await auth();
@@ -96,6 +239,8 @@ export async function createSession(formData: FormData) {
                 trainerName,
                 startDate,
                 endDate,
+                startTime: formData.get('startTime') as string || "10:00 am",
+                endTime: formData.get('endTime') as string || "1:00 pm",
                 location: formData.get('location') as string,
                 topics: formData.get('topics') as string,
                 nominationBatchId: batch.id

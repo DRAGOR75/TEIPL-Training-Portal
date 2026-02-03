@@ -1,4 +1,5 @@
 import { getCalendarMetadata, getSessionsForDate } from '@/app/actions';
+import { db } from '@/lib/prisma';
 import { getServerLocalDateString } from '@/lib/date-utils';
 import { getTrainers } from '@/app/actions/trainers';
 import DashboardClient from './DashboardClient';
@@ -18,10 +19,12 @@ export default async function AdminDashboardPage() {
 
     const today = new Date();
 
-    const [calendarMetadata, todayData, trainersData] = await Promise.all([
+    const [calendarMetadata, todayData, trainersData, programs, locations] = await Promise.all([
         getCalendarMetadata(),
         getSessionsForDate(getServerLocalDateString()),
-        getTrainers()
+        getTrainers(),
+        db.program.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } }),
+        db.location.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
     ]);
 
     return (
@@ -29,6 +32,8 @@ export default async function AdminDashboardPage() {
             initialMetadata={calendarMetadata}
             initialSessions={todayData.sessions}
             initialTrainers={trainersData}
+            programs={programs}
+            locations={locations}
             initialPendingReviews={todayData.pendingCount}
             currentPage={1}
             totalPages={1}

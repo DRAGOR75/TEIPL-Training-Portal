@@ -14,6 +14,7 @@ import {
     HiOutlineTrash
 } from 'react-icons/hi2';
 import ConfirmBatchButton from '@/components/admin/ConfirmBatchButton';
+import SendInvitationButton from '@/components/admin/SendInvitationButton';
 
 interface Props {
     session: any;
@@ -293,12 +294,19 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     </div>
                 </div>
 
-                <div className="flex justify-end">
+                <div className="flex justify-end gap-3">
                     {session.nominationBatch && (
-                        <ConfirmBatchButton
-                            sessionId={session.id}
-                            initialStatus={session.nominationBatch.status}
-                        />
+                        <>
+                            <SendInvitationButton
+                                sessionId={session.id}
+                                emailsSent={session.emailsSent}
+                                participantCount={session.nominationBatch.nominations.length}
+                            />
+                            <ConfirmBatchButton
+                                sessionId={session.id}
+                                initialStatus={session.nominationBatch.status}
+                            />
+                        </>
                     )}
                 </div>
 

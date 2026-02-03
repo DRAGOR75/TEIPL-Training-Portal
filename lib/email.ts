@@ -44,7 +44,7 @@ const getBaseUrl = () => {
 /**
  * CORE SENDER FUNCTION
  */
-export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
+export async function sendEmail({ to, subject, html, cc, bcc }: { to: string, subject: string, html: string, cc?: string, bcc?: string }) {
   try {
     const gmail = getGmailClient();
     const userEmail = clean(process.env.EMAIL_USER);
@@ -53,15 +53,20 @@ export async function sendEmail({ to, subject, html }: { to: string, subject: st
     // Headers must be ASCII. Use RFC 2047 encoding for the subject if it contains non-ASCII characters.
     const encodedSubject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
 
+    // Prepare options for header construction
+    const options = { cc, bcc };
+
     const str = [
       `From: "Training Thriveni" <${userEmail}>`,
       `To: ${to}`,
+      options?.cc ? `Cc: ${options.cc}` : '',
+      options?.bcc ? `Bcc: ${options.bcc}` : '',
       `Subject: ${encodedSubject}`,
       `Content-Type: text/html; charset=utf-8`,
       `MIME-Version: 1.0`,
       ``,
       html
-    ].join('\n');
+    ].filter(Boolean).join('\n');
 
     // Encode the string to Base64URL format (Safe for URL)
     const encodedMessage = Buffer.from(str)
@@ -421,9 +426,129 @@ export async function sendManagerSessionApprovalEmail(
       <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
 
+
   return await sendEmail({
     to: managerEmail,
     subject: `Approval Required: Training Session for ${employeeName}`,
+    html
+  });
+}
+/**
+ * EMAIL FOR BATCH INVITATION (Participants + Managers)
+ */
+/**
+ * EMAIL FOR BATCH INVITATION (Participants + Managers)
+ */
+export function generateBatchInvitationHtml(
+  programName: string,
+  startDate: Date,
+  endDate: Date,
+  startTime: string = "10:00 am",
+  endTime: string = "1:00 pm",
+  venue: string = "Training classroom, TRC",
+  trainerName: string = "Internal/External",
+  participants: { empId: string; name: string; designation: string | null }[],
+  topics?: string
+) {
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+
+  const dateStr = `${dateFormatter.format(startDate)} to ${dateFormatter.format(endDate)}`;
+
+  const rows = participants.map(p => `
+    <tr>
+      <td style="border: 1px solid #ddd; padding: 8px;">${p.empId}</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">${p.name}</td>
+      <td style="border: 1px solid #ddd; padding: 8px;">${p.designation || '-'}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto;">
+      <p>Dear All,</p>
+      
+      <p>Greetings of the day.</p>
+      
+      <p>We are delighted to invite the following participants to the "<strong>${programName}</strong>" scheduled from <strong>${dateStr}</strong>.</p>
+      
+      <p>This training is designed to boost productivity, enhance collaboration, and improve skills for both individuals and businesses.</p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 20px 0;">
+        <h3 style="margin-top: 0; color: #0056b3;">Program Details:</h3>
+        <p><strong>Training Name:</strong> ${programName}</p>
+        <p><strong>Date:</strong> ${dateStr}</p>
+        <p><strong>Time:</strong> ${startTime} to ${endTime}</p>
+        <p><strong>Venue:</strong> ${venue}</p>
+        <p><strong>Trainer:</strong> ${trainerName}</p>
+        ${topics ? `<p><strong>Topics to be Covered:</strong><br/><span style="white-space: pre-line;">${topics}</span></p>` : ''}
+        
+        <p style="margin-top: 15px; font-style: italic;"><strong>Note:</strong> All participants are requested to bring their own laptops for the training. Participants may also use their personal laptops.</p>
+      </div>
+
+      <p>All participants are requested to reply to this email confirming their attendance. In case of any queries, please feel free to contact us.</p>
+
+      <h3 style="color: #444; margin-top: 30px;">Confirmed Participants</h3>
+      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
+        <thead>
+          <tr style="background-color: #0056b3; color: white;">
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Emp Id</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Name</th>
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Designation</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+      
+      <hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;" />
+      <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
+    </div>
+  `;
+}
+
+export async function sendBatchInvitationEmail(
+  toEmails: string[],
+  ccEmails: string[],
+  programName: string,
+  startDate: Date,
+  endDate: Date,
+  startTime: string = "10:00 am",
+  endTime: string = "1:00 pm",
+  venue: string = "Training classroom, TRC",
+  trainerName: string = "Internal/External",
+  participants: { empId: string; name: string; designation: string | null }[],
+  customHtml?: string,
+  topics?: string
+) {
+
+  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants, topics);
+
+  // Filter out any invalid emails
+  const validTo = toEmails.filter(e => e && e.includes('@'));
+  const validCc = ccEmails.filter(e => e && e.includes('@'));
+
+  if (validTo.length === 0) return { success: false, error: "No valid participants found." };
+
+  const toStr = validTo.join(', ');
+  const ccStr = validCc.join(', ');
+
+  const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+  const dateStr = `${dateFormatter.format(startDate)} to ${dateFormatter.format(endDate)}`;
+
+  return await sendEmail({
+    to: toStr,
+    cc: ccStr,
+    subject: `Invitation: ${programName} from ${dateStr}`,
     html
   });
 }

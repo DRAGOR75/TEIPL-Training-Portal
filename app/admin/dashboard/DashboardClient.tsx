@@ -59,6 +59,8 @@ type DashboardClientProps = {
     initialPendingReviews: number;
     currentPage: number;
     totalPages: number;
+    programs: any[];
+    locations: any[];
 };
 
 export default function DashboardClient({
@@ -66,6 +68,8 @@ export default function DashboardClient({
     initialSessions,
     initialTrainers,
     initialPendingReviews,
+    programs,
+    locations
 }: DashboardClientProps) {
     const [date, setDate] = useState<any>(new Date());
     const [optimisticToggles, setOptimisticToggles] = useState<Record<string, boolean>>({});
@@ -281,7 +285,7 @@ export default function DashboardClient({
                                 <h3 className="font-bold text-slate-900">New Training Session</h3>
                                 <p className="text-xs text-slate-500 mt-1">Configure dates and assign a trainer.</p>
                             </div>
-                            <CreateSessionModal trainers={trainers} />
+                            <CreateSessionModal trainers={trainers} programs={programs} locations={locations} />
                         </div>
                     </div>
 
