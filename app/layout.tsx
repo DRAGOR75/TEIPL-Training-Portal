@@ -38,6 +38,7 @@ export default async function RootLayout({
                 {/* Updated: Pass session to Navbar */}
                 <Navbar session={session} />
                 {children}
+                <SpeedInsights />
             </body>
         </html>
     );
