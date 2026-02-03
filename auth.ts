@@ -2,8 +2,10 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { db } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { authConfig } from "./auth.config";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+    ...authConfig,
     providers: [
         Credentials({
             name: "Credentials",
@@ -37,25 +39,4 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             },
         }),
     ],
-    pages: {
-        signIn: "/login", // Custom login page
-    },
-    callbacks: {
-        // This function runs on every request to check permissions
-        authorized({ auth, request: { nextUrl } }) {
-
-            if (process.env.NODE_ENV === 'development') {
-                return true;
-            }
-
-            const isLoggedIn = !!auth?.user;
-            const isAdminRoute = nextUrl.pathname.startsWith('/admin');
-
-            if (isAdminRoute) {
-                if (isLoggedIn) return true;
-                return false; // Redirect unauthenticated users to login
-            }
-            return true; // Allow access to other pages (like /join)
-        },
-    },
 });
