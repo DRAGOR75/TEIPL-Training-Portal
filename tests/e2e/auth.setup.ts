@@ -16,6 +16,12 @@ setup('authenticate as admin', async ({ page }) => {
     await page.locator('input[name="password"]').fill('thriveni2025');
     await page.getByRole('button', { name: /sign in/i }).click();
 
+    // Check for explicit error to fail fast
+    const errorMsg = page.locator('text=Invalid email or password');
+    if (await errorMsg.isVisible()) {
+        throw new Error("Login failed with 'Invalid email or password'");
+    }
+
     // specific to your app's success state
     await page.waitForURL('/admin', { timeout: 30000 });
 

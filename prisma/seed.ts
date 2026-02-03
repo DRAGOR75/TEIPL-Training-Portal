@@ -1,7 +1,7 @@
 import { PrismaClient, TrainingCategory, Grade } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+import { db as prisma } from '../lib/prisma';
 
 const PROGRAM_DATA = [
     // --- FOUNDATIONAL ---
