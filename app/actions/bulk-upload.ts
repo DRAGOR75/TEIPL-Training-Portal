@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { Grade } from '@prisma/client';
+import { Grade, Gender } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 
 // Simple interface for parsed data - in reality we might validate deeper
@@ -12,6 +12,7 @@ interface EmployeeImportRow {
     grade?: string;
     sectionName?: string;
     location?: string;
+    gender?: string;
     manager_name?: string; // These might be empty in CSV, causing issues if not handled
     manager_email?: string;
     program_name?: string;
@@ -55,6 +56,15 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     gradeEnum = normalizedGrade as Grade;
                 }
 
+                // Validate Gender
+                let genderEnum: Gender | null = null;
+                if (row.gender && row.gender.trim()) {
+                    const normalizedGender = row.gender.trim().toUpperCase();
+                    if (Object.values(Gender).includes(normalizedGender as Gender)) {
+                        genderEnum = normalizedGender as Gender;
+                    }
+                }
+
                 await db.employee.upsert({
                     where: { id: row.id.toString() },
                     update: {
@@ -63,6 +73,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         grade: gradeEnum,
                         sectionName: row.sectionName || null,
                         location: row.location || null,
+                        gender: genderEnum,
                         managerName: row.manager_name || null,
                         managerEmail: row.manager_email || null,
                         programName: row.program_name || null,
@@ -76,6 +87,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         grade: gradeEnum,
                         sectionName: row.sectionName || null,
                         location: row.location || null,
+                        gender: genderEnum,
                         managerName: row.manager_name || null,
                         managerEmail: row.manager_email || null,
                         programName: row.program_name || null,

@@ -15,6 +15,7 @@ interface SearchableSelectProps {
     placeholder?: string;
     disabled?: boolean;
     className?: string;
+    name?: string;
     searchPlaceholder?: string;
     noResultsText?: string;
     icon?: React.ReactNode;
@@ -28,6 +29,7 @@ export default function SearchableSelect({
     placeholder = 'Select option...',
     disabled = false,
     className = '',
+    name,
     searchPlaceholder = 'Search...',
     noResultsText = 'No results found.',
     icon,
@@ -77,13 +79,14 @@ export default function SearchableSelect({
 
     return (
         <div className={`relative ${className}`} ref={containerRef}>
+            {name && <input type="hidden" name={name} value={String(value || '')} />}
             {/* Main Control (Trigger or Input) */}
             <div
                 className={`
-                    w-full rounded-xl border-2 shadow-sm bg-slate-50 font-bold text-slate-900 
+                    w-full rounded-xl border shadow-sm bg-white font-medium text-slate-900 
                     transition-all flex items-center justify-between cursor-pointer
                     ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-thriveni-blue/30 focus-within:ring-2 focus-within:ring-thriveni-blue/20 focus-within:border-thriveni-blue'}
-                    ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white' : 'border-slate-300'}
+                    ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white shadow-md' : 'border-slate-200'}
                 `}
                 onClick={() => {
                     if (!disabled && !isOpen) {
@@ -131,37 +134,39 @@ export default function SearchableSelect({
             </div>
 
             {/* Dropdown Menu */}
-            {isOpen && (
-                <div className={`
+            {
+                isOpen && (
+                    <div className={`
                     absolute z-50 w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-100
                     ${direction === 'up' ? 'bottom-full mb-2' : ''}
                     ${direction === 'down' ? 'top-full mt-2' : ''}
                     ${direction === 'responsive-bottom' ? 'bottom-full mb-2 md:bottom-auto md:top-full md:mt-2 md:mb-0' : ''}
                 `}>
-                    <div className="max-h-60 overflow-y-auto">
-                        {filteredOptions.length > 0 ? (
-                            <div className="p-1">
-                                {filteredOptions.map((option) => (
-                                    <div
-                                        key={option.value}
-                                        className={`
+                        <div className="max-h-60 overflow-y-auto">
+                            {filteredOptions.length > 0 ? (
+                                <div className="p-1">
+                                    {filteredOptions.map((option) => (
+                                        <div
+                                            key={option.value}
+                                            className={`
                                             px-4 py-3 rounded-lg text-sm cursor-pointer transition-colors break-words leading-relaxed border-b border-transparent hover:border-slate-100 last:border-0
                                             ${String(option.value) === String(value) ? 'bg-thriveni-blue/5 text-thriveni-blue font-bold' : 'text-slate-700 hover:bg-slate-50'}
                                         `}
-                                        onClick={() => handleSelect(option.value)}
-                                    >
-                                        {option.label}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="p-8 text-center text-slate-500 text-sm">
-                                {noResultsText}
-                            </div>
-                        )}
+                                            onClick={() => handleSelect(option.value)}
+                                        >
+                                            {option.label}
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="p-8 text-center text-slate-500 text-sm">
+                                    {noResultsText}
+                                </div>
+                            )}
+                        </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

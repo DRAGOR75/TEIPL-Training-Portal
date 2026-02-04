@@ -19,6 +19,7 @@ model Employee {
   designation       String?
   yearsOfExperience String?       @map("years_of_experience")
   subDepartment     String?       @map("sub_department")
+  gender            Gender?
   managerName       String?       @map("manager_name")
   managerEmail      String?       @map("manager_email")
   programName       String?       @map("program_name")
@@ -34,6 +35,12 @@ model Employee {
 enum Grade {
   EXECUTIVE
   WORKMAN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 // 2. Section Table (The 20+ Departments)

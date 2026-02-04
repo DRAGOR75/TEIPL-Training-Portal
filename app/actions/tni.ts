@@ -2,7 +2,7 @@
 // Force recompile
 
 import { db } from '@/lib/prisma';
-import { Grade } from '@prisma/client';
+import { Grade, Gender } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
 
@@ -50,6 +50,7 @@ export async function updateEmployeeProfile(empId: string, data: {
     grade: unknown;
     sectionName: string;
     location: string;
+    gender?: string;
     mobile?: string;
     designation?: string;
     yearsOfExperience?: string;
@@ -69,6 +70,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 })(),
                 sectionName: data.sectionName,
                 location: data.location,
+                gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
                 mobile: data.mobile,
                 designation: data.designation,
                 yearsOfExperience: data.yearsOfExperience,
@@ -83,6 +85,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 grade: data.grade as any,
                 sectionName: data.sectionName,
                 location: data.location,
+                gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
                 mobile: data.mobile,
                 designation: data.designation,
                 yearsOfExperience: data.yearsOfExperience,

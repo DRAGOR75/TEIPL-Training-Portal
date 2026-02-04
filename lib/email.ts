@@ -106,7 +106,7 @@ export async function sendApprovalEmail(
   const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Nomination Approval Request</h2>
       <p>Dear <strong>${managerName}</strong>,</p>
       <p>A training nomination has been submitted for <strong>${employeeName}</strong>.</p>
@@ -135,7 +135,7 @@ export async function sendFeedbackRequestEmail(
   const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #2e7d32;">Post training (30 days) performance feedback</h2>
       <p>Dear <strong>${employeeName}</strong>,</p>
       <p>Thank you for participating in the <strong>${programName}</strong> program.</p>
@@ -168,7 +168,7 @@ export async function sendTrainerReminderEmail(
   const baseUrl = getBaseUrl();
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #d32f2f;">Reminder: Post-Training Feedback Deadline</h2>
       
       <p>This is a reminder to please proceed for the Post Training Feedback for <strong>${programName}</strong> conducted on <strong>${startDateStr}</strong> to <strong>${endDateStr}</strong>.</p>
@@ -204,7 +204,7 @@ export async function sendFeedbackAcknowledgmentEmail(
   }
 ) {
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Feedback Received</h2>
       <p>Dear <strong>${name}</strong>,</p>
       <p>Thank you for submitting your feedback for the training program <strong>${programName}</strong>.</p>
@@ -275,7 +275,7 @@ export async function sendManagerRejectionNotification(
   const subject = `Urgent: Manager Disagreed with Feedback - ${employeeName}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #d32f2f; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #d32f2f; border-radius: 8px;">
       <h2 style="color: #d32f2f;">Manager Disagreement Alert</h2>
       <p>The manager <strong>${managerName}</strong> has reviewed the post-training feedback for <strong>${employeeName}</strong> for (${programName}) and disagrees with the comments.</p>
       
@@ -314,7 +314,7 @@ export async function sendFeedbackReviewRequestEmail(
   const managerLink = `${baseUrl}/feedback/manager/${enrollmentId}?token=${token}`;
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Post training (30 days) performance feedback</h2>
       <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
       <p>The employee <strong>${employeeName}</strong> has submitted their post-training (30 days) performance feedback for the program <strong>${programName}</strong>.</p>
@@ -349,7 +349,7 @@ export async function sendTNIApprovalEmail(
   const programsList = programs.map(p => `<li style="margin-bottom: 5px;">${p}</li>`).join('');
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Action Required: TNI Nomination Approval</h2>
       <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
       <p><strong>${employeeName}</strong> has submitted nominations for the following training programs:</p>
@@ -403,7 +403,7 @@ export async function sendManagerSessionApprovalEmail(
   const endDateStr = dateFormatter.format(endDate);
 
   const html = `
-    <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <h2 style="color: #0056b3;">Training Nomination Approval Required</h2>
       <p>Dear <strong>${managerName || 'Manager'}</strong>,</p>
       <p>Your team member <strong>${employeeName}</strong> has been selected for the following training session:</p>
@@ -447,8 +447,7 @@ export function generateBatchInvitationHtml(
   endTime: string = "1:00 pm",
   venue: string = "Training classroom, TRC",
   trainerName: string = "Internal/External",
-  participants: { empId: string; name: string; designation: string | null }[],
-  topics?: string
+  participants: { empId: string; name: string; designation: string | null }[]
 ) {
   const dateFormatter = new Intl.DateTimeFormat('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -468,28 +467,25 @@ export function generateBatchInvitationHtml(
   `).join('');
 
   return `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto;">
+    <div style="font-family: Georgia, serif; line-height: 1.6; color: #000000ff; padding: 20px;">
       <p>Dear All,</p>
       
       <p>Greetings of the day.</p>
       
       <p>We are delighted to invite the following participants to the "<strong>${programName}</strong>" scheduled from <strong>${dateStr}</strong>.</p>
       
-      <p>This training is designed to boost productivity, enhance collaboration, and improve skills for both individuals and businesses.</p>
+      
       
       <div style="background-color: #f9f9f9; padding: 15px; border-left: 4px solid #0056b3; margin: 20px 0;">
         <h3 style="margin-top: 0; color: #0056b3;">Program Details:</h3>
         <p><strong>Training Name:</strong> ${programName}</p>
         <p><strong>Date:</strong> ${dateStr}</p>
         <p><strong>Time:</strong> ${startTime} to ${endTime}</p>
-        <p><strong>Venue:</strong> ${venue}</p>
-        <p><strong>Trainer:</strong> ${trainerName}</p>
-        ${topics ? `<p><strong>Topics to be Covered:</strong><br/><span style="white-space: pre-line;">${topics}</span></p>` : ''}
+        <p><strong>Location:</strong> ${venue}</p>
+        <p><strong>Trainer Name:</strong> ${trainerName}</p>
         
-        <p style="margin-top: 15px; font-style: italic;"><strong>Note:</strong> All participants are requested to bring their own laptops for the training. Participants may also use their personal laptops.</p>
+      
       </div>
-
-      <p>All participants are requested to reply to this email confirming their attendance. In case of any queries, please feel free to contact us.</p>
 
       <h3 style="color: #444; margin-top: 30px;">Confirmed Participants</h3>
       <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
@@ -523,10 +519,9 @@ export async function sendBatchInvitationEmail(
   trainerName: string = "Internal/External",
   participants: { empId: string; name: string; designation: string | null }[],
   customHtml?: string,
-  topics?: string
+  customSubject?: string
 ) {
-
-  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants, topics);
+  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants);
 
   // Filter out any invalid emails
   const validTo = toEmails.filter(e => e && e.includes('@'));
@@ -545,10 +540,12 @@ export async function sendBatchInvitationEmail(
   });
   const dateStr = `${dateFormatter.format(startDate)} to ${dateFormatter.format(endDate)}`;
 
+  const subject = customSubject || `Invitation: ${programName} from ${dateStr}`;
+
   return await sendEmail({
     to: toStr,
     cc: ccStr,
-    subject: `Invitation: ${programName} from ${dateStr}`,
+    subject: subject,
     html
   });
 }

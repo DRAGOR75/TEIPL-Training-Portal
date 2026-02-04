@@ -28,6 +28,7 @@ type Employee = {
     designation: string | null;
     yearsOfExperience: string | null;
     subDepartment: string | null;
+    gender: string | null;
     managerName: string | null;
     managerEmail: string | null;
 };
@@ -62,6 +63,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         grade: employee.grade || '',
         sectionName: employee.sectionName || '',
         location: employee.location || '',
+        gender: employee.gender || '',
         mobile: employee.mobile || '',
         designation: employee.designation || '',
         yearsOfExperience: employee.yearsOfExperience || '',
@@ -87,6 +89,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             grade: formData.grade as any,
             sectionName: formData.sectionName,
             location: formData.location,
+            gender: formData.gender,
             mobile: formData.mobile,
             designation: formData.designation,
             yearsOfExperience: formData.yearsOfExperience,
@@ -119,13 +122,13 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Employee ID</label>
-                        <div className="w-full p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-500 font-mono text-sm">{employee.id}</div>
+                        <div className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-sm">{employee.id}</div>
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Full Name</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             placeholder="Your Full Name"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -135,10 +138,24 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Mobile Number</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             placeholder="+91..."
                             value={formData.mobile}
                             onChange={e => setFormData({ ...formData, mobile: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1.5">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Gender</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'Male', value: 'MALE' },
+                                { label: 'Female', value: 'FEMALE' },
+                                { label: 'Other', value: 'OTHER' }
+                            ]}
+                            value={formData.gender}
+                            onChange={(val) => setFormData({ ...formData, gender: val })}
+                            placeholder="Select Gender"
                         />
                     </div>
 
@@ -161,7 +178,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <input
                             type="text"
                             inputMode="numeric"
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             placeholder="e.g. 5"
                             value={formData.yearsOfExperience}
                             onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value.replace(/[^0-9]/g, '') })}
@@ -170,36 +187,32 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Grade / Level</label>
-                        <select
-                            className={`w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all font-medium ${formData.grade ? 'text-slate-900' : 'text-slate-500'}`}
+                        <SearchableSelect
+                            options={[
+                                { label: 'EXECUTIVE', value: 'EXECUTIVE' },
+                                { label: 'WORKMAN', value: 'WORKMAN' }
+                            ]}
                             value={formData.grade}
-                            onChange={e => setFormData({ ...formData, grade: e.target.value })}
-                        >
-                            <option value="">Select Grade</option>
-                            <option value="EXECUTIVE">EXECUTIVE</option>
-                            <option value="WORKMAN">WORKMAN</option>
-                        </select>
+                            onChange={(val) => setFormData({ ...formData, grade: val })}
+                            placeholder="Select Grade"
+                        />
                     </div>
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Department</label>
-                        <select
-                            className={`w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all font-medium ${formData.sectionName ? 'text-slate-900' : 'text-slate-500'}`}
+                        <SearchableSelect
+                            options={sections.map(sec => ({ label: sec.name, value: sec.name }))}
                             value={formData.sectionName}
-                            onChange={e => setFormData({ ...formData, sectionName: e.target.value })}
-                        >
-                            <option value="">Select Section</option>
-                            {sections.map(sec => (
-                                <option key={sec.id} value={sec.name}>{sec.name}</option>
-                            ))}
-                        </select>
+                            onChange={(val) => setFormData({ ...formData, sectionName: val })}
+                            placeholder="Select Section"
+                        />
                     </div>
 
                     {/* 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Sub-Department</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             placeholder="e.g. Maintenance"
                             value={formData.subDepartment}
                             onChange={e => setFormData({ ...formData, subDepartment: e.target.value })}
@@ -210,7 +223,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Email</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             placeholder="Your Email"
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -234,7 +247,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Name</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             value={formData.managerName}
                             placeholder="Your Manager Name"
                             onChange={e => setFormData({ ...formData, managerName: e.target.value })}
@@ -243,7 +256,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Email</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
                             value={formData.managerEmail}
                             placeholder="Your Manager Email"
                             onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
@@ -344,6 +357,18 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <div className="text-sm font-semibold text-slate-900">{formData.location || 'Not Set'}</div>
                     </div>
                 </div>
+
+                {formData.gender && (
+                    <div className="flex items-start gap-3 group">
+                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><HiOutlineUser size={18} /></div>
+                        <div>
+                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Gender</label>
+                            <div className="text-sm font-semibold text-slate-900">
+                                {formData.gender ? formData.gender.charAt(0) + formData.gender.slice(1).toLowerCase() : 'Not Set'}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {formData.mobile && (
                     <div className="flex items-start gap-3 group">
