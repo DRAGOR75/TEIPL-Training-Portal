@@ -301,6 +301,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 sessionId={session.id}
                                 emailsSent={session.emailsSent}
                                 participantCount={session.nominationBatch.nominations.length}
+                                isLocked={isLocked}
                             />
                             <ConfirmBatchButton
                                 sessionId={session.id}

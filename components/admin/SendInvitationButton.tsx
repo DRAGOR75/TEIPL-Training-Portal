@@ -9,9 +9,10 @@ interface SendInvitationButtonProps {
     sessionId: string;
     emailsSent: boolean;
     participantCount: number;
+    isLocked: boolean;
 }
 
-export default function SendInvitationButton({ sessionId, emailsSent, participantCount }: SendInvitationButtonProps) {
+export default function SendInvitationButton({ sessionId, emailsSent, participantCount, isLocked }: SendInvitationButtonProps) {
     const [showModal, setShowModal] = useState(false);
     const [hasSent, setHasSent] = useState(emailsSent);
     const router = useRouter();
@@ -36,8 +37,9 @@ export default function SendInvitationButton({ sessionId, emailsSent, participan
         <>
             <button
                 onClick={() => setShowModal(true)}
-                disabled={participantCount === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-md border border-slate-700 font-bold text-sm transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none"
+                disabled={participantCount === 0 || !isLocked}
+                title={!isLocked ? "Batch must be confirmed/locked before sending invites" : participantCount === 0 ? "No participants in batch" : "Send Invites"}
+                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-md border border-slate-700 font-bold text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
                 <HiOutlinePaperAirplane size={16} className="-rotate-45" />
                 <span>Send Invites</span>

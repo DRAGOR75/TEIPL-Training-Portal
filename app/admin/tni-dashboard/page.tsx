@@ -2,6 +2,7 @@ import { db } from '@/lib/prisma';
 import SectionManager from '@/components/admin/SectionManager';
 import ProgramManager from '@/components/admin/ProgramManager';
 import EmployeeManager from '@/components/admin/EmployeeManager';
+import LocationManager from '@/components/admin/LocationManager';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default async function MasterDataPage() {
     }
 
     // Parallel Fetching for Performance
-    const [sections, programs, employees] = await Promise.all([
+    const [sections, programs, employees, locations] = await Promise.all([
         // 1. Fetch Sections
         db.section.findMany({
             orderBy: { name: 'asc' },
@@ -44,6 +45,10 @@ export default async function MasterDataPage() {
                 grade: true,
                 sectionName: true
             }
+        }),
+        // 4. Fetch Locations
+        db.location.findMany({
+            orderBy: { name: 'asc' }
         })
     ]);
 
@@ -67,6 +72,9 @@ export default async function MasterDataPage() {
 
                 {/* 3. EMPLOYEES */}
                 <EmployeeManager employees={employees as any} />
+
+                {/* 4. LOCATIONS */}
+                <LocationManager locations={locations} />
 
             </div>
         </main>

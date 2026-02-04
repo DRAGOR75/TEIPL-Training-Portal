@@ -41,27 +41,27 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     <div className="flex justify-between items-center h-16 md:h-20">
                         {/* Left Side: Logos */}
                         <div className="flex items-center gap-2">
-                            <Link href="/" className="flex items-center gap-2 md:gap-3">
-                                <div className="flex flex-col md:flex-row items-center justify-center -space-y-1 md:space-y-0 md:gap-4">
-                                    {/* Thriveni Logo */}
-                                    <div className="relative w-20 h-6 md:w-32 md:h-16">
-                                        <img
-                                            src="/thriveny_logo.svg"
-                                            alt="Thriveni Logo"
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
-                                    <div className="h-4 md:h-8 w-[1px] bg-slate-300 hidden md:block"></div>
-                                    {/* Lloyds Logo */}
-                                    <div className="relative w-20 h-6 md:w-34 md:h-10">
-                                        <img
-                                            src="/LLoyds_logo.svg"
-                                            alt="Lloyds Metals Logo"
-                                            className="w-full h-full object-contain"
-                                        />
-                                    </div>
+
+                            <div className="flex flex-col md:flex-row items-center justify-center -space-y-1 md:space-y-0 md:gap-4">
+                                {/* Thriveni Logo */}
+                                <div className="relative w-20 h-6 md:w-32 md:h-16">
+                                    <img
+                                        src="/thriveny_logo.svg"
+                                        alt="Thriveni Logo"
+                                        className="w-full h-full object-contain"
+                                    />
                                 </div>
-                            </Link>
+                                <div className="h-4 md:h-8 w-[1px] bg-slate-300 hidden md:block"></div>
+                                {/* Lloyds Logo */}
+                                <div className="relative w-20 h-6 md:w-34 md:h-10">
+                                    <img
+                                        src="/LLoyds_logo.svg"
+                                        alt="Lloyds Metals Logo"
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
+                            </div>
+
                         </div>
 
                         {/* Centered Title */}

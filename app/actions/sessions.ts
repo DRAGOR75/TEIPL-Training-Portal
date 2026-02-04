@@ -52,18 +52,55 @@ export async function getBatchInvitationPreview(sessionId: string) {
             trainingSession.endTime || "6:00 pm",
             trainingSession.location || "Training classroom, TRC",
             trainingSession.trainerName || "Internal/External",
-            participants,
-            trainingSession.topics || undefined
+            participants
         );
 
-        return { success: true, to: toEmails, cc: managerEmails, html };
+        const sessionData = {
+            programName: trainingSession.programName,
+            startDate: trainingSession.startDate,
+            endDate: trainingSession.endDate,
+            startTime: trainingSession.startTime || "8:30 am",
+            endTime: trainingSession.endTime || "6:00 pm",
+            location: trainingSession.location || "Training classroom, TRC",
+            trainerName: trainingSession.trainerName || "Internal/External",
+            participants
+        };
+
+        return { success: true, to: toEmails, cc: managerEmails, html, sessionData };
     } catch (error) {
         console.error("Preview Error:", error);
         return { success: false, error: "Failed to load recipient preview." };
     }
 }
 
-export async function sendBatchInvitation(sessionId: string, customTo?: string[], customCc?: string[], customHtml?: string) {
+export async function generateBatchInvitationPreview(
+    programName: string,
+    startDate: Date,
+    endDate: Date,
+    startTime: string,
+    endTime: string,
+    location: string,
+    trainerName: string,
+    participants: any[]
+) {
+    try {
+        const html = generateBatchInvitationHtml(
+            programName,
+            startDate,
+            endDate,
+            startTime,
+            endTime,
+            location,
+            trainerName,
+            participants
+        );
+        return { success: true, html };
+    } catch (error) {
+        return { success: false, error: "Failed to generate preview." };
+    }
+}
+
+export async function sendBatchInvitation(sessionId: string, customTo?: string[], customCc?: string[], customHtml?: string, customSubject?: string) {
     const session = await auth();
     if (!session?.user?.email) {
         return { success: false, error: "Unauthorized" };
@@ -129,7 +166,7 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
             trainingSession.trainerName || "Internal/External",
             participants,
             customHtml,
-            trainingSession.topics || undefined
+            customSubject
         );
 
         if (result.success) {

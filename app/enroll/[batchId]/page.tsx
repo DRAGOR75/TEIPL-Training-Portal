@@ -401,7 +401,7 @@ export default function JoinPage() {
                                 Verifying...
                             </>
                         ) : (
-                            'Confirm Attendance'
+                            'Join Batch'
                         )}
                     </button>
                 </form>

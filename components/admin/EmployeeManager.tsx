@@ -15,6 +15,7 @@ import {
     HiOutlineArrowPath
 } from 'react-icons/hi2';
 import Papa from 'papaparse';
+import SearchableSelect from '@/components/ui/SearchableSelect';
 
 interface Employee {
     id: string; // emp_id
@@ -33,6 +34,8 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [selectedGrade, setSelectedGrade] = useState('EXECUTIVE');
+    const [selectedGender, setSelectedGender] = useState('');
 
     // --- MANUAL ADD ---
     async function handleAdd(formData: FormData) {
@@ -40,7 +43,11 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
         const result = await createEmployee(formData);
         setLoading(false);
         if (result?.error) alert(result.error);
-        else formRef.current?.reset();
+        else {
+            formRef.current?.reset();
+            setSelectedGrade('EXECUTIVE');
+            setSelectedGender('');
+        }
     }
 
     async function handleDelete(id: string) {
@@ -152,14 +159,34 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                             <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
                                 <div className="grid grid-cols-2 gap-3">
                                     <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                    <select name="grade" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500 bg-white">
-                                        <option value="EXECUTIVE">Executive</option>
-                                        <option value="WORKMAN">Workman</option>
-                                    </select>
+                                    <SearchableSelect
+                                        name="grade"
+                                        options={[
+                                            { label: 'Executive', value: 'EXECUTIVE' },
+                                            { label: 'Workman', value: 'WORKMAN' }
+                                        ]}
+                                        value={selectedGrade}
+                                        onChange={setSelectedGrade}
+                                        className="w-full"
+                                    />
                                 </div>
                                 <input name="name" required placeholder="Full Name *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
                                 <input name="email" required type="email" placeholder="Email Address *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                <div className="grid grid-cols-2 gap-3">
+                                    <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                    <SearchableSelect
+                                        name="gender"
+                                        options={[
+                                            { label: 'Male', value: 'MALE' },
+                                            { label: 'Female', value: 'FEMALE' },
+                                            { label: 'Other', value: 'OTHER' }
+                                        ]}
+                                        value={selectedGender}
+                                        onChange={setSelectedGender}
+                                        placeholder="Select Gender"
+                                        className="w-full"
+                                    />
+                                </div>
 
                                 <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
                                     Add Employee
@@ -196,7 +223,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                         <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
                                         <p className="text-sm text-slate-600 mb-4">
                                             Upload CSV with headers:<br />
-                                            <code className="text-xs bg-slate-200 px-1 rounded text-slate-700">id, name, email, grade, sectionName, location, manager_name, manager_email, program_name, start_date, end_date</code>
+                                            <code className="text-xs bg-slate-200 px-1 rounded text-slate-700">id, name, email, grade, sectionName, location, gender, manager_name, manager_email, program_name, start_date, end_date</code>
                                         </p>
                                         <input
                                             type="file"

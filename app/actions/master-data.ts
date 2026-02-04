@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
-import { Grade, TrainingCategory } from '@prisma/client';
+import { Grade, TrainingCategory, Gender } from '@prisma/client';
 
 // --- SECTIONS ---
 export async function createSection(formData: FormData) {
@@ -102,12 +102,17 @@ export async function createEmployee(formData: FormData) {
                 })(),
                 sectionName: formData.get('sectionName') as string,
                 location: formData.get('location') as string,
+                gender: (() => {
+                    const g = formData.get('gender') as string;
+                    if (!g) return null;
+                    return g.toUpperCase() as Gender;
+                })(),
                 managerName: formData.get('manager_name') as string,
                 managerEmail: formData.get('manager_email') as string,
             }
         });
         revalidatePath('/admin/tni-dashboard');
-        revalidateTag('employee-profile', 'max'); // Invalidate generic profile cache if needed
+        revalidateTag('employee-profile', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create employee (ID or Email might exist)' };
@@ -124,8 +129,32 @@ export async function deleteEmployee(id: string) {
     }
 }
 
-// --- FETCH HELPERS (For Searchable Selects) ---
-export const getSections = unstable_cache(
+// --- LOCATIONS ---
+export async function createLocation(formData: FormData) {
+    const name = formData.get('name') as string;
+    try {
+        await db.location.create({ data: { name } });
+        revalidatePath('/admin/tni-dashboard');
+        revalidateTag('locations', 'max');
+        return { success: true };
+    } catch (error) {
+        return { error: 'Failed to create location' };
+    }
+}
+
+export async function deleteLocation(id: string) {
+    try {
+        await db.location.delete({ where: { id } });
+        revalidatePath('/admin/tni-dashboard');
+        revalidateTag('locations', 'max');
+        return { success: true };
+    } catch (error) {
+        return { error: 'Failed to delete location' };
+    }
+}
+
+// --- FETCH HELPERS (Proper Server Actions) ---
+const getCachedSections = unstable_cache(
     async () => {
         try {
             const sections = await db.section.findMany({
@@ -141,7 +170,11 @@ export const getSections = unstable_cache(
     { revalidate: 86400, tags: ['sections'] }
 );
 
-export const getDesignations = unstable_cache(
+export async function getSections() {
+    return await getCachedSections();
+}
+
+const getCachedDesignations = unstable_cache(
     async () => {
         try {
             const designations = await db.designation.findMany({
@@ -157,15 +190,22 @@ export const getDesignations = unstable_cache(
     { revalidate: 86400, tags: ['designations'] }
 );
 
-export const getLocations = unstable_cache(
+export async function getDesignations() {
+    return await getCachedDesignations();
+}
+
+const getCachedLocations = unstable_cache(
     async () => {
         try {
+            console.log("Fetching locations from DB for cache...");
             const locations = await db.location.findMany({
                 select: { name: true },
                 orderBy: { name: 'asc' }
             });
+            console.log(`Found ${locations.length} locations`);
             return locations.map(l => ({ label: l.name, value: l.name }));
         } catch (error) {
+            console.error("Fetch Locations Error:", error);
             return [];
         }
     },
@@ -173,7 +213,11 @@ export const getLocations = unstable_cache(
     { revalidate: 86400, tags: ['locations'] }
 );
 
-export const getTrainerOptions = unstable_cache(
+export async function getLocations() {
+    return await getCachedLocations();
+}
+
+const getCachedTrainerOptions = unstable_cache(
     async () => {
         try {
             const trainers = await db.trainer.findMany({
@@ -188,3 +232,7 @@ export const getTrainerOptions = unstable_cache(
     ['trainers-options'],
     { revalidate: 86400, tags: ['trainers'] }
 );
+
+export async function getTrainerOptions() {
+    return await getCachedTrainerOptions();
+}
