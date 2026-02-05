@@ -175,6 +175,8 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
                 data: { emailsSent: true } // Mark as sent
             });
             revalidatePath(`/admin/sessions/${sessionId}/manage`);
+            revalidateTag('sessions-list', 'max');
+            revalidateTag('session-details', 'max');
             return { success: true };
         } else {
             return { success: false, error: result.error || "Failed to send email." };
@@ -510,7 +512,10 @@ export async function joinBatch(batchId: string, empId: string) {
             return { error: 'Invalid Batch ID.' };
         }
 
-
+        // SECURITY FIX: Only allow joining IF the batch is not completed
+        if (batch.status === 'Completed') {
+            return { error: 'This training session has already been completed. You cannot join now.' };
+        }
 
         // 4. Create Nomination
         const nomination = await db.nomination.create({
@@ -578,36 +583,48 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             return { error: 'Invalid Batch ID.' };
         }
 
+        // SECURITY FIX: Only allow joining IF the batch is not completed
+        if (batch.status === 'Completed') {
+            return { error: 'This training session has already been completed. You cannot join now.' };
+        }
+
+        // Validation for JIT registration
+        if (!formData.empId || formData.empId.length > 50) return { error: "Invalid Employee ID" };
+        if (!formData.name || formData.name.length > 100) return { error: "Invalid Name" };
+        if (!formData.email || formData.email.length > 100) return { error: "Invalid Email" };
+        if (!formData.mobile || formData.mobile.length > 20) return { error: "Invalid Mobile" };
+        if (!formData.managerEmail || formData.managerEmail.length > 100) return { error: "Invalid Manager Email" };
+
         // 2. Create Employee with ALL master fields
         // Use upsert just in case of race condition or if they were deactivated
         const employee = await db.employee.upsert({
             where: { id: formData.empId },
             update: {
-                name: formData.name,
-                email: formData.email,
-                sectionName: formData.sectionName,
-                designation: formData.designation,
-                mobile: formData.mobile,
+                name: formData.name.substring(0, 100),
+                email: formData.email.substring(0, 100),
+                sectionName: formData.sectionName?.substring(0, 100),
+                designation: formData.designation?.substring(0, 100),
+                mobile: formData.mobile.substring(0, 20),
                 grade: formData.grade,
-                location: formData.location,
-                yearsOfExperience: formData.yearsOfExperience,
-                subDepartment: formData.subDepartment,
-                managerName: formData.managerName,
-                managerEmail: formData.managerEmail
+                location: formData.location?.substring(0, 100),
+                yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
+                subDepartment: formData.subDepartment?.substring(0, 100),
+                managerName: formData.managerName?.substring(0, 100),
+                managerEmail: formData.managerEmail.substring(0, 100)
             },
             create: {
-                id: formData.empId,
-                name: formData.name,
-                email: formData.email,
-                sectionName: formData.sectionName,
-                designation: formData.designation,
-                mobile: formData.mobile,
+                id: formData.empId.substring(0, 50),
+                name: formData.name.substring(0, 100),
+                email: formData.email.substring(0, 100),
+                sectionName: formData.sectionName?.substring(0, 100),
+                designation: formData.designation?.substring(0, 100),
+                mobile: formData.mobile.substring(0, 20),
                 grade: formData.grade,
-                location: formData.location,
-                yearsOfExperience: formData.yearsOfExperience,
-                subDepartment: formData.subDepartment,
-                managerName: formData.managerName,
-                managerEmail: formData.managerEmail
+                location: formData.location?.substring(0, 100),
+                yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
+                subDepartment: formData.subDepartment?.substring(0, 100),
+                managerName: formData.managerName?.substring(0, 100),
+                managerEmail: formData.managerEmail.substring(0, 100)
             }
         });
 

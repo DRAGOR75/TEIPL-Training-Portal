@@ -3,7 +3,14 @@
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
-export async function submitManagerNominationDecision(nominationId: string, decision: 'Approved' | 'Rejected', reason?: string) {
+import { verifySecureToken } from '@/lib/security';
+
+export async function submitManagerNominationDecision(nominationId: string, decision: 'Approved' | 'Rejected', token: string, reason?: string) {
+    // 1. SECURITY CHECK (HMAC Verification)
+    if (!token || !verifySecureToken(token, nominationId)) {
+        return { error: "Unauthorized: Invalid or missing security token." };
+    }
+
     try {
         const nomination = await db.nomination.findUnique({
             where: { id: nominationId },

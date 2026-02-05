@@ -1,7 +1,4 @@
-
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { db as prisma } from '../lib/prisma';
 
 const designationData = [
     { name: "Board Director (Executive)", grade: "B2 - Executive" }, // Mapped from "B-Level B2 Executive"

@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { db as prisma } from '../lib/prisma';
 import Papa from 'papaparse';
-
-const prisma = new PrismaClient();
 
 // --- 1. Products Data ---
 const products = [

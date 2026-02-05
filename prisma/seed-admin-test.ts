@@ -1,4 +1,5 @@
 import { db as prisma } from '../lib/prisma';
+import bcrypt from 'bcryptjs';
 
 async function main() {
     console.log('🚀 Seeding admin user only...');
@@ -8,8 +9,8 @@ async function main() {
 
     await prisma.user.upsert({
         where: { email },
-        update: { password: hashedPassword },
-        create: { email, name: 'Admin', password: hashedPassword },
+        update: { password: hashedPassword, role: 'ADMIN' },
+        create: { email, name: 'Admin', password: hashedPassword, role: 'ADMIN' },
     });
 
     console.log('👤 Admin ensured: admin@thriveni.com');

@@ -30,10 +30,10 @@ export async function submitFeedback(data: FeedbackState) {
             data: {
                 rating: data.rating,
                 isHelpful: data.isHelpful,
-                comments: data.comments,
-                name: data.name,
-                mobile: data.mobile,
-                email: data.email,
+                comments: data.comments?.substring(0, 1000),
+                name: data.name.substring(0, 100),
+                mobile: data.mobile.substring(0, 20),
+                email: data.email?.substring(0, 100),
             },
         });
 

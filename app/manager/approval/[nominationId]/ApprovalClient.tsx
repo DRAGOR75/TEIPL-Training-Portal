@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { submitManagerNominationDecision } from '@/app/actions/manager-approval';
 import { HiOutlineCheck, HiOutlineXMark, HiOutlineArrowPath, HiOutlineExclamationCircle } from 'react-icons/hi2';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 interface Props {
     nomination: any; // Type this properly if possible, but any is fine for now
@@ -14,12 +14,14 @@ export default function ApprovalClient({ nomination }: Props) {
     const [rejectionReason, setRejectionReason] = useState('');
     const [showRejectForm, setShowRejectForm] = useState(false);
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const token = searchParams.get('token') || '';
 
     const handleApprove = async () => {
         if (!confirm("Are you sure you want to APPROVE this nomination?")) return;
         setStatus('APPROVING');
         try {
-            const res = await submitManagerNominationDecision(nomination.id, 'Approved');
+            const res = await submitManagerNominationDecision(nomination.id, 'Approved', token);
             if (res.success) {
                 setStatus('SUCCESS');
                 router.refresh();
@@ -36,7 +38,7 @@ export default function ApprovalClient({ nomination }: Props) {
         if (!rejectionReason.trim()) return;
         setStatus('REJECTING');
         try {
-            const res = await submitManagerNominationDecision(nomination.id, 'Rejected', rejectionReason);
+            const res = await submitManagerNominationDecision(nomination.id, 'Rejected', token, rejectionReason);
             if (res.success) {
                 setStatus('SUCCESS');
                 router.refresh();
