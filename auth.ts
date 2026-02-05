@@ -32,7 +32,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
                 if (passwordsMatch) {
                     // Return the user object (this creates the session)
-                    return { id: user.id, name: user.name, email: user.email };
+                    return { id: user.id, name: user.name, email: user.email, role: user.role };
                 }
 
                 return null;

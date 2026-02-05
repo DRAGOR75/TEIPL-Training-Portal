@@ -3,7 +3,7 @@ import Image from "next/image";
 export default function Loading() {
     return (
         <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/80 backdrop-blur-xl">
-            <div className="relative flex items-center justify-center w-80 h-40">
+            <div className="relative flex items-center justify-center w-100 h-40">
 
                 {/* Logo 1: Thriveni */}
                 <div className="absolute inset-0 flex items-center justify-center animate-blur-cycle-1">

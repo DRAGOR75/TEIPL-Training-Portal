@@ -54,7 +54,7 @@ model Section {
   @@map("sections")
 }
 
-// 3. Master Program Catalog (The 140+ Trainings)
+// 3. Master Program Catalog
 model Program {
   id             String            @id @default(uuid())
   name           String            @unique
@@ -97,9 +97,9 @@ model Nomination {
   updatedAt      DateTime @updatedAt @map("updated_at")
 
   // Relations
-  employee       Employee         @relation(fields: [empId], references: [id])
-  program        Program          @relation(fields: [programId], references: [id])
-  batch          NominationBatch? @relation(fields: [batchId], references: [id])
+  employee       Employee         @relation(fields: [empId], references: [id], onDelete: Cascade)
+  program        Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  batch          NominationBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
   // Manager Approval Workflow
   managerApprovalStatus String   @default("Pending") // Pending, Approved, Rejected
@@ -222,11 +222,18 @@ model Location {
   @@map("locations")
 }
 
+enum Role {
+  ADMIN
+  MANAGER
+  USER
+}
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   password  String
   name      String?
+  role      Role     @default(USER)
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("users")

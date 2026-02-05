@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 // Removed logging for performance
 
 const ADMIN_PATH = '/admin/troubleshooting';
@@ -9,6 +10,7 @@ const ADMIN_PATH = '/admin/troubleshooting';
 // --- 1. Product Management ---
 
 export async function createTroubleshootingProduct(formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         const name = formData.get('name') as string;
         const viewSeq = parseInt(formData.get('viewSeq') as string) || 99;
@@ -31,6 +33,7 @@ export async function createTroubleshootingProduct(formData: FormData) {
 }
 
 export async function deleteTroubleshootingProduct(id: number) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         // Validation: Verify existence (optional but good)
         // Manual Cascade: Delete related ProductFaults first
@@ -57,6 +60,7 @@ export async function deleteTroubleshootingProduct(id: number) {
 }
 
 export async function updateTroubleshootingProduct(id: number, data: { name: string; viewSeq: number }) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!data.name) return { error: 'Product Name is required' };
 
@@ -80,6 +84,7 @@ export async function updateTroubleshootingProduct(id: number, data: { name: str
 }
 
 export async function toggleProductStatus(id: number, currentStatus: number) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         const newStatus = currentStatus === 1 ? 0 : 1;
         await db.troubleshootingProduct.update({
@@ -97,6 +102,7 @@ export async function toggleProductStatus(id: number, currentStatus: number) {
 // --- 2. Fault Library Management ---
 
 export async function createFaultLibraryItem(formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         const name = formData.get('name') as string;
         const faultCode = formData.get('faultCode') as string || null;
@@ -116,6 +122,7 @@ export async function createFaultLibraryItem(formData: FormData) {
 }
 
 export async function deleteFaultLibraryItem(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.faultLibrary.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
@@ -129,6 +136,7 @@ export async function deleteFaultLibraryItem(id: string) {
 // --- 3. Cause Library Management ---
 
 export async function createCauseLibraryItem(formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         const name = formData.get('name') as string;
         const justification = formData.get('justification') as string || '';
@@ -151,6 +159,7 @@ export async function createCauseLibraryItem(formData: FormData) {
 }
 
 export async function deleteCauseLibraryItem(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.causeLibrary.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
@@ -162,6 +171,7 @@ export async function deleteCauseLibraryItem(id: string) {
 }
 
 export async function updateCauseLibraryItem(id: string, data: { name: string; justification?: string; action: string; symptoms: string; manualRef: string }) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!data.name) return { error: 'Check/Cause Name is required' };
 
@@ -188,6 +198,7 @@ export async function updateCauseLibraryItem(id: string, data: { name: string; j
 
 
 export async function updateFaultLibraryItem(id: string, data: { name: string; faultCode: string; viewSeq: number }) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!data.name) return { error: 'Fault Name is required' };
 
@@ -211,6 +222,7 @@ export async function updateFaultLibraryItem(id: string, data: { name: string; f
 // --- 4. Product <-> Fault Linking ---
 
 export async function linkFaultToProduct(productId: number, faultId: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.productFault.create({
             data: {
@@ -227,6 +239,7 @@ export async function linkFaultToProduct(productId: number, faultId: string) {
 }
 
 export async function unlinkFaultFromProduct(productFaultId: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.productFault.delete({ where: { id: productFaultId } });
         revalidatePath(ADMIN_PATH);
@@ -238,6 +251,7 @@ export async function unlinkFaultFromProduct(productFaultId: string) {
 }
 
 export async function updateProductFault(id: string, data: { viewSeq: number }) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.productFault.update({
             where: { id },
@@ -256,6 +270,7 @@ export async function updateProductFault(id: string, data: { viewSeq: number }) 
 // --- 5. Diagnostic Sequencing (Fault <-> Cause) ---
 
 export async function addCauseToSequence(productFaultId: string, causeId: string, seq: number) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.faultCause.create({
             data: {
@@ -273,6 +288,7 @@ export async function addCauseToSequence(productFaultId: string, causeId: string
 }
 
 export async function removeCauseFromSequence(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.faultCause.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
@@ -284,6 +300,7 @@ export async function removeCauseFromSequence(id: string) {
 }
 
 export async function updateFaultCauseItem(id: string, data: { justification?: string }) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.faultCause.update({
             where: { id },
@@ -298,6 +315,7 @@ export async function updateFaultCauseItem(id: string, data: { justification?: s
 }
 
 export async function toggleFaultCauseStatus(id: string, isActive: boolean) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.faultCause.update({
             where: { id },
@@ -312,6 +330,7 @@ export async function toggleFaultCauseStatus(id: string, isActive: boolean) {
 }
 
 export async function updateSequenceOrder(items: { id: string; seq: number }[]) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         // Run in transaction for safety
         await db.$transaction(
@@ -331,6 +350,7 @@ export async function updateSequenceOrder(items: { id: string; seq: number }[]) 
 }
 
 export async function reorderProductFaults(items: { id: string; viewSeq: number }[]) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.$transaction(
             items.map((item) =>
@@ -349,6 +369,7 @@ export async function reorderProductFaults(items: { id: string; viewSeq: number 
 }
 
 export async function reorderProducts(items: { id: number; viewSeq: number }[]) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.$transaction(
             items.map((item) =>
@@ -416,6 +437,7 @@ export type BulkUploadRow = {
 };
 
 export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         let count = 0;
         // Map to track the next sequence number for each ProductFault (Key: ProductFaultID, Value: NextSeq)

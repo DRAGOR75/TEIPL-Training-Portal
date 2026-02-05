@@ -24,90 +24,67 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
     let successCount = 0;
     let errors: string[] = [];
 
-    // Concurrency Control: Process the received batch in smaller chunks to avoid overwhelming the DB
-    const BATCH_SIZE = 50; // number of concurrent DB operations
-
-    for (let i = 0; i < rowData.length; i += BATCH_SIZE) {
-        const batch = rowData.slice(i, i + BATCH_SIZE);
-
-        const batchResults = await Promise.allSettled(batch.map(async (row, batchIndex) => {
-            const globalIndex = i + batchIndex;
-            try {
-                // Validate basic required fields
-                if (!row.id) {
-                    throw new Error(`Row ${globalIndex + 1}: Missing required fields (id)`);
-                }
-
-
-                // Helper to parse date strictly
-                const parseDate = (dateStr: string | undefined) => {
-                    if (!dateStr) return null;
-                    const d = new Date(dateStr);
-                    return isNaN(d.getTime()) ? null : d;
-                };
-
-                // Validate Grade
-                let gradeEnum: Grade | null = null;
-                if (row.grade && row.grade.trim()) {
-                    const normalizedGrade = row.grade.trim().toUpperCase();
-                    if (!Object.values(Grade).includes(normalizedGrade as Grade)) {
-                        throw new Error(`Row ${globalIndex + 1}: Invalid grade '${row.grade}'. Must be one of: ${Object.values(Grade).join(', ')}`);
-                    }
-                    gradeEnum = normalizedGrade as Grade;
-                }
-
-                // Validate Gender
-                let genderEnum: Gender | null = null;
-                if (row.gender && row.gender.trim()) {
-                    const normalizedGender = row.gender.trim().toUpperCase();
-                    if (Object.values(Gender).includes(normalizedGender as Gender)) {
-                        genderEnum = normalizedGender as Gender;
-                    }
-                }
-
-                await db.employee.upsert({
-                    where: { id: row.id.toString() },
-                    update: {
-                        name: row.name,
-                        email: row.email,
-                        grade: gradeEnum,
-                        sectionName: row.sectionName || null,
-                        location: row.location || null,
-                        gender: genderEnum,
-                        managerName: row.manager_name || null,
-                        managerEmail: row.manager_email || null,
-                        programName: row.program_name || null,
-                        startDate: parseDate(row.start_date),
-                        endDate: parseDate(row.end_date),
-                    },
-                    create: {
-                        id: row.id.toString(),
-                        name: row.name,
-                        email: row.email,
-                        grade: gradeEnum,
-                        sectionName: row.sectionName || null,
-                        location: row.location || null,
-                        gender: genderEnum,
-                        managerName: row.manager_name || null,
-                        managerEmail: row.manager_email || null,
-                        programName: row.program_name || null,
-                        startDate: parseDate(row.start_date),
-                        endDate: parseDate(row.end_date),
-                    }
-                });
-                return "success";
-            } catch (e: any) {
-                throw new Error(e.message || `Row ${globalIndex + 1}: Failed to import`);
+    // Concurrency Control: Serial processing prevents race conditions during upsert
+    for (const row of rowData) {
+        try {
+            // Validate basic required fields
+            if (!row.id) {
+                errors.push(`Row missing ID: Skipping`);
+                continue;
             }
-        }));
 
-        batchResults.forEach((result) => {
-            if (result.status === 'fulfilled') {
-                successCount++;
-            } else {
-                errors.push(result.reason.message);
+            // Helper to parse date strictly
+            const parseDate = (dateStr: string | undefined) => {
+                if (!dateStr) return null;
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? null : d;
+            };
+
+            // Validate Grade
+            let gradeEnum: Grade | null = null;
+            if (row.grade && row.grade.trim()) {
+                const normalizedGrade = row.grade.trim().toUpperCase() as Grade;
+                if (Object.values(Grade).includes(normalizedGrade)) {
+                    gradeEnum = normalizedGrade;
+                }
             }
-        });
+
+            // Validate Gender
+            let genderEnum: Gender | null = null;
+            if (row.gender && row.gender.trim()) {
+                const normalizedGender = row.gender.trim().toUpperCase() as Gender;
+                if (Object.values(Gender).includes(normalizedGender)) {
+                    genderEnum = normalizedGender;
+                }
+            }
+
+            // Sanitized Data Object
+            const employeeData = {
+                name: row.name ? row.name.toString().replace(/<[^>]*>?/gm, '').trim() : '',
+                email: row.email ? row.email.toString().replace(/<[^>]*>?/gm, '').trim() : '',
+                grade: gradeEnum,
+                sectionName: row.sectionName ? row.sectionName.toString().replace(/<[^>]*>?/gm, '').trim() : null,
+                location: row.location ? row.location.toString().replace(/<[^>]*>?/gm, '').trim() : null,
+                gender: genderEnum,
+                managerName: row.manager_name ? row.manager_name.toString().replace(/<[^>]*>?/gm, '').trim() : null,
+                managerEmail: row.manager_email ? row.manager_email.toString().replace(/<[^>]*>?/gm, '').trim() : null,
+                programName: row.program_name ? row.program_name.toString().replace(/<[^>]*>?/gm, '').trim() : null,
+                startDate: parseDate(row.start_date),
+                endDate: parseDate(row.end_date),
+            };
+
+            await db.employee.upsert({
+                where: { id: row.id.toString() },
+                update: employeeData,
+                create: {
+                    id: row.id.toString(),
+                    ...employeeData
+                }
+            });
+            successCount++;
+        } catch (e: any) {
+            errors.push(`ID ${row.id}: ${e.message}`);
+        }
     }
 
     revalidatePath('/admin/master-data');

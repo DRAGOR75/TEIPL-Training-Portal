@@ -103,7 +103,8 @@ export async function sendApprovalEmail(
   nominationId: string
 ) {
   const baseUrl = getBaseUrl();
-  const approvalLink = `${baseUrl}/nominations/manager/${nominationId}`;
+  const token = generateSecureToken(nominationId);
+  const approvalLink = `${baseUrl}/nominations/manager/${nominationId}?token=${token}`;
 
   const html = `
     <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
@@ -132,7 +133,8 @@ export async function sendFeedbackRequestEmail(
   enrollmentId: string
 ) {
   const baseUrl = getBaseUrl();
-  const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}`;
+  const token = generateSecureToken(enrollmentId);
+  const feedbackLink = `${baseUrl}/feedback/employee/${enrollmentId}?token=${token}`;
 
   const html = `
     <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">

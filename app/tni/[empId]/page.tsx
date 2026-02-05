@@ -127,6 +127,14 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                         </div>
                     </div>
 
+                    {/* P0 Mitigation: Privacy Warning Case T09 */}
+                    <div className="p-4 bg-amber-50 border-b border-amber-200">
+                        <p className="text-sm text-amber-800 flex items-start gap-3">
+                            <span className="flex-shrink-0 mt-0.5">⚠️</span>
+                            <span><strong>Privacy Note:</strong> This report view is currently shared across all users. Secure, personalized filtering is in progress. For now, please use the dropdown filter within the report to find your own records only.</span>
+                        </p>
+                    </div>
+
                     <div className="relative w-full aspect-[4/3] lg:aspect-[16/9] bg-slate-50">
                         <iframe
                             src="https://lookerstudio.google.com/embed/reporting/dbba1f2c-4ff6-4bda-b1ab-f7f96f0a9f90/page/zpm1D"
