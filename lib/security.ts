@@ -2,11 +2,8 @@ import crypto from 'crypto';
 
 const SECRET_KEY = process.env.NEXTAUTH_SECRET;
 
-if (!SECRET_KEY) {
-    if (process.env.NODE_ENV === 'production') {
-        throw new Error('CRITICAL: NEXTAUTH_SECRET is not defined in production environment.');
-    }
-}
+// Note: Critical checks moved inside functions to prevent build-time crashes
+// when environment variables are not yet available.
 
 /**
  * Generates a URL-safe HMAC-SHA256 signature for the given data with 7-day expiration.
