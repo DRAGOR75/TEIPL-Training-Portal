@@ -228,8 +228,8 @@ export async function submitTNINomination(formData: FormData) {
             console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
         }
 
-        revalidateTag('employee-profile', 'max');
-        revalidateTag('manager-approval', 'max');
+        revalidateTag('employee-profile');
+        revalidateTag('manager-approval');
     } catch (error) {
         console.error("Failed to submit nominations:", error);
         throw new Error("Failed to submit nominations");
