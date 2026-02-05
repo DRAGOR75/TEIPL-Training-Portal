@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 
-const SECRET_KEY = process.env.NEXTAUTH_SECRET;
+const SECRET_KEY = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
 
 // Note: Critical checks moved inside functions to prevent build-time crashes
 // when environment variables are not yet available.
@@ -12,7 +12,7 @@ const SECRET_KEY = process.env.NEXTAUTH_SECRET;
  */
 export function generateSecureToken(data: string): string {
     if (!SECRET_KEY) {
-        throw new Error('NEXTAUTH_SECRET is required for token generation.');
+        throw new Error('AUTH_SECRET or NEXTAUTH_SECRET is required for token generation.');
     }
     // Default expiration: 7 days
     const expiresAt = Date.now() + (7 * 24 * 60 * 60 * 1000);
