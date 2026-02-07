@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { HiOutlineClipboardDocumentList, HiOutlineWrench, HiOutlineArrowRight, HiOutlineCalendarDays, HiOutlineChatBubbleBottomCenterText } from 'react-icons/hi2';
+import { HiOutlineClipboardDocumentList, HiOutlineWrench, HiOutlineArrowRight, HiOutlineCalendarDays, HiOutlineChatBubbleBottomCenterText, HiOutlinePaperAirplane } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
 export default function Home() {
@@ -181,6 +181,34 @@ export default function Home() {
                 <div className="absolute inset-0 bg-grid-slate-200/50 [mask-image:linear-gradient(0deg,white,transparent)]" />
                 <div className="w-24 h-24 bg-blue-100 rounded-full blur-2xl opacity-60 absolute" />
                 <SiLooker className="text-blue-200 w-32 h-32 relative z-10 opacity-50 rotate-12" />
+              </div>
+
+            </div>
+          </Link>
+
+          {/* Card 6: Bulk Email (Compact Widget Mobile, Standard Desktop) - Purple Theme */}
+          <Link href="/admin/bulk-email" className="group col-span-1 relative">
+            <div className="h-full bg-purple-50/50 rounded-3xl md:rounded-[2.5rem] p-4 md:p-8 border border-purple-100 transition-all duration-500 hover:shadow-air-lg hover:shadow-purple-900/10 hover:-translate-y-1 hover:border-purple-200 flex flex-col justify-between relative z-10 min-h-[160px] md:min-h-[320px]">
+
+              <div className="space-y-3 md:space-y-6">
+                <div className="w-10 h-10 md:w-14 md:h-14 rounded-2xl bg-white text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm">
+                  <HiOutlinePaperAirplane className="w-5 h-5 md:w-7 md:h-7 -rotate-45" />
+                </div>
+                <div>
+                  <h2 className="text-lg md:text-2xl font-bold tracking-tight text-slate-900 mb-1 md:mb-2 group-hover:text-purple-700 transition-colors">
+                    Bulk Email
+                  </h2>
+                  <p className="hidden md:block text-slate-600 font-medium leading-relaxed text-sm line-clamp-3 md:line-clamp-none">
+                    Send credentials & notifications.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-auto pt-4 md:pt-6 border-t border-purple-100">
+                <span className="text-purple-700 font-bold text-xs md:text-sm uppercase">Communication</span>
+                <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-white flex items-center justify-center group-hover:rotate-45 transition-transform shadow-sm">
+                  <HiOutlineArrowRight className="w-3 h-3 md:w-4 md:h-4 text-purple-600" />
+                </div>
               </div>
 
             </div>
