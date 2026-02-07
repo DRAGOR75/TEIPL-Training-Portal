@@ -37,7 +37,6 @@ export async function getCalendarMetadata() {
 // 1.b SESSION DETAILS (Heavy - For Selected Date)
 export async function getSessionsForDate(dateStr: string) {
     try {
-        // 🟢 DATE FIX: input is "YYYY-MM-DD".
         // incorrectly parsing it could lead to timezone issues.
         // We act as if this date is IST Midnight.
         const startOfDay = new Date(dateStr + "T00:00:00.000+05:30");
@@ -97,7 +96,7 @@ export async function toggleFeedbackAutomation(sessionId: string, isEnabled: boo
 export async function getUpcomingSessions() {
     try {
         return await db.trainingSession.findMany({
-            where: { startDate: { gte: new Date() } }, // 🟢 Updated
+            where: { startDate: { gte: new Date() } },
             orderBy: { startDate: 'asc' },
         });
     } catch (error) {
