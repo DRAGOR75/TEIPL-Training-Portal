@@ -7,7 +7,8 @@ import {
     HiOutlineSquares2X2,
     HiOutlineUsers,
     HiOutlineWrench,
-    HiOutlineClipboardDocumentList
+    HiOutlineClipboardDocumentList,
+    HiOutlinePaperAirplane
 } from 'react-icons/hi2';
 
 export const dynamic = 'force-dynamic';
@@ -99,6 +100,25 @@ export default async function AdminHubPage() {
                             </p>
                             <div className="flex items-center text-emerald-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
                                 Manage Sessions <HiOutlineChevronRight size={16} />
+                            </div>
+                        </div>
+                    </Link>
+
+                    {/* Card 5: Bulk Email */}
+                    <Link href="/admin/bulk-email" className="group bg-white rounded-3xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-slate-200 hover:border-purple-500 block">
+                        <div className="p-6">
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="p-3 bg-purple-50 text-purple-600 rounded-lg group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                                    <HiOutlinePaperAirplane size={24} className="-rotate-45" />
+                                </div>
+                                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Communication</span>
+                            </div>
+                            <h2 className="text-xl font-bold text-slate-900 mb-2">Bulk Email</h2>
+                            <p className="text-slate-500 text-sm mb-6">
+                                Import CSV to send bulk credentials and notifications to users.
+                            </p>
+                            <div className="flex items-center text-purple-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                                Send Emails <HiOutlineChevronRight size={16} />
                             </div>
                         </div>
                     </Link>
