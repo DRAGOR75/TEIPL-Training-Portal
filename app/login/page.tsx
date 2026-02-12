@@ -21,20 +21,26 @@ export default function LoginPage() {
         const password = formData.get("password");
 
         try {
+            console.log("Attempting sign in for:", email);
             const result = await signIn("credentials", {
                 email,
                 password,
                 redirect: false,
             });
 
+            console.log("Sign in result:", result);
+
             if (result?.error) {
+                console.error("Sign in error:", result.error);
                 setError("Invalid email or password.");
                 setLoading(false);
             } else {
+                console.log("Sign in successful, redirecting to /admin");
                 // Force full reload to ensure session is picked up by Middleware/Server
                 window.location.href = "/admin";
             }
         } catch (err) {
+            console.error("Sign in exception:", err);
             setError("Something went wrong. Please try again.");
             setLoading(false);
         }
