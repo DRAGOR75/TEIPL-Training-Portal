@@ -11,15 +11,8 @@ export const authConfig = {
             const role = (auth?.user as any)?.role;
             const isAdminRoute = nextUrl.pathname.startsWith('/admin');
 
-            // Debug logging for production issues
-            if (isAdminRoute || nextUrl.pathname === '/login') {
-                console.log(`Middleware Check: Path=${nextUrl.pathname}, LoggedIn=${isLoggedIn}, Role=${role}`);
-            }
-
             if (isAdminRoute) {
                 if (isLoggedIn && role === 'ADMIN') return true;
-
-                console.log(`Access Denied to ${nextUrl.pathname}. Redirecting to /login. LoggedIn=${isLoggedIn}, Role=${role}`);
                 return Response.redirect(new URL('/login', nextUrl));
             }
             return true; // Allow access to other pages

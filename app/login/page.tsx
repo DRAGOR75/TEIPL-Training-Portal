@@ -21,26 +21,31 @@ export default function LoginPage() {
         const password = formData.get("password");
 
         try {
-            console.log("Attempting sign in for:", email);
             const result = await signIn("credentials", {
                 email,
                 password,
                 redirect: false,
             });
 
-            console.log("Sign in result:", result);
-
             if (result?.error) {
-                console.error("Sign in error:", result.error);
                 setError("Invalid email or password.");
                 setLoading(false);
             } else {
-                console.log("Sign in successful, redirecting to /admin");
-                // Force full reload to ensure session is picked up by Middleware/Server
-                window.location.href = "/admin";
+                // Determine redirect based on role
+                // Fetch the session to see user role
+                const response = await fetch("/api/auth/session");
+                const session = await response.json();
+
+                if (session?.user?.role === "ADMIN") {
+                    window.location.href = "/admin";
+                } else if (session?.user?.role === "MANAGER") {
+                    window.location.href = "/manager"; // Adjust if there is a specific manager dashboard working
+                } else {
+                    // Default for USER role or others
+                    window.location.href = "/";
+                }
             }
         } catch (err) {
-            console.error("Sign in exception:", err);
             setError("Something went wrong. Please try again.");
             setLoading(false);
         }
