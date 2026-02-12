@@ -369,3 +369,12 @@ model TroubleshootingEvent {
 
   @@map("troubleshooting_events")
 }
+
+// 8. Rate Limiting (Security)
+model RateLimit {
+  key       String   @id
+  count     Int      @default(0)
+  expiresAt DateTime @map("expires_at")
+  
+  @@map("rate_limits")
+}
