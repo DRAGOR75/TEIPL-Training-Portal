@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { updateNominationStatus } from '@/app/actions/tni';
 import { HiOutlineCheck, HiOutlineXMark, HiOutlineArrowPath } from 'react-icons/hi2';
+import { useSearchParams } from 'next/navigation';
 
 interface ManagerApprovalButtonsProps {
     nominationId: string;
@@ -11,6 +12,8 @@ interface ManagerApprovalButtonsProps {
 export default function ManagerApprovalButtons({ nominationId }: ManagerApprovalButtonsProps) {
     const [status, setStatus] = useState<'Pending' | 'Approved' | 'Rejected'>('Pending');
     const [isUpdating, setIsUpdating] = useState(false);
+    const searchParams = useSearchParams();
+    const token = searchParams.get('token') || '';
 
     const handleAction = async (newStatus: 'Approved' | 'Rejected') => {
         // Optimistic Update
@@ -19,7 +22,7 @@ export default function ManagerApprovalButtons({ nominationId }: ManagerApproval
         setIsUpdating(true);
 
         try {
-            const result = await updateNominationStatus(nominationId, newStatus);
+            const result = await updateNominationStatus(nominationId, newStatus, token);
             if (!result.success) {
                 throw new Error(result.error);
             }

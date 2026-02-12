@@ -3,10 +3,13 @@
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 import { Grade, TrainingCategory, Gender } from '@prisma/client';
+import { auth } from '@/auth';
+import { sanitizeInput } from '@/lib/security';
 
 // --- SECTIONS ---
 export async function createSection(formData: FormData) {
-    const name = formData.get('name') as string;
+    if (!await auth()) return { error: 'Unauthorized' };
+    const name = sanitizeInput(formData.get('name') as string);
     try {
         await db.section.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
@@ -18,6 +21,7 @@ export async function createSection(formData: FormData) {
 }
 
 export async function deleteSection(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.section.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
@@ -30,7 +34,8 @@ export async function deleteSection(id: string) {
 
 // --- PROGRAMS ---
 export async function createProgram(formData: FormData) {
-    const name = formData.get('name') as string;
+    if (!await auth()) return { error: 'Unauthorized' };
+    const name = sanitizeInput(formData.get('name') as string);
     const category = formData.get('category') as TrainingCategory;
     const grades = formData.getAll('targetGrades') as Grade[];
     const sectionIds = formData.getAll('sectionIds') as string[];
@@ -57,6 +62,7 @@ export async function createProgram(formData: FormData) {
 }
 
 export async function deleteProgram(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.program.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
@@ -69,6 +75,7 @@ export async function deleteProgram(id: string) {
 }
 
 export async function updateProgramSections(programId: string, sectionIds: string[]) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.program.update({
             where: { id: programId },
@@ -88,13 +95,14 @@ export async function updateProgramSections(programId: string, sectionIds: strin
 
 // --- EMPLOYEES (Single) ---
 export async function createEmployee(formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
     const empId = formData.get('id') as string;
     try {
         await db.employee.create({
             data: {
-                id: empId,
-                name: formData.get('name') as string,
-                email: formData.get('email') as string,
+                id: sanitizeInput(empId),
+                name: sanitizeInput(formData.get('name') as string),
+                email: sanitizeInput(formData.get('email') as string),
                 grade: (() => {
                     const g = formData.get('grade') as string;
                     if (!g) throw new Error("Grade is required");
@@ -107,8 +115,8 @@ export async function createEmployee(formData: FormData) {
                     if (!g) return null;
                     return g.toUpperCase() as Gender;
                 })(),
-                managerName: formData.get('manager_name') as string,
-                managerEmail: formData.get('manager_email') as string,
+                managerName: sanitizeInput(formData.get('manager_name') as string),
+                managerEmail: sanitizeInput(formData.get('manager_email') as string),
             }
         });
         revalidatePath('/admin/tni-dashboard');
@@ -120,6 +128,7 @@ export async function createEmployee(formData: FormData) {
 }
 
 export async function deleteEmployee(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.employee.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
@@ -131,7 +140,8 @@ export async function deleteEmployee(id: string) {
 
 // --- LOCATIONS ---
 export async function createLocation(formData: FormData) {
-    const name = formData.get('name') as string;
+    if (!await auth()) return { error: 'Unauthorized' };
+    const name = sanitizeInput(formData.get('name') as string);
     try {
         await db.location.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
@@ -143,6 +153,7 @@ export async function createLocation(formData: FormData) {
 }
 
 export async function deleteLocation(id: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.location.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');

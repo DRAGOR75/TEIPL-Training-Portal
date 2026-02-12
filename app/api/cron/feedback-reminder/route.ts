@@ -5,6 +5,10 @@ import { sendTrainerReminderEmail } from '@/lib/email';
 export const dynamic = 'force-dynamic'; // Ensure this route is never cached
 
 export async function GET(req: NextRequest) {
+    const authHeader = req.headers.get('authorization');
+    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+        return new Response('Unauthorized', { status: 401 });
+    }
 
     try {
         // 1. Find sessions where:

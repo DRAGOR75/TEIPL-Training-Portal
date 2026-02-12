@@ -4,12 +4,14 @@
 import { db } from '@/lib/prisma';
 import { Grade, Gender } from '@prisma/client';
 import { redirect } from 'next/navigation';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // Added cache imports
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { auth } from '@/auth';
+import { verifySecureToken } from '@/lib/security';
 
 export async function checkEmployeeAccess(formData: FormData) {
     const empId = formData.get('empId') as string;
-    if (!empId) {
-        throw new Error('Employee ID is required');
+    if (!empId || empId.length > 50) {
+        throw new Error('Valid Employee ID is required (max 50 chars)');
     }
     redirect(`/tni/${empId}`);
 }
@@ -62,36 +64,36 @@ export async function updateEmployeeProfile(empId: string, data: {
         const updated = await db.employee.upsert({
             where: { id: empId },
             update: {
-                name: data.name,
-                email: data.email,
+                name: data.name.substring(0, 100),
+                email: data.email.substring(0, 100),
                 grade: (() => {
                     if (!data.grade) throw new Error("Grade is required");
                     return data.grade as any;
                 })(),
-                sectionName: data.sectionName,
-                location: data.location,
+                sectionName: data.sectionName.substring(0, 100),
+                location: data.location.substring(0, 100),
                 gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
-                mobile: data.mobile,
-                designation: data.designation,
-                yearsOfExperience: data.yearsOfExperience,
-                subDepartment: data.subDepartment,
-                managerName: data.managerName,
-                managerEmail: data.managerEmail,
+                mobile: data.mobile?.substring(0, 15),
+                designation: data.designation?.substring(0, 100),
+                yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
+                subDepartment: data.subDepartment?.substring(0, 100),
+                managerName: data.managerName?.substring(0, 100),
+                managerEmail: data.managerEmail?.substring(0, 100),
             },
             create: {
-                id: empId, // Ensure ID is used for creation
-                name: data.name,
-                email: data.email,
+                id: empId.substring(0, 50),
+                name: data.name.substring(0, 100),
+                email: data.email.substring(0, 100),
                 grade: data.grade as any,
-                sectionName: data.sectionName,
-                location: data.location,
+                sectionName: data.sectionName.substring(0, 100),
+                location: data.location.substring(0, 100),
                 gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
-                mobile: data.mobile,
-                designation: data.designation,
-                yearsOfExperience: data.yearsOfExperience,
-                subDepartment: data.subDepartment,
-                managerName: data.managerName,
-                managerEmail: data.managerEmail,
+                mobile: data.mobile?.substring(0, 15),
+                designation: data.designation?.substring(0, 100),
+                yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
+                subDepartment: data.subDepartment?.substring(0, 100),
+                managerName: data.managerName?.substring(0, 100),
+                managerEmail: data.managerEmail?.substring(0, 100),
             }
         });
 
@@ -184,9 +186,11 @@ export async function submitTNINomination(formData: FormData) {
     const p4 = formData.get('programId_COMMON') as string;
     if (p4) programIds.push(p4);
 
-    if (!empId || programIds.length === 0) {
-        throw new Error("Employee ID and at least one Program are required");
+    if (!empId || empId.length > 50 || programIds.length === 0) {
+        throw new Error("Employee ID (max 50) and at least one Program are required");
     }
+
+    const safeJustification = justification?.substring(0, 1000);
 
     try {
         // OPTIMIZATION: Use createMany to insert all records in a SINGLE database transaction.
@@ -195,7 +199,7 @@ export async function submitTNINomination(formData: FormData) {
             data: programIds.map(programId => ({
                 empId,
                 programId,
-                justification,
+                justification: safeJustification,
                 status: 'Pending'
             }))
         });
@@ -221,7 +225,7 @@ export async function submitTNINomination(formData: FormData) {
                 employee.managerName || 'Manager',
                 employee.name,
                 programNames,
-                justification,
+                safeJustification || 'No justification provided',
                 empId
             );
         } else {
@@ -238,7 +242,30 @@ export async function submitTNINomination(formData: FormData) {
     redirect(`/tni/${empId}`);
 }
 
-export async function updateNominationStatus(nominationId: string, status: 'Approved' | 'Rejected') {
+export async function updateNominationStatus(nominationId: string, status: 'Approved' | 'Rejected', token?: string) {
+    const session = await auth();
+    const isAdmin = (session?.user as any)?.role === 'ADMIN';
+
+    // SECURITY CHECK: If NOT admin, must provide valid token matching nominationId or employee ID (context dependent)
+    // For TNI Manager Approval, the token is signed against the ID in the URL.
+    if (!isAdmin) {
+        if (!token) return { success: false, error: 'Unauthorized' };
+
+        // For TNI approval, the ID in the link is often the employee ID. 
+        // Let's find the nomination to see who it belongs to.
+        const nomination = await db.nomination.findUnique({
+            where: { id: nominationId },
+            select: { empId: true }
+        });
+
+        if (!nomination) return { error: 'Nomination not found' };
+
+        // Verify token against nomination ID OR employee ID (to support both link types if needed)
+        const isValid = verifySecureToken(token, nominationId) || verifySecureToken(token, nomination.empId);
+
+        if (!isValid) return { success: false, error: 'Invalid or expired security token.' };
+    }
+
     try {
         const updatedNomination = await db.nomination.update({
             where: { id: nominationId },
