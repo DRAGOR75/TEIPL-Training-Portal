@@ -18,10 +18,10 @@ export default function Home() {
       <div className="max-w-7xl w-full flex flex-col gap-24 relative z-10">
 
         {/* High-Impact Editorial Header */}
-        <div className="relative flex flex-col items-start pt-12 md:pt-20">
+        <div className="group relative flex flex-col items-start pt-12 md:pt-20">
 
           {/* Massive Background Logo Watermark */}
-          <div className="absolute -top-24 md:-top-40 -left-12 md:-left-24 w-[120%] md:w-[150%] opacity-[0.03] pointer-events-none select-none">
+          <div className="absolute top-8 md:-top-40 -left-12 md:-left-24 w-[180%] md:w-[150%] opacity-[0.03] pointer-events-none select-none transition-all duration-700 group-hover:opacity-[0.06] group-hover:-translate-y-4">
             <img
               src="/thriveny_logo.svg"
               alt=""
@@ -31,14 +31,14 @@ export default function Home() {
 
           <div className="relative z-10 flex flex-col items-start">
             <div className="flex items-center gap-6 mb-8">
-              <div className="w-1.5 h-16 md:h-24 bg-thriveni-blue rounded-full" />
-              <div className="flex flex-col">
+              <div className="w-1.5 h-16 md:h-24 bg-thriveni-blue rounded-full transition-transform duration-500 group-hover:scale-y-110" />
+              <div className="flex flex-col transition-transform duration-500 group-hover:translate-x-2">
                 <span className="text-thriveni-blue font-black text-xs md:text-sm uppercase tracking-[0.6em] mb-2">Excellence in Learning</span>
                 <span className="text-slate-400 font-bold text-xs md:text-sm uppercase tracking-[0.3em]">Internal Tool</span>
               </div>
             </div>
 
-            <h1 className="text-6xl sm:text-8xl md:text-[11rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.75] mb-8 select-none">
+            <h1 className="text-6xl sm:text-8xl md:text-[11rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.75] mb-8 select-none transition-transform duration-500 group-hover:translate-x-4">
               Training <br />
               <span className="text-thriveni-blue">Thriveni</span>
             </h1>
