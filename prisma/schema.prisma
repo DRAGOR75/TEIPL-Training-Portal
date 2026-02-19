@@ -28,6 +28,8 @@ model Employee {
   
   // Relations
   nominations       Nomination[]  // Links to their training requests
+  cohortMemberships CohortMember[]  // Cohort journeys
+  cohortFeedbacks   CohortFeedback[] // Cohort-level feedback
   
   @@map("employees")
 }
@@ -67,6 +69,7 @@ model Program {
   // Relation to nominations
   nominations    Nomination[]
   batches        NominationBatch[]
+  cohortPrograms CohortProgram[]   // Cohort usage
 
   @@map("programs")
 }
@@ -151,6 +154,7 @@ model TrainingSession {
   
   // Relations
   nominationBatch           NominationBatch? @relation(fields: [nominationBatchId], references: [id])
+  cohortProgram             CohortProgram?   // If this session is part of a cohort
 
   @@unique([programName, startDate, endDate, trainerName])
   @@index([startDate])
@@ -377,4 +381,82 @@ model RateLimit {
   expiresAt DateTime @map("expires_at")
   
   @@map("rate_limits")
+}
+
+// --- COHORT SYSTEM (Multi-Program Learning Journeys) ---
+
+// 9. Cohort — A named group of students going through multiple programs
+model Cohort {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "Inplant Batch 2026", "Technicians Batch"
+  description String?  @db.Text
+  status      String   @default("Draft") // Draft, Active, Completed
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  programs    CohortProgram[]   // Programs in this journey
+  members     CohortMember[]    // Students in this cohort
+  feedbacks   CohortFeedback[]  // Overall cohort evaluations
+
+  @@map("cohorts")
+}
+
+// 10. CohortProgram — Which programs are part of this cohort
+model CohortProgram {
+  id        String  @id @default(uuid())
+  cohortId  String  @map("cohort_id")
+  programId String  @map("program_id")
+  seq       Int     @default(0) // Suggested order (flexible)
+  status    String  @default("Pending") // Pending, InProgress, Completed
+
+  // Link to a TrainingSession when scheduled
+  sessionId String? @unique @map("session_id")
+
+  // Relations
+  cohort    Cohort           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  program   Program          @relation(fields: [programId], references: [id])
+  session   TrainingSession? @relation(fields: [sessionId], references: [id])
+
+  @@unique([cohortId, programId])
+  @@map("cohort_programs")
+}
+
+// 11. CohortMember — Students enrolled in a cohort journey
+model CohortMember {
+  id            String    @id @default(uuid())
+  cohortId      String    @map("cohort_id")
+  employeeId    String    @map("employee_id")
+  status        String    @default("Active") // Active, Dropped, Completed
+  joinedAt      DateTime  @default(now()) @map("joined_at")
+  completedAt   DateTime? @map("completed_at")
+  certificateId String?   @map("certificate_id") // Graduation tracking
+
+  // Relations
+  cohort   Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [id])
+
+  @@unique([cohortId, employeeId])
+  @@map("cohort_members")
+}
+
+// 12. CohortFeedback — Overall journey evaluation (sent to manager)
+model CohortFeedback {
+  id        String   @id @default(uuid())
+  cohortId  String   @map("cohort_id")
+  empId     String   @map("emp_id")
+
+  rating    Int      // 1-5 Overall Journey Rating
+  comments  String?  @db.Text
+  managerCc Boolean  @default(true) @map("manager_cc")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  cohort   Cohort   @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  employee Employee @relation(fields: [empId], references: [id], onDelete: Cascade)
+
+  @@unique([cohortId, empId])
+  @@map("cohort_feedbacks")
 }
