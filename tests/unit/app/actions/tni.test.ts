@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { submitTNINomination } from './tni';
+import { submitTNINomination } from '@/app/actions/tni';
 import { db } from '@/lib/prisma';
 import { sendTNIApprovalEmail } from '@/lib/email';
 import { redirect } from 'next/navigation';

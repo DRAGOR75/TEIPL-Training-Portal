@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { submitFeedback, type FeedbackState } from './feedback';
+import { submitFeedback, type FeedbackState } from '@/app/actions/feedback';
 import { db } from '@/lib/prisma';
 
 // Mock the entire module

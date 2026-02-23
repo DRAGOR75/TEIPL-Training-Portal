@@ -44,8 +44,8 @@ export default function Home() {
             </h1>
 
             <p className="max-w-2xl text-xl md:text-3xl text-slate-500 font-medium leading-relaxed italic border-l-4 border-slate-100 pl-8 ml-2">
-              Select a specialized hub to manage enterprise development, <br className="hidden md:block" />
-              technical operations, and strategic training initiatives.
+              Select your designated workspace based on your role to <br className="hidden md:block" />
+              manage professional growth, oversee operations, and drive excellence.
             </p>
           </div>
         </div>

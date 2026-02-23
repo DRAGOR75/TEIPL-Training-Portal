@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getServerLocalDateString } from './date-utils';
+import { getServerLocalDateString } from '@/lib/date-utils';
 
 describe('getServerLocalDateString', () => {
     it('should return the correct date string for a given date', () => {

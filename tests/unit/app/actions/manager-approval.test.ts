@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { submitManagerNominationDecision } from './manager-approval';
+import { submitManagerNominationDecision } from '@/app/actions/manager-approval';
 import { db } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import * as security from '@/lib/security';
 
 // Mock Modules
 vi.mock('@/lib/prisma', () => ({
@@ -11,6 +12,10 @@ vi.mock('@/lib/prisma', () => ({
             findUnique: vi.fn(),
         },
     },
+}));
+
+vi.mock('@/lib/security', () => ({
+    verifySecureToken: vi.fn(),
 }));
 
 vi.mock('next/cache', () => ({
@@ -29,8 +34,9 @@ describe('submitManagerNominationDecision', () => {
     it('should successfully APPROVE a nomination', async () => {
         (db.nomination.findUnique as any).mockResolvedValue({ status: 'Pending', empId });
         (db.nomination.update as any).mockResolvedValue({});
+        (security.verifySecureToken as any).mockReturnValue(true);
 
-        const result = await submitManagerNominationDecision(nominationId, 'Approved');
+        const result = await submitManagerNominationDecision(nominationId, 'Approved', 'dummy-token');
 
         expect(result).toEqual({ success: true });
 
@@ -52,9 +58,10 @@ describe('submitManagerNominationDecision', () => {
     it('should successfully REJECT a nomination and reset status', async () => {
         (db.nomination.findUnique as any).mockResolvedValue({ status: 'Batched', empId });
         (db.nomination.update as any).mockResolvedValue({});
+        (security.verifySecureToken as any).mockReturnValue(true);
 
         const reason = 'Not relevant now';
-        const result = await submitManagerNominationDecision(nominationId, 'Rejected', reason);
+        const result = await submitManagerNominationDecision(nominationId, 'Rejected', 'dummy-token', reason);
 
         expect(result).toEqual({ success: true });
 
@@ -72,8 +79,9 @@ describe('submitManagerNominationDecision', () => {
 
     it('should handle DB errors', async () => {
         (db.nomination.update as any).mockRejectedValue(new Error('DB Error'));
+        (security.verifySecureToken as any).mockReturnValue(true);
 
-        const result = await submitManagerNominationDecision(nominationId, 'Approved');
+        const result = await submitManagerNominationDecision(nominationId, 'Approved', 'dummy-token');
 
         expect(result).toEqual({ success: false, error: 'Failed to submit decision' });
     });
