@@ -3,6 +3,7 @@
 import { db } from '@/lib/prisma';
 import { Grade, Gender } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 
 // Simple interface for parsed data - in reality we might validate deeper
 interface EmployeeImportRow {
@@ -21,6 +22,7 @@ interface EmployeeImportRow {
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
+    if (!await auth()) return { success: false, count: 0, errors: ['Unauthorized'] };
     let successCount = 0;
     let errors: string[] = [];
 

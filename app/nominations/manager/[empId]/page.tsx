@@ -4,6 +4,8 @@ import { HiOutlineShieldExclamation, HiOutlineUser, HiOutlineChatBubbleBottomCen
 import { verifySecureToken } from '@/lib/security';
 import ManagerApprovalButtons from '@/components/admin/tni/ManagerApprovalButtons';
 import { notFound, redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 // Server Component for Manager Approval
 export default async function ManagerApprovalPage({
@@ -15,6 +17,22 @@ export default async function ManagerApprovalPage({
 }) {
     const { empId } = await params;
     const { token } = await searchParams;
+
+    // 0. RATE LIMITING (Prevent Enumeration/Brute Force)
+    const ip = (await headers()).get("x-forwarded-for") || "unknown";
+    const rateLimitKey = `approve:emp:${empId}:${ip}`;
+    const { success } = await checkRateLimit(rateLimitKey, 10, 60); // 10 req / 60 sec
+
+    if (!success) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md border-t-4 border-orange-500">
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Too Many Requests</h1>
+                    <p className="text-slate-600">Please wait a moment before trying again.</p>
+                </div>
+            </div>
+        );
+    }
 
     // 1. SECURITY CHECK (HMAC Token Verification)
     if (!token || !verifySecureToken(token, empId)) {
@@ -150,7 +168,7 @@ export default async function ManagerApprovalPage({
                 </div>
 
                 <div className="bg-slate-50 p-4 text-center border-t border-slate-200">
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Thriveni Training Management System • Secure Approval Portal</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest"> Training Thriveni • Secure Approval Portal</p>
                 </div>
             </div>
         </div>

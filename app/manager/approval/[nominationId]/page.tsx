@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation';
 import { verifySecureToken } from '@/lib/security';
 import ApprovalClient from './ApprovalClient';
 import { HiOutlineCalendar, HiOutlineUser, HiOutlineBookOpen, HiOutlineClock } from 'react-icons/hi2';
+import { headers } from 'next/headers';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export default async function Page({
     params,
@@ -13,6 +15,22 @@ export default async function Page({
 }) {
     const { nominationId } = await params;
     const { token } = await searchParams;
+
+    // 0. RATE LIMITING
+    const ip = (await headers()).get("x-forwarded-for") || "unknown";
+    const rateLimitKey = `approve:nom:${nominationId}:${ip}`;
+    const { success } = await checkRateLimit(rateLimitKey, 10, 60);
+
+    if (!success) {
+        return (
+            <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+                <div className="bg-white p-8 rounded-xl shadow-xl text-center max-w-md border-t-4 border-orange-500">
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Too Many Requests</h1>
+                    <p className="text-slate-600">Please wait a moment before trying again.</p>
+                </div>
+            </div>
+        );
+    }
 
     // SECURITY CHECK
     if (!token || !verifySecureToken(token, nominationId)) {
@@ -128,7 +146,7 @@ export default async function Page({
                 </div>
 
                 <div className="bg-slate-50 p-4 text-center border-t border-slate-200">
-                    <p className="text-xs text-slate-400">Secure approval link via Thriveni Training Portal</p>
+                    <p className="text-xs text-slate-400">Secure approval link via Thriveni Training</p>
                 </div>
             </div>
         </div>

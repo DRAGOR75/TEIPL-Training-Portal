@@ -71,6 +71,7 @@ export default async function EmployeeFeedbackPage({
 
                 <form action={saveFeedback} className="p-8 space-y-6">
                     <input type="hidden" name="enrollmentId" value={id} />
+                    <input type="hidden" name="token" value={token} />
 
                     <div className="space-y-4">
 

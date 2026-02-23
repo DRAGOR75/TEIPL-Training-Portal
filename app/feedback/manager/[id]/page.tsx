@@ -192,6 +192,7 @@ export default async function ManagerFeedbackPage({
 
                             <h3 className="font-extrabold text-indigo-900 text-lg mb-6 pt-2">Validation Decision</h3>
                             <input type="hidden" name="enrollmentId" value={id} />
+                            <input type="hidden" name="token" value={token} />
 
                             <div className="mb-8">
                                 <p className="text-sm font-bold text-slate-800 mb-4 leading-relaxed">

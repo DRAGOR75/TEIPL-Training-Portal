@@ -419,16 +419,63 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             return { success: false, error: "Batch is locked." };
         }
 
-        // 1. Update Database
-        const updateResult = await db.nomination.updateMany({
+        // 1. Resolve Redundant Nominations & Update
+        // To avoid P2002 (Unique constraint failed on emp_id, batch_id), we check if any
+        // of these employees are already in this batch (e.g. via Cohort or QR).
+
+        // Find the empIds for the incoming nominations
+        const incomingNominations = await db.nomination.findMany({
             where: { id: { in: nominationIds } },
-            data: {
+            select: { id: true, empId: true }
+        });
+
+        const empIds = incomingNominations.map(n => n.empId);
+
+        // Check who is already in this batch
+        const alreadyInBatch = await db.nomination.findMany({
+            where: {
                 batchId,
-                status: 'Batched',
-                managerApprovalStatus: 'Pending'
+                empId: { in: empIds }
+            },
+            select: { empId: true }
+        });
+
+        const existingEmpIds = new Set(alreadyInBatch.map(n => n.empId));
+
+        // Split IDs into "To Update" and "To Cleanup (Redundant)"
+        const toUpdateIds: string[] = [];
+        const toCleanupIds: string[] = [];
+
+        incomingNominations.forEach(nom => {
+            if (existingEmpIds.has(nom.empId)) {
+                toCleanupIds.push(nom.id);
+            } else {
+                toUpdateIds.push(nom.id);
             }
         });
-        console.log('✅ Updated nominations:', updateResult.count);
+
+        // Execute changes
+        if (toUpdateIds.length > 0) {
+            await db.nomination.updateMany({
+                where: { id: { in: toUpdateIds } },
+                data: {
+                    batchId,
+                    status: 'Batched'
+                    // Note: We keep original managerApprovalStatus or update as needed.
+                    // Usually from waitlist they are either Pending or Approved.
+                }
+            });
+            console.log(`✅ Updated ${toUpdateIds.length} nominations to batch ${batchId}`);
+        }
+
+        if (toCleanupIds.length > 0) {
+            // These employees are already in the batch (maybe via Cohort).
+            // We just delete the redundant pending TNI nomination to clear the waitlist.
+            await db.nomination.deleteMany({
+                where: { id: { in: toCleanupIds } }
+            });
+            console.log(`🧹 Cleaned up ${toCleanupIds.length} redundant nominations`);
+        }
 
         // 2. Fetch details for emails
         const batch = await db.nominationBatch.findUnique({

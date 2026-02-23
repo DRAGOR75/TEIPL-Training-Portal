@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createSession, joinBatch, lockSessionBatch, removeNominationFromBatch } from './sessions';
+import { createSession, joinBatch, lockSessionBatch, removeNominationFromBatch } from '@/app/actions/sessions';
 import { db } from '@/lib/prisma';
 import { sendManagerSessionApprovalEmail } from '@/lib/email';
 import { revalidatePath } from 'next/cache';

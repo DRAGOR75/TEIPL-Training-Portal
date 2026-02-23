@@ -38,10 +38,8 @@ export default function LoginPage() {
 
                 if (session?.user?.role === "ADMIN") {
                     window.location.href = "/admin";
-                } else if (session?.user?.role === "MANAGER") {
-                    window.location.href = "/manager"; // Adjust if there is a specific manager dashboard working
                 } else {
-                    // Default for USER role or others
+                    // Default for USER, MANAGER, etc.
                     window.location.href = "/";
                 }
             }
@@ -55,7 +53,7 @@ export default function LoginPage() {
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
             <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
 
-                {/* Header - High Contrast Blue */}
+
                 <div className="bg-blue-700 p-8 text-center">
                     <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
                         <HiOutlineShieldCheck className="text-white" size={32} />
@@ -66,7 +64,7 @@ export default function LoginPage() {
                 <div className="p-8 pt-6">
                     <form onSubmit={handleSubmit} className="space-y-6">
 
-                        {/* Email Field - Darker Labels */}
+
                         <div className="space-y-1.5">
                             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
                                 Email Address
@@ -83,7 +81,7 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Password Field */}
+
                         <div className="space-y-1.5">
                             <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
                                 Password
@@ -100,7 +98,7 @@ export default function LoginPage() {
                             </div>
                         </div>
 
-                        {/* Error Message - High Visibility Red */}
+
                         {error && (
                             <div className="p-3 bg-red-100 border border-red-200 rounded-lg">
                                 <p className="text-red-700 text-xs font-bold text-center italic">
@@ -109,7 +107,7 @@ export default function LoginPage() {
                             </div>
                         )}
 
-                        {/* Submit Button */}
+
                         <FormSubmitButton
                             isLoading={loading}
                             loadingText="SIGNING IN..."

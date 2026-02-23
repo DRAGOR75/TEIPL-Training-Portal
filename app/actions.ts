@@ -3,6 +3,7 @@
 import { db } from "@/lib/prisma";
 import { revalidatePath } from 'next/cache';
 import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail } from '@/lib/email';
+import { verifySecureToken } from '@/lib/security';
 
 // --- TYPES ---
 export type ParticipantData = {
@@ -148,6 +149,12 @@ export async function submitNomination(formData: FormData) {
 // 3. EMPLOYEE FEEDBACK LOGIC
 export async function submitEmployeeFeedback(formData: FormData) {
     const enrollmentId = formData.get('enrollmentId') as string;
+    const token = formData.get('token') as string;
+
+    // 0. SECURITY CHECK (HMAC Verification)
+    if (!token || !verifySecureToken(token, enrollmentId)) {
+        return { success: false, error: "Unauthorized: Invalid or missing security token." };
+    }
 
     // Parse ratings
     const q1 = parseInt(formData.get('q1') as string) || 0;
@@ -199,6 +206,12 @@ export async function submitEmployeeFeedback(formData: FormData) {
 // 4. MANAGER REVIEW LOGIC
 export async function submitManagerReview(formData: FormData) {
     const enrollmentId = formData.get('enrollmentId') as string;
+    const token = formData.get('token') as string;
+
+    // 0. SECURITY CHECK (HMAC Verification)
+    if (!token || !verifySecureToken(token, enrollmentId)) {
+        return { success: false, error: "Unauthorized: Invalid or missing security token." };
+    }
     const agree = formData.get('agree') as string;
     const comments = formData.get('comments') as string;
 

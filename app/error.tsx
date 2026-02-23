@@ -57,7 +57,7 @@ export default function Error({
             </div>
 
             <div className="mt-8 text-slate-400 text-sm">
-                Thriveni Training Management System
+                Training Thriveni
             </div>
         </div>
     );
