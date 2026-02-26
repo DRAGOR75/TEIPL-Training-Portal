@@ -21,7 +21,7 @@ export default function Home() {
         <div className="group relative flex flex-col items-start pt-12 md:pt-20">
 
           {/* Massive Background Logo Watermark */}
-          <div className="absolute top-8 md:-top-40 -left-12 md:-left-24 w-[180%] md:w-[150%] opacity-[0.03] pointer-events-none select-none transition-all duration-700 group-hover:opacity-[0.06] group-hover:-translate-y-4">
+          <div className="absolute top-8 md:-top-40 -left-12 md:-left-24 w-[120%] md:w-[120%] opacity-[0.03] pointer-events-none select-none transition-all duration-700 group-hover:opacity-[0.06] group-hover:-translate-y-4">
             <img
               src="/thriveny_logo.svg"
               alt=""
@@ -38,7 +38,7 @@ export default function Home() {
               </div>
             </div>
 
-            <h1 className="text-6xl sm:text-8xl md:text-[11rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.75] mb-8 select-none transition-transform duration-500 group-hover:translate-x-4">
+            <h1 className="text-5xl sm:text-8xl md:text-[10rem] font-black tracking-tighter text-slate-900 uppercase leading-[0.75] mb-8 select-none transition-transform duration-500 group-hover:translate-x-4">
               Training <br />
               <span className="text-thriveni-blue">Thriveni</span>
             </h1>
@@ -77,7 +77,7 @@ export default function Home() {
           </Link>
 
           {/* Hub 2: Trainer Hub - Shifted Right */}
-          <Link href="/trainers" className="group relative flex flex-col md:flex-row-reverse items-start md:items-end gap-8 md:gap-16 self-end text-right md:text-left">
+          <Link href="/wip" className="group relative flex flex-col md:flex-row-reverse items-start md:items-end gap-8 md:gap-16 self-end text-right md:text-left">
             <div className="absolute -top-12 md:-top-24 -right-6 md:-right-12 text-[10rem] md:text-[20rem] font-black text-emerald-500/5 select-none transition-all duration-700 group-hover:text-emerald-500/10 group-hover:-translate-y-4">
               02
             </div>

@@ -146,6 +146,7 @@ model TrainingSession {
   emailsSent                Boolean      @default(false) @map("emails_sent")
   feedbackReminderSent      Boolean      @default(false) @map("feedback_reminder_sent")
   sendFeedbackAutomatically Boolean      @default(false) @map("send_feedback_automatically")
+  requireManagerApproval    Boolean      @default(true) @map("require_manager_approval")
   
   nominationBatchId         String?      @unique @map("nomination_batch_id")
 
@@ -230,6 +231,7 @@ enum Role {
   ADMIN
   MANAGER
   USER
+  TRAINER
 }
 
 model User {

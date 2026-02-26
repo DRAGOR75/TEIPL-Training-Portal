@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { auth } from '@/auth';
 import {
     HiOutlineUsers,
     HiOutlineChatBubbleBottomCenterText,
@@ -6,22 +7,36 @@ import {
 } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
-export default function TrainerHubPage() {
+export default async function TrainerHubPage() {
+    const session = await auth();
+
     return (
         <div className="min-h-screen bg-slate-50 font-sans text-slate-900 pb-20">
             {/* Header */}
             <div className="bg-white border-b border-slate-200 pt-16 pb-12">
                 <div className="container mx-auto px-6 max-w-7xl">
-                    <div className="flex flex-col items-start space-y-2">
-                        <Link href="/" className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-emerald-600 transition-colors mb-2 flex items-center gap-1 group">
+                    <div className="flex flex-col space-y-4">
+                        <Link href="/" className="text-xs font-bold text-slate-400 uppercase tracking-widest hover:text-emerald-600 transition-colors flex items-center gap-1 group w-fit">
                             <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Home
                         </Link>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
-                            Trainer <span className="text-emerald-600">Workspace</span>
-                        </h1>
-                        <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed">
-                            Access your training sessions, monitor feedback, and track program performance.
-                        </p>
+
+                        <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+                            <div className="flex flex-col items-start space-y-2">
+                                <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
+                                    Trainer <span className="text-emerald-600">Workspace</span>
+                                </h1>
+                                <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed pt-2">
+                                    Access your training sessions, monitor feedback, and track program performance.
+                                </p>
+                            </div>
+
+                            {session?.user?.name && (
+                                <div className="flex flex-col md:items-end bg-white/50 px-6 py-4 rounded-[2rem] border border-emerald-100 shadow-sm shrink-0">
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Welcome Back</span>
+                                    <span className="text-2xl font-black tracking-tight text-slate-800 leading-none">{session.user.name}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -31,9 +46,9 @@ export default function TrainerHubPage() {
 
                     {/* Card 1: Training Sessions - Emerald */}
                     <TrainerCard
-                        href="/admin/sessions"
+                        href="/trainer/sessions"
                         title="Training Sessions"
-                        description="Schedule workshops, manage participant batches, and generate enrollment QR codes."
+                        description="View and manage the details of your assigned training sessions and batches."
                         icon={<HiOutlineUsers size={28} />}
                         tag="Operations"
                         color="emerald"
@@ -41,9 +56,9 @@ export default function TrainerHubPage() {
 
                     {/* Card 2: Training Feedback - Blue */}
                     <TrainerCard
-                        href="/admin/dashboard"
+                        href="/trainer/dashboard"
                         title="Training Feedback"
-                        description="Review employee feedback and training ratings to improve program delivery."
+                        description="Review employee feedback and training ratings to analyze your program success."
                         icon={<HiOutlineChatBubbleBottomCenterText size={28} />}
                         tag="Analytics"
                         color="blue"
@@ -64,7 +79,7 @@ export default function TrainerHubPage() {
 
                 <div className="mt-20 text-center">
                     <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.25em]">
-                        Thriveni Earthmovers &copy; {new Date().getFullYear()}
+                        Thriveni Earthmovers and infra pvt Ltd &copy; {new Date().getFullYear()}
                     </p>
                 </div>
             </div>

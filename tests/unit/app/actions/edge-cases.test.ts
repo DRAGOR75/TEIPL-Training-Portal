@@ -24,6 +24,10 @@ vi.mock('next/navigation', () => ({
     redirect: vi.fn(),
 }));
 
+vi.mock('@/auth', () => ({
+    auth: vi.fn(),
+}));
+
 describe('Edge Cases: TNI Nomination', () => {
     beforeEach(() => {
         vi.clearAllMocks();

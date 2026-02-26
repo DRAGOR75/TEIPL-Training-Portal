@@ -93,20 +93,26 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                                 </div>
                             </div>
 
-                            {/* Row 2: Mobile Number and Button */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                            {/* Row 2: Mobile Number and Password */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile Number</label>
                                     <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
-                                <div>
-                                    <FormSubmitButton
-                                        className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
-                                    >
-                                        <HiOutlinePlus size={18} />
-                                        Add Trainer
-                                    </FormSubmitButton>
+                                <div className="space-y-1">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Login Password</label>
+                                    <input name="password" type="password" required placeholder="Create a secure password" minLength={6} className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
                                 </div>
+                            </div>
+
+                            {/* Row 3: Button */}
+                            <div className="flex justify-end pt-2">
+                                <FormSubmitButton
+                                    className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
+                                >
+                                    <HiOutlinePlus size={18} />
+                                    Add Trainer
+                                </FormSubmitButton>
                             </div>
                         </div>
                     </form>

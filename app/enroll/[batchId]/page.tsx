@@ -344,6 +344,7 @@ export default function JoinPage() {
                         </div>
 
 
+
                         <button
                             type="submit"
                             disabled={status === 'loading'}
@@ -389,6 +390,8 @@ export default function JoinPage() {
                             className="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-lg font-mono placeholder:font-sans"
                         />
                     </div>
+
+
 
                     <button
                         type="submit"

@@ -338,7 +338,7 @@ export const getSessionById = unstable_cache(
     { revalidate: 3600, tags: ['session-details'] } // 1 hour cache
 );
 
-export async function getTrainingSessionsForDate(dateStr: string): Promise<SessionWithDetails[]> {
+export async function getTrainingSessionsForDate(dateStr: string, trainerName?: string): Promise<SessionWithDetails[]> {
     try {
         // Create dates in local time (assuming server acts as IST or we want full day coverage regardless of UTC shift)
         // Alternatively, shift UTC to match IST 00:00 to 23:59
@@ -350,13 +350,19 @@ export async function getTrainingSessionsForDate(dateStr: string): Promise<Sessi
         const startOfDay = new Date(dateStr + "T00:00:00.000+05:30");
         const endOfDay = new Date(dateStr + "T23:59:59.999+05:30");
 
+        const whereClause: any = {
+            startDate: {
+                gte: startOfDay,
+                lte: endOfDay
+            }
+        };
+
+        if (trainerName) {
+            whereClause.trainerName = trainerName;
+        }
+
         return await db.trainingSession.findMany({
-            where: {
-                startDate: {
-                    gte: startOfDay,
-                    lte: endOfDay
-                }
-            },
+            where: whereClause,
             orderBy: { startDate: 'desc' },
             include: {
                 nominationBatch: {
@@ -577,7 +583,7 @@ export async function joinBatch(batchId: string, empId: string) {
         });
 
         // 5. Send Email if Session exists
-        if (batch.trainingSession && employee.managerEmail) {
+        if (batch.trainingSession && employee.managerEmail && batch.trainingSession.requireManagerApproval) {
             const { startDate, endDate } = batch.trainingSession;
             await sendManagerSessionApprovalEmail(
                 employee.managerEmail,
@@ -690,7 +696,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
         // 4. Send Email if Session exists
         // Note: We use formData.managerEmail because employee object return from upsert might not have it if upsert return behavior varies, 
         // but robustly we should use employee.managerEmail or formData.managerEmail.
-        if (batch.trainingSession && formData.managerEmail) {
+        if (batch.trainingSession && formData.managerEmail && batch.trainingSession.requireManagerApproval) {
             const { startDate, endDate } = batch.trainingSession;
             await sendManagerSessionApprovalEmail(
                 formData.managerEmail,
@@ -752,3 +758,26 @@ export async function removeNominationFromBatch(nominationId: string) {
         return { error: 'Failed to remove participant.' };
     }
 }
+
+export async function toggleManagerApprovalRequirement(sessionId: string, requireApproval: boolean) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
+    try {
+        await db.trainingSession.update({
+            where: { id: sessionId },
+            data: { requireManagerApproval: requireApproval }
+        });
+
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/sessions');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
+        return { success: true };
+    } catch (error) {
+        console.error('Toggle Manager Approval Error:', error);
+        return { error: 'Failed to update manager approval requirement setting.' };
+    }
+}
+
