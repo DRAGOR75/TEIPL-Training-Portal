@@ -11,6 +11,7 @@ import { Session } from 'next-auth';
 export default function Navbar({ session }: { session: Session | null }) {
     const [isOpen, setIsOpen] = useState(false);
     const isLoggedIn = !!session?.user;
+    const userRole = (session?.user as any)?.role;
     const pathname = usePathname();
 
     // Hide Navbar on Feedback, Join & TNI Pages
@@ -54,10 +55,16 @@ export default function Navbar({ session }: { session: Session | null }) {
                     {/* Right Side: Desktop Menu */}
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<HiOutlineHome size={18} />} text="Home" />
-                        <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
+                        {userRole === 'ADMIN' && (
+                            <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
+                        )}
+                        {userRole === 'TRAINER' && (
+                            <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                        )}
 
                         {isLoggedIn && (
-                            <div className="ml-4 pl-4 border-l border-slate-200">
+                            <div className="ml-4 pl-4 border-l border-slate-200 flex flex-col items-center">
+                                <span className="text-xs font-bold text-slate-700 mb-1">{session?.user?.name}</span>
                                 <SignOutButton />
                             </div>
                         )}
@@ -80,10 +87,16 @@ export default function Navbar({ session }: { session: Session | null }) {
                 <div className="md:hidden bg-white border-t border-slate-100 absolute w-full shadow-lg animate-in slide-in-from-top-5">
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         <MobileNavLink href="/" onClick={() => setIsOpen(false)} text="Home" />
-                        <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
+                        {userRole === 'ADMIN' && (
+                            <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
+                        )}
+                        {userRole === 'TRAINER' && (
+                            <MobileNavLink href="/trainer" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                        )}
 
                         {isLoggedIn && (
-                            <div className="pt-4 border-t border-slate-100 mt-2 flex justify-center">
+                            <div className="pt-4 border-t border-slate-100 mt-2 flex flex-col items-center gap-2">
+                                <span className="text-sm font-bold text-slate-700">{session?.user?.name}</span>
                                 <SignOutButton />
                             </div>
                         )}

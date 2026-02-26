@@ -14,11 +14,14 @@ export type ParticipantData = {
 
 // 1. DASHBOARD LOGIC (Updated for Start Date)
 // 1. CALENDAR METADATA (Lightweight - For Dots)
-export async function getCalendarMetadata() {
+export async function getCalendarMetadata(trainerName?: string) {
     try {
         // Fetch minimal data for ALL sessions (lightweight)
         // This allows the calendar to show dots for all past/future events without loading heavy enrollments
+        const whereClause = trainerName ? { trainerName } : {};
+
         return await db.trainingSession.findMany({
+            where: whereClause,
             select: {
                 id: true,
                 startDate: true,
@@ -36,39 +39,56 @@ export async function getCalendarMetadata() {
 }
 
 // 1.b SESSION DETAILS (Heavy - For Selected Date)
-export async function getSessionsForDate(dateStr: string) {
+export async function getSessionsForDate(dateStr: string, trainerName?: string) {
     try {
         // incorrectly parsing it could lead to timezone issues.
         // We act as if this date is IST Midnight.
         const startOfDay = new Date(dateStr + "T00:00:00.000+05:30");
         const endOfDay = new Date(dateStr + "T23:59:59.999+05:30");
 
-        const sessions = await db.trainingSession.findMany({
-            where: {
-                OR: [
-                    // 1. Strict Match: Is this the Session END DATE?
-                    {
-                        endDate: {
-                            gte: startOfDay,
-                            lte: endOfDay
-                        }
-                    },
-                    // 2. Strict Match: Is this the FEEDBACK DEADLINE DATE?
-                    {
-                        feedbackCreationDate: {
-                            gte: startOfDay,
-                            lte: endOfDay
-                        }
+        const dateFilter = {
+            OR: [
+                // 1. Strict Match: Is this the Session END DATE?
+                {
+                    endDate: {
+                        gte: startOfDay,
+                        lte: endOfDay
                     }
-                ]
-            },
+                },
+                // 2. Strict Match: Is this the FEEDBACK DEADLINE DATE?
+                {
+                    feedbackCreationDate: {
+                        gte: startOfDay,
+                        lte: endOfDay
+                    }
+                }
+            ]
+        };
+
+        const whereClause = trainerName
+            ? { AND: [dateFilter, { trainerName }] }
+            : dateFilter;
+
+        const sessions = await db.trainingSession.findMany({
+            where: whereClause,
             include: { enrollments: true }, // Heavy data (Enrollments) only for this day
             orderBy: { startDate: 'desc' },
         });
 
         // Calculate pending reviews for the badge
+        // Only count pending reviews for sessions related to this trainer (if trainer is filtering)
+        const pendingCountWhere: any = { status: 'Pending Manager' };
+        if (trainerName) {
+            // Find all session IDs for this trainer
+            const trainerSessions = await db.trainingSession.findMany({
+                where: { trainerName },
+                select: { id: true }
+            });
+            pendingCountWhere.sessionId = { in: trainerSessions.map(s => s.id) };
+        }
+
         const pendingCount = await db.enrollment.count({
-            where: { status: 'Pending Manager' },
+            where: pendingCountWhere,
         });
 
         return { sessions, pendingCount };

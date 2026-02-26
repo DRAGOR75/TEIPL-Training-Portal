@@ -10,11 +10,18 @@ export const authConfig = {
             const isLoggedIn = !!auth?.user;
             const role = (auth?.user as any)?.role;
             const isAdminRoute = nextUrl.pathname.startsWith('/admin');
+            const isTrainerRoute = nextUrl.pathname.startsWith('/trainer');
 
             if (isAdminRoute) {
                 if (isLoggedIn && role === 'ADMIN') return true;
                 return Response.redirect(new URL('/login', nextUrl));
             }
+
+            if (isTrainerRoute) {
+                if (isLoggedIn && role === 'TRAINER') return true;
+                return Response.redirect(new URL('/login', nextUrl));
+            }
+
             return true; // Allow access to other pages
         },
         async jwt({ token, user }) {

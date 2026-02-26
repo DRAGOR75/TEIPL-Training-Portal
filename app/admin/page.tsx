@@ -82,7 +82,7 @@ export default async function AdminHubPage() {
 
                     {/* Card 5: Training Cohorts - Indigo */}
                     <AdminCard
-                        href="/admin/cohorts"
+                        href="/wip"
                         title="Cohort Control Panel"
                         description="Create structured multi-program learning paths for specialized employee groups."
                         icon={<HiOutlineAcademicCap size={24} />}

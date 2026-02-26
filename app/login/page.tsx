@@ -38,6 +38,8 @@ export default function LoginPage() {
 
                 if (session?.user?.role === "ADMIN") {
                     window.location.href = "/admin";
+                } else if (session?.user?.role === "TRAINER") {
+                    window.location.href = "/trainer";
                 } else {
                     // Default for USER, MANAGER, etc.
                     window.location.href = "/";
@@ -58,7 +60,7 @@ export default function LoginPage() {
                     <div className="bg-white/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md">
                         <HiOutlineShieldCheck className="text-white" size={32} />
                     </div>
-                    <h1 className="text-2xl font-extrabold text-white tracking-tight">Admin Portal</h1>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">Platform Login</h1>
                 </div>
 
                 <div className="p-8 pt-6">

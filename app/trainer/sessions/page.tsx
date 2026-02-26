@@ -3,19 +3,18 @@ import { db } from '@/lib/prisma';
 import { getServerLocalDateString } from '@/lib/date-utils';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
 import { getTrainers } from '@/app/actions/trainers';
-import SessionsDashboard from './SessionsDashboard';
+import TrainerSessionsDashboard from './TrainerSessionsDashboard';
 import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SessionsPage() {
+export default async function TrainerSessionsPage() {
     // 0. Get the current user session
     const session = await auth();
-    const isTrainer = session?.user?.role === 'TRAINER';
     let trainerName: string | undefined = undefined;
 
-    // If the user is a trainer, grab their trainer record name to filter sessions
-    if (isTrainer && session?.user?.email) {
+    // Filter sessions by the logged in Trainer's name
+    if (session?.user?.email) {
         const trainerRecord = await db.trainer.findUnique({
             where: { email: session.user.email }
         });
@@ -36,12 +35,13 @@ export default async function SessionsPage() {
     ]);
 
     return (
-        <SessionsDashboard
-            initialSessions={initialSessions}
+        <TrainerSessionsDashboard
+            initialSessions={initialSessions as any}
             initialMetadata={calendarMetadata}
             initialTrainers={trainersData}
             programs={programs}
             locations={locations}
+            currentTrainerName={trainerName}
         />
     );
 }

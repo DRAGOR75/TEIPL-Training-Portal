@@ -1,26 +1,24 @@
 import { getCalendarMetadata, getSessionsForDate } from '@/app/actions';
 import { db } from '@/lib/prisma';
 import { getServerLocalDateString } from '@/lib/date-utils';
-import { getTrainers } from '@/app/actions/trainers';
-import DashboardClient from './DashboardClient';
+import TrainerDashboardClient from './TrainerDashboardClient';
 import { Metadata } from 'next';
 import { auth } from '@/auth';
 
 export const metadata: Metadata = {
-    title: 'Admin Dashboard | Thriveni Training',
-    description: 'Manage training sessions, trainers, and nominations.',
+    title: 'Trainer Dashboard | Thriveni Training',
+    description: 'View your training sessions and feedbacks.',
 };
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminDashboardPage() {
+export default async function TrainerDashboardPage() {
     // 0. Get the current user session
     const session = await auth();
-    const isTrainer = session?.user?.role === 'TRAINER';
     let trainerName: string | undefined = undefined;
 
-    // If the user is a trainer, grab their trainer record name to filter sessions
-    if (isTrainer && session?.user?.email) {
+    // Filter sessions by the logged in Trainer's name
+    if (session?.user?.email) {
         const trainerRecord = await db.trainer.findUnique({
             where: { email: session.user.email }
         });
@@ -29,25 +27,19 @@ export default async function AdminDashboardPage() {
         }
     }
 
-    // 1. Fetch Metadata (Lightweight spots for calendar)
-    // 2. Fetch TODAY'S Sessions (Detailed cards)
-    // 3. Fetch Trainers
-
     const today = new Date();
 
-    const [calendarMetadata, todayData, trainersData, programs, locations] = await Promise.all([
+    const [calendarMetadata, todayData, programs, locations] = await Promise.all([
         getCalendarMetadata(trainerName),
         getSessionsForDate(getServerLocalDateString(), trainerName),
-        getTrainers(),
         db.program.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } }),
         db.location.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
     ]);
 
     return (
-        <DashboardClient
+        <TrainerDashboardClient
             initialMetadata={calendarMetadata}
-            initialSessions={todayData.sessions}
-            initialTrainers={trainersData}
+            initialSessions={todayData.sessions as any}
             programs={programs}
             locations={locations}
             initialPendingReviews={todayData.pendingCount}

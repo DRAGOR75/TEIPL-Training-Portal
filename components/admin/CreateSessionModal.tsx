@@ -10,14 +10,15 @@ type CreateSessionModalProps = {
     trainers: any[];
     programs: any[];
     locations: any[];
+    fixedTrainerName?: string;
 };
 
-export default function CreateSessionModal({ trainers, programs, locations }: CreateSessionModalProps) {
+export default function CreateSessionModal({ trainers, programs, locations, fixedTrainerName }: CreateSessionModalProps) {
     const [isOpen, setIsOpen] = useState(false);
 
     // Form State
     const [selectedProgram, setSelectedProgram] = useState<string>('');
-    const [selectedTrainer, setSelectedTrainer] = useState<string>('');
+    const [selectedTrainer, setSelectedTrainer] = useState<string>(fixedTrainerName || '');
     const [locationMode, setLocationMode] = useState<'select' | 'custom'>('select');
     const [selectedLocation, setSelectedLocation] = useState<string>('');
     const [customLocation, setCustomLocation] = useState<string>('');
@@ -115,16 +116,22 @@ export default function CreateSessionModal({ trainers, programs, locations }: Cr
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Trainer</label>
                                 <div className="relative">
-                                    <SearchableSelect
-                                        options={trainerOptions}
-                                        value={selectedTrainer}
-                                        onChange={(val) => setSelectedTrainer(typeof val === 'string' ? val : String(val))}
-                                        placeholder="Select Trainer"
-                                        searchPlaceholder="Search trainers..."
-                                        className="w-full"
-                                    />
+                                    {fixedTrainerName ? (
+                                        <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
+                                            {fixedTrainerName}
+                                        </div>
+                                    ) : (
+                                        <SearchableSelect
+                                            options={trainerOptions}
+                                            value={selectedTrainer}
+                                            onChange={(val) => setSelectedTrainer(typeof val === 'string' ? val : String(val))}
+                                            placeholder="Select Trainer"
+                                            searchPlaceholder="Search trainers..."
+                                            className="w-full"
+                                        />
+                                    )}
                                 </div>
-                                <input type="hidden" name="trainerName" value={selectedTrainer} />
+                                <input type="hidden" name="trainerName" value={fixedTrainerName || selectedTrainer} />
                             </div>
                         </div>
 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import QRCode from 'react-qr-code';
-import { addNominationsToBatch, removeNominationFromBatch, toggleManagerApprovalRequirement } from '@/app/actions/sessions';
+import { addNominationsToBatch, removeNominationFromBatch } from '@/app/actions/sessions';
 import {
     HiOutlineUserPlus,
     HiOutlineQrCode,
@@ -26,8 +26,6 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const [selectedNominations, setSelectedNominations] = useState<Set<string>>(new Set());
     const [isAdding, setIsAdding] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
-    const [requireApproval, setRequireApproval] = useState(session.requireManagerApproval ?? true);
-    const [isToggling, setIsToggling] = useState(false);
 
     const isLocked = session.nominationBatch?.status === 'Scheduled' || session.nominationBatch?.status === 'Completed';
 
@@ -67,18 +65,6 @@ export default function ManagementClient({ session, pendingNominations, batchId 
         }
 
         setRemovingId(null);
-    };
-
-    const handleToggleApproval = async () => {
-        setIsToggling(true);
-        const newValue = !requireApproval;
-        const result = await toggleManagerApprovalRequirement(session.id, newValue);
-        if (result.success) {
-            setRequireApproval(newValue);
-        } else {
-            alert(result.error || 'Failed to update setting.');
-        }
-        setIsToggling(false);
     };
 
     // Construct Join URL (using window.location for origin if on client)
@@ -147,35 +133,6 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         </div>
                     </div>
                 </div>
-
-                {/* Session Settings */}
-                <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                    <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                        Settings
-                    </h3>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-bold text-slate-700">Require Manager Approval</p>
-                            <p className="text-[10px] text-slate-500 max-w-[150px]">Send email to manager for JIT enrollment approval.</p>
-                        </div>
-                        <button
-                            type="button"
-                            role="switch"
-                            aria-checked={requireApproval}
-                            onClick={handleToggleApproval}
-                            disabled={isToggling || isLocked}
-                            className={`${requireApproval ? 'bg-blue-600' : 'bg-slate-300'
-                                } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50`}
-                        >
-                            <span
-                                aria-hidden="true"
-                                className={`${requireApproval ? 'translate-x-5' : 'translate-x-0'
-                                    } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                            />
-                        </button>
-                    </div>
-                </div>
-
             </div>
 
             {/* Middle & Right: Management Area */}

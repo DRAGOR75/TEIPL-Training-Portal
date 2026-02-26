@@ -27,6 +27,10 @@ vi.mock('next/cache', () => ({
     unstable_cache: (fn: any) => fn,
 }));
 
+vi.mock('@/auth', () => ({
+    auth: vi.fn(),
+}));
+
 describe('submitTNINomination', () => {
     beforeEach(() => {
         vi.clearAllMocks();
@@ -40,14 +44,14 @@ describe('submitTNINomination', () => {
         const formData = new FormData();
         formData.append('programId_FOUNDATIONAL', programId);
 
-        await expect(submitTNINomination(formData)).rejects.toThrow('Employee ID and at least one Program are required');
+        await expect(submitTNINomination(formData)).rejects.toThrow('Employee ID (max 50) and at least one Program are required');
     });
 
     it('should throw error if no Program is selected', async () => {
         const formData = new FormData();
         formData.append('empId', empId);
 
-        await expect(submitTNINomination(formData)).rejects.toThrow('Employee ID and at least one Program are required');
+        await expect(submitTNINomination(formData)).rejects.toThrow('Employee ID (max 50) and at least one Program are required');
     });
 
     it('should successfully submit nomination and send email', async () => {
