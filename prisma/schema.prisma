@@ -45,7 +45,7 @@ enum Gender {
   OTHER
 }
 
-// 2. Section Table (The 20+ Departments)
+// 2. Section Table (Departments)
 model Section {
   id        String    @id @default(uuid())
   name      String    @unique // e.g., "Mining", "Mechanical"
@@ -81,7 +81,6 @@ enum TrainingCategory {
   COMMON
 }
 
-// --- UPDATED EXISTING TABLES ---
 
 // 4. Updated Nomination Table (TNI Table)
 model Nomination {
@@ -129,7 +128,7 @@ model NominationBatch {
   @@map("nomination_batches")
 }
 
-// --- REST OF YOUR ORIGINAL TABLES (RETAINED) ---
+
 
 model TrainingSession {
   id                        String       @id @default(uuid())
