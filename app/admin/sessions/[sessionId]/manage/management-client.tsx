@@ -264,8 +264,21 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                 {/* 2. Current Batch List */}
                 <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                     <div className="p-6 border-b border-slate-100">
-                        <h3 className="font-bold text-slate-900 text-lg">Enrolled Participants</h3>
-                        <p className="text-sm text-slate-500">Employees currently in this batch.</p>
+                        <div className="flex items-center gap-4">
+                            <div>
+                                <h3 className="font-bold text-slate-900 text-lg">Enrolled Participants</h3>
+                                <p className="text-sm text-slate-500">Employees currently in this batch.</p>
+                            </div>
+                            <div className="ml-auto">
+                                <a
+                                    href={`/admin/sessions/${session.id}/participants`}
+                                    className="bg-blue-50 hover:bg-blue-100 text-blue-700 px-4 py-2 rounded-xl text-xs font-bold transition-all border border-blue-200 flex items-center gap-2"
+                                >
+                                    <HiOutlineClipboardDocumentList className="w-4 h-4" />
+                                    View More
+                                </a>
+                            </div>
+                        </div>
                     </div>
                     <div className="max-h-[400px] overflow-y-auto">
                         {session.nominationBatch?.nominations.length === 0 ? (
