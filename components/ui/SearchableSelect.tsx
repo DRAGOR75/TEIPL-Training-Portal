@@ -142,7 +142,7 @@ export default function SearchableSelect({
                     ${direction === 'down' ? 'top-full mt-2' : ''}
                     ${direction === 'responsive-bottom' ? 'bottom-full mb-2 md:bottom-auto md:top-full md:mt-2 md:mb-0' : ''}
                 `}>
-                        <div className="max-h-60 overflow-y-auto">
+                        <div className="max-h-72 overflow-y-auto scroll-smooth overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent', WebkitOverflowScrolling: 'touch' }}>
                             {filteredOptions.length > 0 ? (
                                 <div className="p-1">
                                     {filteredOptions.map((option) => (

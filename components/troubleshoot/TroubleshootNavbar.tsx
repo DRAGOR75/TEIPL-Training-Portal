@@ -11,7 +11,7 @@ export default function TroubleshootNavbar() {
                 <div className="flex justify-between items-center h-20">
                     {/* Left Side: Header */}
                     <div className="flex items-center gap-4">
-                        <Link href="/" className="flex items-center gap-2 md:gap-3">
+                        <Link href="/troubleshoot" className="flex items-center gap-2 md:gap-3">
                             {/* Logos Container */}
                             <div className="flex flex-col md:flex-row items-center justify-center -space-y-2 md:space-y-0 md:gap-4">
                                 {/* Thriveni Logo */}
@@ -50,7 +50,7 @@ export default function TroubleshootNavbar() {
                     {/* Right Side: Feedback Button */}
                     <div>
                         <a
-                            href="/troubleshoot/feedback"
+                            href="/feedback"
                             className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 px-3 py-2 rounded-lg font-bold text-sm border border-slate-200 transition-colors group animate-pulse hover:animate-none"
                             title="Give Feedback"
                         >

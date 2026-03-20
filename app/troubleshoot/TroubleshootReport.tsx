@@ -376,7 +376,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                                 <div>
 
                                                                     <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
-                                                                        Justification:{step.justification || step.cause.justification}
+                                                                        Explanation:{step.justification || step.cause.justification}
                                                                     </p>
                                                                 </div>
                                                             )}
