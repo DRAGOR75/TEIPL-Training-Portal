@@ -18,8 +18,7 @@ export default async function TroubleshootingPage() {
     }
 
     return (
-        <div className="w-full min-h-screen">
-
+        <div className="w-full flex flex-col min-h-[calc(100vh-5rem)]">
             <TroubleshootReport products={products} />
         </div>
     );

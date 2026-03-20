@@ -11,11 +11,11 @@ export default function TroubleshootNavbar() {
                 <div className="flex justify-between items-center h-20">
                     {/* Left Side: Header */}
                     <div className="flex items-center gap-4">
-                        <Link href="/troubleshoot" className="flex items-center gap-2 md:gap-3">
+                        <a href="/" className="flex items-center gap-2 md:gap-3">
                             {/* Logos Container */}
                             <div className="flex flex-col md:flex-row items-center justify-center -space-y-2 md:space-y-0 md:gap-4">
                                 {/* Thriveni Logo */}
-                                <div className="relative w-24 h-8 md:w-32 md:h-16">
+                                <div className="relative w-20 h-6 md:w-32 md:h-16">
                                     <Image
                                         src="/thriveny_logo.svg"
                                         alt="Thriveni Logo"
@@ -24,9 +24,9 @@ export default function TroubleshootNavbar() {
                                         priority
                                     />
                                 </div>
-                                <div className="h-8 w-[1px] bg-slate-300 mx-4 hidden md:block"></div>
+                                <div className="h-6 w-[1px] bg-slate-200 mx-2 hidden md:block"></div>
                                 {/* Lloyds Logo */}
-                                <div className="relative w-27 h-8 md:w-34 md:h-10">
+                                <div className="relative w-22 h-6 md:w-34 md:h-10">
                                     <Image
                                         src="/LLoyds_logo.svg"
                                         alt="Lloyds Metals Logo"
@@ -37,12 +37,16 @@ export default function TroubleshootNavbar() {
                                     />
                                 </div>
                             </div>
-                        </Link>
+                        </a>
                     </div>
 
                     {/* Centered Title */}
-                    <div className="flex flex-col items-center  md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
-                        <h1 className="text-base md:text-2xl font-black text-slate-900 tracking-wide leading-snug md:leading-tight text-center">
+                    <div className="flex items-center gap-2 md:gap-3 md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-lg md:rounded-xl flex items-center justify-center text-white shrink-0">
+                            <HiOutlineWrench size={20} className="md:hidden" />
+                            <HiOutlineWrench size={24} className="hidden md:block" />
+                        </div>
+                        <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-tight">
                             Troubleshooting<br className="md:hidden" /> Library
                         </h1>
                     </div>
