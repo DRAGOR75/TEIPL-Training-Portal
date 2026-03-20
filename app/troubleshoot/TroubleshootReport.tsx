@@ -266,7 +266,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 searchPlaceholder="Search issues..."
                                 disabled={!selectedProductId || loadingFaults}
                                 icon={<HiOutlineMagnifyingGlass size={20} />}
-                                direction={diagnosis ? 'down' : 'responsive-bottom'}
+                                direction={diagnosis ? 'up' : 'responsive-bottom'}
                             />
                             {faults.length === 0 && selectedProductId && !loadingFaults && (
                                 <p className="flex items-center gap-1.5 text-xs text-lloyds-red font-medium ml-1 bg-lloyds-red/10 w-fit px-2 py-1 rounded-md">
