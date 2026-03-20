@@ -18,6 +18,22 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
     title: "Training Thriveni",
     description: "Training Management System for Thriveni Earthmovers & Infra Pvt. Ltd.",
+    appleWebApp: {
+        capable: true,
+        statusBarStyle: "default",
+        title: "Troubleshooting Library",
+    },
+    formatDetection: {
+        telephone: false,
+    },
+};
+
+export const viewport = {
+    themeColor: "#0a3292",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
 };
 
 import { headers } from "next/headers";
