@@ -499,45 +499,47 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {!selectedProductId && (
-                        <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
-                            <p className="text-slate-500 max-w-sm mx-auto mb-2 text-sm leading-relaxed">
-                                Please select a machine model from the dropdown above to identify common faults and solutions.
-                            </p>
-                        </div>
-                    )}
+                        <>
+                            <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
+                                <p className="text-slate-500 max-w-sm mx-auto mb-2 text-sm leading-relaxed">
+                                    Please select a machine model from the dropdown above to identify common faults and solutions.
+                                </p>
+                            </div>
 
-                    {/* Secondary Navigation Row (Guidelines, Disclaimer, Feedback) */}
-                    <div className="px-2 md:px-4">
-                        <div className="bg-slate-50/50 backdrop-blur-sm border border-slate-200/60 rounded-2xl md:rounded-[2rem] p-3 md:p-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-                            <button
-                                onClick={() => setShowGuide(true)}
-                                className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 hover:text-thriveni-blue transition-all group"
-                            >
-                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                    <HiOutlineBookOpen size={16} />
+                            {/* Secondary Navigation Row (Guidelines, Disclaimer, Feedback) - Only on landing */}
+                            <div className="px-2 md:px-4">
+                                <div className="bg-slate-50/50 backdrop-blur-sm border border-slate-200/60 rounded-2xl md:rounded-[2rem] p-3 md:p-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+                                    <button
+                                        onClick={() => setShowGuide(true)}
+                                        className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 hover:text-thriveni-blue transition-all group"
+                                    >
+                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                            <HiOutlineBookOpen size={16} />
+                                        </div>
+                                        Guidelines
+                                    </button>
+                                    <button
+                                        onClick={() => setShowDisclaimer(true)}
+                                        className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
+                                    >
+                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                            <HiOutlineExclamationCircle size={16} />
+                                        </div>
+                                        Disclaimer
+                                    </button>
+                                    <button
+                                        onClick={handleFeedbackNav}
+                                        className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
+                                    >
+                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                            <HiOutlineChatBubbleLeftRight size={16} />
+                                        </div>
+                                        Feedback
+                                    </button>
                                 </div>
-                                Guidelines
-                            </button>
-                            <button
-                                onClick={() => setShowDisclaimer(true)}
-                                className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
-                            >
-                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                    <HiOutlineExclamationCircle size={16} />
-                                </div>
-                                Disclaimer
-                            </button>
-                            <button
-                                onClick={handleFeedbackNav}
-                                className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
-                            >
-                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                    <HiOutlineChatBubbleLeftRight size={16} />
-                                </div>
-                                Feedback
-                            </button>
-                        </div>
-                    </div>
+                            </div>
+                        </>
+                    )}
 
                 </div>
             </div>
