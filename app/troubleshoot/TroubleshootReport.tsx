@@ -49,8 +49,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     const [loadingFaults, setLoadingFaults] = useState(false);
     const [loadingDiagnosis, setLoadingDiagnosis] = useState(false);
 
-    // State for collapsible steps
+    // State for collapsible steps and symptoms
     const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
+    const [isSymptomsExpanded, setIsSymptomsExpanded] = useState(false);
 
     const toggleStep = (index: number) => {
         setExpandedSteps(prev => ({
@@ -224,14 +225,11 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                 </div>
             )}
 
-            {/* Main Content Wrapper */}
-            <div className="flex flex-col gap-4 md:gap-9">
+            {/* Main Content Wrapper (Occupies full space to push footer to bottom) */}
+            <div className="flex-1 flex flex-col gap-4 md:gap-9">
 
-                {/* Control Panel (Conditional Order: Bottom on Mobile initially, Top when diagnosis is shown) */}
-                <div className={`
-                    bg-white p-6 md:p-8 rounded-3xl md:rounded-3xl shadow-sm border border-slate-200 mb-6 md:mb-0
-                    ${diagnosis ? 'order-1' : 'order-2 md:order-1'}
-                `}>
+                {/* Control Panel (Always top) */}
+                <div className="bg-white p-6 md:p-8 rounded-3xl md:rounded-3xl shadow-sm border border-slate-200">
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                         {/* Machine Selector */}
@@ -279,11 +277,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     </div>
                 </div>
 
-                {/* Diagnostic Content (Conditional Order: Top on Mobile initially, Bottom when diagnosis is shown) */}
-                <div className={`
-                    space-y-4 md:space-y-9
-                    ${diagnosis ? 'order-2' : 'order-1 md:order-2'}
-                `}>
+                {/* Diagnostic Content (Always below selectors) */}
+                <div className="space-y-4 md:space-y-9">
 
                     {/* Diagnostic Report Area */}
                     {loadingDiagnosis && (
@@ -320,6 +315,57 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     </div>
                                 </div>
                             )}
+
+                            {/* Symptoms Section */}
+                            {(() => {
+                                // Extract and split symptoms more robustly
+                                const allSymptoms = Array.from(new Set(
+                                    diagnosis.sequence
+                                        .map(step => step.cause.symptoms)
+                                        .filter(Boolean)
+                                        .flatMap(s => {
+                                            if (/\d+\./.test(s!)) {
+                                                return s!.split(/\s*(?=\d+\.)/).map(item => item.trim());
+                                            }
+                                            return s!.split(',').map(item => item.trim());
+                                        })
+                                        .filter(item => item.length > 2)
+                                ));
+
+                                if (allSymptoms.length === 0) return null;
+
+                                return (
+                                    <div className="border-b border-slate-100 bg-white">
+                                        <button
+                                            onClick={() => setIsSymptomsExpanded(!isSymptomsExpanded)}
+                                            className="w-full flex items-center justify-between p-4 md:p-8 pr-4 md:pr-16 hover:bg-slate-50 transition-colors text-left"
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-500 border border-slate-200">
+                                                    <HiOutlineInformationCircle size={22} />
+                                                </div>
+                                                <h4 className="text-slate-900 font-bold text-sm uppercase tracking-wide">Observed Symptoms ({allSymptoms.length})</h4>
+                                            </div>
+                                            <div className={`text-slate-400 transition-transform duration-300 ${isSymptomsExpanded ? 'rotate-180' : ''}`}>
+                                                <HiOutlineChevronDown size={20} />
+                                            </div>
+                                        </button>
+
+                                        {isSymptomsExpanded && (
+                                            <div className="px-4 md:px-8 pb-8 animate-in fade-in slide-in-from-top-2 duration-200">
+                                                <ul className="space-y-3">
+                                                    {allSymptoms.map((symptom, i) => (
+                                                        <li key={i} className="flex gap-3 text-slate-700 text-sm md:text-base leading-relaxed bg-slate-50/50 p-3 rounded-xl border border-slate-100">
+                                                            <span className="shrink-0 w-1.5 h-1.5 rounded-full bg-slate-300 mt-2"></span>
+                                                            {symptom}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
 
                             {/* Diagnostic Steps */}
                             <div className="p-2 md:p-8 bg-slate-50/50">
@@ -463,23 +509,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                     )}
 
                     {!selectedProductId && (
-                        <div className="bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
-                            <div className="w-14 h-14 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-300 mx-auto mb-4 transform rotate-3">
-                                <HiOutlineWrench size={28} />
-                            </div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">Start Troubleshooting</h3>
-                            <p className="text-slate-500 max-w-sm mx-auto mb-6 text-sm">
-                                Select a machine model from the dropdown (provided below) to identify common faults and solutions.
+                        <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
+                            <p className="text-slate-500 max-w-sm mx-auto mb-2 text-sm leading-relaxed">
+                                Please select a machine model from the dropdown above to identify common faults and solutions.
                             </p>
-                            <div className="flex justify-center gap-3 text-[10px] md:text-xs font-semibold text-slate-400 uppercase tracking-widest">
-                                <span className="flex items-center gap-1"><HiOutlineCheckCircle size={12} /> Identify</span>
-                                <span className="w-px h-3 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><HiOutlineMagnifyingGlass size={12} /> Diagnose</span>
-                                <span className="w-px h-3 bg-slate-300"></span>
-                                <span className="flex items-center gap-1"><HiOutlineWrench size={12} /> Resolve</span>
-                            </div>
                         </div>
                     )}
+
                 </div>
             </div>
         </div>
