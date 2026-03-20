@@ -20,6 +20,7 @@ export const metadata: Metadata = {
     description: "Training Management System for Thriveni Earthmovers & Infra Pvt. Ltd.",
 };
 
+import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
 
 export default async function RootLayout({
@@ -27,8 +28,8 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const session = await auth(); // Updated: Fetch session
-    // const session = null;
+    const session = await auth();
+    const host = (await headers()).get("host") || "";
 
     return (
         <html lang="en">
@@ -36,8 +37,8 @@ export default async function RootLayout({
                 className={`${inter.variable} ${geistMono.variable} antialiased font-sans text-slate-900`}
                 suppressHydrationWarning={true}
             >
-                {/* Updated: Pass session to Navbar */}
-                <Navbar session={session} />
+                {/* Updated: Pass session and host to Navbar */}
+                <Navbar session={session} hostname={host} />
                 {children}
                 <SpeedInsights />
             </body>

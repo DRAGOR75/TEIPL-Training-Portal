@@ -2,23 +2,26 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList } from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
 
-export default function Navbar({ session }: { session: Session | null }) {
+export default function Navbar({ session, hostname = '' }: { session: Session | null; hostname?: string }) {
     const [isOpen, setIsOpen] = useState(false);
     const isLoggedIn = !!session?.user;
     const userRole = (session?.user as any)?.role;
     const pathname = usePathname();
 
     // Hide Navbar on Troubleshooting Subdomain or specific paths
-    const isTroubleshootSubdomain = typeof window !== 'undefined' && 
-        (window.location.hostname === 'hemmts.academythriveni.com' || window.location.hostname.includes('troubleshoot.localhost'));
+    const isTroubleshootPage = hostname.includes('hemmts') || 
+                               pathname?.startsWith('/join') || 
+                               pathname?.startsWith('/feedback') || 
+                               pathname?.startsWith('/tni') || 
+                               pathname?.startsWith('/troubleshoot');
 
-    if (isTroubleshootSubdomain || pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni') || pathname?.startsWith('/troubleshoot')) {
+    if (isTroubleshootPage) {
         return null;
     }
 
