@@ -3,10 +3,15 @@
 import Link from 'next/link';
 import { HiOutlineWrench, HiOutlineChatBubbleBottomCenterText } from 'react-icons/hi2';
 import Image from 'next/image';
+import { useState } from 'react';
+import LoadingSpinner from './LoadingSpinner';
 
 export default function TroubleshootNavbar() {
+    const [isNavigating, setIsNavigating] = useState(false);
+
     return (
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
+            {isNavigating && <LoadingSpinner />}
             <div className="w-full px-2 sm:px-4 lg:px-6">
                 <div className="flex justify-between items-center h-20">
                     {/* Left Side: Header */}
@@ -53,14 +58,17 @@ export default function TroubleshootNavbar() {
 
                     {/* Right Side: Feedback Button */}
                     <div>
-                        <a
-                            href="/feedback"
+                        <button
+                            onClick={() => {
+                                setIsNavigating(true);
+                                window.location.href = '/feedback';
+                            }}
                             className="flex items-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 px-3 py-2 rounded-lg font-bold text-sm border border-slate-200 transition-colors group animate-pulse hover:animate-none"
                             title="Give Feedback"
                         >
                             <HiOutlineChatBubbleBottomCenterText size={18} className="text-lloyds-red" />
                             <span className="hidden md:inline">Feedback</span>
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>

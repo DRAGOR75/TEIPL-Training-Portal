@@ -138,9 +138,7 @@ export default function SearchableSelect({
                 isOpen && (
                     <div className={`
                     absolute z-50 w-full bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden animate-in fade-in zoom-in-95 duration-100
-                    ${direction === 'up' ? 'bottom-full mb-2' : ''}
-                    ${direction === 'down' ? 'top-full mt-2' : ''}
-                    ${direction === 'responsive-bottom' ? 'bottom-full mb-2 md:bottom-auto md:top-full md:mt-2 md:mb-0' : ''}
+                    ${direction === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'}
                 `}>
                         <div className="max-h-72 overflow-y-auto scroll-smooth overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent', WebkitOverflowScrolling: 'touch' }}>
                             {filteredOptions.length > 0 ? (

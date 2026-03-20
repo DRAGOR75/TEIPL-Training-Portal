@@ -37,11 +37,13 @@ interface TroubleshootReportProps {
 }
 
 import TroubleshootingFeedbackModal from '@/components/TroubleshootingFeedbackModal';
+import LoadingSpinner from '@/components/troubleshoot/LoadingSpinner';
 
 export default function TroubleshootReport({ products }: TroubleshootReportProps) {
     const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
     const [selectedFaultId, setSelectedFaultId] = useState<string | null>(null);
-    const [showFeedbackModal, setShowFeedbackModal] = useState(true);
+    const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+    const [showDisclaimer, setShowDisclaimer] = useState(false);
 
     const [faults, setFaults] = useState<FullProductFault[]>([]);
     const [diagnosis, setDiagnosis] = useState<DiagnosisData | null>(null);
@@ -116,113 +118,99 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     };
 
     const [showGuide, setShowGuide] = useState(false);
+    const [isNavigating, setIsNavigating] = useState(false);
+
+    const handleFeedbackNav = () => {
+        setIsNavigating(true);
+        // Navigate to feedback page after showing spinner
+        window.location.href = '/feedback';
+    };
 
     return (
         <div className="space-y-4 md:space-y-9 w-full mx-auto px-1 md:px-0">
-            <TroubleshootingFeedbackModal
-                isOpen={showFeedbackModal}
-                onClose={() => {
-                    setShowFeedbackModal(false);
-                    setShowGuide(true);
-                }}
-            />
+            {isNavigating && <LoadingSpinner />}
 
-            {/* Guide Modal Overlay */}
+
+            {/* Guideline Modal Overlay */}
             {showGuide && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] md:max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-slate-200 flex flex-col">
-                        {/* Modal Header */}
                         <div className="sticky top-0 bg-white z-10 px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="bg-thriveni-blue/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-thriveni-blue">
                                     <HiOutlineBookOpen size={20} className="stroke-[2.5]" />
                                 </div>
-                                <div>
-                                    <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Troubleshooting Guidelines</h2>
-
-                                </div>
+                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Guidelines</h2>
                             </div>
                         </div>
-
-                        {/* Modal Content */}
                         <div className="p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
-                            {/* 8-Point Checklist */}
-                            <div className="space-y-3 md:space-y-4">
-
-                                <ol className="space-y-2 md:space-y-3">
-                                    {[
-                                        "Get all the facts concerning the complaint",
-                                        "Analyse the problem thoroughly",
-                                        "Relate the symptoms to the basic engine / genset systems and components",
-                                        "Consider any recent maintenance or repair action that can relate to the complaint",
-                                        "Double-check before beginning any disassembly",
-                                        "Solve the problem by using the symptom charts and doing the easiest things first",
-                                        "Determine the cause of the problem and make a thorough repair",
-                                        "After repairs have been made, operate the machine to make sure the cause of the complaint has been corrected."
-                                    ].map((item, idx) => (
-                                        <li key={idx} className="flex gap-2 md:gap-3 text-slate-700 text-sm md:text-base font-medium leading-relaxed bg-slate-50 p-2.5 md:p-3 rounded-lg border border-slate-100">
-                                            <span className="flex-shrink-0 w-5 h-5 md:w-6 md:h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-xs font-bold shadow-sm mt-0.5">
-                                                {idx + 1}
-                                            </span>
-                                            {item}
-                                        </li>
-                                    ))}
-                                </ol>
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                                {/* Disclaimer */}
-                                <div className="bg-gray-50 rounded-xl p-4 md:p-5 border border-gray-100">
-                                    <h4 className="flex items-center gap-2 text-gray-800 font-bold text-sm uppercase tracking-wide mb-1.5 md:mb-2">
-                                        <HiOutlineExclamationCircle size={14} /> Disclaimer
-                                    </h4>
-                                    <p className="text-gray-900/80 text-sm font-medium leading-relaxed">
-                                        The troubleshooting steps provided are for reference only and based on common scenarios..
-                                    </p>
-                                </div>
-
-                                {/* User Guide & Feedback */}
-                                <div className="bg-thriveni-blue/5 rounded-xl p-4 md:p-5 border border-thriveni-blue/10 space-y-3 md:space-y-4">
-                                    <div>
-                                        <h4 className="flex items-center gap-2 text-thriveni-blue font-bold text-sm uppercase tracking-wide mb-1">
-                                            <HiOutlineQuestionMarkCircle size={14} /> User Guide
-                                        </h4>
-
-                                    </div>
-                                    <div className="pt-3 border-t border-thriveni-blue/10">
-                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
-                                            <HiOutlineInformationCircle size={14} /> Step 1 - Search for the machine you want to Troubleshoot.
-                                        </a>
-                                    </div>
-                                    <div className="pt-3 border-t border-thriveni-blue/10">
-                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
-                                            <HiOutlineInformationCircle size={14} /> Step 2 - Select the fault you are experiencing.
-                                        </a>
-                                    </div>
-                                    <div className="pt-3 border-t border-thriveni-blue/10">
-                                        <a href="#" className="flex items-center gap-2 text-thriveni-blue hover:text-thriveni-light hover:underline text-sm font-bold transition-colors">
-                                            You will get the steps to follow to Troubleshoot the machine.
-                                        </a>
-                                    </div>
-
-                                </div>
-                            </div>
-
-
-                            {/* Modal Footer */}
-                            <div className=" bottom-0 bg-white px-4 py-4 md:px-8 md:py-5 border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-end gap-3 shrink-0">
-
+                            <ol className="space-y-2 md:space-y-3">
+                                {[
+                                    "Get all the facts concerning the complaint",
+                                    "Analyse the problem thoroughly",
+                                    "Relate the symptoms to the basic engine / genset systems and components",
+                                    "Consider any recent maintenance or repair action that can relate to the complaint",
+                                    "Double-check before beginning any disassembly",
+                                    "Solve the problem by using the symptom charts and doing the easiest things first",
+                                    "Determine the cause of the problem and make a thorough repair",
+                                    "After repairs have been made, operate the machine to make sure the cause of the complaint has been corrected."
+                                ].map((item, idx) => (
+                                    <li key={idx} className="flex gap-2 md:gap-3 text-slate-700 text-sm md:text-base font-medium leading-relaxed bg-slate-50 p-2.5 md:p-3 rounded-lg border border-slate-100">
+                                        <span className="flex-shrink-0 w-6 h-6 bg-white border border-slate-200 text-slate-500 rounded-full flex items-center justify-center text-xs font-bold shadow-sm mt-0.5">
+                                            {idx + 1}
+                                        </span>
+                                        {item}
+                                    </li>
+                                ))}
+                            </ol>
+                            <div className="pt-6 flex justify-end">
                                 <button
                                     onClick={() => setShowGuide(false)}
-                                    className="w-full md:w-auto bg-lloyds-red hover:bg-[#D11F25] text-white px-6 py-3 md:px-8 md:py-3 rounded-xl font-bold text-base md:text-lg shadow-lg shadow-lloyds-red/20 transform transition-all active:scale-95 flex items-center justify-center gap-2"
+                                    className="bg-thriveni-blue text-white px-8 py-2.5 rounded-xl font-bold hover:bg-thriveni-light transition-all shadow-lg"
                                 >
-                                    <HiOutlineWrench size={18} />
-                                    Start Troubleshooting
+                                    Close Guidelines
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Disclaimer Modal Overlay */}
+            {showDisclaimer && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-xl w-full animate-in zoom-in-95 duration-300 border border-slate-200 flex flex-col">
+                        <div className="bg-white px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-amber-500/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-amber-600">
+                                    <HiOutlineExclamationCircle size={20} className="stroke-[2.5]" />
+                                </div>
+                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Disclaimer</h2>
+                            </div>
+                        </div>
+                        <div className="p-4 md:p-8 space-y-4">
+                            <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
+                                The troubleshooting steps provided are for reference only and based on common scenarios.
+                            </p>
+                            <div className="pt-6 flex justify-end">
+                                <button
+                                    onClick={() => setShowDisclaimer(false)}
+                                    className="bg-slate-900 text-white px-8 py-2.5 rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-lg"
+                                >
+                                    Understood
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Feedback Modal Overlay */}
+            {showFeedbackModal && (
+                <TroubleshootingFeedbackModal
+                    isOpen={showFeedbackModal}
+                    onClose={() => setShowFeedbackModal(false)}
+                />
             )}
 
             {/* Main Content Wrapper (Occupies full space to push footer to bottom) */}
@@ -245,7 +233,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 placeholder="-- Choose a Machine --"
                                 searchPlaceholder="Search machines..."
                                 icon={<HiOutlineMagnifyingGlass size={20} />}
-                                direction={diagnosis ? 'down' : 'responsive-bottom'}
+                                direction="down"
                             />
                         </div>
 
@@ -266,7 +254,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 searchPlaceholder="Search issues..."
                                 disabled={!selectedProductId || loadingFaults}
                                 icon={<HiOutlineMagnifyingGlass size={20} />}
-                                direction={diagnosis ? 'up' : 'responsive-bottom'}
+                                direction="down"
                             />
                             {faults.length === 0 && selectedProductId && !loadingFaults && (
                                 <p className="flex items-center gap-1.5 text-xs text-lloyds-red font-medium ml-1 bg-lloyds-red/10 w-fit px-2 py-1 rounded-md">
@@ -276,6 +264,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         </div>
                     </div>
                 </div>
+
+
 
                 {/* Diagnostic Content (Always below selectors) */}
                 <div className="space-y-4 md:space-y-9">
@@ -486,7 +476,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <div className="text-center mt-8 pb-8">
                             <p className="text-slate-500 mb-2">Did this help you solve the issue?</p>
                             <button
-                                onClick={() => setShowFeedbackModal(true)}
+                                onClick={handleFeedbackNav}
                                 className="inline-flex items-center gap-2 text-lloyds-red font-bold hover:underline"
                             >
                                 <HiOutlineChatBubbleLeftRight size={18} />
@@ -515,6 +505,39 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             </p>
                         </div>
                     )}
+
+                    {/* Secondary Navigation Row (Guidelines, Disclaimer, Feedback) */}
+                    <div className="px-2 md:px-4">
+                        <div className="bg-slate-50/50 backdrop-blur-sm border border-slate-200/60 rounded-2xl md:rounded-[2rem] p-3 md:p-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
+                            <button
+                                onClick={() => setShowGuide(true)}
+                                className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 hover:text-thriveni-blue transition-all group"
+                            >
+                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                    <HiOutlineBookOpen size={16} />
+                                </div>
+                                Guidelines
+                            </button>
+                            <button
+                                onClick={() => setShowDisclaimer(true)}
+                                className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
+                            >
+                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                    <HiOutlineExclamationCircle size={16} />
+                                </div>
+                                Disclaimer
+                            </button>
+                            <button
+                                onClick={handleFeedbackNav}
+                                className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
+                            >
+                                <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
+                                    <HiOutlineChatBubbleLeftRight size={16} />
+                                </div>
+                                Feedback
+                            </button>
+                        </div>
+                    </div>
 
                 </div>
             </div>
