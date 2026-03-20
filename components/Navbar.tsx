@@ -14,8 +14,11 @@ export default function Navbar({ session }: { session: Session | null }) {
     const userRole = (session?.user as any)?.role;
     const pathname = usePathname();
 
-    // Hide Navbar on Feedback, Join & TNI Pages
-    if (pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni') || pathname?.startsWith('/troubleshoot')) {
+    // Hide Navbar on Troubleshooting Subdomain or specific paths
+    const isTroubleshootSubdomain = typeof window !== 'undefined' && 
+        (window.location.hostname === 'hemmts.academythriveni.com' || window.location.hostname.includes('troubleshoot.localhost'));
+
+    if (isTroubleshootSubdomain || pathname?.startsWith('/join') || pathname?.startsWith('/feedback') || pathname?.startsWith('/tni') || pathname?.startsWith('/troubleshoot')) {
         return null;
     }
 
