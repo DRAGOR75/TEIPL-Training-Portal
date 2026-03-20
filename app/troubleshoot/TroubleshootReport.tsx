@@ -140,7 +140,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 <div className="bg-thriveni-blue/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-thriveni-blue">
                                     <HiOutlineBookOpen size={20} className="stroke-[2.5]" />
                                 </div>
-                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Guidelines</h2>
+                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Troubleshooting Guidelines</h2>
                             </div>
                         </div>
                         <div className="p-4 md:p-8 space-y-6 md:space-y-8 overflow-y-auto">
@@ -168,7 +168,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                     onClick={() => setShowGuide(false)}
                                     className="bg-thriveni-blue text-white px-8 py-2.5 rounded-xl font-bold hover:bg-thriveni-light transition-all shadow-lg"
                                 >
-                                    Close Guidelines
+                                    Close Troubleshooting Guidelines
                                 </button>
                             </div>
                         </div>
@@ -185,13 +185,17 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 <div className="bg-amber-500/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-amber-600">
                                     <HiOutlineExclamationCircle size={20} className="stroke-[2.5]" />
                                 </div>
-                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">Disclaimer</h2>
+                                <h2 className="text-lg md:text-2xl font-black text-slate-900 leading-tight">User Guidelines</h2>
                             </div>
                         </div>
                         <div className="p-4 md:p-8 space-y-4">
                             <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
-                                The troubleshooting steps provided are for reference only and based on common scenarios.
+                                Step 1: Select the machine you want to troubleshoot.
                             </p>
+                            <p className="text-slate-700 text-sm md:text-base leading-relaxed font-medium">
+                                Step 2: Select the fault you want to troubleshoot.
+                            </p>
+
                             <div className="pt-6 flex justify-end">
                                 <button
                                     onClick={() => setShowDisclaimer(false)}
@@ -500,9 +504,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
                     {!selectedProductId && (
                         <>
-                            <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-center">
-                                <p className="text-slate-500 max-w-sm mx-auto mb-2 text-sm leading-relaxed">
-                                    Please select a machine model from the dropdown above to identify common faults and solutions.
+                            <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-justify">
+                                <p className="text-slate-500 max-w-md mx-auto mb-2 text-sm leading-relaxed">
+                                    <strong>Caution :</strong> <span className="text-lloyds-red">This troubleshooting library provides only quick guidelines and is intended as a reference for technicians who possess comprehensive knowledge of the machines. For detailed instructions, safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
                                 </p>
                             </div>
 
@@ -516,7 +520,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
                                             <HiOutlineBookOpen size={16} />
                                         </div>
-                                        Guidelines
+                                        Troubleshooting Guidelines
                                     </button>
                                     <button
                                         onClick={() => setShowDisclaimer(true)}
@@ -525,7 +529,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                         <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
                                             <HiOutlineExclamationCircle size={16} />
                                         </div>
-                                        Disclaimer
+                                        User guidelines
                                     </button>
                                     <button
                                         onClick={handleFeedbackNav}
