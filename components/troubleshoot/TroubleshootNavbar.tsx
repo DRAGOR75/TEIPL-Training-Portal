@@ -1,13 +1,54 @@
 'use client';
 
 import Link from 'next/link';
-import { HiOutlineWrench, HiOutlineChatBubbleBottomCenterText } from 'react-icons/hi2';
+import { HiOutlineWrench, HiOutlineChatBubbleBottomCenterText, HiOutlineArrowDownTray } from 'react-icons/hi2';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
 export default function TroubleshootNavbar() {
     const [isNavigating, setIsNavigating] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [showInstallBtn, setShowInstallBtn] = useState(false);
+
+    useEffect(() => {
+        const handler = (e: Event) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            setShowInstallBtn(true);
+        };
+        
+        window.addEventListener('beforeinstallprompt', handler);
+
+        // Check if iOS and not already installed
+        const isIos = () => {
+            const userAgent = window.navigator.userAgent.toLowerCase();
+            return /iphone|ipad|ipod/.test(userAgent);
+        }
+        const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator as any).standalone;
+        
+        // Match media for desktop PWAs installed already
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
+        if (isIos() && !isInStandaloneMode() && !isStandalone) {
+            setShowInstallBtn(true);
+        }
+
+        return () => window.removeEventListener('beforeinstallprompt', handler);
+    }, []);
+
+    const handleInstallClick = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setShowInstallBtn(false);
+            }
+            setDeferredPrompt(null);
+        } else {
+            alert("To install this app on your iPhone/iPad:\n\n1. Tap the Share button at the bottom of Safari\n2. Scroll down and tap 'Add to Home Screen'");
+        }
+    };
 
     return (
         <nav className="bg-white border-b border-slate-200 sticky top-0 z-50">
@@ -56,8 +97,18 @@ export default function TroubleshootNavbar() {
                         </h1>
                     </div>
 
-                    {/* Right Side: Feedback Button */}
-                    <div>
+                    {/* Right Side: Install + Feedback Buttons */}
+                    <div className="flex items-center gap-2">
+                        {showInstallBtn && (
+                            <button
+                                onClick={handleInstallClick}
+                                className="flex items-center gap-1.5 md:gap-2 bg-thriveni-blue hover:bg-thriveni-light text-white px-2.5 py-2 md:px-3 rounded-lg font-bold text-sm transition-colors shadow-sm"
+                                title="Install App"
+                            >
+                                <HiOutlineArrowDownTray size={18} />
+                                <span className="hidden md:inline">Install App</span>
+                            </button>
+                        )}
                         <button
                             onClick={() => {
                                 setIsNavigating(true);
