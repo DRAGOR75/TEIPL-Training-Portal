@@ -15,18 +15,40 @@ const geistMono = Geist_Mono({
     subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-    title: "Training Thriveni",
-    description: "Training Management System for Thriveni Earthmovers & Infra Pvt. Ltd.",
-    appleWebApp: {
-        capable: true,
-        statusBarStyle: "default",
-        title: "Troubleshooting Library",
-    },
-    formatDetection: {
-        telephone: false,
-    },
-};
+export async function generateMetadata(): Promise<Metadata> {
+    const headersList = await headers();
+    const host = headersList.get("host") || "";
+    const troubleshootHost = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com';
+    const isTroubleshoot = host.split(':')[0] === troubleshootHost.split(':')[0];
+
+    if (isTroubleshoot) {
+        return {
+            title: "Troubleshooting Library - Thriveni",
+            description: "Standalone troubleshooting guide for Thriveni earthmoving machinery.",
+            appleWebApp: {
+                capable: true,
+                statusBarStyle: "default",
+                title: "Troubleshooting",
+            },
+            formatDetection: {
+                telephone: false,
+            },
+        };
+    }
+
+    return {
+        title: "Training Thriveni",
+        description: "Training Management System for Thriveni Earthmovers & Infra Pvt. Ltd.",
+        appleWebApp: {
+            capable: true,
+            statusBarStyle: "default",
+            title: "Training Portal",
+        },
+        formatDetection: {
+            telephone: false,
+        },
+    };
+}
 
 export const viewport = {
     themeColor: "#0a3292",

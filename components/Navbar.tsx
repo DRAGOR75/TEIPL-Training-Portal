@@ -15,7 +15,8 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
     const pathname = usePathname();
 
     // Hide Navbar on Troubleshooting Subdomain or specific paths
-    const isTroubleshootPage = hostname.includes('hemmts') || 
+    const isTroubleshootHost = hostname.startsWith('troubleshoot') || hostname.includes('hemmts');
+    const isTroubleshootPage = isTroubleshootHost || 
                                pathname?.startsWith('/join') || 
                                pathname?.startsWith('/feedback') || 
                                pathname?.startsWith('/tni') || 
