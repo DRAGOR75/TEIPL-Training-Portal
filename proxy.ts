@@ -33,7 +33,7 @@ export default authMiddleware(async (req) => {
         const isStatic = pathname.startsWith('/_next') ||
             pathname.startsWith('/api') ||
             pathname.startsWith('/favicon') ||
-            /\.(?:svg|png|jpg|jpeg|gif|ico|css|js|woff|woff2|ttf)$/.test(pathname);
+            /\.(?:svg|png|jpg|jpeg|gif|ico|css|js|woff|woff2|ttf|webmanifest)$/.test(pathname);
 
         if (!isStatic && !pathname.startsWith('/troubleshoot')) {
             // Block non-troubleshoot app routes on the subdomain
