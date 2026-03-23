@@ -99,7 +99,6 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
         const libraryData = {
             name: formData.get('name') as string,
             action: formData.get('action') as string,
-            symptoms: formData.get('symptoms') as string,
             manualRef: formData.get('manualRef') as string,
         };
 
@@ -130,14 +129,10 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                         <label className="text-xs font-bold text-slate-500 uppercase">Justification (Context Specific)</label>
                         <textarea defaultValue={step.justification || step.cause.justification || ''} name="justification" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <div>
                             <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
                             <textarea defaultValue={step.cause.action || ''} name="action" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
-                        </div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
-                            <textarea defaultValue={step.cause.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                         </div>
                     </div>
                     <div>
@@ -537,11 +532,42 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                             &larr; Select a fault on the left to edit its sequence.
                         </div>
                     ) : (
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                        >
+                        <div className="space-y-6">
+                            <div className="bg-white p-4 rounded-xl border border-blue-200 shadow-sm relative">
+                                <label className="text-xs font-bold text-blue-700 uppercase flex justify-between items-center mb-1">
+                                    <span>Observed Symptoms</span>
+                                    {isUpdating && <span className="text-blue-500 flex items-center gap-1"><HiOutlineArrowPath className="animate-spin" size={12} /> Saving...</span>}
+                                </label>
+                                <form action={async (formData) => {
+                                    const pf = linkedFaults.find(p => p.id === selectedProductFaultId);
+                                    if (pf) {
+                                        setIsUpdating(true);
+                                        const res = await updateProductFault(pf.id, { viewSeq: pf.viewSeq, symptoms: formData.get('symptoms') as string });
+                                        if (res?.error) alert(res.error);
+                                        const data = await getProductFaults(selectedProductId!);
+                                        setLinkedFaults(data);
+                                        setIsUpdating(false);
+                                    }
+                                }}>
+                                    <textarea 
+                                        name="symptoms"
+                                        className="w-full mt-1 p-3 text-slate-700 rounded-lg text-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 bg-blue-50/30 border border-blue-100"
+                                        rows={3}
+                                        placeholder="Enter symptoms expected for this specific machine's fault (e.g. 'Engine temperature reads over 100C')..."
+                                        defaultValue={linkedFaults.find(pf => pf.id === selectedProductFaultId)?.symptoms || ''}
+                                    />
+                                    <div className="flex justify-between items-center mt-2">
+                                        <p className="text-[10px] text-slate-400">Enter symptoms and click Save.</p>
+                                        <FormSubmitButton className="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-bold hover:bg-blue-700">Save Symptoms</FormSubmitButton>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragEnd={handleDragEnd}
+                            >
                             <SortableContext
                                 items={sequence.map(s => s.id)}
                                 strategy={verticalListSortingStrategy}
@@ -600,6 +626,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                 </div>
                             </SortableContext>
                         </DndContext>
+                        </div>
                     )}
                 </div>
             </div>

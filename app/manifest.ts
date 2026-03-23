@@ -10,7 +10,7 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   if (isTroubleshoot) {
     return {
       name: 'Troubleshooting Library - Thriveni',
-      short_name: 'Troubleshoot',
+      short_name: 'Troubleshooting Library',
       description: 'Standalone troubleshooting guide for Thriveni earthmoving machinery.',
       start_url: '/',
       display: 'standalone',
@@ -18,15 +18,15 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       theme_color: '#0a3292',
       icons: [
         {
-          src: '/icon.png',
+          src: '/logo%20ts.webp',
           sizes: '512x512',
-          type: 'image/png',
+          type: 'image/webp',
           purpose: 'maskable',
         },
         {
-          src: '/icon.png',
+          src: '/logo%20ts.webp',
           sizes: '512x512',
-          type: 'image/png',
+          type: 'image/webp',
           purpose: 'any',
         },
       ],
