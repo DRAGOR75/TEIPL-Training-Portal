@@ -4,8 +4,12 @@ import { headers } from 'next/headers';
 export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const headersList = await headers();
   const host = headersList.get('host') || '';
+  const referer = headersList.get('referer') || '';
   const troubleshootHost = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com';
-  const isTroubleshoot = host.split(':')[0] === troubleshootHost.split(':')[0];
+  
+  const isTroubleshoot = 
+    host.split(':')[0] === troubleshootHost.split(':')[0] || 
+    referer.includes('/troubleshoot');
 
   if (isTroubleshoot) {
     return {
@@ -18,14 +22,14 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       theme_color: '#0a3292',
       icons: [
         {
-          src: '/logo%20ts.webp',
-          sizes: '512x512',
+          src: '/logo_ts.webp',
+          sizes: '192x192 512x512',
           type: 'image/webp',
           purpose: 'maskable',
         },
         {
-          src: '/logo%20ts.webp',
-          sizes: '512x512',
+          src: '/logo_ts.webp',
+          sizes: '192x192 512x512',
           type: 'image/webp',
           purpose: 'any',
         },
