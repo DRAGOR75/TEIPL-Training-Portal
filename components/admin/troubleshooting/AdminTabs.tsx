@@ -28,7 +28,7 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
         { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
         { id: 'products', label: 'Machine Manager', icon: HiOutlineSquare3Stack3D },
         { id: 'faults', label: 'Fault Manager', icon: HiOutlineExclamationTriangle },
-        { id: 'causes', label: 'Cause Library', icon: HiOutlineClipboardDocumentCheck },
+        // { id: 'causes', label: 'Cause Library', icon: HiOutlineClipboardDocumentCheck }, // Hidden per user request
         { id: 'import', label: 'Bulk Import', icon: HiOutlineCloudArrowUp },
     ];
 

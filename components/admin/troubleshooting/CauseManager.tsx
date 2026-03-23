@@ -28,7 +28,6 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
             name: formData.get('name') as string,
             justification: formData.get('justification') as string,
             action: formData.get('action') as string,
-            symptoms: formData.get('symptoms') as string,
             manualRef: formData.get('manualRef') as string,
         };
 
@@ -77,14 +76,10 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                             <textarea name="justification" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Low coolant leads to overheating..." />
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 gap-4">
                             <div>
                                 <label className="text-xs font-bold text-slate-500 uppercase">Remedy / Action</label>
                                 <textarea name="action" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Top up coolant..." />
-                            </div>
-                            <div>
-                                <label className="text-xs font-bold text-slate-500 uppercase">Symptoms (Optional)</label>
-                                <textarea name="symptoms" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. High temp gauge reading..." />
                             </div>
                         </div>
 
@@ -129,10 +124,6 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                                 <div>
                                                     <label className="text-xs font-bold text-slate-500 uppercase">Remedy</label>
                                                     <textarea defaultValue={c.action || ''} name="action" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
-                                                </div>
-                                                <div>
-                                                    <label className="text-xs font-bold text-slate-500 uppercase">Symptoms</label>
-                                                    <textarea defaultValue={c.symptoms || ''} name="symptoms" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                                 </div>
                                             </div>
                                             <div>

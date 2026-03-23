@@ -141,13 +141,12 @@ export async function createCauseLibraryItem(formData: FormData) {
         const name = formData.get('name') as string;
         const justification = formData.get('justification') as string || '';
         const action = formData.get('action') as string || '';
-        const symptoms = formData.get('symptoms') as string || '';
         const manualRef = formData.get('manualRef') as string || '';
 
         if (!name) return { error: 'Check/Cause Name is required' };
 
         await db.causeLibrary.create({
-            data: { name, justification, action, symptoms, manualRef }
+            data: { name, justification, action, manualRef }
         });
 
         revalidatePath(ADMIN_PATH);
@@ -170,7 +169,7 @@ export async function deleteCauseLibraryItem(id: string) {
     }
 }
 
-export async function updateCauseLibraryItem(id: string, data: { name: string; justification?: string; action: string; symptoms: string; manualRef: string }) {
+export async function updateCauseLibraryItem(id: string, data: { name: string; justification?: string; action: string; manualRef: string }) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!data.name) return { error: 'Check/Cause Name is required' };
@@ -181,7 +180,6 @@ export async function updateCauseLibraryItem(id: string, data: { name: string; j
                 name: data.name,
                 justification: data.justification,
                 action: data.action,
-                symptoms: data.symptoms,
                 manualRef: data.manualRef
             }
         });
@@ -250,13 +248,14 @@ export async function unlinkFaultFromProduct(productFaultId: string) {
     }
 }
 
-export async function updateProductFault(id: string, data: { viewSeq: number }) {
+export async function updateProductFault(id: string, data: { viewSeq: number; symptoms?: string }) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.productFault.update({
             where: { id },
             data: {
-                viewSeq: data.viewSeq
+                viewSeq: data.viewSeq,
+                symptoms: data.symptoms
             }
         });
         revalidatePath(ADMIN_PATH);
@@ -390,6 +389,7 @@ export async function reorderProducts(items: { id: number; viewSeq: number }[]) 
 // --- Fetchers for Admin UI ---
 
 export async function getAdminData() {
+    console.log('Fetching admin data...');
     const products = await db.troubleshootingProduct.findMany({ orderBy: { viewSeq: 'asc' } });
     const faultLib = await db.faultLibrary.findMany({ orderBy: { viewSeq: 'asc' } });
     const causeLib = await db.causeLibrary.findMany({ orderBy: { name: 'asc' } });
@@ -508,38 +508,33 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
                 }
 
                 if (product && (row.faultName || row.faultId)) {
-                    const faultKey = row.faultId || row.faultName;
+                    // Create a robust cache key that won't mix up simple IDs across different machines
+                    const cacheKeyId = row.faultId ? `${product.id}-${row.faultId}` : null;
+                    const cacheKeyName = row.faultName ? `name-${row.faultName.toLowerCase()}` : null;
 
-                    if (faultKey && processedFaults.has(faultKey)) {
-                        // CACHE HIT
-                        fault = processedFaults.get(faultKey);
+                    if (cacheKeyId && processedFaults.has(cacheKeyId)) {
+                        fault = processedFaults.get(cacheKeyId);
+                    } else if (cacheKeyName && processedFaults.has(cacheKeyName)) {
+                        fault = processedFaults.get(cacheKeyName);
                     } else {
-                        // CACHE MISS
-                        // Try finding fault by ID first (more precise), then Name
-                        if (row.faultId) {
-                            fault = await db.faultLibrary.findUnique({ where: { legacyId: String(row.faultId) } });
-                        }
-                        if (!fault && row.faultName) {
+                        // CACHE MISS: DB Lookup
+                        // Prioritize matching by Name globally to avoid merging different faults that share ID "1"
+                        if (row.faultName) {
                             fault = await db.faultLibrary.upsert({
                                 where: { name: row.faultName },
-                                update: {
-                                    faultCode: row.faultCode || undefined,
-                                    legacyId: row.faultId ? String(row.faultId) : undefined
-                                },
-                                create: {
-                                    name: row.faultName,
-                                    faultCode: row.faultCode,
-                                    legacyId: row.faultId ? String(row.faultId) : undefined
-                                }
+                                update: { faultCode: row.faultCode || undefined },
+                                create: { name: row.faultName, faultCode: row.faultCode }
                             });
+                        } else if (row.faultId) {
+                            // Fallback if no name provided (assumes globally unique ID in legacy system)
+                            fault = await db.faultLibrary.findUnique({ where: { legacyId: String(row.faultId) } });
                         }
 
                         // Update Cache
                         if (fault) {
                             const faultObj = { id: fault.id, legacyId: fault.legacyId };
-                            if (row.faultName) processedFaults.set(row.faultName, faultObj);
-                            if (row.faultId) processedFaults.set(row.faultId, faultObj);
-                            if (fault.legacyId) processedFaults.set(fault.legacyId, faultObj);
+                            if (cacheKeyId) processedFaults.set(cacheKeyId, faultObj);
+                            if (cacheKeyName) processedFaults.set(cacheKeyName, faultObj);
                         }
                     }
 
@@ -551,14 +546,16 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
                             update: {
                                 viewSeq: row.faultViewSeq ?? undefined,
                                 notes: row.notes ?? undefined,
-                                keywords: row.keywords ?? undefined
+                                keywords: row.keywords ?? undefined,
+                                symptoms: row.symptoms ?? undefined
                             },
                             create: {
                                 productId: product.id,
                                 faultId: fault.id,
                                 viewSeq: row.faultViewSeq || 99,
                                 notes: row.notes,
-                                keywords: row.keywords
+                                keywords: row.keywords,
+                                symptoms: row.symptoms
                             }
                         });
                         targetProductFaults.push(pf);
@@ -602,13 +599,11 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
                 where: { name: row.causeName },
                 update: {
                     action: row.action,
-                    symptoms: row.symptoms,
                     manualRef: row.manualRef
                 },
                 create: {
                     name: row.causeName,
                     action: row.action,
-                    symptoms: row.symptoms,
                     manualRef: row.manualRef
                 }
             });

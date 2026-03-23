@@ -291,6 +291,7 @@ model ProductFault {
   viewSeq     Int      @default(0) @map("view_seq")
   notes       String?  // Machine-specific cautions or notes
   keywords    String?  // Machine-specific search tags
+  symptoms    String?  @db.Text // Symptoms for this specific machine/fault context
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -312,7 +313,6 @@ model CauseLibrary {
   name        String   @unique // "Low Coolant Level"
   justification String?  @db.Text
   action      String?  @db.Text // The fix
-  symptoms    String?  @db.Text
   manualRef   String?  @map("manual_ref")
   
   imageUrl    String?  @map("image_url")

@@ -55,26 +55,55 @@ export default function BulkUploader() {
                         seq: findHeader(['Sequence', 'CauseViewSeq', 'CauseSeq'])
                     };
 
-                    const rows = results.data.map((row: any) => ({
-                        machineName: mapHeader.machineName ? row[mapHeader.machineName]?.trim() : undefined,
-                        productSeq: mapHeader.productSeq ? parseInt(row[mapHeader.productSeq]) || undefined : undefined,
-                        keywords: mapHeader.keywords ? row[mapHeader.keywords]?.trim() : undefined,
-                        productId: mapHeader.productId ? row[mapHeader.productId] : undefined,
+                    let lastMachineName: string | undefined;
+                    let lastProductId: any;
+                    let lastFaultName: string | undefined;
+                    let lastFaultId: any;
+                    let lastFaultCode: string | undefined;
 
-                        faultName: mapHeader.faultName ? row[mapHeader.faultName]?.trim() : undefined,
-                        faultId: mapHeader.faultId ? row[mapHeader.faultId] : undefined,
-                        faultCode: mapHeader.faultCode ? row[mapHeader.faultCode]?.trim() : undefined,
-                        faultViewSeq: mapHeader.faultViewSeq ? parseInt(row[mapHeader.faultViewSeq]) || undefined : undefined,
+                    const rows = results.data.map((row: any) => {
+                        const machineName = mapHeader.machineName ? row[mapHeader.machineName]?.trim() : undefined;
+                        const productId = mapHeader.productId ? row[mapHeader.productId] : undefined;
+                        const faultName = mapHeader.faultName ? row[mapHeader.faultName]?.trim() : undefined;
+                        const faultId = mapHeader.faultId ? row[mapHeader.faultId] : undefined;
+                        const faultCode = mapHeader.faultCode ? row[mapHeader.faultCode]?.trim() : undefined;
 
-                        // Cause & Action
-                        causeName: mapHeader.causeName ? row[mapHeader.causeName]?.trim() : undefined,
-                        action: mapHeader.action ? row[mapHeader.action]?.trim() : undefined,
-                        justification: mapHeader.justification ? row[mapHeader.justification]?.trim() : undefined,
+                        // Update sticky context if explicitly provided
+                        if (machineName) lastMachineName = machineName;
+                        if (productId) lastProductId = productId;
+                        // Important: Only reset Fault if new Machine or explicit Fault is provided
+                        if (machineName || faultName || faultId) {
+                            if (faultName) lastFaultName = faultName;
+                            else if (machineName && !faultName) lastFaultName = undefined; // reset if moving to new machine without fault data
+                            
+                            if (faultId) lastFaultId = faultId;
+                            else if (machineName && !faultId) lastFaultId = undefined;
 
-                        symptoms: mapHeader.symptoms ? row[mapHeader.symptoms]?.trim() : undefined,
-                        manualRef: mapHeader.manualRef ? row[mapHeader.manualRef]?.trim() : undefined,
-                        seq: mapHeader.seq ? (parseInt(row[mapHeader.seq]) || undefined) : undefined
-                    })).filter((r: any) => r.machineName || r.faultId || r.productId);
+                            if (faultCode) lastFaultCode = faultCode;
+                            else if (machineName && !faultCode) lastFaultCode = undefined;
+                        }
+
+                        return {
+                            machineName: machineName || lastMachineName,
+                            productSeq: mapHeader.productSeq ? parseInt(row[mapHeader.productSeq]) || undefined : undefined,
+                            keywords: mapHeader.keywords ? row[mapHeader.keywords]?.trim() : undefined,
+                            productId: productId || lastProductId,
+
+                            faultName: faultName || lastFaultName,
+                            faultId: faultId || lastFaultId,
+                            faultCode: faultCode || lastFaultCode,
+                            faultViewSeq: mapHeader.faultViewSeq ? parseInt(row[mapHeader.faultViewSeq]) || undefined : undefined,
+
+                            // Cause & Action
+                            causeName: mapHeader.causeName ? row[mapHeader.causeName]?.trim() : undefined,
+                            action: mapHeader.action ? row[mapHeader.action]?.trim() : undefined,
+                            justification: mapHeader.justification ? row[mapHeader.justification]?.trim() : undefined,
+
+                            symptoms: mapHeader.symptoms ? row[mapHeader.symptoms]?.trim() : undefined,
+                            manualRef: mapHeader.manualRef ? row[mapHeader.manualRef]?.trim() : undefined,
+                            seq: mapHeader.seq ? (parseInt(row[mapHeader.seq]) || undefined) : undefined
+                        };
+                    }).filter((r: any) => r.machineName || r.faultId || r.productId);
 
                     if (rows.length === 0) {
                         setStats({ error: 'No valid rows found. Check column headers.' });
@@ -153,7 +182,7 @@ export default function BulkUploader() {
                     <p className="font-bold mb-2 text-slate-500 uppercase">Supported Formats:</p>
                     <div className="mb-2">
                         <span className="font-bold text-slate-800">1. Full Diagnostic Data:</span><br />
-                        Machine Model, FaultID, Fault Name, CauseSeq, Cause, Justification, Action
+                        Machine Model, FaultID, Fault Name, Symptoms, CauseSeq, Cause, Justification, Action
                     </div>
 
                 </div>

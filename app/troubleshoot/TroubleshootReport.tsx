@@ -313,17 +313,19 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                             {/* Symptoms Section */}
                             {(() => {
                                 // Extract and split symptoms more robustly
+                                const rawSymptoms = (diagnosis.context as any).symptoms;
+                                if (!rawSymptoms) return null;
+
                                 const allSymptoms = Array.from(new Set(
-                                    diagnosis.sequence
-                                        .map(step => step.cause.symptoms)
+                                    [rawSymptoms]
                                         .filter(Boolean)
                                         .flatMap(s => {
                                             if (/\d+\./.test(s!)) {
-                                                return s!.split(/\s*(?=\d+\.)/).map(item => item.trim());
+                                                return s!.split(/\s*(?=\d+\.)/).map((item: string) => item.trim());
                                             }
-                                            return s!.split(',').map(item => item.trim());
+                                            return s!.split(',').map((item: string) => item.trim());
                                         })
-                                        .filter(item => item.length > 2)
+                                        .filter((item: string) => item.length > 2)
                                 ));
 
                                 if (allSymptoms.length === 0) return null;

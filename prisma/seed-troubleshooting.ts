@@ -413,24 +413,28 @@ export async function seedTroubleshooting() {
         }
 
         // A. Ensure Cause exists in Library (Unique by Name)
-        // Note: Some causes might have same name but different action? 
-        // Data analysis shows many duplicates. We'll upsert by Name.
         const causeLib = await prisma.causeLibrary.upsert({
             where: { name: name },
             update: {
                 action: action,
-                symptoms: symptoms,
                 manualRef: ref
             },
             create: {
                 name: name,
                 action: action,
-                symptoms: symptoms,
                 manualRef: ref
             },
         });
 
-        // B. Link to ProductFault (The specific Diagnostic Path)
+        // B. Update ProductFault with Symptoms (New Architecture)
+        if (symptoms) {
+            await prisma.productFault.update({
+                where: { id: productFaultId },
+                data: { symptoms: symptoms }
+            });
+        }
+
+        // C. Link to ProductFault (The specific Diagnostic Path)
         await prisma.faultCause.upsert({
             where: {
                 productFaultId_causeId: {
