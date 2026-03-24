@@ -37,21 +37,13 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     };
   }
 
-  // Default Portal Manifest
+  // Default Portal Manifest (Not an installable PWA)
   return {
     name: 'Training Thriveni',
     short_name: 'Training',
     description: 'Training Management System for Thriveni Earthmovers',
-    start_url: '/',
-    display: 'standalone',
+    display: 'browser',
     background_color: '#ffffff',
     theme_color: '#0a3292',
-    icons: [
-      {
-        src: '/icon.png',
-        sizes: '512x512',
-        type: 'image/png',
-      },
-    ],
   };
 }

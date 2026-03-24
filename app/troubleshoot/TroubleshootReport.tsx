@@ -53,6 +53,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     const [loadingFaults, setLoadingFaults] = useState(false);
     const [loadingDiagnosis, setLoadingDiagnosis] = useState<boolean>(false);
     const [activeModalStep, setActiveModalStep] = useState<any | null>(null);
+    const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
 
     // State for collapsible steps and symptoms
     const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
@@ -135,15 +136,22 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Cause Details Modal (Card Style) */}
             {activeModalStep && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500 flex items-center justify-center p-4 sm:p-6" onClick={() => setActiveModalStep(null)}>
+                <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300 flex items-center justify-center p-4 sm:p-6" onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }}>
                     <div 
-                        className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-700"
-                        style={{ animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+                        className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-500"
+                        style={{ animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="bg-white/95 backdrop-blur-sm z-10 px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0 shadow-sm">
-                            <h3 className="font-black text-lg text-slate-800">Diagnostic Details</h3>
-                            <button onClick={() => setActiveModalStep(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+                            <h3 className="font-black text-lg text-slate-800 flex items-center gap-2">
+                                {activeModalIndex !== null && (
+                                    <span className="w-7 h-7 rounded-full bg-blue-50 text-thriveni-blue border border-blue-100 flex items-center justify-center text-sm shadow-inner">
+                                        {activeModalIndex + 1}
+                                    </span>
+                                )}
+                                Diagnostic Details
+                            </h3>
+                            <button onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
                                 <HiOutlineXMark size={20} />
                             </button>
                         </div>
@@ -171,7 +179,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         </div>
                         
                         <div className="p-4 md:p-6 border-t border-slate-100 shrink-0 bg-white">
-                             <button onClick={() => setActiveModalStep(null)} className="w-full py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                             <button onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }} className="w-full py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2">
                                 Close Details
                              </button>
                         </div>
@@ -445,7 +453,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                                                     <div className={`${step.cause.imageUrl ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-4`}>
                                                         <div
-                                                            onClick={() => setActiveModalStep(step)}
+                                                            onClick={() => { setActiveModalStep(step); setActiveModalIndex(index); }}
                                                             className="cursor-pointer select-none group"
                                                         >
                                                             <div className="flex items-center justify-between gap-4 w-full">
