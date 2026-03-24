@@ -15,17 +15,6 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
     const pathname = usePathname();
     const isTroubleshootHost = hostname.toLowerCase().startsWith('troubleshoot') || hostname.toLowerCase().includes('hemmts');
 
-    useEffect(() => {
-        // Cleanup Service Worker on the main portal to prevent PWA prompts
-        if (!isTroubleshootHost && 'serviceWorker' in navigator) {
-            navigator.serviceWorker.getRegistrations().then((registrations) => {
-                for (const registration of registrations) {
-                    registration.unregister();
-                }
-            });
-        }
-    }, [isTroubleshootHost]);
-
     // Hide Navbar on Troubleshooting Subdomain or specific paths
     const isTroubleshootPage = isTroubleshootHost || 
                                pathname?.startsWith('/join') || 
