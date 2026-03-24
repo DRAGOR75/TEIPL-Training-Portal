@@ -298,6 +298,51 @@ export async function removeCauseFromSequence(id: string) {
     }
 }
 
+export async function updateOrBranchCause(
+    faultCauseId: string,
+    causeId: string,
+    updateMode: 'universal' | 'branch',
+    libraryData: { name: string; action: string; manualRef: string },
+    justification: string
+) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        await db.$transaction(async (tx) => {
+            if (updateMode === 'branch') {
+                const newCause = await tx.causeLibrary.create({
+                    data: {
+                        name: libraryData.name,
+                        action: libraryData.action,
+                        manualRef: libraryData.manualRef,
+                    }
+                });
+                await tx.faultCause.update({
+                    where: { id: faultCauseId },
+                    data: {
+                        causeId: newCause.id,
+                        justification
+                    }
+                });
+            } else {
+                await tx.causeLibrary.update({
+                    where: { id: causeId },
+                    data: libraryData
+                });
+                await tx.faultCause.update({
+                    where: { id: faultCauseId },
+                    data: { justification }
+                });
+            }
+        });
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update or branch cause details' };
+    }
+}
+
 export async function updateFaultCauseItem(id: string, data: { justification?: string }) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {

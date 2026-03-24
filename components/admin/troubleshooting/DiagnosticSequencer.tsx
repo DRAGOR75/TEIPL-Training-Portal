@@ -28,8 +28,7 @@ import {
     removeCauseFromSequence,
     toggleFaultCauseStatus, // New
     updateSequenceOrder,     // New
-    updateCauseLibraryItem,   // New
-    updateFaultCauseItem, // New
+    updateOrBranchCause,      // New
     createCauseAndAddToSequence
 } from '@/app/actions/admin-troubleshooting';
 import {
@@ -40,6 +39,7 @@ import {
     FaultCause
 } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import FormatList from '@/components/ui/FormatList';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineArrowRight,
@@ -85,6 +85,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [updateMode, setUpdateMode] = useState<'universal' | 'branch'>('universal');
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -106,11 +107,10 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
         // Context specific field
         const justification = formData.get('justification') as string;
 
-        const libraryRes = await updateCauseLibraryItem(step.cause.id, libraryData);
-        const faultCauseRes = await updateFaultCauseItem(step.id, { justification });
+        const res = await updateOrBranchCause(step.id, step.cause.id, updateMode, libraryData, justification);
 
-        if (libraryRes?.error || faultCauseRes?.error) {
-            alert(libraryRes?.error || faultCauseRes?.error);
+        if (res?.error) {
+            alert(res.error);
         } else {
             setIsEditing(false);
             onUpdate();
@@ -140,7 +140,32 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                         <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
                         <input defaultValue={step.cause.manualRef || ''} name="manualRef" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
-                    <div className="flex justify-end gap-2 mt-2">
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4 mb-2">
+                        <label className="text-xs font-bold text-slate-500 uppercase block mb-3">Update Strategy</label>
+                        <div className="flex flex-col gap-3">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="mt-0.5">
+                                    <input type="radio" value="universal" checked={updateMode === 'universal'} onChange={() => setUpdateMode('universal')} className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-slate-800 group-hover:text-blue-700">Update Globally</div>
+                                    <div className="text-xs text-slate-500">Changes will apply to ALL faults that use this cause across the platform.</div>
+                                </div>
+                            </label>
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="mt-0.5">
+                                    <input type="radio" value="branch" checked={updateMode === 'branch'} onChange={() => setUpdateMode('branch')} className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-slate-800 group-hover:text-blue-700">Update for this Fault Only</div>
+                                    <div className="text-xs text-slate-500">Creates an independent copy of this cause specifically for this machine's fault sequence.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-100">
                         <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
                         <FormSubmitButton
                             isLoading={isSaving}
@@ -164,9 +189,12 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                     <h4 className={`font-bold text-sm ${step.isActive ? 'text-slate-800' : 'text-slate-500'}`}>{step.cause.name}</h4>
                     {!step.isActive && <span className="text-[10px] uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">Disabled</span>}
                 </div>
-
-                <p className="text-xs text-slate-600 mt-1 font-medium">{step.justification || step.cause.justification}</p>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2 pl-8">{step.cause.action}</p>
+                { (step.justification || step.cause.justification) && (
+                    <FormatList className="text-xs text-slate-600 mt-1 font-medium" text={step.justification || step.cause.justification!} />
+                )}
+                { step.cause.action && (
+                    <FormatList className="text-xs text-slate-500 mt-1 pl-8" text={step.cause.action} />
+                )}
                 {step.cause.manualRef && (
                     <span className="inline-block mt-2 ml-8 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded font-mono">
                         Ref: {step.cause.manualRef}
