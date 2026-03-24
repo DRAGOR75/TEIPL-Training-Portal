@@ -28,8 +28,8 @@ import {
     removeCauseFromSequence,
     toggleFaultCauseStatus, // New
     updateSequenceOrder,     // New
-    updateCauseLibraryItem,   // New
-    updateFaultCauseItem // New
+    updateOrBranchCause,      // New
+    createCauseAndAddToSequence
 } from '@/app/actions/admin-troubleshooting';
 import {
     TroubleshootingProduct,
@@ -39,6 +39,7 @@ import {
     FaultCause
 } from '@prisma/client';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import FormatList from '@/components/ui/FormatList';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineArrowRight,
@@ -84,6 +85,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
 
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [updateMode, setUpdateMode] = useState<'universal' | 'branch'>('universal');
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -105,11 +107,10 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
         // Context specific field
         const justification = formData.get('justification') as string;
 
-        const libraryRes = await updateCauseLibraryItem(step.cause.id, libraryData);
-        const faultCauseRes = await updateFaultCauseItem(step.id, { justification });
+        const res = await updateOrBranchCause(step.id, step.cause.id, updateMode, libraryData, justification);
 
-        if (libraryRes?.error || faultCauseRes?.error) {
-            alert(libraryRes?.error || faultCauseRes?.error);
+        if (res?.error) {
+            alert(res.error);
         } else {
             setIsEditing(false);
             onUpdate();
@@ -139,7 +140,32 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                         <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
                         <input defaultValue={step.cause.manualRef || ''} name="manualRef" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
-                    <div className="flex justify-end gap-2 mt-2">
+
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4 mb-2">
+                        <label className="text-xs font-bold text-slate-500 uppercase block mb-3">Update Strategy</label>
+                        <div className="flex flex-col gap-3">
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="mt-0.5">
+                                    <input type="radio" value="universal" checked={updateMode === 'universal'} onChange={() => setUpdateMode('universal')} className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-slate-800 group-hover:text-blue-700">Update Globally</div>
+                                    <div className="text-xs text-slate-500">Changes will apply to ALL faults that use this cause across the platform.</div>
+                                </div>
+                            </label>
+                            <label className="flex items-start gap-3 cursor-pointer group">
+                                <div className="mt-0.5">
+                                    <input type="radio" value="branch" checked={updateMode === 'branch'} onChange={() => setUpdateMode('branch')} className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer" />
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-slate-800 group-hover:text-blue-700">Update for this Fault Only</div>
+                                    <div className="text-xs text-slate-500">Creates an independent copy of this cause specifically for this machine's fault sequence.</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-4 pt-2 border-t border-slate-100">
                         <button type="button" onClick={() => setIsEditing(false)} className="px-3 py-1.5 text-slate-600 bg-white border border-slate-300 rounded text-xs">Cancel</button>
                         <FormSubmitButton
                             isLoading={isSaving}
@@ -163,9 +189,12 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                     <h4 className={`font-bold text-sm ${step.isActive ? 'text-slate-800' : 'text-slate-500'}`}>{step.cause.name}</h4>
                     {!step.isActive && <span className="text-[10px] uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">Disabled</span>}
                 </div>
-
-                <p className="text-xs text-slate-600 mt-1 font-medium">{step.justification || step.cause.justification}</p>
-                <p className="text-xs text-slate-500 mt-1 line-clamp-2 pl-8">{step.cause.action}</p>
+                { (step.justification || step.cause.justification) && (
+                    <FormatList className="text-xs text-slate-600 mt-1 font-medium" text={step.justification || step.cause.justification!} />
+                )}
+                { step.cause.action && (
+                    <FormatList className="text-xs text-slate-500 mt-1 pl-8" text={step.cause.action} />
+                )}
                 {step.cause.manualRef && (
                     <span className="inline-block mt-2 ml-8 px-2 py-0.5 bg-slate-100 text-slate-500 text-[10px] rounded font-mono">
                         Ref: {step.cause.manualRef}
@@ -311,6 +340,9 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
 
     // Add Step to Sequence
     const [isAddingStep, setIsAddingStep] = useState(false);
+    const [isNewCause, setIsNewCause] = useState(false);
+    const [newCauseName, setNewCauseName] = useState('');
+    
     async function handleAddStep(formData: FormData) {
         if (!selectedProductFaultId) return;
         const causeId = formData.get('causeId') as string;
@@ -323,6 +355,22 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
         await refreshSequence();
         setIsAddingStep(false);
         setAddStepCauseId(''); // Reset
+    }
+
+    async function handleCreateAndAddStep(formData: FormData) {
+        if (!selectedProductFaultId) return;
+        
+        const res = await createCauseAndAddToSequence(selectedProductFaultId, formData);
+        if (res?.error) {
+            alert(res.error);
+            return;
+        }
+        
+        await refreshSequence();
+        setIsAddingStep(false);
+        setIsNewCause(false);
+        setNewCauseName('');
+        setAddStepCauseId('');
     }
 
     async function handleRemoveStep(id: string) {
@@ -576,22 +624,62 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                     {/* Add Step Form */}
                                     {isAddingStep && (
                                         <div className="mb-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm animate-in slide-in-from-top-1">
-                                            <form action={handleAddStep} className="space-y-3">
-                                                <input type="hidden" name="causeId" value={addStepCauseId} />
-                                                <div>
-                                                    <label className="text-xs font-bold text-slate-500 uppercase">Select Check / Remedy</label>
-                                                    <SearchableSelect
-                                                        options={allCauses.map(c => ({ value: c.id, label: c.name }))}
-                                                        value={addStepCauseId}
-                                                        onChange={setAddStepCauseId}
-                                                        placeholder="Select Check / Remedy..."
-                                                        searchPlaceholder="Search causes..."
-                                                        className="w-full mt-1"
-                                                    />
-                                                </div>
-                                                <div className="flex justify-end gap-2">
-                                                    <button type="button" onClick={() => setIsAddingStep(false)} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700">Cancel</button>
-                                                    <FormSubmitButton className="px-4 py-2 bg-green-600 text-white text-xs rounded-xl font-bold">Add Step</FormSubmitButton>
+                                            <form action={isNewCause ? handleCreateAndAddStep : handleAddStep} className="space-y-3">
+                                                {isNewCause ? (
+                                                    <>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Check / Cause Name</label>
+                                                            <input defaultValue={newCauseName} name="name" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Context Justification</label>
+                                                            <textarea name="justification" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" rows={2} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Remedy / Action</label>
+                                                            <textarea name="action" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" rows={2} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
+                                                            <input name="manualRef" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" />
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <input type="hidden" name="causeId" value={addStepCauseId} />
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Select Check / Remedy</label>
+                                                            <SearchableSelect
+                                                                options={allCauses.map(c => ({ value: c.id, label: c.name }))}
+                                                                value={addStepCauseId}
+                                                                onChange={setAddStepCauseId}
+                                                                placeholder="Select Check / Remedy..."
+                                                                searchPlaceholder="Search causes..."
+                                                                className="w-full mt-1"
+                                                                onAddNew={(query) => {
+                                                                    setIsNewCause(true);
+                                                                    setNewCauseName(query);
+                                                                }}
+                                                                addNewLabel="Create new cause"
+                                                            />
+                                                        </div>
+                                                    </>
+                                                )}
+                                                <div className="flex justify-between items-center mt-2">
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            setIsNewCause(!isNewCause);
+                                                            if (isNewCause) setNewCauseName('');
+                                                        }} 
+                                                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                                    >
+                                                        {isNewCause ? "Cancel / Select existing" : "Can't find it? Create New"}
+                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        <button type="button" onClick={() => { setIsAddingStep(false); setIsNewCause(false); }} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+                                                        <FormSubmitButton className="px-4 py-2 bg-green-600 text-white text-xs rounded-xl font-bold">{isNewCause ? "Create & Add" : "Add Step"}</FormSubmitButton>
+                                                    </div>
                                                 </div>
                                             </form>
                                         </div>

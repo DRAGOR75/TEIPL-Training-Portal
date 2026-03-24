@@ -5,6 +5,7 @@ import { createCauseLibraryItem, deleteCauseLibraryItem, updateCauseLibraryItem 
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import { HiOutlineTrash, HiOutlinePlus, HiOutlineClipboardDocumentCheck, HiOutlineArrowPath } from 'react-icons/hi2';
 import { CauseLibrary } from '@prisma/client';
+import FormatList from '@/components/ui/FormatList';
 
 export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
     const formRef = useRef<HTMLFormElement>(null);
@@ -142,8 +143,12 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                             <div className="font-medium text-slate-700">{c.name}</div>
                                             {c.manualRef && <div className="text-xs text-blue-500 mt-1 font-mono">{c.manualRef}</div>}
                                         </td>
-                                        <td className="px-4 py-3 align-top text-slate-600 text-xs">
-                                            {c.action || <span className="text-slate-300 italic">No remedy specified</span>}
+                                        <td className="px-4 py-3 align-top text-slate-600 text-xs text-left">
+                                            {c.action ? (
+                                                <FormatList text={c.action} />
+                                            ) : (
+                                                <span className="text-slate-300 italic">No remedy specified</span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-3 text-right align-top">
                                             <div className="flex items-center justify-end gap-1">

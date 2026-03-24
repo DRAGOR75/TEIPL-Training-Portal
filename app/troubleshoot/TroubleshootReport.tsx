@@ -18,10 +18,12 @@ import {
     HiOutlineChevronDown,
     HiOutlineChevronUp,
     HiOutlineClipboardDocumentList,
-    HiOutlineChatBubbleLeftRight
+    HiOutlineChatBubbleLeftRight,
+    HiOutlineXMark
 } from 'react-icons/hi2';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Link from 'next/link';
+import FormatList from '@/components/ui/FormatList';
 
 type FullProductFault = ProductFault & {
     fault: FaultLibrary;
@@ -49,7 +51,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     const [diagnosis, setDiagnosis] = useState<DiagnosisData | null>(null);
 
     const [loadingFaults, setLoadingFaults] = useState(false);
-    const [loadingDiagnosis, setLoadingDiagnosis] = useState(false);
+    const [loadingDiagnosis, setLoadingDiagnosis] = useState<boolean>(false);
+    const [activeModalStep, setActiveModalStep] = useState<any | null>(null);
 
     // State for collapsible steps and symptoms
     const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
@@ -130,6 +133,51 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
         <div className="space-y-4 md:space-y-9 w-full mx-auto px-1 md:px-0">
             {isNavigating && <LoadingSpinner />}
 
+            {/* Cause Details Modal (Card Style) */}
+            {activeModalStep && (
+                <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-500 flex items-center justify-center p-4 sm:p-6" onClick={() => setActiveModalStep(null)}>
+                    <div 
+                        className="bg-white w-full max-w-2xl rounded-[2rem] shadow-2xl max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-700"
+                        style={{ animationTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)' }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="bg-white/95 backdrop-blur-sm z-10 px-6 py-4 flex items-center justify-between border-b border-slate-100 shrink-0 shadow-sm">
+                            <h3 className="font-black text-lg text-slate-800">Diagnostic Details</h3>
+                            <button onClick={() => setActiveModalStep(null)} className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors">
+                                <HiOutlineXMark size={20} />
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 bg-slate-50/30">
+                            {/* Cause Section */}
+                            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                                <FormatList label="Cause" text={activeModalStep.cause.name} className="text-xl font-bold text-slate-900 leading-snug" />
+                            </div>
+
+                            {/* Remedy Section */}
+                            {activeModalStep.cause.action && (
+                                <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center shadow-inner">
+                                            <HiOutlineClipboardDocumentList size={18} />
+                                        </div>
+                                        <h4 className="font-black text-blue-900 tracking-wide uppercase text-sm">Remedy / Action</h4>
+                                    </div>
+                                    <div className="text-slate-800 text-base md:text-lg leading-relaxed">
+                                        <FormatList text={activeModalStep.cause.action} />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                        
+                        <div className="p-4 md:p-6 border-t border-slate-100 shrink-0 bg-white">
+                             <button onClick={() => setActiveModalStep(null)} className="w-full py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                                Close Details
+                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Guideline Modal Overlay */}
             {showGuide && (
@@ -395,71 +443,28 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                             {/* Step Content Card */}
                                             <div className="bg-white rounded-2xl md:rounded-[2rem] p-6 md:p-8 border border-slate-200 shadow-sm hover:shadow-md hover:border-thriveni-blue/30 transition-all duration-300">
                                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                                    <div className="lg:col-span-2 space-y-4">
+                                                    <div className={`${step.cause.imageUrl ? 'lg:col-span-2' : 'lg:col-span-3'} space-y-4`}>
                                                         <div
-                                                            onClick={() => toggleStep(index)}
-                                                            className="cursor-pointer select-none"
+                                                            onClick={() => setActiveModalStep(step)}
+                                                            className="cursor-pointer select-none group"
                                                         >
-                                                            <div className="flex items-center justify-between gap-4">
-                                                                <h4 className="text-sm md:text-base font-bold text-slate-900 flex items-center gap-2 mb-2 group-hover/card:text-thriveni-blue transition-colors">
-                                                                    Cause:  {step.cause.name}
+                                                            <div className="flex items-center justify-between gap-4 w-full">
+                                                                <div className="flex-1 text-sm md:text-base text-slate-900 flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-2 group-hover:text-thriveni-blue transition-colors">
+                                                                    <div className="font-bold flex-1">
+                                                                        <FormatList label="Cause" text={step.cause.name} />
+                                                                    </div>
                                                                     {step.isLikely && (
-                                                                        <span className="bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200">
+                                                                        <span className="bg-rose-100 text-rose-700 text-xs px-2 py-0.5 rounded-full uppercase tracking-wider font-bold border border-rose-200 shrink-0">
                                                                             High Probability
                                                                         </span>
                                                                     )}
-                                                                </h4>
-                                                                <div className={`text-slate-400 transition-transform duration-300 ${expandedSteps[index] ? 'rotate-180' : ''}`}>
-                                                                    <HiOutlineChevronDown size={20} />
+                                                                </div>
+                                                                <div className="text-slate-400 group-hover:text-thriveni-blue transition-colors duration-300">
+                                                                    <HiOutlineChevronRight size={22} />
                                                                 </div>
                                                             </div>
-
-                                                            {(step.justification || step.cause.justification) && (
-                                                                <div>
-
-                                                                    <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
-                                                                        Explanation:{step.justification || step.cause.justification}
-                                                                    </p>
-                                                                </div>
-                                                            )}
                                                         </div>
-
-                                                        {expandedSteps[index] && (
-                                                            <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
-                                                                {step.cause.action && (
-                                                                    <div>
-
-                                                                        <span className="text-slate-700 font-medium text-sm md:text-lg">
-                                                                            Remedy: {step.cause.action}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-
-
-                                                            </div>
-                                                        )}
                                                     </div>
-
-                                                    {/* Visual Aid (Wrapped in conditional) */}
-                                                    {expandedSteps[index] && step.cause.imageUrl && (
-                                                        <div className="lg:col-span-1 animate-in fade-in slide-in-from-top-2 duration-300">
-                                                            <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner group-hover:shadow-md transition-shadow">
-                                                                <img
-                                                                    src={step.cause.imageUrl}
-                                                                    alt={step.cause.name}
-                                                                    className="w-full h-full object-cover"
-                                                                    onError={(e) => {
-                                                                        (e.target as HTMLImageElement).src = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable';
-                                                                    }}
-                                                                />
-                                                                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/50 to-transparent p-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                                    <span className="text-white text-xs font-medium flex items-center gap-1.5">
-                                                                        <HiOutlineInformationCircle size={12} /> Reference Image
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
                                                 </div>
                                             </div>
                                         </div>

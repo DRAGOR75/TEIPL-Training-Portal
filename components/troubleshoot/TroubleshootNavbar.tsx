@@ -34,6 +34,13 @@ export default function TroubleshootNavbar() {
             setShowInstallBtn(true);
         }
 
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js').catch((err) => {
+                console.error('Service Worker registration failed:', err);
+            });
+        }
+
         return () => window.removeEventListener('beforeinstallprompt', handler);
     }, []);
 
