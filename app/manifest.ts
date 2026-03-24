@@ -5,11 +5,10 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const headersList = await headers();
   const host = headersList.get('host') || '';
   const referer = headersList.get('referer') || '';
-  const troubleshootHost = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com';
+  const troubleshootHost = (process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com').split(':')[0].toLowerCase();
+  const currentHost = host.split(':')[0].toLowerCase();
   
-  const isTroubleshoot = 
-    host.split(':')[0] === troubleshootHost.split(':')[0] || 
-    referer.includes('/troubleshoot');
+  const isTroubleshoot = currentHost === troubleshootHost || referer.includes('/troubleshoot');
 
   if (isTroubleshoot) {
     return {
@@ -37,13 +36,10 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     };
   }
 
-  // Default Portal Manifest (Not an installable PWA)
+  // Default Portal Manifest (Completely non-installable)
   return {
     name: 'Training Thriveni',
     short_name: 'Training',
-    description: 'Training Management System for Thriveni Earthmovers',
     display: 'browser',
-    background_color: '#ffffff',
-    theme_color: '#0a3292',
   };
 }
