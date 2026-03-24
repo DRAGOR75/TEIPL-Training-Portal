@@ -60,6 +60,7 @@ export const viewport = {
 
 import { headers } from "next/headers";
 import Navbar from "@/components/Navbar";
+import PWACleanup from "@/components/PWACleanup";
 
 export default async function RootLayout({
     children,
@@ -77,6 +78,7 @@ export default async function RootLayout({
             >
                 {/* Updated: Pass session and host to Navbar */}
                 <Navbar session={session} hostname={host} />
+                <PWACleanup hostname={host} />
                 {children}
                 <SpeedInsights />
             </body>

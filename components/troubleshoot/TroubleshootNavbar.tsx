@@ -14,7 +14,7 @@ export default function TroubleshootNavbar() {
     useEffect(() => {
         const troubleshootHost = (process.env.NEXT_PUBLIC_TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com').split(':')[0].toLowerCase();
         const currentHost = window.location.hostname.toLowerCase();
-        const isTroubleshoot = currentHost === troubleshootHost || window.location.pathname.startsWith('/troubleshoot');
+        const isTroubleshoot = currentHost === troubleshootHost;
 
         if (!isTroubleshoot) return;
 

@@ -7,12 +7,12 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const referer = headersList.get('referer') || '';
   const troubleshootHost = (process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com').split(':')[0].toLowerCase();
   const currentHost = host.split(':')[0].toLowerCase();
-  
-  const isTroubleshoot = currentHost === troubleshootHost || referer.includes('/troubleshoot');
+
+  const isTroubleshoot = currentHost === troubleshootHost;
 
   if (isTroubleshoot) {
     return {
-      name: 'Troubleshooting Library - Thriveni',
+      name: 'Troubleshooting Library',
       short_name: 'Troubleshooting Library',
       description: 'Standalone troubleshooting guide for Thriveni earthmoving machinery.',
       start_url: '/',
