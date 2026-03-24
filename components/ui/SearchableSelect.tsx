@@ -20,6 +20,8 @@ interface SearchableSelectProps {
     noResultsText?: string;
     icon?: React.ReactNode;
     direction?: 'down' | 'up' | 'responsive-bottom';
+    onAddNew?: (searchQuery: string) => void;
+    addNewLabel?: string;
 }
 
 export default function SearchableSelect({
@@ -33,7 +35,9 @@ export default function SearchableSelect({
     searchPlaceholder = 'Search...',
     noResultsText = 'No results found.',
     icon,
-    direction = 'down'
+    direction = 'down',
+    onAddNew,
+    addNewLabel = 'Add New'
 }: SearchableSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -157,8 +161,21 @@ export default function SearchableSelect({
                                     ))}
                                 </div>
                             ) : (
-                                <div className="p-8 text-center text-slate-500 text-sm">
-                                    {noResultsText}
+                                <div className="p-8 text-center text-slate-500 text-sm flex flex-col items-center gap-3">
+                                    <span>{noResultsText}</span>
+                                    {onAddNew && searchQuery && (
+                                        <button 
+                                            type="button" 
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                onAddNew(searchQuery);
+                                                setIsOpen(false);
+                                            }}
+                                            className="bg-thriveni-blue/10 text-thriveni-blue hover:bg-thriveni-blue/20 px-4 py-2 rounded-lg font-bold transition-colors w-full"
+                                        >
+                                            {addNewLabel} "{searchQuery}"
+                                        </button>
+                                    )}
                                 </div>
                             )}
                         </div>

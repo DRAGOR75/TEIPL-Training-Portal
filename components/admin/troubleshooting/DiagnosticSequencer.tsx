@@ -29,7 +29,8 @@ import {
     toggleFaultCauseStatus, // New
     updateSequenceOrder,     // New
     updateCauseLibraryItem,   // New
-    updateFaultCauseItem // New
+    updateFaultCauseItem, // New
+    createCauseAndAddToSequence
 } from '@/app/actions/admin-troubleshooting';
 import {
     TroubleshootingProduct,
@@ -311,6 +312,9 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
 
     // Add Step to Sequence
     const [isAddingStep, setIsAddingStep] = useState(false);
+    const [isNewCause, setIsNewCause] = useState(false);
+    const [newCauseName, setNewCauseName] = useState('');
+    
     async function handleAddStep(formData: FormData) {
         if (!selectedProductFaultId) return;
         const causeId = formData.get('causeId') as string;
@@ -323,6 +327,22 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
         await refreshSequence();
         setIsAddingStep(false);
         setAddStepCauseId(''); // Reset
+    }
+
+    async function handleCreateAndAddStep(formData: FormData) {
+        if (!selectedProductFaultId) return;
+        
+        const res = await createCauseAndAddToSequence(selectedProductFaultId, formData);
+        if (res?.error) {
+            alert(res.error);
+            return;
+        }
+        
+        await refreshSequence();
+        setIsAddingStep(false);
+        setIsNewCause(false);
+        setNewCauseName('');
+        setAddStepCauseId('');
     }
 
     async function handleRemoveStep(id: string) {
@@ -576,22 +596,62 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                     {/* Add Step Form */}
                                     {isAddingStep && (
                                         <div className="mb-4 p-5 bg-white rounded-2xl border border-slate-200 shadow-sm animate-in slide-in-from-top-1">
-                                            <form action={handleAddStep} className="space-y-3">
-                                                <input type="hidden" name="causeId" value={addStepCauseId} />
-                                                <div>
-                                                    <label className="text-xs font-bold text-slate-500 uppercase">Select Check / Remedy</label>
-                                                    <SearchableSelect
-                                                        options={allCauses.map(c => ({ value: c.id, label: c.name }))}
-                                                        value={addStepCauseId}
-                                                        onChange={setAddStepCauseId}
-                                                        placeholder="Select Check / Remedy..."
-                                                        searchPlaceholder="Search causes..."
-                                                        className="w-full mt-1"
-                                                    />
-                                                </div>
-                                                <div className="flex justify-end gap-2">
-                                                    <button type="button" onClick={() => setIsAddingStep(false)} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700">Cancel</button>
-                                                    <FormSubmitButton className="px-4 py-2 bg-green-600 text-white text-xs rounded-xl font-bold">Add Step</FormSubmitButton>
+                                            <form action={isNewCause ? handleCreateAndAddStep : handleAddStep} className="space-y-3">
+                                                {isNewCause ? (
+                                                    <>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Check / Cause Name</label>
+                                                            <input defaultValue={newCauseName} name="name" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Context Justification</label>
+                                                            <textarea name="justification" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" rows={2} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Remedy / Action</label>
+                                                            <textarea name="action" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" rows={2} />
+                                                        </div>
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Manual Reference</label>
+                                                            <input name="manualRef" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" />
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <input type="hidden" name="causeId" value={addStepCauseId} />
+                                                        <div>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Select Check / Remedy</label>
+                                                            <SearchableSelect
+                                                                options={allCauses.map(c => ({ value: c.id, label: c.name }))}
+                                                                value={addStepCauseId}
+                                                                onChange={setAddStepCauseId}
+                                                                placeholder="Select Check / Remedy..."
+                                                                searchPlaceholder="Search causes..."
+                                                                className="w-full mt-1"
+                                                                onAddNew={(query) => {
+                                                                    setIsNewCause(true);
+                                                                    setNewCauseName(query);
+                                                                }}
+                                                                addNewLabel="Create new cause"
+                                                            />
+                                                        </div>
+                                                    </>
+                                                )}
+                                                <div className="flex justify-between items-center mt-2">
+                                                    <button 
+                                                        type="button" 
+                                                        onClick={() => {
+                                                            setIsNewCause(!isNewCause);
+                                                            if (isNewCause) setNewCauseName('');
+                                                        }} 
+                                                        className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                                    >
+                                                        {isNewCause ? "Cancel / Select existing" : "Can't find it? Create New"}
+                                                    </button>
+                                                    <div className="flex gap-2">
+                                                        <button type="button" onClick={() => { setIsAddingStep(false); setIsNewCause(false); }} className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-700">Cancel</button>
+                                                        <FormSubmitButton className="px-4 py-2 bg-green-600 text-white text-xs rounded-xl font-bold">{isNewCause ? "Create & Add" : "Add Step"}</FormSubmitButton>
+                                                    </div>
                                                 </div>
                                             </form>
                                         </div>

@@ -23,6 +23,35 @@ import {
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import Link from 'next/link';
 
+function FormatList({ text, label }: { text?: string | null; label: string }) {
+    if (!text) return null;
+    let items = [text];
+    
+    // Check if text has "1.", "2.", etc. and split it
+    if (/\d+\./.test(text)) {
+        items = text.split(/\s*(?=\d+\.)/).map(item => item.trim()).filter(i => i.length > 2);
+    }
+
+    if (items.length > 1) {
+        return (
+            <div>
+                <span className="font-bold">{label}:</span>
+                <ul className="list-none space-y-1.5 mt-2">
+                    {items.map((item, idx) => (
+                        <li key={idx} className="block">{item}</li>
+                    ))}
+                </ul>
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <span className="font-bold">{label}:</span> {text}
+        </div>
+    );
+}
+
 type FullProductFault = ProductFault & {
     fault: FaultLibrary;
 };
@@ -415,11 +444,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                             </div>
 
                                                             {(step.justification || step.cause.justification) && (
-                                                                <div>
-
-                                                                    <p className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
-                                                                        Explanation:{step.justification || step.cause.justification}
-                                                                    </p>
+                                                                <div className="text-slate-600 text-sm md:text-base leading-relaxed mb-4 border-l-2 border-slate-200 pl-4 py-1">
+                                                                    <FormatList label="Explanation" text={step.justification || step.cause.justification} />
                                                                 </div>
                                                             )}
                                                         </div>
@@ -427,15 +453,10 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                                         {expandedSteps[index] && (
                                                             <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
                                                                 {step.cause.action && (
-                                                                    <div>
-
-                                                                        <span className="text-slate-700 font-medium text-sm md:text-lg">
-                                                                            Remedy: {step.cause.action}
-                                                                        </span>
+                                                                    <div className="text-slate-700 text-sm md:text-lg">
+                                                                        <FormatList label="Remedy" text={step.cause.action} />
                                                                     </div>
                                                                 )}
-
-
                                                             </div>
                                                         )}
                                                     </div>

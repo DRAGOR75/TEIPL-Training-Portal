@@ -388,6 +388,45 @@ export async function reorderProducts(items: { id: number; viewSeq: number }[]) 
 
 // --- Fetchers for Admin UI ---
 
+export async function createCauseAndAddToSequence(productFaultId: string, formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        const name = formData.get('name') as string;
+        const justification = formData.get('justification') as string || '';
+        const action = formData.get('action') as string || '';
+        const manualRef = formData.get('manualRef') as string || '';
+
+        if (!name) return { error: 'Cause Name is required' };
+
+        // Transaction to create cause and link it
+        await db.$transaction(async (tx) => {
+            const cause = await tx.causeLibrary.create({
+                data: { name, justification, action, manualRef }
+            });
+
+            const currentSteps = await tx.faultCause.findMany({
+                where: { productFaultId }
+            });
+            const nextSeq = currentSteps.length > 0 ? Math.max(...currentSteps.map(s => s.seq)) + 1 : 1;
+
+            await tx.faultCause.create({
+                data: {
+                    productFaultId,
+                    causeId: cause.id,
+                    seq: nextSeq,
+                    justification // context specific
+                }
+            });
+        });
+
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to create and add cause' };
+    }
+}
+
 export async function getAdminData() {
     console.log('Fetching admin data...');
     const products = await db.troubleshootingProduct.findMany({ orderBy: { viewSeq: 'asc' } });
