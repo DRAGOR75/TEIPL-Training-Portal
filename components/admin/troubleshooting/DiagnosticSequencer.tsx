@@ -127,7 +127,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                         <input defaultValue={step.cause.name} name="name" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
                     </div>
                     <div>
-                        <label className="text-xs font-bold text-slate-500 uppercase">Justification (Context Specific)</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase">Explanation (Context Specific)</label>
                         <textarea defaultValue={step.justification || step.cause.justification || ''} name="justification" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                     </div>
                     <div className="grid grid-cols-1 gap-4">
@@ -190,7 +190,7 @@ function SortableStep({ step, index, onRemove, onToggle, onUpdate, removingId, t
                     {!step.isActive && <span className="text-[10px] uppercase bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded">Disabled</span>}
                 </div>
                 { (step.justification || step.cause.justification) && (
-                    <FormatList className="text-xs text-slate-600 mt-1 font-medium" text={step.justification || step.cause.justification!} />
+                    <div className="text-xs text-slate-600 mt-1 font-medium whitespace-pre-wrap">{step.justification || step.cause.justification}</div>
                 )}
                 { step.cause.action && (
                     <FormatList className="text-xs text-slate-500 mt-1 pl-8" text={step.cause.action} />
@@ -632,7 +632,7 @@ export default function DiagnosticSequencer({ products, allFaults, allCauses }: 
                                                             <input defaultValue={newCauseName} name="name" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" required />
                                                         </div>
                                                         <div>
-                                                            <label className="text-xs font-bold text-slate-500 uppercase">Context Justification</label>
+                                                            <label className="text-xs font-bold text-slate-500 uppercase">Context Explanation</label>
                                                             <textarea name="justification" className="w-full mt-1 p-3 border border-slate-200 rounded-xl text-sm" rows={2} />
                                                         </div>
                                                         <div>
