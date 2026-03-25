@@ -73,7 +73,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                         </div>
 
                         <div>
-                            <label className="text-xs font-bold text-slate-500 uppercase">Justification (Why?)</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase">Explanation (Why?)</label>
                             <textarea name="justification" rows={2} className="w-full mt-1 p-3 border border-green-200 rounded-xl text-sm" placeholder="e.g. Low coolant leads to overheating..." />
                         </div>
 
@@ -118,7 +118,7 @@ export default function CauseManager({ causes }: { causes: CauseLibrary[] }) {
                                                 <input defaultValue={c.name} name="name" className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
                                             </div>
                                             <div>
-                                                <label className="text-xs font-bold text-slate-500 uppercase">Justification</label>
+                                                <label className="text-xs font-bold text-slate-500 uppercase">Explanation</label>
                                                 <textarea defaultValue={c.justification || ''} name="justification" rows={2} className="w-full mt-1 p-3 border border-blue-200 rounded-xl text-sm" />
                                             </div>
                                             <div className="grid grid-cols-2 gap-4">

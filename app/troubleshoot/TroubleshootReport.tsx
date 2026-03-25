@@ -162,6 +162,21 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 <FormatList label="Cause" text={activeModalStep.cause.name} className="text-xl font-bold text-slate-900 leading-snug" />
                             </div>
 
+                            {/* Explanation / Justification Section */}
+                            {activeModalStep.justification && (
+                                <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200">
+                                    <div className="flex items-center gap-3 mb-4">
+                                        <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center shadow-inner">
+                                            <HiOutlineInformationCircle size={18} />
+                                        </div>
+                                        <h4 className="font-black text-slate-900 tracking-wide uppercase text-sm">Explanation</h4>
+                                    </div>
+                                    <div className="text-slate-700 text-base leading-relaxed whitespace-pre-wrap">
+                                        {activeModalStep.justification}
+                                    </div>
+                                </div>
+                            )}
+
                             {/* Remedy Section */}
                             {activeModalStep.cause.action && (
                                 <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
@@ -521,7 +536,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <>
                             <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-justify">
                                 <p className="text-slate-500 max-w-md mx-auto mb-2 text-sm leading-relaxed">
-                                    <strong>Caution :</strong> <span className="text-lloyds-red">This troubleshooting library provides only quick guidelines and is intended as a reference for technicians who possess comprehensive knowledge of the machines. For detailed instructions, safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
+                                    <strong>Caution:</strong> <span className="text-lloyds-red">This troubleshooting library is a learning resource and a quick reference for technicians and engineers who possess comprehensive knowledge of the machines. For detailed instructions, safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
                                 </p>
                             </div>
 
