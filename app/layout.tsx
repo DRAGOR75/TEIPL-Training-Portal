@@ -17,9 +17,10 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
     const headersList = await headers();
-    const host = headersList.get("host") || "";
-    const troubleshootHost = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com';
-    const isTroubleshoot = host.split(':')[0] === troubleshootHost.split(':')[0];
+    const host = (headersList.get("host") || "").toLowerCase();
+    const isTroubleshoot = host.startsWith('troubleshoot') || 
+                          host.includes('hemmts') || 
+                          host === 'hemmts.academythriveni.com';
 
     if (isTroubleshoot) {
         return {

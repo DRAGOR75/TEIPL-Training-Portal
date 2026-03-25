@@ -12,9 +12,10 @@ export default function TroubleshootNavbar() {
     const [showInstallBtn, setShowInstallBtn] = useState(false);
 
     useEffect(() => {
-        const troubleshootHost = (process.env.NEXT_PUBLIC_TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com').split(':')[0].toLowerCase();
         const currentHost = window.location.hostname.toLowerCase();
-        const isTroubleshoot = currentHost === troubleshootHost;
+        const isTroubleshoot = currentHost === 'hemmts.academythriveni.com' || 
+                             currentHost.includes('hemmts') || 
+                             currentHost.startsWith('troubleshoot');
 
         if (!isTroubleshoot) return;
 

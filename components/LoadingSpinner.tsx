@@ -37,9 +37,10 @@ export default function LoadingSpinner() {
             <div className="mt-8 w-48 h-[2px] bg-gray-100 rounded-full overflow-hidden">
                 <div className="h-full bg-thriveni-blue/40 animate-shimmer origin-left w-full" />
             </div>
-
+            
+            {/* Main Site Loading Text */}
             <p className="mt-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">
-                Loading
+                Loading Training Portal
             </p>
         </div>
     );

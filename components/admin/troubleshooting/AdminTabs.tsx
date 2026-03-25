@@ -22,12 +22,12 @@ interface AdminTabsProps {
 }
 
 export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsProps) {
-    const [activeTab, setActiveTab] = useState('sequencer');
+    const [activeTab, setActiveTab] = useState('products');
 
     const tabs = [
-        { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
         { id: 'products', label: 'Machine Manager', icon: HiOutlineSquare3Stack3D },
         { id: 'faults', label: 'Fault Manager', icon: HiOutlineExclamationTriangle },
+        { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
         // { id: 'causes', label: 'Cause Library', icon: HiOutlineClipboardDocumentCheck }, // Hidden per user request
         { id: 'import', label: 'Bulk Import', icon: HiOutlineCloudArrowUp },
     ];
