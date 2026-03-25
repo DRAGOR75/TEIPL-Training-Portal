@@ -136,9 +136,9 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Cause Details Modal (Card Style) */}
             {activeModalStep && (
-                <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300 flex items-center justify-center p-4 sm:p-6" onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }}>
-                    <div 
-                        className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-500"
+                <div className="fixed inset-0 w-screen h-[100dvh] z-[999] bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300 flex items-center justify-center p-4 sm:p-6" onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }}>
+                    <div
+                        className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-12 duration-500"
                         style={{ animationTimingFunction: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }}
                         onClick={e => e.stopPropagation()}
                     >
@@ -155,7 +155,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 <HiOutlineXMark size={20} />
                             </button>
                         </div>
-                        
+
                         <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-8 bg-slate-50/30">
                             {/* Cause Section */}
                             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
@@ -177,11 +177,11 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                                 </div>
                             )}
                         </div>
-                        
+
                         <div className="p-4 md:p-6 border-t border-slate-100 shrink-0 bg-white">
-                             <button onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }} className="w-full py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                            <button onClick={() => { setActiveModalStep(null); setActiveModalIndex(null); }} className="w-full py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl font-bold transition-all shadow-lg shadow-slate-200 flex items-center justify-center gap-2">
                                 Close Details
-                             </button>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -189,8 +189,8 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
             {/* Guideline Modal Overlay */}
             {showGuide && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="bg-white rounded-xl md:rounded-2xl shadow-2xl max-w-3xl w-full max-h-[85vh] md:max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300 border border-slate-200 flex flex-col">
+                <div className="fixed inset-0 w-screen h-[100dvh] z-[999] flex items-center justify-center p-2 md:p-4 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300">
+                    <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[85vh] md:max-h-[90vh] overflow-hidden animate-in zoom-in-95 duration-300 border border-slate-200 flex flex-col">
                         <div className="sticky top-0 bg-white z-10 px-4 py-4 md:px-8 md:py-6 border-b border-slate-100 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="bg-thriveni-blue/10 p-2 md:p-2.5 rounded-lg md:rounded-xl text-thriveni-blue">

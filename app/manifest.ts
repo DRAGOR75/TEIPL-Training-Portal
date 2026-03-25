@@ -5,10 +5,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
   const headersList = await headers();
   const host = headersList.get('host') || '';
   const referer = headersList.get('referer') || '';
-  const troubleshootHost = (process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com').split(':')[0].toLowerCase();
   const currentHost = host.split(':')[0].toLowerCase();
-
-  const isTroubleshoot = currentHost === troubleshootHost;
+  const isTroubleshoot = currentHost === 'hemmts.academythriveni.com' || currentHost.includes('hemmts') || currentHost.startsWith('troubleshoot');
 
   if (isTroubleshoot) {
     return {

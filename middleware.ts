@@ -17,10 +17,11 @@ const TROUBLESHOOT_HOSTNAME = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.acade
 
 function isTroubleshootHost(host: string | null): boolean {
     if (!host) return false;
-    // Strip port for comparison (important for local dev)
-    const hostname = host.split(':')[0];
-    const expected = TROUBLESHOOT_HOSTNAME.split(':')[0];
-    return hostname === expected;
+    const hostname = host.toLowerCase().split(':')[0];
+    // Favor production hostname, but allow 'troubleshoot' prefix for local dev if env is set
+    return hostname === 'hemmts.academythriveni.com' || 
+           hostname.includes('hemmts') || 
+           hostname.startsWith('troubleshoot');
 }
 
 export default authMiddleware(async (req) => {
