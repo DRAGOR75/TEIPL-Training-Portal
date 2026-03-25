@@ -19,15 +19,27 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       theme_color: '#0a3292',
       icons: [
         {
-          src: '/logo_ts.webp',
-          sizes: '192x192 512x512',
-          type: 'image/webp',
+          src: '/troubleshoot-icon-192.png',
+          sizes: '192x192',
+          type: 'image/png',
           purpose: 'maskable',
         },
         {
-          src: '/logo_ts.webp',
-          sizes: '192x192 512x512',
-          type: 'image/webp',
+          src: '/troubleshoot-icon-192.png',
+          sizes: '192x192',
+          type: 'image/png',
+          purpose: 'any',
+        },
+        {
+          src: '/troubleshoot-icon-512.png',
+          sizes: '512x512',
+          type: 'image/png',
+          purpose: 'maskable',
+        },
+        {
+          src: '/troubleshoot-icon-512.png',
+          sizes: '512x512',
+          type: 'image/png',
           purpose: 'any',
         },
       ],
