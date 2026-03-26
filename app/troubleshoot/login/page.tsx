@@ -13,9 +13,9 @@ export default function TroubleshootLoginPage() {
     async function handleSubmit(formData: FormData) {
         setIsLoading(true);
         setError(null);
-        
+
         const res = await loginTroubleshoot(formData);
-        
+
         if (res?.error) {
             setError(res.error);
             setIsLoading(false);
@@ -27,16 +27,7 @@ export default function TroubleshootLoginPage() {
 
     return (
         <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-            {/* Logo Section */}
-            <div className="mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-8 opacity-90">
-                <div className="relative w-32 h-12">
-                    <Image src="/thriveny_logo.svg" alt="Thriveni" fill className="object-contain" />
-                </div>
-                <div className="hidden md:block h-8 w-px bg-slate-300"></div>
-                <div className="relative w-36 h-10">
-                    <Image src="/LLoyds_logo.svg" alt="Lloyds" fill className="object-contain" />
-                </div>
-            </div>
+
 
             {/* Login Card */}
             <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden transform transition-all">
@@ -111,10 +102,7 @@ export default function TroubleshootLoginPage() {
                 </div>
             </div>
 
-            {/* Support Link */}
-            <p className="mt-8 text-xs text-slate-400">
-                Having trouble? <span className="text-slate-600 font-bold cursor-pointer hover:underline">Contact Technical Support</span>
-            </p>
+
         </div>
     );
 }
