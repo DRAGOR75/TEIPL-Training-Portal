@@ -131,8 +131,21 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     };
 
     return (
-        <div className="space-y-4 md:space-y-9 w-full mx-auto px-1 md:px-0">
+        <div className="space-y-4 md:space-y-7 w-full mx-auto px-1 md:px-0">
             {isNavigating && <LoadingSpinner />}
+
+            {/* Top Action Bar - Troubleshooting Guidelines Only */}
+            <div className="flex justify-center pb-2">
+                <button
+                    onClick={() => setShowGuide(true)}
+                    className="flex items-center gap-2 px-6 py-2 bg-white border border-slate-200 rounded-full shadow-sm hover:shadow-md hover:border-thriveni-blue/30 transition-all group"
+                >
+                    <HiOutlineBookOpen size={18} className="text-thriveni-blue group-hover:scale-110 transition-transform" />
+                    <span className="text-[11px] md:text-xs font-black text-slate-700 tracking-wider">
+                        TROUBLESHOOTING GUIDELINES
+                    </span>
+                </button>
+            </div>
 
             {/* Cause Details Modal (Card Style) */}
             {activeModalStep && (
@@ -299,7 +312,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <div className="space-y-3">
                             <label className="flex items-center gap-2 text-sm font-bold text-slate-700 uppercase tracking-wide">
                                 <HiOutlineWrench size={16} className="text-slate-400" />
-                                Select Machine Model
+                                Select Machine/Component
                             </label>
                             <SearchableSelect
                                 options={products.map(p => ({ value: p.id, label: p.name }))}
@@ -536,42 +549,34 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <>
                             <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-justify hyphens-auto break-words">
                                 <p className="text-slate-500 max-w-md mx-auto mb-2 text-sm leading-relaxed">
-                                    <strong>Caution:</strong> <span className="text-lloyds-red">This troubleshooting library is a learning resource and a quick reference for technicians and engineers who possess comprehensive knowledge of the machines. For detailed instructions, safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
+                                    <strong>Caution:</strong> <span className="text-lloyds-red">This troubleshooting library is for learning and training purposes.This is also a quick reference for technicians and engineers who possess comprehensive knowledge of the machines. For detailed instructions,safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
                                 </p>
                             </div>
 
-                            {/* Secondary Navigation Row (Guidelines, Disclaimer, Feedback) - Only on landing */}
+                            {/* Secondary Actions Row (Visible only on landing) */}
                             <div className="px-2 md:px-4">
-                                <div className="bg-slate-50/50 backdrop-blur-sm border border-slate-200/60 rounded-2xl md:rounded-[2rem] p-3 md:p-4 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
-                                    <button
-                                        onClick={() => setShowGuide(true)}
-                                        className="flex items-center gap-1.5 text-[11px] md:text-xs font-bold text-slate-500 hover:text-thriveni-blue transition-all group"
-                                    >
-                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                            <HiOutlineBookOpen size={16} />
-                                        </div>
-                                        Troubleshooting Guidelines
-                                    </button>
+                                <div className="bg-slate-100/50 border border-slate-200/60 rounded-2xl p-3 flex flex-wrap items-center justify-center gap-x-6 gap-y-3">
                                     <button
                                         onClick={() => setShowDisclaimer(true)}
                                         className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
                                     >
-                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                            <HiOutlineExclamationCircle size={16} />
+                                        <div className="p-1.5 bg-white group-hover:bg-thriveni-blue/10 rounded-lg transition-colors border border-slate-200">
+                                            <HiOutlineExclamationCircle size={16} className="text-amber-500" />
                                         </div>
-                                        User guidelines
+                                        User guide
                                     </button>
                                     <button
                                         onClick={handleFeedbackNav}
                                         className="flex items-center gap-2 text-xs md:text-sm font-bold text-slate-500 hover:text-thriveni-blue transition-colors group"
                                     >
-                                        <div className="p-1.5 bg-slate-50 group-hover:bg-thriveni-blue/10 rounded-lg transition-colors">
-                                            <HiOutlineChatBubbleLeftRight size={16} />
+                                        <div className="p-1.5 bg-white group-hover:bg-thriveni-blue/10 rounded-lg transition-colors border border-slate-200">
+                                            <HiOutlineChatBubbleLeftRight size={16} className="text-lloyds-red" />
                                         </div>
                                         Feedback
                                     </button>
                                 </div>
                             </div>
+
                         </>
                     )}
 

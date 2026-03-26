@@ -101,15 +101,18 @@ export default function TroubleshootNavbar() {
                     </div>
 
                     {/* Centered Title */}
-                    <div className="flex items-center gap-2 md:gap-3 md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2">
-                        <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-lg md:rounded-xl flex items-center justify-center text-white shrink-0">
+                    <a 
+                        href="/"
+                        className="flex items-center gap-2 md:gap-3 md:ml-0 md:absolute md:left-1/2 md:top-1/2 md:transform md:-translate-x-1/2 md:-translate-y-1/2 group transition-all"
+                    >
+                        <div className="w-8 h-8 md:w-10 md:h-10 bg-slate-900 rounded-lg md:rounded-xl flex items-center justify-center text-white shrink-0 group-hover:scale-110 transition-transform">
                             <HiOutlineWrench size={20} className="md:hidden" />
                             <HiOutlineWrench size={24} className="hidden md:block" />
                         </div>
-                        <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-tight">
+                        <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-tight transition-colors">
                             Troubleshooting<br className="md:hidden" /> Library
                         </h1>
-                    </div>
+                    </a>
 
                     {/* Right Side: Install + Feedback Buttons */}
                     <div className="flex items-center gap-2">
