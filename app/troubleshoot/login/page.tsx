@@ -94,11 +94,7 @@ export default function TroubleshootLoginPage() {
                     </form>
                 </div>
 
-                <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
-                    <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                        Authorized personnel only
-                    </p>
-                </div>
+
             </div>
 
 
