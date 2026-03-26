@@ -96,8 +96,7 @@ export default function TroubleshootLoginPage() {
 
                 <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
                     <p className="text-[10px] text-slate-400 font-medium leading-relaxed">
-                        This system is restricted to Thriveni & Lloyds Metals authorized staff.
-                        Unauthorized access attempts are logged.
+                        Authorized personnel only
                     </p>
                 </div>
             </div>
