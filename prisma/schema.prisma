@@ -310,7 +310,7 @@ model ProductFault {
 // 4. Cause Library (Master Cause/Remedy List)
 model CauseLibrary {
   id          String   @id @default(uuid())
-  name        String   @unique // "Low Coolant Level"
+  name        String   // "Low Coolant Level"
   justification String?  @db.Text
   action      String?  @db.Text // The fix
   manualRef   String?  @map("manual_ref")

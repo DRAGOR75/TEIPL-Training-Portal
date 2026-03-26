@@ -679,18 +679,33 @@ export async function bulkUploadTroubleshooting(rows: BulkUploadRow[]) {
                 continue;
             }
 
-            const cause = await db.causeLibrary.upsert({
-                where: { name: row.causeName },
-                update: {
-                    action: row.action,
-                    manualRef: row.manualRef
-                },
-                create: {
+            // Check for a Cause by both Name AND Remedy (Action)
+            // This allows us to have multiple "Low Coolant" entries if they have different fixes.
+            let cause = await db.causeLibrary.findFirst({ 
+                where: { 
                     name: row.causeName,
-                    action: row.action,
-                    manualRef: row.manualRef
-                }
+                    action: row.action || undefined 
+                } 
             });
+
+            if (!cause) {
+                // If no exact name+remedy match, create a new record
+                cause = await db.causeLibrary.create({
+                    data: {
+                        name: row.causeName,
+                        action: row.action,
+                        manualRef: row.manualRef
+                    }
+                });
+            } else {
+                // If match found, update manualRef only if provided
+                if (row.manualRef) {
+                    cause = await db.causeLibrary.update({
+                        where: { id: cause.id },
+                        data: { manualRef: row.manualRef }
+                    });
+                }
+            }
 
             // --- Step 3: Link Cause to ALL Targets ---
             for (const pf of targetProductFaults) {

@@ -30,16 +30,26 @@ export default authMiddleware(async (req) => {
 
     // --- Subdomain Routing Logic ---
     if (isTroubleshootHost(host)) {
+        const isAuth = req.cookies.get('troubleshoot_auth')?.value === 'true';
+
         // Skip for static assets, API, or if already on a /troubleshoot path
         const isStatic = pathname.startsWith('/_next') ||
             pathname.startsWith('/api') ||
             pathname.startsWith('/favicon') ||
             /\.(?:svg|png|jpg|jpeg|gif|ico|css|js|woff|woff2|ttf|webmanifest)$/.test(pathname);
 
+        // Redirect to login if not authenticated
+        if (!isAuth && !pathname.startsWith('/login') && !isStatic && !pathname.startsWith('/api')) {
+            const url = req.nextUrl.clone();
+            url.pathname = '/login';
+            return NextResponse.redirect(url);
+        }
+
         if (!isStatic && !pathname.startsWith('/troubleshoot')) {
             // Block non-troubleshoot app routes on the subdomain
             const blockedPrefixes = ['/admin', '/login', '/trainer', '/join', '/tni'];
-            if (blockedPrefixes.some(prefix => pathname.startsWith(prefix))) {
+            // EXCEPT /login which we need for auth flow
+            if (blockedPrefixes.some(prefix => pathname.startsWith(prefix) && prefix !== '/login')) {
                 const url = req.nextUrl.clone();
                 url.pathname = '/';
                 return NextResponse.redirect(url);
