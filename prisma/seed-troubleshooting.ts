@@ -412,19 +412,28 @@ export async function seedTroubleshooting() {
             continue;
         }
 
-        // A. Ensure Cause exists in Library (Unique by Name)
-        const causeLib = await prisma.causeLibrary.upsert({
-            where: { name: name },
-            update: {
-                action: action,
-                manualRef: ref
-            },
-            create: {
+        // A. Ensure Cause exists in Library (Search by Name + Action/Remedy)
+        let causeLib = await prisma.causeLibrary.findFirst({
+            where: { 
                 name: name,
-                action: action,
-                manualRef: ref
-            },
+                action: action || undefined 
+            }
         });
+
+        if (!causeLib) {
+            causeLib = await prisma.causeLibrary.create({
+                data: {
+                    name: name,
+                    action: action,
+                    manualRef: ref
+                }
+            });
+        } else if (ref && causeLib.manualRef !== ref) {
+            causeLib = await prisma.causeLibrary.update({
+                where: { id: causeLib.id },
+                data: { manualRef: ref }
+            });
+        }
 
         // B. Update ProductFault with Symptoms (New Architecture)
         if (symptoms) {
