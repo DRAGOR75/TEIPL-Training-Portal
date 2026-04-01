@@ -549,7 +549,7 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
                         <>
                             <div className="bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 md:p-20 text-justify hyphens-auto break-words">
                                 <p className="text-slate-500 max-w-md mx-auto mb-2 text-sm leading-relaxed">
-                                    <strong>Caution:</strong> <span className="text-lloyds-red">This troubleshooting library is for learning and training purposes.This is also a quick reference for technicians and engineers who possess comprehensive knowledge of the machines. For detailed instructions,safety guidelines, and complete procedures, please refer to the manufacturer’s official manuals.</span>
+                                    <strong>Caution:</strong> <span className="text-lloyds-red">This troubleshooting library is made for learning and training purposes. This is also a quick reference for technicians and engineers who possess comprehensive knowledge of the machines. Always refer to the manufacturer’s manuals for detailed instructions, safety guidelines and complete procedures.</span>
                                 </p>
                             </div>
 
