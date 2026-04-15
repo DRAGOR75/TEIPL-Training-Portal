@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { addTrainer, deleteTrainer } from '@/app/actions/trainers';
-import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineUserPlus,
     HiOutlineEnvelope,
@@ -12,8 +10,12 @@ import {
     HiOutlineChevronDown,
     HiOutlineChevronUp,
     HiOutlinePlus,
-    HiOutlineArrowPath
+    HiOutlineArrowPath,
+    HiOutlinePencil,
+    HiOutlineXMark
 } from 'react-icons/hi2';
+import { addTrainer, deleteTrainer, updateTrainer } from '@/app/actions/trainers';
+import { FormSubmitButton } from '@/components/FormSubmitButton';
 
 type Trainer = {
     id: string;
@@ -26,18 +28,33 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
+    const [editingTrainer, setEditingTrainer] = useState<Trainer | null>(null);
     const formRef = useRef<HTMLFormElement>(null);
 
-    async function handleAddTrainer(formData: FormData) {
+    async function handleSubmit(formData: FormData) {
         setLoading(true);
-        const result = await addTrainer(formData);
+        let result;
+        
+        if (editingTrainer) {
+            result = await updateTrainer(editingTrainer.id, formData);
+        } else {
+            result = await addTrainer(formData);
+        }
+        
         setLoading(false);
 
         if (result?.error) {
             alert(result.error);
         } else {
             formRef.current?.reset();
+            setEditingTrainer(null);
         }
+    }
+
+    function handleEditClick(t: Trainer) {
+        setEditingTrainer(t);
+        setIsExpanded(true);
+        // We use window.scrollTo if needed, but the form is at the top of the expanded area
     }
 
     async function handleDeleteTrainer(id: string) {
@@ -73,11 +90,25 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
             {isExpanded && (
                 <div className="p-5 pt-0 space-y-6 border-t border-slate-100 animate-in fade-in slide-in-from-top-1 duration-200">
 
-                    {/* Professional Add Form */}
-                    <form ref={formRef} action={handleAddTrainer} className="mt-4 p-5 bg-slate-50 rounded-2xl border border-slate-200">
-                        <div className="flex items-center gap-2 mb-5 text-slate-700">
-                            <HiOutlineUserPlus size={16} />
-                            <span className="text-sm font-bold">Register New Trainer</span>
+                    {/* Professional Add/Edit Form */}
+                    <form ref={formRef} action={handleSubmit} className={`mt-4 p-5 rounded-2xl border transition-all ${editingTrainer ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-200'}`}>
+                        <div className="flex items-center justify-between mb-5">
+                            <div className="flex items-center gap-2 text-slate-700">
+                                {editingTrainer ? <HiOutlinePencil size={16} className="text-blue-600" /> : <HiOutlineUserPlus size={16} />}
+                                <span className={`text-sm font-bold ${editingTrainer ? 'text-blue-700' : ''}`}>
+                                    {editingTrainer ? 'Edit Trainer Details' : 'Register New Trainer'}
+                                </span>
+                            </div>
+                            {editingTrainer && (
+                                <button 
+                                    type="button" 
+                                    onClick={() => setEditingTrainer(null)}
+                                    className="text-xs font-bold text-slate-500 hover:text-slate-700 flex items-center gap-1"
+                                >
+                                    <HiOutlineXMark size={14} />
+                                    Cancel
+                                </button>
+                            )}
                         </div>
 
                         <div className="space-y-4">
@@ -85,11 +116,26 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Full Name</label>
-                                    <input name="name" required placeholder="Your Full Name" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input 
+                                        name="name" 
+                                        required 
+                                        defaultValue={editingTrainer?.name || ''}
+                                        key={`name-${editingTrainer?.id || 'new'}`}
+                                        placeholder="Full Name" 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                                    />
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Email Address</label>
-                                    <input name="email" type="email" required placeholder="Your Official Email" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input 
+                                        name="email" 
+                                        type="email" 
+                                        required 
+                                        defaultValue={editingTrainer?.email || ''}
+                                        key={`email-${editingTrainer?.id || 'new'}`}
+                                        placeholder="Official Email" 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                                    />
                                 </div>
                             </div>
 
@@ -97,21 +143,37 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Mobile Number</label>
-                                    <input name="phone" required placeholder="Your Mobile Number" className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <input 
+                                        name="phone" 
+                                        required 
+                                        defaultValue={editingTrainer?.phone || ''}
+                                        key={`phone-${editingTrainer?.id || 'new'}`}
+                                        placeholder="Mobile Number" 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                                    />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Login Password</label>
-                                    <input name="password" type="password" required placeholder="Create a secure password" minLength={6} className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                                        {editingTrainer ? 'New Password (Optional)' : 'Login Password'}
+                                    </label>
+                                    <input 
+                                        name="password" 
+                                        type="password" 
+                                        required={!editingTrainer} 
+                                        placeholder={editingTrainer ? "Leave blank to keep current" : "Create a password"} 
+                                        minLength={6} 
+                                        className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" 
+                                    />
                                 </div>
                             </div>
 
                             {/* Row 3: Button */}
                             <div className="flex justify-end pt-2">
                                 <FormSubmitButton
-                                    className="w-full md:w-auto px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95"
+                                    className={`w-full md:w-auto px-8 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-sm active:transform active:scale-95 ${editingTrainer ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'} text-white`}
                                 >
-                                    <HiOutlinePlus size={18} />
-                                    Add Trainer
+                                    {editingTrainer ? <HiOutlinePencil size={18} /> : <HiOutlinePlus size={18} />}
+                                    {editingTrainer ? 'Update Trainer' : 'Add Trainer'}
                                 </FormSubmitButton>
                             </div>
                         </div>
@@ -143,19 +205,28 @@ export default function TrainerManager({ trainers }: { trainers: Trainer[] }) {
                                     </div>
                                 </div>
 
-                                {/* Delete Button */}
-                                <button
-                                    onClick={() => handleDeleteTrainer(t.id)}
-                                    disabled={deletingId === t.id}
-                                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors shrink-0 disabled:opacity-50"
-                                    title="Delete Trainer"
-                                >
-                                    {deletingId === t.id ? (
-                                        <HiOutlineArrowPath className="animate-spin" size={16} />
-                                    ) : (
-                                        <HiOutlineTrash size={16} />
-                                    )}
-                                </button>
+                                {/* Action Buttons */}
+                                <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                        onClick={() => handleEditClick(t)}
+                                        className="p-2 text-slate-300 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        title="Edit Trainer"
+                                    >
+                                        <HiOutlinePencil size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteTrainer(t.id)}
+                                        disabled={deletingId === t.id}
+                                        className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                                        title="Delete Trainer"
+                                    >
+                                        {deletingId === t.id ? (
+                                            <HiOutlineArrowPath className="animate-spin" size={16} />
+                                        ) : (
+                                            <HiOutlineTrash size={16} />
+                                        )}
+                                    </button>
+                                </div>
                             </div>
                         ))}
                         {trainers.length === 0 && (

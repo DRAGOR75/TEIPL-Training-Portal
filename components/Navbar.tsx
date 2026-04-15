@@ -66,7 +66,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                             <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
                         )}
                         {userRole === 'TRAINER' && (
-                            <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                            <NavLink href="/trainer/dashboard" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
                         )}
 
                         {isLoggedIn && (
@@ -98,7 +98,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                             <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
                         )}
                         {userRole === 'TRAINER' && (
-                            <MobileNavLink href="/trainer" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                            <MobileNavLink href="/trainer/dashboard" onClick={() => setIsOpen(false)} text="Trainer Hub" />
                         )}
 
                         {isLoggedIn && (

@@ -77,7 +77,7 @@ export default function Home() {
           </Link>
 
           {/* Hub 2: Trainer Hub - Shifted Right */}
-          <Link href="/wip" className="group relative flex flex-col md:flex-row-reverse items-start md:items-end gap-8 md:gap-16 self-end text-right md:text-left">
+          <Link href="/trainer/dashboard" className="group relative flex flex-col md:flex-row-reverse items-start md:items-end gap-8 md:gap-16 self-end text-right md:text-left">
             <div className="absolute -top-12 md:-top-24 -right-6 md:-right-12 text-[10rem] md:text-[20rem] font-black text-emerald-500/5 select-none transition-all duration-700 group-hover:text-emerald-500/10 group-hover:-translate-y-4">
               02
             </div>

@@ -69,3 +69,71 @@ export async function deleteTrainer(id: string) {
         return { error: "Failed to delete trainer." };
     }
 }
+// 4. Update a Trainer
+export async function updateTrainer(trainerId: string, formData: FormData) {
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const rawPassword = formData.get("password") as string;
+
+    // Validation
+    if (!name || !email) {
+        return { error: "Name and Email are required." };
+    }
+
+    try {
+        // Fetch current trainer to get the current email (needed to find the associated User)
+        const currentTrainer = await db.trainer.findUnique({
+            where: { id: trainerId }
+        });
+
+        if (!currentTrainer) {
+            return { error: "Trainer not found." };
+        }
+
+        const dataToUpdate: any = {
+            name,
+            email,
+            phone
+        };
+
+        // Prepare User update data
+        const userDataToUpdate: any = {
+            name,
+            email
+        };
+
+        // If a new password is provided, hash it
+        if (rawPassword && rawPassword.length >= 6) {
+            userDataToUpdate.password = await bcrypt.hash(rawPassword, 10);
+        }
+
+        // Run updates in a transaction
+        await db.$transaction([
+            db.trainer.update({
+                where: { id: trainerId },
+                data: dataToUpdate
+            }),
+            db.user.upsert({
+                where: { email: currentTrainer.email! },
+                update: userDataToUpdate,
+                create: {
+                    name,
+                    email,
+                    password: userDataToUpdate.password || await bcrypt.hash("ChangeMe123!", 10),
+                    role: 'TRAINER'
+                }
+            })
+        ]);
+
+        revalidatePath("/admin/dashboard");
+        revalidatePath("/admin/sessions");
+        return { success: true };
+    } catch (error: any) {
+        if (error.code === 'P2002') {
+            return { error: "This email is already in use by another account." };
+        }
+        console.error("Update Trainer Error:", error);
+        return { error: "Failed to update trainer." };
+    }
+}

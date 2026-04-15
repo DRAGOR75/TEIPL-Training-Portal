@@ -314,6 +314,7 @@ model CauseLibrary {
   justification String?  @db.Text
   action      String?  @db.Text // The fix
   manualRef   String?  @map("manual_ref")
+  symptoms    String?  @db.Text
   
   imageUrl    String?  @map("image_url")
 
@@ -461,3 +462,140 @@ model CohortFeedback {
   @@unique([cohortId, empId])
   @@map("cohort_feedbacks")
 }
+
+// --- TRAINING MANUALS LIBRARY SYSTEM ---
+
+// 1. Manual Subject (High-level category, e.g., "Hydraulics", "Safety")
+model ManualSubject {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  viewSeq     Int      @default(0) @map("view_seq")
+  userView    Int      @default(0) @map("user_view")
+  keywords    String?
+  imageUrl    String?  @map("image_url")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectModules SubjectModule[]
+  learningPathMappings LearningPathSubject[]
+
+  @@map("manual_subjects")
+}
+
+// 2. Manual Module (The curriculum component, e.g., "Pump Basics")
+model ManualModule {
+  id          String   @id @default(uuid())
+  moduleCode  String?  @unique @map("module_code")
+  name        String   @unique
+  viewSeq     Int      @default(0) @map("view_seq")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectMappings SubjectModule[]
+
+  @@map("manual_modules")
+}
+
+// 3. Subject-Module Bridge (Logic: Which subject includes which modules)
+model SubjectModule {
+  id          String   @id @default(uuid())
+  subjectId   Int      @map("subject_id")
+  moduleId    String   @map("module_id")
+  
+  viewSeq     Int      @default(0) @map("view_seq")
+  description String?  @db.Text 
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subject     ManualSubject @relation(fields: [subjectId], references: [id])
+  module      ManualModule  @relation(fields: [moduleId], references: [id])
+  
+  // Downstream: The topics for this specific subject-module context
+  topics      ModuleTopic[]
+
+  @@unique([subjectId, moduleId])
+  @@map("subject_modules")
+}
+
+// 4. Manual Topic (The actual lesson content with PDF link)
+model ManualTopic {
+  id          String   @id @default(uuid())
+  name        String   
+  content     String?  @db.Text // Detailed text content/steps
+  pdfUrl      String?  @map("pdf_url")
+  imageUrl    String?  @map("image_url")
+  manualRef   String?  @map("manual_ref")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  moduleMappings ModuleTopic[]
+
+  @@map("manual_topics")
+}
+
+// 5. Module-Topic Bridge (Logic: Sequence of topics in a module)
+model ModuleTopic {
+  id              String   @id @default(uuid())
+  subjectModuleId String   @map("subject_module_id")
+  topicId         String   @map("topic_id")
+  
+  seq             Int      @default(0) 
+  isActive        Boolean  @default(true) @map("is_active")
+  notes           String?  @db.Text
+
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectModule   SubjectModule @relation(fields: [subjectModuleId], references: [id], onDelete: Cascade)
+  topic           ManualTopic   @relation(fields: [topicId], references: [id])
+
+  @@unique([subjectModuleId, topicId])
+  @@index([subjectModuleId, seq])
+  @@map("module_topics")
+}
+
+// --- LEARNING PATHS SYSTEM ---
+
+// Learning Path — A curated collection of subjects for a group
+model LearningPath {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?  @db.Text
+  groupName   String   @map("group_name")
+  status      String   @default("Draft") // Draft, Active, Archived
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjects    LearningPathSubject[]
+
+  @@map("learning_paths")
+}
+
+// Learning Path <-> Subject Bridge
+model LearningPathSubject {
+  id             String   @id @default(uuid())
+  learningPathId String   @map("learning_path_id")
+  subjectId      Int      @map("subject_id")
+  seq            Int      @default(0)
+
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  learningPath   LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  subject        ManualSubject @relation(fields: [subjectId], references: [id])
+
+  @@unique([learningPathId, subjectId])
+  @@map("learning_path_subjects")
+}
+

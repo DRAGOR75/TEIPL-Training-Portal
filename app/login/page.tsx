@@ -39,7 +39,7 @@ export default function LoginPage() {
                 if (session?.user?.role === "ADMIN") {
                     window.location.href = "/admin";
                 } else if (session?.user?.role === "TRAINER") {
-                    window.location.href = "/trainer";
+                    window.location.href = "/trainer/dashboard";
                 } else {
                     // Default for USER, MANAGER, etc.
                     window.location.href = "/";
