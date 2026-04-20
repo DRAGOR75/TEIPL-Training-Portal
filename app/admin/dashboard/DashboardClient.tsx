@@ -32,7 +32,9 @@ type Session = {
     startDate: Date;
     endDate: Date;
     feedbackCreationDate?: Date | null;
+    assessmentDate?: Date | null;
     emailsSent: boolean;
+    feedbackEmailsSent: boolean;
     sendFeedbackAutomatically: boolean;
     enrollments: any[];
 };
@@ -401,14 +403,14 @@ export default function DashboardClient({
                                                                     if (!confirm("Send feedback emails to all participants?")) return;
                                                                     await sendFeedbackEmails(t.id);
                                                                 }}
-                                                                disabled={t.emailsSent}
-                                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide transition-all shrink-0 ${t.emailsSent
+                                                                disabled={t.feedbackEmailsSent}
+                                                                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold text-[10px] uppercase tracking-wide transition-all shrink-0 ${t.feedbackEmailsSent
                                                                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                                                                     : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md active:scale-95'
                                                                     }`}
                                                             >
                                                                 <HiOutlineEnvelope size={12} />
-                                                                {t.emailsSent ? 'Sent' : 'Send Manually'}
+                                                                {t.feedbackEmailsSent ? 'Sent' : 'Send Manually'}
                                                             </button>
                                                         </div>
 
@@ -420,8 +422,8 @@ export default function DashboardClient({
                                                                         <HiOutlineClock size={18} />
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"> POST TRAINING (30 DAYS) FEEDBACK DATE</span>
-                                                                        <span className="font-bold text-slate-900 text-sm block">{new Date(t.feedbackCreationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5"> POST TRAINING assessment DATE</span>
+                                                                        <span className="font-bold text-slate-900 text-sm block">{new Date(t.assessmentDate || t.feedbackCreationDate || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                                                                     </div>
                                                                 </div>
                                                             ) : (
@@ -430,7 +432,7 @@ export default function DashboardClient({
                                                                         <HiOutlineClock size={18} />
                                                                     </div>
                                                                     <div>
-                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">30 Days Post Feedback Date</span>
+                                                                        <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Post Assessment Date</span>
                                                                         <span className="font-medium text-slate-400 text-sm block">Not Scheduled</span>
                                                                     </div>
                                                                 </div>

@@ -138,16 +138,16 @@ export async function sendFeedbackRequestEmail(
 
   const html = `
     <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
-      <h2 style="color: #2e7d32;">Post training (30 days) performance feedback</h2>
+      <h2 style="color: #2e7d32;">Post Training Performance Assessment</h2>
       <p>Dear <strong>${employeeName}</strong>,</p>
       <p>Thank you for participating in the <strong>${programName}</strong> program.</p>
-      <p>Your feedback is valuable to us. Please click the button below to submit your evaluation:</p>
-      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Submit Feedback</a></p>
+      <p>Your assessment is valuable to us. Please click the button below to submit your evaluation:</p>
+      <p><a href="${feedbackLink}" style="background: #2e7d32; color: white; padding: 12px 25px; text-decoration: none; display: inline-block; border-radius: 4px; font-weight: bold;">Submit Assessment</a></p>
       <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
       <small style="color: #888;">This is an automated message from the Thriveni Training Management System.</small>
     </div>`;
 
-  return await sendEmail({ to: employeeEmail, subject: `Action Required: Post training (30 days) performance feedback for ${programName}`, html });
+  return await sendEmail({ to: employeeEmail, subject: `Action Required: Post Training Performance Assessment for ${programName}`, html });
 }
 
 /**

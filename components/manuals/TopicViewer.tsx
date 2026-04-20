@@ -14,7 +14,8 @@ import {
 import {
     addTopicToModule,
     removeTopicFromModule,
-    updateTopicSequenceOrder
+    updateTopicSequenceOrder,
+    createAndLinkTopicToModule
 } from '@/app/actions/admin-training-manuals';
 import { getModuleTopicSequence } from '@/app/actions/training-manuals';
 
@@ -30,6 +31,8 @@ export default function TopicViewer({ subjectModuleId, moduleName, topicLib, isA
     const [topicSequence, setTopicSequence] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [topicToLink, setTopicToLink] = useState('');
+    const [mode, setMode] = useState<'link' | 'create'>('link');
+    const [newTopicName, setNewTopicName] = useState('');
     const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
 
     useEffect(() => {
@@ -55,6 +58,16 @@ export default function TopicViewer({ subjectModuleId, moduleName, topicLib, isA
             const result = await addTopicToModule(subjectModuleId, topicToLink, nextSeq);
             if (result.error) alert(result.error);
             else { setTopicToLink(''); refreshTopics(); }
+        });
+    }
+
+    function handleCreateTopic() {
+        if (!newTopicName.trim()) return;
+        const nextSeq = topicSequence.length > 0 ? Math.max(...topicSequence.map(t => t.seq)) + 1 : 1;
+        startTransition(async () => {
+            const result = await createAndLinkTopicToModule(subjectModuleId, newTopicName, nextSeq);
+            if (result.error) alert(result.error);
+            else { setNewTopicName(''); refreshTopics(); }
         });
     }
 
@@ -115,26 +128,67 @@ export default function TopicViewer({ subjectModuleId, moduleName, topicLib, isA
         <div className="space-y-4 animate-in fade-in duration-300">
             {/* Add Topic (Admin) */}
             {isAdmin && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 p-4">
-                    <HiOutlinePlus size={18} className="text-emerald-600 shrink-0" />
-                    <select
-                        value={topicToLink}
-                        onChange={(e) => setTopicToLink(e.target.value)}
-                        className="flex-1 px-3 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
-                    >
-                        <option value="">Add a topic to &quot;{moduleName}&quot;...</option>
-                        {availableTopics.map((t) => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={handleAddTopic}
-                        disabled={!topicToLink || isPending}
-                        className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
-                        Add
-                    </button>
+                <div className="bg-gradient-to-r from-emerald-50 to-teal-50 rounded-2xl border border-emerald-200 overflow-hidden">
+                    <div className="flex border-b border-emerald-100">
+                        <button
+                            onClick={() => setMode('link')}
+                            className={`flex-1 py-2 text-sm font-bold transition-colors ${mode === 'link' ? 'bg-emerald-100 text-emerald-800' : 'text-emerald-500 hover:bg-white/50 hover:text-emerald-700'}`}
+                        >
+                            Add Existing Topic
+                        </button>
+                        <button
+                            onClick={() => setMode('create')}
+                            className={`flex-1 py-2 text-sm font-bold transition-colors ${mode === 'create' ? 'bg-emerald-100 text-emerald-800' : 'text-emerald-500 hover:bg-white/50 hover:text-emerald-700'}`}
+                        >
+                            Create New Topic
+                        </button>
+                    </div>
+                    
+                    <div className="p-4 flex items-center gap-3">
+                        {mode === 'link' ? (
+                            <>
+                                <HiOutlineDocumentText size={18} className="text-emerald-600 shrink-0" />
+                                <select
+                                    value={topicToLink}
+                                    onChange={(e) => setTopicToLink(e.target.value)}
+                                    className="flex-1 px-3 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+                                >
+                                    <option value="">Add a topic to &quot;{moduleName}&quot;...</option>
+                                    {availableTopics.map((t) => (
+                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleAddTopic}
+                                    disabled={!topicToLink || isPending}
+                                    className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
+                                    Add Topic
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <HiOutlinePlus size={18} className="text-emerald-600 shrink-0" />
+                                <input
+                                    type="text"
+                                    value={newTopicName}
+                                    onChange={(e) => setNewTopicName(e.target.value)}
+                                    placeholder="Enter new topic name..."
+                                    className="flex-1 px-3 py-2.5 border border-emerald-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-emerald-400 outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleCreateTopic()}
+                                />
+                                <button
+                                    onClick={handleCreateTopic}
+                                    disabled={!newTopicName.trim() || isPending}
+                                    className="px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-bold hover:bg-emerald-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
+                                    Create & Add
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             )}
 

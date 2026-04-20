@@ -222,8 +222,8 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     <>
                                         <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
                                         <p className="text-sm text-slate-600 mb-4">
-                                            Upload CSV with headers:<br />
-                                            <code className="text-xs bg-slate-200 px-1 rounded text-slate-700">id, name, email, grade, sectionName, location, gender, manager_name, manager_email, program_name, start_date, end_date</code>
+                                            Upload CSV with Master TNI headers:<br />
+                                            <code className="text-[10px] break-all bg-slate-200 p-1 mt-1 block rounded text-slate-700">Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)</code>
                                         </p>
                                         <input
                                             type="file"

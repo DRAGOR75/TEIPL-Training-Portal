@@ -257,6 +257,62 @@ export async function updateTopicSequenceOrder(items: { id: string; seq: number 
     }
 }
 
+// --- 6. Unified UI Helpers ---
+
+export async function createAndLinkModuleToSubject(subjectId: number, moduleName: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        if (!moduleName.trim()) return { error: 'Module Name is required' };
+        
+        await db.$transaction(async (tx) => {
+            const newModule = await tx.manualModule.create({
+                data: { name: moduleName.trim() }
+            });
+            await tx.subjectModule.create({
+                data: {
+                    subjectId,
+                    moduleId: newModule.id
+                }
+            });
+        });
+        
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e: any) {
+        console.error(e);
+        if (e.code === 'P2002') {
+             return { error: 'A module with this name already exists in the library.' };
+        }
+        return { error: 'Failed to create and link module' };
+    }
+}
+
+export async function createAndLinkTopicToModule(subjectModuleId: string, topicName: string, seq: number) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        if (!topicName.trim()) return { error: 'Topic Name is required' };
+        
+        await db.$transaction(async (tx) => {
+            const newTopic = await tx.manualTopic.create({
+                data: { name: topicName.trim() }
+            });
+            await tx.moduleTopic.create({
+                data: {
+                    subjectModuleId,
+                    topicId: newTopic.id,
+                    seq
+                }
+            });
+        });
+        
+        revalidatePath(ADMIN_PATH);
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to create and link topic' };
+    }
+}
+
 // --- Fetchers ---
 
 export async function getAdminManualData() {

@@ -112,14 +112,14 @@ export default async function AdminHubPage() {
                         isExternal
                     />
 
-                    {/* Card 8: Looker Reports */}
+                    {/* Card 8: Training Manuals */}
                     <AdminCard
                         href="/training-manuals"
                         title="Training Manuals"
                         description="Upload and manage training manuals."
                         icon={<HiOutlineDocumentText size={24} />}
-                        tag="Analytics"
-                        color="amber"
+                        tag="Manuals"
+                        color="indigo"
                         isExternal
                     />
 

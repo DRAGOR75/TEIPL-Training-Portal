@@ -21,6 +21,7 @@ import {
     deleteManualSubject,
     toggleManualSubjectStatus
 } from '@/app/actions/admin-training-manuals';
+import ModuleList from './ModuleList';
 
 interface Subject {
     id: number;
@@ -33,8 +34,9 @@ interface Subject {
 
 interface SubjectGridProps {
     subjects: Subject[];
+    moduleLib: any[];
+    topicLib: any[];
     isAdmin: boolean;
-    onSelectSubject: (subject: Subject) => void;
     searchQuery: string;
 }
 
@@ -49,7 +51,7 @@ const GRADIENTS = [
     'from-lime-500 to-green-500',
 ];
 
-export default function SubjectGrid({ subjects, isAdmin, onSelectSubject, searchQuery }: SubjectGridProps) {
+export default function SubjectGrid({ subjects, moduleLib, topicLib, isAdmin, searchQuery }: SubjectGridProps) {
     const [isPending, startTransition] = useTransition();
     const [showAddForm, setShowAddForm] = useState(false);
     const [newName, setNewName] = useState('');
@@ -57,6 +59,7 @@ export default function SubjectGrid({ subjects, isAdmin, onSelectSubject, search
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [deletingId, setDeletingId] = useState<number | null>(null);
+    const [expandedSubjectId, setExpandedSubjectId] = useState<number | null>(null);
 
     const filtered = subjects.filter(s => {
         if (!searchQuery) return isAdmin ? true : s.userView === 1;
@@ -165,15 +168,19 @@ export default function SubjectGrid({ subjects, isAdmin, onSelectSubject, search
                 {filtered.map((subject, index) => (
                     <div
                         key={subject.id}
-                        onClick={() => {
-                            if (editingId !== subject.id) onSelectSubject(subject);
-                        }}
-                        className={`group relative bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden cursor-pointer hover:-translate-y-1 ${isAdmin && subject.userView !== 1 ? 'opacity-60 hover:opacity-100' : ''}`}
+                        className={`group relative bg-white rounded-2xl border border-slate-200 shadow-sm transition-all duration-300 overflow-hidden ${expandedSubjectId === subject.id ? 'col-span-full shadow-2xl ring-2 ring-indigo-500/20' : 'hover:shadow-xl hover:-translate-y-1'} ${isAdmin && subject.userView !== 1 ? 'opacity-60 hover:opacity-100' : ''}`}
                     >
                         {/* Top Gradient Accent */}
                         <div className={`h-2 bg-gradient-to-r ${GRADIENTS[index % GRADIENTS.length]} opacity-80 group-hover:opacity-100 transition-opacity`} />
 
-                        <div className="p-5">
+                        <div 
+                            className="p-5 cursor-pointer"
+                            onClick={() => {
+                                if (editingId !== subject.id) {
+                                    setExpandedSubjectId(expandedSubjectId === subject.id ? null : subject.id);
+                                }
+                            }}
+                        >
                             {/* Icon */}
                             <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
                                 <HiOutlineBookOpen size={22} />
@@ -252,6 +259,19 @@ export default function SubjectGrid({ subjects, isAdmin, onSelectSubject, search
                                 </div>
                             )}
                         </div>
+                        
+                        {/* Expanded Modules Inline */}
+                        {expandedSubjectId === subject.id && (
+                            <div className="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-6 lg:p-8 animate-in slide-in-from-top-4 duration-300">
+                                <ModuleList
+                                    subjectId={subject.id}
+                                    subjectName={subject.name}
+                                    moduleLib={moduleLib}
+                                    topicLib={topicLib}
+                                    isAdmin={isAdmin}
+                                />
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

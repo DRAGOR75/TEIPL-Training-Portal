@@ -13,22 +13,27 @@ import {
 import {
     linkModuleToSubject,
     unlinkModuleFromSubject,
+    createAndLinkModuleToSubject,
 } from '@/app/actions/admin-training-manuals';
 import { getManualModules } from '@/app/actions/training-manuals';
+import TopicViewer from './TopicViewer';
 
 interface ModuleListProps {
     subjectId: number;
     subjectName: string;
     moduleLib: any[];
+    topicLib: any[];
     isAdmin: boolean;
-    onSelectModule: (subjectModuleId: string, moduleName: string) => void;
 }
 
-export default function ModuleList({ subjectId, subjectName, moduleLib, isAdmin, onSelectModule }: ModuleListProps) {
+export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib, isAdmin }: ModuleListProps) {
     const [isPending, startTransition] = useTransition();
     const [linkedModules, setLinkedModules] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [moduleToLink, setModuleToLink] = useState('');
+    const [mode, setMode] = useState<'link' | 'create'>('link');
+    const [newModuleName, setNewModuleName] = useState('');
+    const [expandedModuleId, setExpandedModuleId] = useState<string | null>(null);
 
     useEffect(() => {
         setLoading(true);
@@ -52,6 +57,15 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, isAdmin,
             const result = await linkModuleToSubject(subjectId, moduleToLink);
             if (result.error) alert(result.error);
             else { setModuleToLink(''); refreshModules(); }
+        });
+    }
+
+    function handleCreateModule() {
+        if (!newModuleName.trim()) return;
+        startTransition(async () => {
+            const result = await createAndLinkModuleToSubject(subjectId, newModuleName);
+            if (result.error) alert(result.error);
+            else { setNewModuleName(''); refreshModules(); }
         });
     }
 
@@ -89,28 +103,69 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, isAdmin,
 
     return (
         <div className="space-y-4 animate-in fade-in duration-300">
-            {/* Link Module (Admin) */}
+            {/* Add/Link Module (Admin) */}
             {isAdmin && (
-                <div className="flex items-center gap-3 bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl border border-indigo-200 p-4">
-                    <HiOutlineLink size={18} className="text-indigo-500 shrink-0" />
-                    <select
-                        value={moduleToLink}
-                        onChange={(e) => setModuleToLink(e.target.value)}
-                        className="flex-1 px-3 py-2.5 border border-indigo-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
-                    >
-                        <option value="">Link a module to &quot;{subjectName}&quot;...</option>
-                        {availableModules.map((m) => (
-                            <option key={m.id} value={m.id}>{m.name}</option>
-                        ))}
-                    </select>
-                    <button
-                        onClick={handleLinkModule}
-                        disabled={!moduleToLink || isPending}
-                        className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2"
-                    >
-                        {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
-                        Link
-                    </button>
+                <div className="bg-gradient-to-r from-indigo-50 to-violet-50 rounded-2xl border border-indigo-200 overflow-hidden">
+                    <div className="flex border-b border-indigo-100">
+                        <button
+                            onClick={() => setMode('link')}
+                            className={`flex-1 py-2 text-sm font-bold transition-colors ${mode === 'link' ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-400 hover:bg-white/50 hover:text-indigo-600'}`}
+                        >
+                            Link Existing Module
+                        </button>
+                        <button
+                            onClick={() => setMode('create')}
+                            className={`flex-1 py-2 text-sm font-bold transition-colors ${mode === 'create' ? 'bg-indigo-100 text-indigo-800' : 'text-indigo-400 hover:bg-white/50 hover:text-indigo-600'}`}
+                        >
+                            Create New Module
+                        </button>
+                    </div>
+                    
+                    <div className="p-4 flex items-center gap-3">
+                        {mode === 'link' ? (
+                            <>
+                                <HiOutlineLink size={18} className="text-indigo-500 shrink-0" />
+                                <select
+                                    value={moduleToLink}
+                                    onChange={(e) => setModuleToLink(e.target.value)}
+                                    className="flex-1 px-3 py-2.5 border border-indigo-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                >
+                                    <option value="">Link a module to &quot;{subjectName}&quot;...</option>
+                                    {availableModules.map((m) => (
+                                        <option key={m.id} value={m.id}>{m.name}</option>
+                                    ))}
+                                </select>
+                                <button
+                                    onClick={handleLinkModule}
+                                    disabled={!moduleToLink || isPending}
+                                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlineLink size={16} />}
+                                    Link
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <HiOutlinePlus size={18} className="text-indigo-500 shrink-0" />
+                                <input
+                                    type="text"
+                                    value={newModuleName}
+                                    onChange={(e) => setNewModuleName(e.target.value)}
+                                    placeholder="Enter new module name..."
+                                    className="flex-1 px-3 py-2.5 border border-indigo-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-indigo-400 outline-none"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleCreateModule()}
+                                />
+                                <button
+                                    onClick={handleCreateModule}
+                                    disabled={!newModuleName.trim() || isPending}
+                                    className="px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
+                                    Create & Link
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             )}
 
@@ -128,12 +183,11 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, isAdmin,
             ) : (
                 <div className="space-y-3">
                     {linkedModules.map((lm, index) => (
-                        <div
-                            key={lm.id}
-                            onClick={() => onSelectModule(lm.id, lm.module.name)}
-                            className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-lg hover:border-indigo-200 transition-all duration-300 cursor-pointer overflow-hidden hover:-translate-y-0.5"
-                        >
-                            <div className="flex items-center gap-4 p-5">
+                        <div key={lm.id} className="group bg-white rounded-2xl border border-slate-200 shadow-sm transition-all duration-300 overflow-hidden">
+                            <div
+                                onClick={() => setExpandedModuleId(expandedModuleId === lm.id ? null : lm.id)}
+                                className="flex items-center gap-4 p-5 cursor-pointer hover:bg-slate-50"
+                            >
                                 {/* Index */}
                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-100 to-violet-100 flex items-center justify-center text-indigo-700 font-black text-sm shrink-0 group-hover:from-indigo-200 group-hover:to-violet-200 transition-colors">
                                     {index + 1}
@@ -171,6 +225,18 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, isAdmin,
                                     )}
                                 </div>
                             </div>
+                            
+                            {/* Nested Topic Viewer inline */}
+                            {expandedModuleId === lm.id && (
+                                <div className="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-5">
+                                    <TopicViewer
+                                        subjectModuleId={lm.id}
+                                        moduleName={lm.module.name}
+                                        topicLib={topicLib}
+                                        isAdmin={isAdmin}
+                                    />
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

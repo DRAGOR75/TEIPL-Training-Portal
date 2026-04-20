@@ -111,7 +111,7 @@ model Nomination {
   @@map("nominations")
 }
 
-// 5. NEW Nomination Batch Table (Groups participants)
+// 5.  Nomination Batch Table (Groups participants)
 model NominationBatch {
   id              String           @id @default(uuid())
   name            String?          // e.g., "Feb 2026 Safety Batch"
@@ -146,6 +146,10 @@ model TrainingSession {
   feedbackReminderSent      Boolean      @default(false) @map("feedback_reminder_sent")
   sendFeedbackAutomatically Boolean      @default(false) @map("send_feedback_automatically")
   requireManagerApproval    Boolean      @default(true) @map("require_manager_approval")
+  
+  // NEW fields for Assessment tracking
+  assessmentDate            DateTime?    @map("assessment_date")
+  feedbackEmailsSent        Boolean      @default(false) @map("feedback_emails_sent")
   
   nominationBatchId         String?      @unique @map("nomination_batch_id")
 

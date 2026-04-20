@@ -255,6 +255,14 @@ export async function createSession(formData: FormData) {
     const startDate = new Date(startDateRaw);
     const endDate = new Date(endDateRaw);
 
+    // Auto-calculate Assessment Dates (+20 days)
+    const assessmentDateRaw = formData.get('assessmentDate') as string;
+    const assessmentDate = assessmentDateRaw 
+        ? new Date(assessmentDateRaw) 
+        : new Date(endDate.getTime() + 20 * 24 * 60 * 60 * 1000);
+
+    const feedbackCreationDate = assessmentDate; // Keep them in sync for now
+
     try {
         const program = await db.program.findUnique({
             where: { name: programName }
@@ -282,6 +290,8 @@ export async function createSession(formData: FormData) {
                 endTime: formData.get('endTime') as string || "6:00 pm",
                 location: formData.get('location') as string,
                 topics: formData.get('topics') as string,
+                assessmentDate,
+                feedbackCreationDate,
                 nominationBatchId: batch.id
             }
         });

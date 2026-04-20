@@ -322,7 +322,7 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         await db.trainingSession.update({
             where: { id: sessionId },
-            data: { emailsSent: true }
+            data: { feedbackEmailsSent: true }
         });
 
         revalidatePath('/admin/dashboard');

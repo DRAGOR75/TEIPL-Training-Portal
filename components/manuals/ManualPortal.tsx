@@ -19,14 +19,7 @@ import TopicViewer from './TopicViewer';
 import LearningPathDesigner from './LearningPathDesigner';
 import LearningPathViewer from './LearningPathViewer';
 
-type View = 'subjects' | 'modules' | 'topics' | 'learning-paths' | 'manage-subjects' | 'manage-modules' | 'manage-topics';
-
-interface SelectedState {
-    subjectId: number | null;
-    subjectName: string;
-    subjectModuleId: string | null;
-    moduleName: string;
-}
+type View = 'subjects' | 'learning-paths' | 'manage-subjects' | 'manage-modules' | 'manage-topics';
 
 interface ManualPortalProps {
     subjects: any[];
@@ -40,43 +33,19 @@ interface ManualPortalProps {
 export default function ManualPortal({ subjects, moduleLib, topicLib, learningPaths, isAdmin, userName }: ManualPortalProps) {
     const [currentView, setCurrentView] = useState<View>('subjects');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selected, setSelected] = useState<SelectedState>({
-        subjectId: null,
-        subjectName: '',
-        subjectModuleId: null,
-        moduleName: ''
-    });
     const [sidebarOpen, setSidebarOpen] = useState(false);
 
     // Navigation helpers
     function goToSubjects() {
         setCurrentView('subjects');
-        setSelected({ subjectId: null, subjectName: '', subjectModuleId: null, moduleName: '' });
-    }
-
-    function goToModules(subject: { id: number; name: string }) {
-        setCurrentView('modules');
-        setSelected({ ...selected, subjectId: subject.id, subjectName: subject.name, subjectModuleId: null, moduleName: '' });
         setSidebarOpen(false);
-    }
-
-    function goToTopics(subjectModuleId: string, moduleName: string) {
-        setCurrentView('topics');
-        setSelected({ ...selected, subjectModuleId, moduleName });
     }
 
     // Build breadcrumbs
     function getBreadcrumbs(): BreadcrumbItem[] {
         const crumbs: BreadcrumbItem[] = [{ label: 'Subjects', onClick: goToSubjects }];
 
-        if (currentView === 'modules' || currentView === 'topics') {
-            if (currentView === 'topics') {
-                crumbs.push({ label: selected.subjectName, onClick: () => goToModules({ id: selected.subjectId!, name: selected.subjectName }) });
-                crumbs.push({ label: selected.moduleName });
-            } else {
-                crumbs.push({ label: selected.subjectName });
-            }
-        } else if (currentView === 'learning-paths') {
+        if (currentView === 'learning-paths') {
             crumbs.push({ label: 'Learning Paths' });
         } else if (currentView === 'manage-subjects' || currentView === 'manage-modules' || currentView === 'manage-topics') {
             crumbs.push({ label: 'Content Manager' });
@@ -240,7 +209,7 @@ export default function ManualPortal({ subjects, moduleLib, topicLib, learningPa
                 {/* Main Content */}
                 <main className="flex-1 min-w-0">
                     {/* Breadcrumbs */}
-                    {(currentView !== 'subjects' || selected.subjectId) && (
+                    {(currentView !== 'subjects') && (
                         <ManualBreadcrumb items={getBreadcrumbs()} />
                     )}
 
@@ -252,39 +221,22 @@ export default function ManualPortal({ subjects, moduleLib, topicLib, learningPa
                                 <LearningPathViewer
                                     learningPaths={learningPaths}
                                     onSelectSubject={(id) => {
-                                        const subject = subjects.find(s => s.id === id);
-                                        if (subject) goToModules(subject);
+                                        goToSubjects();
                                     }}
                                 />
                             )}
 
                             <SubjectGrid
                                 subjects={subjects}
+                                moduleLib={moduleLib}
+                                topicLib={topicLib}
                                 isAdmin={isAdmin}
-                                onSelectSubject={(s) => goToModules(s)}
                                 searchQuery={searchQuery}
                             />
                         </div>
                     )}
 
-                    {currentView === 'modules' && selected.subjectId && (
-                        <ModuleList
-                            subjectId={selected.subjectId}
-                            subjectName={selected.subjectName}
-                            moduleLib={moduleLib}
-                            isAdmin={isAdmin}
-                            onSelectModule={goToTopics}
-                        />
-                    )}
 
-                    {currentView === 'topics' && selected.subjectModuleId && (
-                        <TopicViewer
-                            subjectModuleId={selected.subjectModuleId}
-                            moduleName={selected.moduleName}
-                            topicLib={topicLib}
-                            isAdmin={isAdmin}
-                        />
-                    )}
 
                     {currentView === 'learning-paths' && (
                         isAdmin ? (
@@ -296,8 +248,7 @@ export default function ManualPortal({ subjects, moduleLib, topicLib, learningPa
                             <LearningPathViewer
                                 learningPaths={learningPaths}
                                 onSelectSubject={(id) => {
-                                    const subject = subjects.find(s => s.id === id);
-                                    if (subject) goToModules(subject);
+                                    goToSubjects();
                                 }}
                             />
                         )

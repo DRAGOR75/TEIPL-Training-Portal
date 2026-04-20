@@ -3,6 +3,7 @@ import { HiOutlineArrowLeft } from 'react-icons/hi2';
 import { HiOutlineBookmarkSquare } from 'react-icons/hi2';
 import Link from 'next/link';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
+import TNIProgramSelect from '@/components/tni/TNIProgramSelect';
 
 export default async function NewNominationPage({ params }: { params: Promise<{ empId: string }> }) {
     const { empId } = await params;
@@ -69,15 +70,12 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Foundational Programs
                                 </label>
-                                <select
+                                <TNIProgramSelect 
                                     name="programId_FOUNDATIONAL"
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white text-slate-900"
-                                >
-                                    <option value="">-- Select Foundational Program --</option>
-                                    {programs.filter(p => p.category === 'FOUNDATIONAL').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
+                                    programs={programs}
+                                    category="FOUNDATIONAL"
+                                    placeholder="-- Select Foundational Program --"
+                                />
                             </div>
 
                             {/* 2. FUNCTIONAL */}
@@ -85,15 +83,12 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Functional Programs
                                 </label>
-                                <select
+                                <TNIProgramSelect 
                                     name="programId_FUNCTIONAL"
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white text-slate-900"
-                                >
-                                    <option value="">-- Select Functional Program --</option>
-                                    {programs.filter(p => p.category === 'FUNCTIONAL').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
+                                    programs={programs}
+                                    category="FUNCTIONAL"
+                                    placeholder="-- Select Functional Program --"
+                                />
                             </div>
 
                             {/* 3. BEHAVIOURAL */}
@@ -101,15 +96,12 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Behavioural Programs
                                 </label>
-                                <select
+                                <TNIProgramSelect 
                                     name="programId_BEHAVIOURAL"
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white text-slate-900"
-                                >
-                                    <option value="">-- Select Behavioural Program --</option>
-                                    {programs.filter(p => p.category === 'BEHAVIOURAL').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
+                                    programs={programs}
+                                    category="BEHAVIOURAL"
+                                    placeholder="-- Select Behavioural Program --"
+                                />
                             </div>
 
                             {/* 4. COMMON */}
@@ -117,15 +109,12 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Common Programs
                                 </label>
-                                <select
+                                <TNIProgramSelect 
                                     name="programId_COMMON"
-                                    className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all bg-white text-slate-900"
-                                >
-                                    <option value="">-- Select Common Program --</option>
-                                    {programs.filter(p => p.category === 'COMMON').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
+                                    programs={programs}
+                                    category="COMMON"
+                                    placeholder="-- Select Common Program --"
+                                />
                             </div>
 
                             {/* Justification */}
