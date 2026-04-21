@@ -2,11 +2,10 @@
 
 import { db } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { unstable_cache } from 'next/cache';
 
-export async function getTniReportData() {
-    if (!await auth()) return null;
-
-    try {
+const getCachedTniReportData = unstable_cache(
+    async () => {
         // Parallel fetching for performance
         const [
             topPrograms,
@@ -58,8 +57,8 @@ export async function getTniReportData() {
                 where: { nominations: { some: { status: 'Pending' } } },
                 _count: { id: true }
             }),
-             // 6. Source Distribution
-             db.nomination.groupBy({
+            // 6. Source Distribution
+            db.nomination.groupBy({
                 by: ['source'],
                 _count: { id: true }
             }),
@@ -101,7 +100,16 @@ export async function getTniReportData() {
                 departments: sections.map(s => s.name)
             }
         };
+    },
+    ['tni-reports-data'],
+    { revalidate: 3600, tags: ['tni-reports'] }
+);
 
+export async function getTniReportData() {
+    if (!await auth()) return null;
+
+    try {
+        return await getCachedTniReportData();
     } catch (error) {
         console.error('Failed to fetch report data', error);
         return null;

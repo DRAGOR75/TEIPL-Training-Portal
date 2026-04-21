@@ -234,6 +234,7 @@ export async function submitTNINomination(formData: FormData) {
 
         revalidateTag('employee-profile', 'max');
         revalidateTag('manager-approval', 'max');
+        revalidateTag('tni-reports', 'max');
     } catch (error) {
         console.error("Failed to submit nominations:", error);
         throw new Error("Failed to submit nominations");
@@ -287,6 +288,9 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
 
         // Invalidate the manager approval cache
         revalidateTag('manager-approval', 'max');
+
+        // Invalidate TNI Reports cache
+        revalidateTag('tni-reports', 'max');
 
         return { success: true };
     } catch (error) {

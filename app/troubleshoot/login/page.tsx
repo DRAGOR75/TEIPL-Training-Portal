@@ -26,78 +26,76 @@ export default function TroubleshootLoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-
-
-            {/* Login Card */}
-            <div className="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden transform transition-all">
-                <div className="bg-slate-900 p-8 text-center text-white relative overflow-hidden">
-                    <div className="relative z-10">
-                        <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/20">
-                            <HiOutlineWrench size={32} className="text-white" />
-                        </div>
-                        <h1 className="text-2xl font-black tracking-tight">Troubleshooting Library</h1>
-                        <p className="text-slate-400 text-sm mt-1">Authorized Personnel Only</p>
+        <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
+            <div className="max-w-sm w-full bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+                
+                <div className="bg-slate-900 p-8 text-center">
+                    <div className="bg-white/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-white/20">
+                        <HiOutlineWrench className="text-white" size={32} />
                     </div>
-                    {/* Decorative Background Pattern */}
-                    <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 bg-white/5 rounded-full blur-2xl"></div>
-                    <div className="absolute bottom-0 left-0 -ml-8 -mb-8 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">Troubleshooting</h1>
+                    <p className="text-slate-300 text-xs mt-1 uppercase tracking-widest font-bold">Secure Access</p>
                 </div>
 
-                <div className="p-8">
-                    <form action={handleSubmit} className="space-y-5">
+                <div className="p-8 pt-6">
+                    <form action={handleSubmit} className="space-y-6">
+
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Username</label>
+                            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                                Username
+                            </label>
                             <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                    <HiOutlineUser size={18} />
-                                </div>
+                                <HiOutlineUser className="absolute left-3 top-3 text-slate-500" size={18} />
                                 <input
                                     name="username"
                                     type="text"
                                     required
-                                    className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all text-sm"
-                                    placeholder="Enter username"
+                                    placeholder="Enter your username"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Password</label>
+                            <label className="text-sm font-bold text-slate-700 uppercase tracking-wide">
+                                Password
+                            </label>
                             <div className="relative">
-                                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                    <HiOutlineLockClosed size={18} />
-                                </div>
+                                <HiOutlineLockClosed className="absolute left-3 top-3 text-slate-500" size={18} />
                                 <input
                                     name="password"
                                     type="password"
                                     required
-                                    className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl outline-none focus:ring-2 focus:ring-slate-900 focus:border-transparent transition-all text-sm"
-                                    placeholder="Enter password"
+                                    placeholder="Enter your password"
+                                    className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-slate-900 font-medium focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all placeholder:text-slate-400"
                                 />
                             </div>
                         </div>
 
                         {error && (
-                            <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-xs font-medium animate-in fade-in slide-in-from-top-1">
-                                {error}
+                            <div className="p-3 bg-red-100 border border-red-200 rounded-lg">
+                                <p className="text-red-700 text-xs font-bold text-center italic">
+                                    {error}
+                                </p>
                             </div>
                         )}
 
                         <FormSubmitButton
                             isLoading={isLoading}
-                            className="w-full bg-slate-900 hover:bg-black text-white py-4 rounded-2xl font-bold text-sm shadow-lg shadow-slate-200 transition-all flex items-center justify-center gap-2 group"
+                            loadingText="VERIFYING..."
+                            className="w-full bg-slate-900 hover:bg-black text-white font-black py-3 rounded-xl shadow-lg flex justify-center items-center gap-3 transition-all active:scale-95 disabled:opacity-70"
                         >
-                            Access Library
-                            <HiOutlineLockClosed className="group-hover:scale-110 transition-transform" />
+                            ACCESS LIBRARY
                         </FormSubmitButton>
                     </form>
                 </div>
 
-
+                <div className="bg-slate-50 p-4 border-t border-slate-200 text-center">
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
+                        Secure Environment • Thriveni 2026
+                    </p>
+                </div>
             </div>
-
-
         </div>
     );
 }

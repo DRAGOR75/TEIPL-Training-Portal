@@ -134,7 +134,14 @@ export async function getSessionDetails(sessionId: string) {
                 enrollments: {
                     orderBy: { employeeName: 'asc' }
                 },
-                nominationBatch: true
+                nominationBatch: {
+                    include: {
+                        nominations: {
+                            where: { status: 'Batched' },
+                            include: { employee: true }
+                        }
+                    }
+                }
             }
         });
         return session;

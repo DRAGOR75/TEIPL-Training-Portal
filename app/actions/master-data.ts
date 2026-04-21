@@ -14,6 +14,7 @@ export async function createSection(formData: FormData) {
         await db.section.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('sections', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create section' };
@@ -26,6 +27,7 @@ export async function deleteSection(id: string) {
         await db.section.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('sections', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete section' };
@@ -54,6 +56,7 @@ export async function createProgram(formData: FormData) {
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('programs', 'max');
         revalidateTag('available-programs', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         console.error("Program Create Error", error);
@@ -68,6 +71,7 @@ export async function deleteProgram(id: string) {
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('programs', 'max');
         revalidateTag('available-programs', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete program' };
@@ -121,6 +125,7 @@ export async function createEmployee(formData: FormData) {
         });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('employee-profile', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create employee (ID or Email might exist)' };
@@ -132,6 +137,7 @@ export async function deleteEmployee(id: string) {
     try {
         await db.employee.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete employee' };
@@ -146,6 +152,7 @@ export async function createLocation(formData: FormData) {
         await db.location.create({ data: { name } });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('locations', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to create location' };
@@ -158,6 +165,7 @@ export async function deleteLocation(id: string) {
         await db.location.delete({ where: { id } });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('locations', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete location' };

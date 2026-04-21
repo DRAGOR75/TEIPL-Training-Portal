@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 // ========== READ OPERATIONS ==========
 
@@ -343,6 +343,7 @@ export async function scheduleCohortSession(cohortProgramId: string, sessionData
 
         revalidatePath(`/admin/cohorts/${cohortProgram.cohortId}`);
         revalidatePath('/admin/sessions');
+        revalidateTag('tni-reports', 'max');
 
         return { success: true, sessionId: session.id, batchId: batch.id };
     } catch (error) {

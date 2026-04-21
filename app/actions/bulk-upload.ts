@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { Grade, Gender, TrainingCategory } from '@prisma/client';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
 // Interface for parsed data based on the new CSV headers
@@ -193,5 +193,6 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
     revalidatePath('/admin/master-data');
     revalidatePath('/admin/tni-dashboard');
+    revalidateTag('tni-reports', 'max');
     return { success: true, count: successCount, errors };
 }
