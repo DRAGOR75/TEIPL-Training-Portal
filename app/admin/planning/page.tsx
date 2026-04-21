@@ -2,7 +2,7 @@ import { db } from '@/lib/prisma';
 import { getSessions } from '@/app/actions/sessions';
 import { getTrainers } from '@/app/actions/trainers';
 import GanttCalendar from '@/components/planning/GanttCalendar';
-import OptionBGantt from '@/components/planning/OptionBGantt';
+
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -52,25 +52,16 @@ export default async function PlanningPage() {
                 </div>
             </div>
 
-            {/* Render Option B */}
+            {/* Render Primary Planning Board */}
             <div className="container mx-auto px-6 pt-10 max-w-[1600px] animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <OptionBGantt 
-                   sessions={normalizedSessions}
-                   trainers={trainers}
+                <GanttCalendar 
+                    programs={programs} 
+                    sessions={normalizedSessions}
+                    trainers={trainers}
+                    locations={locations}
                 />
             </div>
-            
-            <div className="container mx-auto px-6 mt-16 max-w-[1600px]">
-                <h3 className="text-xl font-bold mb-4 text-slate-800">Option A (Custom Built Code Archive)</h3>
-                <div className="opacity-50 grayscale pointer-events-none transform scale-95 origin-top">
-                    <GanttCalendar 
-                        programs={programs} 
-                        sessions={normalizedSessions}
-                        trainers={trainers}
-                        locations={locations}
-                    />
-                </div>
-            </div>
+
             
             <div className="mt-16 text-center">
                 <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.2em]">
