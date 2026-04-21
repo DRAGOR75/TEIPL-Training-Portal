@@ -134,7 +134,14 @@ export async function getSessionDetails(sessionId: string) {
                 enrollments: {
                     orderBy: { employeeName: 'asc' }
                 },
-                nominationBatch: true
+                nominationBatch: {
+                    include: {
+                        nominations: {
+                            where: { status: 'Batched' },
+                            include: { employee: true }
+                        }
+                    }
+                }
             }
         });
         return session;
@@ -322,7 +329,7 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         await db.trainingSession.update({
             where: { id: sessionId },
-            data: { emailsSent: true }
+            data: { feedbackEmailsSent: true }
         });
 
         revalidatePath('/admin/dashboard');

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList } from 'react-icons/hi2';
+import { HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList, HiOutlineChartBar } from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
 
@@ -66,7 +66,10 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                             <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
                         )}
                         {userRole === 'TRAINER' && (
-                            <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                            <>
+                                <NavLink href="/trainer/dashboard" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                                <NavLink href="/trainer/reports" icon={<HiOutlineChartBar size={18} />} text="Reports" />
+                            </>
                         )}
 
                         {isLoggedIn && (
@@ -98,7 +101,10 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                             <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
                         )}
                         {userRole === 'TRAINER' && (
-                            <MobileNavLink href="/trainer" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                            <>
+                                <MobileNavLink href="/trainer/dashboard" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                                <MobileNavLink href="/trainer/reports" onClick={() => setIsOpen(false)} text="Reports" />
+                            </>
                         )}
 
                         {isLoggedIn && (

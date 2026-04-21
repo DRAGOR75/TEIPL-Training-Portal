@@ -255,6 +255,14 @@ export async function createSession(formData: FormData) {
     const startDate = new Date(startDateRaw);
     const endDate = new Date(endDateRaw);
 
+    // Auto-calculate Assessment Dates (+20 days)
+    const assessmentDateRaw = formData.get('assessmentDate') as string;
+    const assessmentDate = assessmentDateRaw 
+        ? new Date(assessmentDateRaw) 
+        : new Date(endDate.getTime() + 20 * 24 * 60 * 60 * 1000);
+
+    const feedbackCreationDate = assessmentDate; // Keep them in sync for now
+
     try {
         const program = await db.program.findUnique({
             where: { name: programName }
@@ -282,6 +290,8 @@ export async function createSession(formData: FormData) {
                 endTime: formData.get('endTime') as string || "6:00 pm",
                 location: formData.get('location') as string,
                 topics: formData.get('topics') as string,
+                assessmentDate,
+                feedbackCreationDate,
                 nominationBatchId: batch.id
             }
         });
@@ -518,6 +528,7 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
+        revalidateTag('tni-reports', 'max');
         if (batch?.trainingSession?.id) {
             revalidatePath(`/admin/sessions/${batch.trainingSession.id}/manage`);
         }
@@ -599,6 +610,7 @@ export async function joinBatch(batchId: string, empId: string) {
         revalidateTag('employee-profile', 'max');
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
+        revalidateTag('tni-reports', 'max');
         revalidatePath(`/admin/sessions`); // Update admin view
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -712,6 +724,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
         revalidateTag('employee-profile', 'max');
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
+        revalidateTag('tni-reports', 'max');
         revalidatePath(`/admin/sessions`);
         return { success: true, employeeName: employee.name, programName: batch.program.name };
 
@@ -752,6 +765,7 @@ export async function removeNominationFromBatch(nominationId: string) {
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
         revalidateTag('employee-profile', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
         console.error('Remove Nomination Error:', error);
@@ -778,6 +792,28 @@ export async function toggleManagerApprovalRequirement(sessionId: string, requir
     } catch (error) {
         console.error('Toggle Manager Approval Error:', error);
         return { error: 'Failed to update manager approval requirement setting.' };
+    }
+}
+
+export async function toggleAllowWalkIns(sessionId: string, allowWalkIns: boolean) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
+    try {
+        await db.trainingSession.update({
+            where: { id: sessionId },
+            data: { allowWalkIns: allowWalkIns }
+        });
+
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/sessions');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
+        return { success: true };
+    } catch (error) {
+        console.error('Toggle Allow Walk-Ins Error:', error);
+        return { error: 'Failed to update walk-in setting.' };
     }
 }
 

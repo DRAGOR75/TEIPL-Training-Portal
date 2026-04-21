@@ -30,7 +30,7 @@ export async function sendBulkUserCredentials(
       <p>You have been registered on the Thriveni Training Portal. Please find your login credentials below:</p>
       
       <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
-        <p style="margin: 5px 0;"><strong>Portal URL:</strong> <a href="https://training.thrivenisikshak.com/" target="_blank" style="color: #0056b3;">https://training.thrivenisikshak.com/</a></p>
+        <p style="margin: 5px 0;"><strong>Portal URL:</strong> <a href="https://academythriveni.com/login/index.php" target="_blank" style="color: #0056b3;">https://academythriveni.com/login/index.php</a></p>
         <p style="margin: 5px 0;"><strong>User ID:</strong> ${empId}</p>
         <p style="margin: 5px 0;"><strong>Password:</strong> ${password}</p>
       </div>

@@ -12,6 +12,7 @@ import {
     HiOutlineAcademicCap,
     HiOutlineArrowRight,
     HiOutlineChatBubbleBottomCenterText,
+    HiOutlineDocumentText,
 } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
@@ -108,6 +109,17 @@ export default async function AdminHubPage() {
                         icon={<SiLooker size={24} />}
                         tag="Analytics"
                         color="sky"
+                        isExternal
+                    />
+
+                    {/* Card 8: Training Manuals */}
+                    <AdminCard
+                        href="/training-manuals"
+                        title="Training Manuals"
+                        description="Upload and manage training manuals."
+                        icon={<HiOutlineDocumentText size={24} />}
+                        tag="Manuals"
+                        color="indigo"
                         isExternal
                     />
 

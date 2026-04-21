@@ -11,14 +11,17 @@ export const db =
 
 function createPrismaClient() {
     const connectionString = process.env.DATABASE_URL
-
     if (!connectionString) {
-        // throw new Error("DATABASE_URL is missing from environment variables");
-        console.error("CRITICAL ERROR: DATABASE_URL is missing. DB functionality will fail.");
-        return new PrismaClient(); // Fallback to avoid crash on import
+        console.error("CRITICAL ERROR: DATABASE_URL is missing.");
+        return new PrismaClient();
     }
-
+    console.log(`[Prisma] Initializing with URL: ${connectionString.substring(0, 25)}...`);
     const pool = new Pool({ connectionString })
+    
+    pool.on('error', (err) => {
+        console.error('[Postgres Pool Error]', err);
+    });
+
     const adapter = new PrismaPg(pool)
 
     return new PrismaClient({

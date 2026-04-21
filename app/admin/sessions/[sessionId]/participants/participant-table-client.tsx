@@ -29,7 +29,7 @@ export default function ParticipantTableClient({ participants, sessionName }: Pa
             'Grade': p.grade || '-',
             'Designation': p.designation || '-',
             'Section / Department': p.sectionName || '-',
-            'Sub Department': p.subDepartment || '-',
+            'Project Site': p.subDepartment || '-',
             'Location': p.location || '-',
             'Years of Experience': p.yearsOfExperience || '-',
             'Manager Name': p.managerName || '-',
@@ -127,13 +127,13 @@ export default function ParticipantTableClient({ participants, sessionName }: Pa
                                             <span className="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
                                                 {p.nominationStatus}
                                             </span>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${p.managerApprovalStatus === 'Approved'
-                                                ? 'bg-green-50 text-green-700 border-green-100'
-                                                : p.managerApprovalStatus === 'Rejected'
-                                                    ? 'bg-red-50 text-red-700 border-red-100'
-                                                    : 'bg-yellow-50 text-yellow-700 border-yellow-100'
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                                p.managerApprovalStatus === 'Approved' ? 'bg-green-50 text-green-700 border-green-100'
+                                                : p.managerApprovalStatus === 'BULK_UPLOADED' ? 'bg-purple-50 text-purple-700 border-purple-100'
+                                                : p.managerApprovalStatus === 'Rejected' ? 'bg-red-50 text-red-700 border-red-100'
+                                                : 'bg-yellow-50 text-yellow-700 border-yellow-100'
                                                 }`}>
-                                                {p.managerApprovalStatus}
+                                                {p.managerApprovalStatus.replace('_', ' ')}
                                             </span>
                                         </div>
                                     </td>

@@ -9,28 +9,28 @@ datasource db {
 
 // 1. Master Employee Table (For initial ID verification)
 model Employee {
-  id                String        @id @map("emp_id") // Your official Employee ID
+  id                String    @id @map("emp_id") // Your official Employee ID
   name              String
-  email             String        @unique
-  grade             Grade?         // EXECUTIVE or WORKMAN
-  sectionName       String?       @map("section_name") // Their home department
+  email             String    @unique
+  grade             Grade? // EXECUTIVE or WORKMAN
+  sectionName       String?   @map("section_name") // Their home department
   location          String?
   mobile            String?
   designation       String?
-  yearsOfExperience String?       @map("years_of_experience")
-  subDepartment     String?       @map("sub_department")
+  yearsOfExperience String?   @map("years_of_experience")
+  subDepartment     String?   @map("sub_department")
   gender            Gender?
-  managerName       String?       @map("manager_name")
-  managerEmail      String?       @map("manager_email")
-  programName       String?       @map("program_name")
-  startDate         DateTime?     @map("start_date")
-  endDate           DateTime?     @map("end_date")  
-  
+  managerName       String?   @map("manager_name")
+  managerEmail      String?   @map("manager_email")
+  programName       String?   @map("program_name")
+  startDate         DateTime? @map("start_date")
+  endDate           DateTime? @map("end_date")
+
   // Relations
-  nominations       Nomination[]  // Links to their training requests
-  cohortMemberships CohortMember[]  // Cohort journeys
+  nominations       Nomination[] // Links to their training requests
+  cohortMemberships CohortMember[] // Cohort journeys
   cohortFeedbacks   CohortFeedback[] // Cohort-level feedback
-  
+
   @@map("employees")
 }
 
@@ -47,29 +47,29 @@ enum Gender {
 
 // 2. Section Table (Departments)
 model Section {
-  id        String    @id @default(uuid())
-  name      String    @unique // e.g., "Mining", "Mechanical"
-  
+  id   String @id @default(uuid())
+  name String @unique // e.g., "Mining", "Mechanical"
+
   // Many-to-Many: A section has many programs
-  programs  Program[] @relation("ProgramToSection")
+  programs Program[] @relation("ProgramToSection")
 
   @@map("sections")
 }
 
 // 3. Master Program Catalog
 model Program {
-  id             String            @id @default(uuid())
-  name           String            @unique
-  category       TrainingCategory  // FUNCTIONAL, BEHAVIOURAL, or COMMON
-  targetGrades   Grade[]           // Array: can be for both [EXECUTIVE, WORKMAN]
-  
+  id           String           @id @default(uuid())
+  name         String           @unique
+  category     TrainingCategory // FUNCTIONAL, BEHAVIOURAL, or COMMON
+  targetGrades Grade[] // Array: can be for both [EXECUTIVE, WORKMAN]
+
   // Many-to-Many: A program can belong to many sections
-  sections       Section[]         @relation("ProgramToSection")
-  
+  sections Section[] @relation("ProgramToSection")
+
   // Relation to nominations
   nominations    Nomination[]
   batches        NominationBatch[]
-  cohortPrograms CohortProgram[]   // Cohort usage
+  cohortPrograms CohortProgram[] // Cohort usage
 
   @@map("programs")
 }
@@ -81,45 +81,44 @@ enum TrainingCategory {
   COMMON
 }
 
-
 // 4. Updated Nomination Table (TNI Table)
 model Nomination {
-  id             String   @id @default(uuid())
-  empId          String   @map("emp_id")
-  programId      String   @map("program_id")
-  
-  // Metadata for the snapshot
-  status         String   @default("Pending") // Pending, Batched, Completed
-  source         String   @default("MANUAL") // MANUAL (TNI) or QR (Direct)
-  justification  String?  @db.Text
-  
-  batchId        String?  @map("batch_id")
+  id        String @id @default(uuid())
+  empId     String @map("emp_id")
+  programId String @map("program_id")
 
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  // Metadata for the snapshot
+  status        String  @default("Pending") // Pending, Batched, Completed
+  source        String  @default("MANUAL") // MANUAL (TNI) or QR (Direct)
+  justification String? @db.Text
+
+  batchId String? @map("batch_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  employee       Employee         @relation(fields: [empId], references: [id], onDelete: Cascade)
-  program        Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
-  batch          NominationBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
+  employee Employee         @relation(fields: [empId], references: [id], onDelete: Cascade)
+  program  Program          @relation(fields: [programId], references: [id], onDelete: Cascade)
+  batch    NominationBatch? @relation(fields: [batchId], references: [id], onDelete: SetNull)
 
   // Manager Approval Workflow
-  managerApprovalStatus String   @default("Pending") // Pending, Approved, Rejected
+  managerApprovalStatus  String  @default("Pending") // Pending, Approved, Rejected
   managerRejectionReason String? @map("manager_rejection_reason")
 
   @@unique([empId, batchId]) // Prevent duplicate nomination for same batch
   @@map("nominations")
 }
 
-// 5. NEW Nomination Batch Table (Groups participants)
+// 5.  Nomination Batch Table (Groups participants)
 model NominationBatch {
-  id              String           @id @default(uuid())
-  name            String?          // e.g., "Feb 2026 Safety Batch"
-  programId       String           @map("program_id")
-  
-  status          String           @default("Forming") // Forming, Scheduled, Completed
-  createdAt       DateTime         @default(now()) @map("created_at")
-  
+  id        String  @id @default(uuid())
+  name      String? // e.g., "Feb 2026 Safety Batch"
+  programId String  @map("program_id")
+
+  status    String   @default("Forming") // Forming, Scheduled, Completed
+  createdAt DateTime @default(now()) @map("created_at")
+
   // Relations
   program         Program          @relation(fields: [programId], references: [id])
   nominations     Nomination[]
@@ -128,33 +127,36 @@ model NominationBatch {
   @@map("nomination_batches")
 }
 
-
-
 model TrainingSession {
-  id                        String       @id @default(uuid())
-  programName               String       @map("program_name")
-  trainerName               String?      @map("trainer_name")
-  startDate                 DateTime     @map("start_date")
-  endDate                   DateTime     @map("end_date")
-  startTime                 String?      @map("start_time") // e.g. "10:00 am"
-  endTime                   String?      @map("end_time")   // e.g. "5:00 pm"
+  id                        String    @id @default(uuid())
+  programName               String    @map("program_name")
+  trainerName               String?   @map("trainer_name")
+  startDate                 DateTime  @map("start_date")
+  endDate                   DateTime  @map("end_date")
+  startTime                 String?   @map("start_time") // e.g. "10:00 am"
+  endTime                   String?   @map("end_time") // e.g. "5:00 pm"
   location                  String?
-  topics                    String?      @db.Text
-  feedbackCreationDate      DateTime?    @map("feedback_creation_date")
-  templateType              String       @default("Technical") @map("template_type")
-  emailsSent                Boolean      @default(false) @map("emails_sent")
-  feedbackReminderSent      Boolean      @default(false) @map("feedback_reminder_sent")
-  sendFeedbackAutomatically Boolean      @default(false) @map("send_feedback_automatically")
-  requireManagerApproval    Boolean      @default(true) @map("require_manager_approval")
-  
-  nominationBatchId         String?      @unique @map("nomination_batch_id")
+  topics                    String?   @db.Text
+  feedbackCreationDate      DateTime? @map("feedback_creation_date")
+  templateType              String    @default("Technical") @map("template_type")
+  emailsSent                Boolean   @default(false) @map("emails_sent")
+  feedbackReminderSent      Boolean   @default(false) @map("feedback_reminder_sent")
+  sendFeedbackAutomatically Boolean   @default(false) @map("send_feedback_automatically")
+  requireManagerApproval    Boolean   @default(true) @map("require_manager_approval")
+  allowWalkIns              Boolean   @default(false) @map("allow_walk_ins")
 
-  createdAt                 DateTime     @default(now()) @map("created_at")
-  enrollments               Enrollment[]
-  
+  // NEW fields for Assessment tracking
+  assessmentDate     DateTime? @map("assessment_date")
+  feedbackEmailsSent Boolean   @default(false) @map("feedback_emails_sent")
+
+  nominationBatchId String? @unique @map("nomination_batch_id")
+
+  createdAt   DateTime     @default(now()) @map("created_at")
+  enrollments Enrollment[]
+
   // Relations
-  nominationBatch           NominationBatch? @relation(fields: [nominationBatchId], references: [id])
-  cohortProgram             CohortProgram?   // If this session is part of a cohort
+  nominationBatch NominationBatch? @relation(fields: [nominationBatchId], references: [id])
+  cohortProgram   CohortProgram? // If this session is part of a cohort
 
   @@unique([programName, startDate, endDate, trainerName])
   @@index([startDate])
@@ -164,34 +166,34 @@ model TrainingSession {
 }
 
 model Enrollment {
-  id                    String          @id @default(uuid())
-  sessionId             String          @map("session_id")
-  employeeName          String          @map("employee_name")
-  employeeEmail         String          @map("employee_email")
-  managerEmail          String          @map("manager_email")
-  empId                 String?         @map("emp_id")
-  managerName           String?         @map("manager_name")
-  status                String          @default("Pending")
-  preTrainingRating     Int?            @map("pre_training_rating")
-  postTrainingRating    Int?            @map("post_training_rating")
-  trainingRating        Int?            @map("training_rating")
-  contentRating         Int?            @map("content_rating")
-  trainerRating         Int?            @map("trainer_rating")
-  materialRating        Int?            @map("material_rating")
-  recommendationRating  Boolean?        @map("recommendation_rating")
-  topicsLearned         String?         @map("topics_learned")
-  actionPlan            String?         @map("action_plan")
-  suggestions           String?         @map("suggestions")
-  q1_Relevance          Int?            @map("q1_relevance")
-  q2_Application        Int?            @map("q2_application")
-  q3_Performance        Int?            @map("q3_performance")
-  q4_Influence          Int?            @map("q4_influence")
-  q5_Efficiency         Int?            @map("q5_efficiency")
-  averageRating         Float?          @map("average_rating")
-  managerAgrees         String?         @map("manager_agrees")
-  managerComment        String?         @map("manager_comment")
-  updatedAt             DateTime        @default(now()) @map("updated_at")
-  session               TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id                   String          @id @default(uuid())
+  sessionId            String          @map("session_id")
+  employeeName         String          @map("employee_name")
+  employeeEmail        String          @map("employee_email")
+  managerEmail         String          @map("manager_email")
+  empId                String?         @map("emp_id")
+  managerName          String?         @map("manager_name")
+  status               String          @default("Pending")
+  preTrainingRating    Int?            @map("pre_training_rating")
+  postTrainingRating   Int?            @map("post_training_rating")
+  trainingRating       Int?            @map("training_rating")
+  contentRating        Int?            @map("content_rating")
+  trainerRating        Int?            @map("trainer_rating")
+  materialRating       Int?            @map("material_rating")
+  recommendationRating Boolean?        @map("recommendation_rating")
+  topicsLearned        String?         @map("topics_learned")
+  actionPlan           String?         @map("action_plan")
+  suggestions          String?         @map("suggestions")
+  q1_Relevance         Int?            @map("q1_relevance")
+  q2_Application       Int?            @map("q2_application")
+  q3_Performance       Int?            @map("q3_performance")
+  q4_Influence         Int?            @map("q4_influence")
+  q5_Efficiency        Int?            @map("q5_efficiency")
+  averageRating        Float?          @map("average_rating")
+  managerAgrees        String?         @map("manager_agrees")
+  managerComment       String?         @map("manager_comment")
+  updatedAt            DateTime        @default(now()) @map("updated_at")
+  session              TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([sessionId, employeeEmail])
   @@index([sessionId])
@@ -212,7 +214,7 @@ model Trainer {
 model Designation {
   id        String   @id @default(uuid())
   name      String   @unique
-  grade     String?  // Optional grade mapping (e.g., "M3", "Executive")
+  grade     String? // Optional grade mapping (e.g., "M3", "Executive")
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("designations")
@@ -248,16 +250,16 @@ model User {
 
 // 1. Master Product (Machine) List
 model TroubleshootingProduct {
-  id          Int      @id @default(autoincrement()) // Using Int to match provided data (ProdID)
-  name        String   @unique
-  viewSeq     Int      @default(0) @map("view_seq")
-  userView    Int      @default(0) @map("user_view")
-  keywords    String?
-  legacyId    String?  @unique @map("legacy_source_id") // For CSV Import mapping
-  imageUrl    String?  @map("image_url")  // Add this field if not present in your earlier plan but good for "grid of Products"
+  id       Int     @id @default(autoincrement()) // Using Int to match provided data (ProdID)
+  name     String  @unique
+  viewSeq  Int     @default(0) @map("view_seq")
+  userView Int     @default(0) @map("user_view")
+  keywords String?
+  legacyId String? @unique @map("legacy_source_id") // For CSV Import mapping
+  imageUrl String? @map("image_url") // Add this field if not present in your earlier plan but good for "grid of Products"
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   productFaults ProductFault[]
@@ -267,14 +269,14 @@ model TroubleshootingProduct {
 
 // 2. Fault Library (Master Complaint List)
 model FaultLibrary {
-  id          String   @id @default(uuid())
-  faultCode   String?  @unique @map("fault_code") // For "F001" style codes if needed
-  name        String   @unique // "Engine Overheating" - Unique to avoid duplication
-  viewSeq     Int      @default(0) @map("view_seq")
-  legacyId    String?  @unique @map("legacy_source_id") // For CSV Import mapping
+  id        String  @id @default(uuid())
+  faultCode String? @unique @map("fault_code") // For "F001" style codes if needed
+  name      String  @unique // "Engine Overheating" - Unique to avoid duplication
+  viewSeq   Int     @default(0) @map("view_seq")
+  legacyId  String? @unique @map("legacy_source_id") // For CSV Import mapping
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   productMappings ProductFault[]
@@ -284,24 +286,24 @@ model FaultLibrary {
 
 // 3. Product-Fault Bridge (Logic: Which machine has which fault)
 model ProductFault {
-  id          String   @id @default(uuid())
-  productId   Int      @map("product_id")
-  faultId     String   @map("fault_id")
-  
-  viewSeq     Int      @default(0) @map("view_seq")
-  notes       String?  // Machine-specific cautions or notes
-  keywords    String?  // Machine-specific search tags
-  symptoms    String?  @db.Text // Symptoms for this specific machine/fault context
+  id        String @id @default(uuid())
+  productId Int    @map("product_id")
+  faultId   String @map("fault_id")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  viewSeq  Int     @default(0) @map("view_seq")
+  notes    String? // Machine-specific cautions or notes
+  keywords String? // Machine-specific search tags
+  symptoms String? @db.Text // Symptoms for this specific machine/fault context
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  product     TroubleshootingProduct @relation(fields: [productId], references: [id])
-  fault       FaultLibrary           @relation(fields: [faultId], references: [id])
-  
+  product TroubleshootingProduct @relation(fields: [productId], references: [id])
+  fault   FaultLibrary           @relation(fields: [faultId], references: [id])
+
   // Downstream: The causes for this specific product-fault context
-  causes      FaultCause[]
+  causes FaultCause[]
 
   @@unique([productId, faultId]) // Prevent duplicate linking
   @@map("product_faults")
@@ -309,16 +311,17 @@ model ProductFault {
 
 // 4. Cause Library (Master Cause/Remedy List)
 model CauseLibrary {
-  id          String   @id @default(uuid())
-  name        String   // "Low Coolant Level"
-  justification String?  @db.Text
-  action      String?  @db.Text // The fix
-  manualRef   String?  @map("manual_ref")
-  
-  imageUrl    String?  @map("image_url")
+  id            String  @id @default(uuid())
+  name          String // "Low Coolant Level"
+  justification String? @db.Text
+  action        String? @db.Text // The fix
+  manualRef     String? @map("manual_ref")
+  symptoms      String? @db.Text
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  imageUrl String? @map("image_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
   faultMappings FaultCause[]
@@ -328,21 +331,21 @@ model CauseLibrary {
 
 // 5. Fault-Cause Bridge (Logic: Diagnostic Sequence)
 model FaultCause {
-  id             String   @id @default(uuid())
-  productFaultId String   @map("product_fault_id")
-  causeId        String   @map("cause_id")
-  
-  seq            Int      @default(0) // The order of checking (1, 2, 3...)
-  isLikely       Boolean  @default(false) @map("is_likely")
-  isActive       Boolean  @default(true) @map("is_active")
-  justification  String?  @db.Text
+  id             String @id @default(uuid())
+  productFaultId String @map("product_fault_id")
+  causeId        String @map("cause_id")
 
-  createdAt      DateTime @default(now()) @map("created_at")
-  updatedAt      DateTime @updatedAt @map("updated_at")
+  seq           Int     @default(0) // The order of checking (1, 2, 3...)
+  isLikely      Boolean @default(false) @map("is_likely")
+  isActive      Boolean @default(true) @map("is_active")
+  justification String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  productFault   ProductFault @relation(fields: [productFaultId], references: [id], onDelete: Cascade)
-  cause          CauseLibrary @relation(fields: [causeId], references: [id])
+  productFault ProductFault @relation(fields: [productFaultId], references: [id], onDelete: Cascade)
+  cause        CauseLibrary @relation(fields: [causeId], references: [id])
 
   @@unique([productFaultId, causeId])
   @@index([productFaultId, seq])
@@ -351,15 +354,15 @@ model FaultCause {
 
 // 6. Feedback System
 model TroubleshootingFeedback {
-  id        Int      @id @default(autoincrement())
-  rating    Int      // 1-5 Star Rating
-  isHelpful Boolean  @map("is_helpful") // "Was this useful?"
-  comments  String?  @db.Text
-  
+  id        Int     @id @default(autoincrement())
+  rating    Int // 1-5 Star Rating
+  isHelpful Boolean @map("is_helpful") // "Was this useful?"
+  comments  String? @db.Text
+
   // Contact Info
-  name      String
-  mobile    String
-  email     String?
+  name   String
+  mobile String
+  email  String?
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -369,7 +372,7 @@ model TroubleshootingFeedback {
 // 7. Analytics Events
 model TroubleshootingEvent {
   id        String   @id @default(uuid())
-  type      String   // e.g. "GUIDE_SKIPPED"
+  type      String // e.g. "GUIDE_SKIPPED"
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("troubleshooting_events")
@@ -380,7 +383,7 @@ model RateLimit {
   key       String   @id
   count     Int      @default(0)
   expiresAt DateTime @map("expires_at")
-  
+
   @@map("rate_limits")
 }
 
@@ -388,37 +391,37 @@ model RateLimit {
 
 // 9. Cohort — A named group of students going through multiple programs
 model Cohort {
-  id          String   @id @default(uuid())
-  name        String   // e.g. "Inplant Batch 2026", "Technicians Batch"
-  description String?  @db.Text
-  status      String   @default("Draft") // Draft, Active, Completed
+  id          String  @id @default(uuid())
+  name        String // e.g. "Inplant Batch 2026", "Technicians Batch"
+  description String? @db.Text
+  status      String  @default("Draft") // Draft, Active, Completed
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  programs    CohortProgram[]   // Programs in this journey
-  members     CohortMember[]    // Students in this cohort
-  feedbacks   CohortFeedback[]  // Overall cohort evaluations
+  programs  CohortProgram[] // Programs in this journey
+  members   CohortMember[] // Students in this cohort
+  feedbacks CohortFeedback[] // Overall cohort evaluations
 
   @@map("cohorts")
 }
 
 // 10. CohortProgram — Which programs are part of this cohort
 model CohortProgram {
-  id        String  @id @default(uuid())
-  cohortId  String  @map("cohort_id")
-  programId String  @map("program_id")
-  seq       Int     @default(0) // Suggested order (flexible)
-  status    String  @default("Pending") // Pending, InProgress, Completed
+  id        String @id @default(uuid())
+  cohortId  String @map("cohort_id")
+  programId String @map("program_id")
+  seq       Int    @default(0) // Suggested order (flexible)
+  status    String @default("Pending") // Pending, InProgress, Completed
 
   // Link to a TrainingSession when scheduled
   sessionId String? @unique @map("session_id")
 
   // Relations
-  cohort    Cohort           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
-  program   Program          @relation(fields: [programId], references: [id])
-  session   TrainingSession? @relation(fields: [sessionId], references: [id])
+  cohort  Cohort           @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  program Program          @relation(fields: [programId], references: [id])
+  session TrainingSession? @relation(fields: [sessionId], references: [id])
 
   @@unique([cohortId, programId])
   @@map("cohort_programs")
@@ -444,13 +447,13 @@ model CohortMember {
 
 // 12. CohortFeedback — Overall journey evaluation (sent to manager)
 model CohortFeedback {
-  id        String   @id @default(uuid())
-  cohortId  String   @map("cohort_id")
-  empId     String   @map("emp_id")
+  id       String @id @default(uuid())
+  cohortId String @map("cohort_id")
+  empId    String @map("emp_id")
 
-  rating    Int      // 1-5 Overall Journey Rating
-  comments  String?  @db.Text
-  managerCc Boolean  @default(true) @map("manager_cc")
+  rating    Int // 1-5 Overall Journey Rating
+  comments  String? @db.Text
+  managerCc Boolean @default(true) @map("manager_cc")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -460,4 +463,140 @@ model CohortFeedback {
 
   @@unique([cohortId, empId])
   @@map("cohort_feedbacks")
+}
+
+// --- TRAINING MANUALS LIBRARY SYSTEM ---
+
+// 1. Manual Subject (High-level category, e.g., "Hydraulics", "Safety")
+model ManualSubject {
+  id       Int     @id @default(autoincrement())
+  name     String  @unique
+  viewSeq  Int     @default(0) @map("view_seq")
+  userView Int     @default(0) @map("user_view")
+  keywords String?
+  imageUrl String? @map("image_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectModules       SubjectModule[]
+  learningPathMappings LearningPathSubject[]
+
+  @@map("manual_subjects")
+}
+
+// 2. Manual Module (The curriculum component, e.g., "Pump Basics")
+model ManualModule {
+  id         String  @id @default(uuid())
+  moduleCode String? @unique @map("module_code")
+  name       String  @unique
+  viewSeq    Int     @default(0) @map("view_seq")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectMappings SubjectModule[]
+
+  @@map("manual_modules")
+}
+
+// 3. Subject-Module Bridge (Logic: Which subject includes which modules)
+model SubjectModule {
+  id        String @id @default(uuid())
+  subjectId Int    @map("subject_id")
+  moduleId  String @map("module_id")
+
+  viewSeq     Int     @default(0) @map("view_seq")
+  description String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subject ManualSubject @relation(fields: [subjectId], references: [id])
+  module  ManualModule  @relation(fields: [moduleId], references: [id])
+
+  // Downstream: The topics for this specific subject-module context
+  topics ModuleTopic[]
+
+  @@unique([subjectId, moduleId])
+  @@map("subject_modules")
+}
+
+// 4. Manual Topic (The actual lesson content with PDF link)
+model ManualTopic {
+  id        String  @id @default(uuid())
+  name      String
+  content   String? @db.Text // Detailed text content/steps
+  pdfUrl    String? @map("pdf_url")
+  imageUrl  String? @map("image_url")
+  manualRef String? @map("manual_ref")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  moduleMappings ModuleTopic[]
+
+  @@map("manual_topics")
+}
+
+// 5. Module-Topic Bridge (Logic: Sequence of topics in a module)
+model ModuleTopic {
+  id              String @id @default(uuid())
+  subjectModuleId String @map("subject_module_id")
+  topicId         String @map("topic_id")
+
+  seq      Int     @default(0)
+  isActive Boolean @default(true) @map("is_active")
+  notes    String? @db.Text
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjectModule SubjectModule @relation(fields: [subjectModuleId], references: [id], onDelete: Cascade)
+  topic         ManualTopic   @relation(fields: [topicId], references: [id])
+
+  @@unique([subjectModuleId, topicId])
+  @@index([subjectModuleId, seq])
+  @@map("module_topics")
+}
+
+// --- LEARNING PATHS SYSTEM ---
+
+// Learning Path — A curated collection of subjects for a group
+model LearningPath {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String? @db.Text
+  groupName   String  @map("group_name")
+  status      String  @default("Draft") // Draft, Active, Archived
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  subjects LearningPathSubject[]
+
+  @@map("learning_paths")
+}
+
+// Learning Path <-> Subject Bridge
+model LearningPathSubject {
+  id             String @id @default(uuid())
+  learningPathId String @map("learning_path_id")
+  subjectId      Int    @map("subject_id")
+  seq            Int    @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  learningPath LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  subject      ManualSubject @relation(fields: [subjectId], references: [id])
+
+  @@unique([learningPathId, subjectId])
+  @@map("learning_path_subjects")
 }

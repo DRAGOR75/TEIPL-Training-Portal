@@ -20,8 +20,41 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
     if (!session) return notFound();
 
     const enrollments = session.enrollments || [];
+    
+    // Merge pending nominations from the batch if they haven't submitted anything yet
+    let allParticipants: any[] = [...enrollments];
+    
+    if (session.nominationBatch && session.nominationBatch.nominations) {
+        const enrolledEmpIds = new Set(enrollments.map((e: any) => e.empId));
+        const enrolledEmails = new Set(enrollments.map((e: any) => e.employeeEmail));
+
+        for (const nom of session.nominationBatch.nominations) {
+            if (!enrolledEmpIds.has(nom.employee.id) && !enrolledEmails.has(nom.employee.email)) {
+                allParticipants.push({
+                    id: `pending-${nom.id}`,
+                    employeeName: nom.employee.name,
+                    employeeEmail: nom.employee.email,
+                    empId: nom.employee.id,
+                    managerName: nom.employee.managerName,
+                    managerEmail: nom.employee.managerEmail,
+                    status: 'Not Submitted',
+                    trainingRating: null,
+                    contentRating: null,
+                    trainerRating: null,
+                    materialRating: null,
+                    averageRating: null,
+                    topicsLearned: '',
+                    actionPlan: '',
+                    suggestions: '',
+                    managerComment: ''
+                });
+            }
+        }
+    }
+
     const completedCount = enrollments.filter((e: any) => e.status === 'Completed').length;
-    const completionRate = enrollments.length > 0 ? Math.round((completedCount / enrollments.length) * 100) : 0;
+    const completionRate = allParticipants.length > 0 ? Math.round((completedCount / allParticipants.length) * 100) : 0;
+
 
     // Calculate global average from all completed reviews
     const ratedEnrollments = enrollments.filter((e: any) => e.trainingRating > 0);
@@ -67,7 +100,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                             <h3 className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-2">Total Participants</h3>
                             <div className="flex items-center gap-3">
                                 <HiOutlineUsers size={24} className="text-blue-600" />
-                                <span className="text-3xl font-black text-slate-800">{enrollments.length}</span>
+                                <span className="text-3xl font-black text-slate-800">{allParticipants.length}</span>
                             </div>
                         </div>
                         <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
@@ -92,7 +125,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                         <div className="p-6 border-b border-slate-100 flex justify-between items-center">
                             <h2 className="font-bold text-lg text-slate-800">Participation & Feedback Details</h2>
                             <span className="text-xs font-medium px-3 py-1 bg-slate-100 text-slate-600 rounded-full">
-                                {enrollments.length} Records
+                                {allParticipants.length} Records
                             </span>
                         </div>
 
@@ -109,7 +142,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
-                                    {enrollments.map((e: any) => {
+                                    {allParticipants.map((e: any) => {
                                         // Calculate Feedback Rating (Average of 6 fields)
                                         const feedbackScores = [
                                             e.trainingRating,
@@ -166,6 +199,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                 <td className="px-6 py-4">
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyles(e.status)}`}>
                                                         {e.status === 'Completed' ? <HiOutlineCheckCircle size={12} /> :
+                                                            e.status === 'Not Submitted' ? <HiOutlineExclamationCircle size={12} /> :
                                                             e.status === 'Pending Manager' ? <HiOutlineClock size={12} /> :
                                                                 <HiOutlineExclamationCircle size={12} />}
                                                         {e.status}
@@ -201,7 +235,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                     })}
                                     {enrollments.length === 0 && (
                                         <tr>
-                                            <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
                                                 No participants enrolled yet.
                                             </td>
                                         </tr>
@@ -229,6 +263,7 @@ function getStatusStyles(status: string) {
         case 'Completed': return 'bg-emerald-50 text-emerald-700 border-emerald-200';
         case 'Manager Disagrees': return 'bg-red-50 text-red-700 border-red-200';
         case 'Pending Manager': return 'bg-amber-50 text-amber-700 border-amber-200';
-        default: return 'bg-slate-50 text-slate-600 border-slate-200';
+        case 'Not Submitted': return 'bg-slate-100 text-slate-500 border-slate-200';
+        default: return 'bg-indigo-50 text-indigo-600 border-indigo-200';
     }
 }

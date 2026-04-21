@@ -11,28 +11,52 @@ type CreateSessionModalProps = {
     programs: any[];
     locations: any[];
     fixedTrainerName?: string;
+    
+    // Props for external controlled state (like Gantt Chart)
+    triggerComponent?: React.ReactNode;
+    fixedProgramName?: string;
+    prefillStartDate?: string;
+    defaultOpen?: boolean;
+    onClose?: () => void;
 };
 
-export default function CreateSessionModal({ trainers, programs, locations, fixedTrainerName }: CreateSessionModalProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export default function CreateSessionModal({ 
+    trainers, programs, locations, fixedTrainerName,
+    triggerComponent, fixedProgramName, prefillStartDate, defaultOpen, onClose
+}: CreateSessionModalProps) {
+    const [isOpen, setIsOpen] = useState(defaultOpen || false);
 
     // Form State
-    const [selectedProgram, setSelectedProgram] = useState<string>('');
+    const [selectedProgram, setSelectedProgram] = useState<string>(fixedProgramName || '');
     const [selectedTrainer, setSelectedTrainer] = useState<string>(fixedTrainerName || '');
     const [locationMode, setLocationMode] = useState<'select' | 'custom'>('select');
     const [selectedLocation, setSelectedLocation] = useState<string>('');
     const [customLocation, setCustomLocation] = useState<string>('');
+    const [assessmentDate, setAssessmentDate] = useState<string>('');
 
     // Auto-calculate Feedback Date (+25 days)
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const end = new Date(e.target.value);
+        const endStr = e.target.value;
+        const end = new Date(endStr);
         if (!isNaN(end.getTime())) {
-            // Logic can be added here if we want to auto-populate a hidden field
-            // But since 'createSession' calculates this or it's not strictly needed for creation, we can omit.
+            // Auto-calculate Assessment Date (+20 days)
+            const assessment = new Date(end.getTime() + 20 * 24 * 60 * 60 * 1000);
+            const year = assessment.getFullYear();
+            const month = String(assessment.getMonth() + 1).padStart(2, '0');
+            const day = String(assessment.getDate()).padStart(2, '0');
+            setAssessmentDate(`${year}-${month}-${day}`);
         }
     };
 
+    const handleClose = () => {
+        setIsOpen(false);
+        if (onClose) onClose();
+    };
+
     if (!isOpen) {
+        if (triggerComponent) {
+            return <div onClick={() => setIsOpen(true)}>{triggerComponent}</div>;
+        }
         return (
             <button onClick={() => setIsOpen(true)} className="w-full bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700 font-bold transition shadow-sm">
                 + Schedule New Session
@@ -54,7 +78,7 @@ export default function CreateSessionModal({ trainers, programs, locations, fixe
 
                 <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
                     <h2 className="font-bold text-lg text-slate-800">New Training Session</h2>
-                    <button onClick={() => setIsOpen(false)} className="text-slate-400 hover:text-slate-600"><HiOutlineXMark size={24} /></button>
+                    <button onClick={handleClose} className="text-slate-400 hover:text-slate-600"><HiOutlineXMark size={24} /></button>
                 </div>
 
                 <div className="overflow-y-auto p-6">
@@ -85,8 +109,7 @@ export default function CreateSessionModal({ trainers, programs, locations, fixe
                         try {
                             const result = await createSession(formData);
                             if (result.success) {
-                                setIsOpen(false);
-                                // Optional: Reset form state
+                                handleClose();
                             } else {
                                 alert(result.error || "Failed to create session.");
                             }
@@ -139,7 +162,7 @@ export default function CreateSessionModal({ trainers, programs, locations, fixe
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
-                                <input name="startDate" required type="date" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <input name="startDate" required type="date" defaultValue={prefillStartDate} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
@@ -163,6 +186,19 @@ export default function CreateSessionModal({ trainers, programs, locations, fixe
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">End Time</label>
                                 <input name="endTime" type="time" defaultValue="18:00" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
+                        </div>
+
+                        {/* ROW 3.5: Post Training Assessment Date */}
+                        <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                            <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date</label>
+                            <p className="text-[10px] text-blue-600 mb-2 font-medium">Auto-calculated (+20 days from end date) but can be changed.</p>
+                            <input
+                                name="assessmentDate"
+                                type="date"
+                                value={assessmentDate}
+                                onChange={(e) => setAssessmentDate(e.target.value)}
+                                className="w-full p-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-bold"
+                            />
                         </div>
 
                         {/* ROW 4: Location */}
@@ -226,7 +262,7 @@ export default function CreateSessionModal({ trainers, programs, locations, fixe
                         <input type="hidden" name="feedbackCreationDate" value="" />
 
                         <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-4">
-                            <button type="button" onClick={() => setIsOpen(false)} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-bold transition-colors">Cancel</button>
+                            <button type="button" onClick={handleClose} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-bold transition-colors">Cancel</button>
                             <FormSubmitButton className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-all shadow-md active:scale-95">
                                 Create Session
                             </FormSubmitButton>
