@@ -11,9 +11,9 @@ import {
     HiOutlineCheck,
     HiOutlineXMark,
     HiOutlineArrowPath,
-    HiOutlineMagnifyingGlass,
     HiOutlineArrowRight,
-    HiOutlineRectangleGroup
+    HiOutlineRectangleGroup,
+    HiOutlineDocumentText
 } from 'react-icons/hi2';
 import {
     createManualSubject,
@@ -21,7 +21,6 @@ import {
     deleteManualSubject,
     toggleManualSubjectStatus
 } from '@/app/actions/admin-training-manuals';
-import ModuleList from './ModuleList';
 
 interface Subject {
     id: number;
@@ -34,24 +33,24 @@ interface Subject {
 
 interface SubjectGridProps {
     subjects: Subject[];
-    moduleLib: any[];
-    topicLib: any[];
     isAdmin: boolean;
     searchQuery: string;
+    onSelectSubject: (subject: Subject) => void;
+    onPreviewSubject?: (subject: Subject) => void;
 }
 
-const GRADIENTS = [
-    'from-indigo-500 to-purple-600',
-    'from-blue-500 to-cyan-500',
-    'from-emerald-500 to-teal-500',
-    'from-orange-500 to-amber-500',
-    'from-pink-500 to-rose-500',
-    'from-violet-500 to-fuchsia-500',
-    'from-sky-500 to-blue-600',
-    'from-lime-500 to-green-500',
+const THEME_COLORS = [
+    { name: 'blue', border: 'hover:border-blue-500', text: 'text-blue-600 hover:text-blue-700', blob: 'bg-blue-50', iconBg: 'bg-blue-50 text-blue-600' },
+    { name: 'emerald', border: 'hover:border-emerald-500', text: 'text-emerald-600 hover:text-emerald-700', blob: 'bg-emerald-50', iconBg: 'bg-emerald-50 text-emerald-600' },
+    { name: 'amber', border: 'hover:border-amber-500', text: 'text-amber-600 hover:text-amber-700', blob: 'bg-amber-50', iconBg: 'bg-amber-50 text-amber-600' },
+    { name: 'purple', border: 'hover:border-purple-500', text: 'text-purple-600 hover:text-purple-700', blob: 'bg-purple-50', iconBg: 'bg-purple-50 text-purple-600' },
+    { name: 'rose', border: 'hover:border-rose-500', text: 'text-rose-600 hover:text-rose-700', blob: 'bg-rose-50', iconBg: 'bg-rose-50 text-rose-600' },
+    { name: 'sky', border: 'hover:border-sky-500', text: 'text-sky-600 hover:text-sky-700', blob: 'bg-sky-50', iconBg: 'bg-sky-50 text-sky-600' },
+    { name: 'indigo', border: 'hover:border-indigo-500', text: 'text-indigo-600 hover:text-indigo-700', blob: 'bg-indigo-50', iconBg: 'bg-indigo-50 text-indigo-600' },
+    { name: 'teal', border: 'hover:border-teal-500', text: 'text-teal-600 hover:text-teal-700', blob: 'bg-teal-50', iconBg: 'bg-teal-50 text-teal-600' },
 ];
 
-export default function SubjectGrid({ subjects, moduleLib, topicLib, isAdmin, searchQuery }: SubjectGridProps) {
+export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSubject }: SubjectGridProps) {
     const [isPending, startTransition] = useTransition();
     const [showAddForm, setShowAddForm] = useState(false);
     const [newName, setNewName] = useState('');
@@ -59,7 +58,6 @@ export default function SubjectGrid({ subjects, moduleLib, topicLib, isAdmin, se
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [deletingId, setDeletingId] = useState<number | null>(null);
-    const [expandedSubjectId, setExpandedSubjectId] = useState<number | null>(null);
 
     const filtered = subjects.filter(s => {
         if (!searchQuery) return isAdmin ? true : s.userView === 1;
@@ -155,125 +153,127 @@ export default function SubjectGrid({ subjects, moduleLib, topicLib, isAdmin, se
                 {isAdmin && !showAddForm && (
                     <button
                         onClick={() => setShowAddForm(true)}
-                        className="group relative bg-white/50 rounded-2xl border-2 border-dashed border-slate-300 hover:border-indigo-400 transition-all duration-300 overflow-hidden min-h-[180px] flex flex-col items-center justify-center gap-3 hover:bg-indigo-50/30"
+                        className="group relative bg-white/50 rounded-[2rem] border-2 border-dashed border-slate-300 hover:border-blue-400 transition-all duration-300 overflow-hidden min-h-[220px] flex flex-col items-center justify-center gap-4 hover:bg-blue-50/30 shadow-sm"
                     >
-                        <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-indigo-500 group-hover:scale-110 transition-transform duration-300">
-                            <HiOutlinePlus size={28} />
+                        <div className="w-16 h-16 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-300 shadow-sm">
+                            <HiOutlinePlus size={32} />
                         </div>
-                        <span className="text-sm font-bold text-slate-500 group-hover:text-indigo-600 transition-colors">Add Subject</span>
+                        <span className="text-sm font-bold text-slate-500 group-hover:text-blue-600 transition-colors uppercase tracking-wider">Add Subject</span>
                     </button>
                 )}
 
                 {/* Subject Cards */}
-                {filtered.map((subject, index) => (
-                    <div
-                        key={subject.id}
-                        className={`group relative bg-white rounded-2xl border border-slate-200 shadow-sm transition-all duration-300 overflow-hidden ${expandedSubjectId === subject.id ? 'col-span-full shadow-2xl ring-2 ring-indigo-500/20' : 'hover:shadow-xl hover:-translate-y-1'} ${isAdmin && subject.userView !== 1 ? 'opacity-60 hover:opacity-100' : ''}`}
-                    >
-                        {/* Top Gradient Accent */}
-                        <div className={`h-2 bg-gradient-to-r ${GRADIENTS[index % GRADIENTS.length]} opacity-80 group-hover:opacity-100 transition-opacity`} />
-
-                        <div 
-                            className="p-5 cursor-pointer"
+                {filtered.map((subject, index) => {
+                    const theme = THEME_COLORS[index % THEME_COLORS.length];
+                    return (
+                        <div
+                            key={subject.id}
+                            className={`group relative bg-white rounded-[2rem] border border-slate-200 shadow-sm hover:shadow-air-lg hover:-translate-y-1 transition-all duration-500 overflow-hidden cursor-pointer ${isAdmin && subject.userView !== 1 ? 'opacity-60 hover:opacity-100' : ''} ${theme.border}`}
                             onClick={() => {
                                 if (editingId !== subject.id) {
-                                    setExpandedSubjectId(expandedSubjectId === subject.id ? null : subject.id);
+                                    onSelectSubject(subject);
                                 }
                             }}
                         >
-                            {/* Icon */}
-                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${GRADIENTS[index % GRADIENTS.length]} flex items-center justify-center text-white mb-4 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
-                                <HiOutlineBookOpen size={22} />
-                            </div>
+                            {/* Themed Background Accent (Bento box style) */}
+                            <div className={`absolute top-0 right-0 w-32 h-32 ${theme.blob} rounded-full -mr-16 -mt-16 opacity-40 blur-2xl group-hover:scale-150 transition-transform duration-700`} />
 
-                            {/* Title */}
-                            {editingId === subject.id ? (
-                                <div className="flex items-center gap-2 mb-2" onClick={(e) => e.stopPropagation()}>
-                                    <input
-                                        value={editName}
-                                        onChange={(e) => setEditName(e.target.value)}
-                                        className="flex-1 px-3 py-1.5 border border-indigo-300 rounded-lg text-sm bg-indigo-50/50 focus:ring-2 focus:ring-indigo-400 outline-none"
-                                        autoFocus
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(e as any, subject.id); if (e.key === 'Escape') setEditingId(null); }}
-                                    />
-                                    <button onClick={(e) => handleSaveEdit(e, subject.id)} className="p-1.5 bg-indigo-600 text-white rounded-lg">
-                                        <HiOutlineCheck size={14} />
-                                    </button>
-                                    <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
-                                        <HiOutlineXMark size={14} />
-                                    </button>
-                                </div>
-                            ) : (
-                                <h3 className="text-lg font-bold text-slate-800 group-hover:text-indigo-700 transition-colors mb-1 line-clamp-2">
-                                    {subject.name}
-                                </h3>
-                            )}
-
-                            {subject.keywords && (
-                                <p className="text-xs text-slate-400 mb-4 line-clamp-2">{subject.keywords}</p>
-                            )}
-
-                            {/* Footer */}
-                            <div className="flex items-center justify-between mt-auto pt-2">
-                                <div className="flex items-center gap-2 text-sm font-bold text-indigo-600 group-hover:text-indigo-700 transition-colors">
-                                    <HiOutlineRectangleGroup size={16} />
-                                    View Modules
-                                    <HiOutlineArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                            <div className="p-8 h-full flex flex-col relative z-10">
+                                {/* Icon */}
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className={`w-14 h-14 rounded-2xl ${theme.iconBg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300 shadow-sm border border-slate-50/50`}>
+                                        <HiOutlineBookOpen size={24} />
+                                    </div>
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-40 text-slate-500">
+                                        Subject
+                                    </span>
                                 </div>
 
-                                {/* Admin Controls */}
-                                {isAdmin && editingId !== subject.id && (
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
-                                        <button
-                                            onClick={(e) => handleToggle(e, subject.id, subject.userView)}
-                                            className={`p-1.5 rounded-lg transition-all ${subject.userView === 1 ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
-                                            title={subject.userView === 1 ? 'Published' : 'Hidden'}
-                                        >
-                                            {subject.userView === 1 ? <HiOutlineEye size={16} /> : <HiOutlineEyeSlash size={16} />}
+                                {/* Title */}
+                                {editingId === subject.id ? (
+                                    <div className="flex items-center gap-2 mb-4" onClick={(e) => e.stopPropagation()}>
+                                        <input
+                                            value={editName}
+                                            onChange={(e) => setEditName(e.target.value)}
+                                            className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm bg-blue-50/50 focus:ring-2 focus:ring-blue-400 outline-none shadow-sm"
+                                            autoFocus
+                                            onKeyDown={(e) => { if (e.key === 'Enter') handleSaveEdit(e as any, subject.id); if (e.key === 'Escape') setEditingId(null); }}
+                                        />
+                                        <button onClick={(e) => handleSaveEdit(e, subject.id)} className="p-2 bg-blue-600 text-white rounded-lg shadow-sm hover:bg-blue-700">
+                                            <HiOutlineCheck size={16} />
                                         </button>
-                                        <button
-                                            onClick={(e) => { e.stopPropagation(); setEditingId(subject.id); setEditName(subject.name); }}
-                                            className="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            title="Edit"
-                                        >
-                                            <HiOutlinePencil size={14} />
+                                        <button onClick={(e) => { e.stopPropagation(); setEditingId(null); }} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg bg-slate-100 hover:bg-slate-200">
+                                            <HiOutlineXMark size={16} />
                                         </button>
-                                        <button
-                                            onClick={(e) => handleDelete(e, subject.id)}
-                                            disabled={deletingId === subject.id}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                                            title="Delete"
-                                        >
-                                            {deletingId === subject.id ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineTrash size={14} />}
-                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2 mb-8">
+                                        <h3 className="text-2xl font-bold tracking-tight text-slate-900 group-hover:text-current transition-colors line-clamp-2">
+                                            {subject.name}
+                                        </h3>
+                                        {subject.keywords && (
+                                            <p className="text-sm font-medium text-slate-500 leading-relaxed line-clamp-2">
+                                                {subject.keywords}
+                                            </p>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Footer */}
+                                <div className="flex items-center justify-between mt-auto pt-6 border-t border-slate-100">
+                                    <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-wider ${theme.text} transition-colors group-hover:gap-3`}>
+                                        <span>View Modules</span>
+                                        <HiOutlineArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                                    </div>
+
+                                    {/* Admin Controls */}
+                                    {isAdmin && editingId !== subject.id && (
+                                        <div className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
+                                            <button
+                                                onClick={(e) => handleToggle(e, subject.id, subject.userView)}
+                                                className={`p-2 rounded-xl transition-all ${subject.userView === 1 ? 'text-emerald-500 hover:bg-emerald-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                                                title={subject.userView === 1 ? 'Published' : 'Hidden'}
+                                            >
+                                                {subject.userView === 1 ? <HiOutlineEye size={16} /> : <HiOutlineEyeSlash size={16} />}
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); if (onPreviewSubject) onPreviewSubject(subject); }}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                                title="Preview Course Syllabus"
+                                            >
+                                                <HiOutlineDocumentText size={14} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setEditingId(subject.id); setEditName(subject.name); }}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
+                                                title="Edit"
+                                            >
+                                                <HiOutlinePencil size={14} />
+                                            </button>
+                                            <button
+                                                onClick={(e) => handleDelete(e, subject.id)}
+                                                disabled={deletingId === subject.id}
+                                                className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors disabled:opacity-50"
+                                                title="Delete"
+                                            >
+                                                {deletingId === subject.id ? <HiOutlineArrowPath className="animate-spin" size={14} /> : <HiOutlineTrash size={14} />}
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Status badge */}
+                                {isAdmin && (
+                                    <div className="absolute top-6 left-1/2 -translate-x-1/2">
+                                        <span className={`text-[10px] font-bold px-2 py-1 rounded-full shadow-sm ${subject.userView === 1 ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-50 text-slate-500 border border-slate-200'}`}>
+                                            {subject.userView === 1 ? 'Published' : 'Draft'}
+                                        </span>
                                     </div>
                                 )}
                             </div>
-
-                            {/* Status badge */}
-                            {isAdmin && (
-                                <div className="absolute top-4 right-4">
-                                    <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${subject.userView === 1 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                                        {subject.userView === 1 ? 'Published' : 'Draft'}
-                                    </span>
-                                </div>
-                            )}
                         </div>
-                        
-                        {/* Expanded Modules Inline */}
-                        {expandedSubjectId === subject.id && (
-                            <div className="border-t border-slate-100 bg-slate-50/50 p-4 sm:p-6 lg:p-8 animate-in slide-in-from-top-4 duration-300">
-                                <ModuleList
-                                    subjectId={subject.id}
-                                    subjectName={subject.name}
-                                    moduleLib={moduleLib}
-                                    topicLib={topicLib}
-                                    isAdmin={isAdmin}
-                                />
-                            </div>
-                        )}
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             {filtered.length === 0 && !isAdmin && (

@@ -17,9 +17,32 @@ export default async function TrainingManualsPage() {
     const userName = session?.user?.name || undefined;
 
     // Fetch subjects: admin sees all, others see published only
+    const subjectsWhere = isAdmin ? {} : { where: { userView: 1 } };
+    
     const subjects = await db.manualSubject.findMany({
-        ...(isAdmin ? {} : { where: { userView: 1 } }),
+        ...subjectsWhere,
         orderBy: { viewSeq: 'asc' },
+    });
+
+    // Fetch the full tree for the Overview mode
+    const fullTree = await db.manualSubject.findMany({
+        ...subjectsWhere,
+        orderBy: { viewSeq: 'asc' },
+        include: {
+            subjectModules: {
+                orderBy: { viewSeq: 'asc' },
+                include: {
+                    module: true,
+                    topics: {
+                        where: { isActive: true },
+                        orderBy: { seq: 'asc' },
+                        include: {
+                            topic: true
+                        }
+                    }
+                }
+            }
+        }
     });
 
     // Module and topic libraries (for admin management + linking)
@@ -53,6 +76,7 @@ export default async function TrainingManualsPage() {
             {isAdmin && <AdminHeader />}
             <ManualPortal
                 subjects={subjects}
+                fullTree={fullTree}
                 moduleLib={moduleLib}
                 topicLib={topicLib}
                 learningPaths={learningPaths}
