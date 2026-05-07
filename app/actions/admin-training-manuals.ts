@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
 const ADMIN_PATH = '/training-manuals';
@@ -21,6 +21,7 @@ export async function createManualSubject(formData: FormData) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -47,6 +48,7 @@ export async function deleteManualSubject(id: number) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error('Delete subject error:', e);
@@ -68,6 +70,7 @@ export async function updateManualSubject(id: number, data: { name: string; view
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -87,6 +90,7 @@ export async function toggleManualSubjectStatus(id: number, currentStatus: numbe
             data: { userView: newStatus }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -110,6 +114,7 @@ export async function createManualModule(formData: FormData) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -132,6 +137,7 @@ export async function updateManualModule(id: string, data: { name: string; modul
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -144,6 +150,7 @@ export async function deleteManualModule(id: string) {
     try {
         await db.manualModule.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -168,6 +175,7 @@ export async function createManualTopic(formData: FormData) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -191,6 +199,7 @@ export async function updateManualTopic(id: string, data: { name: string; conten
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -210,6 +219,7 @@ export async function linkModuleToSubject(subjectId: number, moduleId: string) {
             }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -222,6 +232,7 @@ export async function unlinkModuleFromSubject(subjectModuleId: string) {
     try {
         await db.subjectModule.delete({ where: { id: subjectModuleId } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -242,6 +253,7 @@ export async function addTopicToModule(subjectModuleId: string, topicId: string,
             }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -254,6 +266,7 @@ export async function removeTopicFromModule(id: string) {
     try {
         await db.moduleTopic.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -273,6 +286,7 @@ export async function updateTopicSequenceOrder(items: { id: string; seq: number 
             )
         );
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -303,6 +317,7 @@ export async function createAndLinkModuleToSubject(subjectId: number, moduleName
         });
         
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -335,6 +350,7 @@ export async function createAndLinkTopicToModule(subjectModuleId: string, topicN
         });
         
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);

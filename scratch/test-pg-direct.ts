@@ -18,7 +18,7 @@ async function testConnection() {
         console.log("Query result:", res.rows[0]);
         client.release();
     } catch (err) {
-        console.error("Connection error:", err.message);
+        console.error("Connection error:", (err as Error).message);
     } finally {
         await pool.end();
     }

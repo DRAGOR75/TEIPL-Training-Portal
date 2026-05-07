@@ -1,6 +1,6 @@
 'use server';
 import { db } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 const MANUAL_PATH = '/training-manuals';
 
@@ -19,6 +19,7 @@ export async function createLearningPath(data: { name: string; description?: str
             }
         });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -40,6 +41,7 @@ export async function updateLearningPath(id: string, data: { name?: string; desc
             }
         });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -53,6 +55,7 @@ export async function deleteLearningPath(id: string) {
     try {
         await db.learningPath.delete({ where: { id } });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -88,6 +91,7 @@ export async function addSubjectToPath(pathId: string, subjectId: number, seq: n
         }
 
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -102,6 +106,7 @@ export async function removeSubjectFromPath(id: string) {
         // Cascade will delete LearningPathModule entries too
         await db.learningPathSubject.delete({ where: { id } });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -121,6 +126,7 @@ export async function reorderPathSubjects(items: { id: string; seq: number }[]) 
             )
         );
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -137,6 +143,7 @@ export async function addModuleToPathSubject(learningPathSubjectId: string, modu
             data: { learningPathSubjectId, moduleId, seq }
         });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -150,6 +157,7 @@ export async function removeModuleFromPathSubject(id: string) {
     try {
         await db.learningPathModule.delete({ where: { id } });
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -169,6 +177,7 @@ export async function reorderPathModules(items: { id: string; seq: number }[]) {
             )
         );
         revalidatePath(MANUAL_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);

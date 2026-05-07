@@ -3,6 +3,12 @@ import SectionManager from '@/components/admin/SectionManager';
 import ProgramManager from '@/components/admin/ProgramManager';
 import EmployeeManager from '@/components/admin/EmployeeManager';
 import LocationManager from '@/components/admin/LocationManager';
+import { 
+    getCachedAdminSections, 
+    getCachedAdminPrograms, 
+    getCachedAdminEmployees, 
+    getCachedAdminLocations 
+} from '@/lib/cache-master-data';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -20,36 +26,12 @@ export default async function MasterDataPage() {
         redirect("/api/auth/signin"); // Updated: Redirect if not logged in
     }
 
-    // Parallel Fetching for Performance
+    // Parallel Fetching for Performance using cached wrappers
     const [sections, programs, employees, locations] = await Promise.all([
-        // 1. Fetch Sections
-        db.section.findMany({
-            orderBy: { name: 'asc' },
-            include: {
-                _count: { select: { programs: true } }
-            }
-        }),
-        // 2. Fetch Programs (w/ Sections)
-        db.program.findMany({
-            orderBy: { name: 'asc' },
-            include: { sections: { select: { id: true, name: true } } }
-        }),
-        // 3. Fetch Employees (Limit to latest 100)
-        db.employee.findMany({
-            take: 100,
-            orderBy: { id: 'desc' },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                grade: true,
-                sectionName: true
-            }
-        }),
-        // 4. Fetch Locations
-        db.location.findMany({
-            orderBy: { name: 'asc' }
-        })
+        getCachedAdminSections(),
+        getCachedAdminPrograms(),
+        getCachedAdminEmployees(),
+        getCachedAdminLocations()
     ]);
 
     return (

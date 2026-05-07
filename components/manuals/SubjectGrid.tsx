@@ -50,7 +50,7 @@ const THEME_COLORS = [
     { name: 'teal', border: 'hover:border-teal-500', text: 'text-teal-600 hover:text-teal-700', blob: 'bg-teal-50', iconBg: 'bg-teal-50 text-teal-600' },
 ];
 
-export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSubject }: SubjectGridProps) {
+export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSubject, onPreviewSubject }: SubjectGridProps) {
     const [isPending, startTransition] = useTransition();
     const [showAddForm, setShowAddForm] = useState(false);
     const [newName, setNewName] = useState('');
