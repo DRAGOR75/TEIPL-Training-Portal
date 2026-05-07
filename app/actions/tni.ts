@@ -4,7 +4,8 @@
 import { db } from '@/lib/prisma';
 import { Grade, Gender } from '@prisma/client';
 import { redirect } from 'next/navigation';
-import { revalidatePath, revalidateTag, unstable_cache, unstable_after as after } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { after } from 'next/server';
 import { auth } from '@/auth';
 import { verifySecureToken } from '@/lib/security';
 

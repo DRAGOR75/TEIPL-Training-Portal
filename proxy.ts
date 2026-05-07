@@ -1,17 +1,17 @@
 import NextAuth from "next-auth";
 import { authConfig } from "./auth.config";
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import type { NextRequest, NextProxy, ProxyConfig } from 'next/server';
 
 /**
- * Combined Proxy/Auth Middleware.
+ * Combined Proxy/Auth Middleware (Now renamed to Proxy in Next.js 16).
  * 
  * This file handles:
  * 1. NextAuth authentication (v5 Beta)
  * 2. Subdomain-based URL rewriting for the Troubleshooting app
  */
 
-const authMiddleware = NextAuth(authConfig).auth;
+const authProxy = NextAuth(authConfig).auth;
 
 const TROUBLESHOOT_HOSTNAME = process.env.TROUBLESHOOT_HOSTNAME || 'hemmts.academythriveni.com';
 
@@ -24,7 +24,7 @@ function isTroubleshootHost(host: string | null): boolean {
            hostname.startsWith('troubleshoot');
 }
 
-export default authMiddleware(async (req) => {
+export default authProxy(async (req) => {
     const host = req.headers.get('host');
     const { pathname } = req.nextUrl;
 
@@ -64,9 +64,9 @@ export default authMiddleware(async (req) => {
 
     // Default: Continue to auth (NextAuth's auth() already happens via the wrapper)
     return NextResponse.next();
-});
+}) as unknown as NextProxy;
 
-export const config = {
-    // Apply middleware to all routes EXCEPT static files (next internals, etc)
+export const config: ProxyConfig = {
+    // Apply proxy to all routes EXCEPT static files (next internals, etc)
     matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

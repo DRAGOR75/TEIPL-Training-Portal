@@ -106,7 +106,8 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
         fetchData(newProgram, selectedSite);
     };
 
-    const handleSiteClick = async (siteName: string) => {
+    const handleSiteClick = async (siteName?: string) => {
+        if (!siteName) return;
         const newSite = selectedSite === siteName ? null : siteName;
         setSelectedSite(newSite);
         
@@ -254,7 +255,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                             paddingAngle={5}
                                             dataKey="value"
                                             nameKey="name"
-                                            onClick={(data) => handleSiteClick(data.name)}
+                                            onClick={(data) => data && handleSiteClick(data.name)}
                                             className="cursor-pointer outline-none"
                                         >
                                             {dashboardData.siteDemand.map((entry: any, index: number) => (
@@ -272,7 +273,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                         <Legend 
                                             verticalAlign="bottom" 
                                             height={36}
-                                            onClick={(data) => handleSiteClick(data.value)}
+                                            onClick={(data) => data && handleSiteClick(data.value)}
                                             className="cursor-pointer"
                                         />
                                     </PieChart>
@@ -332,7 +333,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                             paddingAngle={5}
                                             dataKey="value"
                                             nameKey="name"
-                                            onClick={(data) => handleSiteClick(data.name)}
+                                            onClick={(data) => data && handleSiteClick(data.name)}
                                             className="cursor-pointer outline-none"
                                         >
                                             {dashboardData.siteDemand.map((entry: any, index: number) => (
@@ -350,7 +351,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                         <Legend 
                                             verticalAlign="bottom" 
                                             height={36}
-                                            onClick={(data) => handleSiteClick(data.value)}
+                                            onClick={(data) => data && handleSiteClick(data.value)}
                                             className="cursor-pointer"
                                         />
                                     </PieChart>
