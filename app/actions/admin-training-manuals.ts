@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
 const ADMIN_PATH = '/training-manuals';
@@ -21,6 +21,7 @@ export async function createManualSubject(formData: FormData) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -47,6 +48,7 @@ export async function deleteManualSubject(id: number) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error('Delete subject error:', e);
@@ -68,6 +70,7 @@ export async function updateManualSubject(id: number, data: { name: string; view
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -87,6 +90,7 @@ export async function toggleManualSubjectStatus(id: number, currentStatus: numbe
             data: { userView: newStatus }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -101,18 +105,43 @@ export async function createManualModule(formData: FormData) {
     try {
         const name = formData.get('name') as string;
         const moduleCode = formData.get('moduleCode') as string || null;
+        const pdfUrl = formData.get('pdfUrl') as string || null;
 
         if (!name) return { error: 'Module Name is required' };
 
         await db.manualModule.create({
-            data: { name, moduleCode }
+            data: { name, moduleCode, pdfUrl }
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
         return { error: 'Failed to create module' };
+    }
+}
+
+export async function updateManualModule(id: string, data: { name: string; moduleCode?: string; pdfUrl?: string }) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        if (!data.name) return { error: 'Module Name is required' };
+
+        await db.manualModule.update({
+            where: { id },
+            data: {
+                name: data.name,
+                moduleCode: data.moduleCode,
+                pdfUrl: data.pdfUrl
+            }
+        });
+
+        revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
+        return { success: true };
+    } catch (e) {
+        console.error(e);
+        return { error: 'Failed to update module' };
     }
 }
 
@@ -121,6 +150,7 @@ export async function deleteManualModule(id: string) {
     try {
         await db.manualModule.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -145,6 +175,7 @@ export async function createManualTopic(formData: FormData) {
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -168,6 +199,7 @@ export async function updateManualTopic(id: string, data: { name: string; conten
         });
 
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -187,6 +219,7 @@ export async function linkModuleToSubject(subjectId: number, moduleId: string) {
             }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -199,6 +232,7 @@ export async function unlinkModuleFromSubject(subjectModuleId: string) {
     try {
         await db.subjectModule.delete({ where: { id: subjectModuleId } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -219,6 +253,7 @@ export async function addTopicToModule(subjectModuleId: string, topicId: string,
             }
         });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -231,6 +266,7 @@ export async function removeTopicFromModule(id: string) {
     try {
         await db.moduleTopic.delete({ where: { id } });
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -250,6 +286,7 @@ export async function updateTopicSequenceOrder(items: { id: string; seq: number 
             )
         );
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);
@@ -259,14 +296,17 @@ export async function updateTopicSequenceOrder(items: { id: string; seq: number 
 
 // --- 6. Unified UI Helpers ---
 
-export async function createAndLinkModuleToSubject(subjectId: number, moduleName: string) {
+export async function createAndLinkModuleToSubject(subjectId: number, moduleName: string, pdfUrl?: string) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!moduleName.trim()) return { error: 'Module Name is required' };
         
         await db.$transaction(async (tx) => {
             const newModule = await tx.manualModule.create({
-                data: { name: moduleName.trim() }
+                data: { 
+                    name: moduleName.trim(),
+                    pdfUrl: pdfUrl || null
+                }
             });
             await tx.subjectModule.create({
                 data: {
@@ -277,6 +317,7 @@ export async function createAndLinkModuleToSubject(subjectId: number, moduleName
         });
         
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
         console.error(e);
@@ -287,14 +328,17 @@ export async function createAndLinkModuleToSubject(subjectId: number, moduleName
     }
 }
 
-export async function createAndLinkTopicToModule(subjectModuleId: string, topicName: string, seq: number) {
+export async function createAndLinkTopicToModule(subjectModuleId: string, topicName: string, seq: number, pdfUrl?: string) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         if (!topicName.trim()) return { error: 'Topic Name is required' };
         
         await db.$transaction(async (tx) => {
             const newTopic = await tx.manualTopic.create({
-                data: { name: topicName.trim() }
+                data: { 
+                    name: topicName.trim(),
+                    pdfUrl: pdfUrl || null
+                }
             });
             await tx.moduleTopic.create({
                 data: {
@@ -306,6 +350,7 @@ export async function createAndLinkTopicToModule(subjectModuleId: string, topicN
         });
         
         revalidatePath(ADMIN_PATH);
+        revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e) {
         console.error(e);

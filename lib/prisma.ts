@@ -16,7 +16,12 @@ function createPrismaClient() {
         return new PrismaClient();
     }
     console.log(`[Prisma] Initializing with URL: ${connectionString.substring(0, 25)}...`);
-    const pool = new Pool({ connectionString })
+    const pool = new Pool({ 
+        connectionString,
+        max: process.env.NODE_ENV === 'production' ? 5 : 100, // On Vercel (Prod), keep per-lambda pool small
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 5000,
+    })
     
     pool.on('error', (err) => {
         console.error('[Postgres Pool Error]', err);

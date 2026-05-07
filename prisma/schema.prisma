@@ -491,13 +491,15 @@ model ManualModule {
   id         String  @id @default(uuid())
   moduleCode String? @unique @map("module_code")
   name       String  @unique
+  pdfUrl     String? @map("pdf_url")
   viewSeq    Int     @default(0) @map("view_seq")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   // Relations
-  subjectMappings SubjectModule[]
+  subjectMappings      SubjectModule[]
+  learningPathMappings LearningPathModule[]
 
   @@map("manual_modules")
 }
@@ -596,7 +598,25 @@ model LearningPathSubject {
   // Relations
   learningPath LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
   subject      ManualSubject @relation(fields: [subjectId], references: [id])
+  modules      LearningPathModule[]
 
   @@unique([learningPathId, subjectId])
   @@map("learning_path_subjects")
+}
+
+// Learning Path Subject <-> Module Bridge (per-path module customization)
+model LearningPathModule {
+  id                    String @id @default(uuid())
+  learningPathSubjectId String @map("learning_path_subject_id")
+  moduleId              String @map("module_id")
+  seq                   Int    @default(0)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  learningPathSubject LearningPathSubject @relation(fields: [learningPathSubjectId], references: [id], onDelete: Cascade)
+  module              ManualModule        @relation(fields: [moduleId], references: [id])
+
+  @@unique([learningPathSubjectId, moduleId])
+  @@map("learning_path_modules")
 }

@@ -4,8 +4,10 @@ import { db } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { unstable_cache } from 'next/cache';
 
-const getCachedTniReportData = unstable_cache(
-    async () => {
+export async function getTniReportData(site?: string) {
+    if (!await auth()) return null;
+
+    try {
         // Parallel fetching for performance
         const [
             topPrograms,
@@ -22,30 +24,30 @@ const getCachedTniReportData = unstable_cache(
             // 1. Top 15 Programs by Pending nominations
             db.nomination.groupBy({
                 by: ['programId'],
-                where: { status: 'Pending' },
+                where: { 
+                    status: 'Pending',
+                    ...(site ? { employee: { location: site } } : {})
+                },
                 _count: { id: true },
-                orderBy: { _count: { id: 'desc' } }
+                orderBy: { _count: { id: 'desc' } },
+                take: 15
             }),
             // 2. Overall Status Breakdown
             db.nomination.groupBy({
                 by: ['status'],
+                where: site ? { employee: { location: site } } : {},
                 _count: { id: true }
             }),
             // 3. Department-wise Demand
-            db.nomination.groupBy({
-                by: ['empId'], // Internal join logic needed for better grouping
-                where: { status: 'Pending' },
+            db.employee.groupBy({
+                by: ['sectionName'],
+                where: { 
+                    nominations: { some: { status: 'Pending' } },
+                    ...(site ? { location: site } : {})
+                },
                 _count: { id: true }
-            }).then(async () => {
-                // Since we can't join in groupBy directly, we fetch aggregated counts from joins if possible
-                // or we do a manual count from the employees table joined to nominations
-                return await db.employee.groupBy({
-                    by: ['sectionName'],
-                    where: { nominations: { some: { status: 'Pending' } } },
-                    _count: { id: true }
-                });
             }),
-            // 4. Site-wise Demand
+            // 4. Site-wise Demand (Always global for the chart, or filtered if needed)
             db.employee.groupBy({
                 by: ['location'],
                 where: { nominations: { some: { status: 'Pending' } } },
@@ -54,16 +56,20 @@ const getCachedTniReportData = unstable_cache(
             // 5. Grade-wise Demand
             db.employee.groupBy({
                 by: ['grade'],
-                where: { nominations: { some: { status: 'Pending' } } },
+                where: { 
+                    nominations: { some: { status: 'Pending' } },
+                    ...(site ? { location: site } : {})
+                },
                 _count: { id: true }
             }),
             // 6. Source Distribution
             db.nomination.groupBy({
                 by: ['source'],
+                where: site ? { employee: { location: site } } : {},
                 _count: { id: true }
             }),
             // Summary Stats
-            db.employee.count(),
+            db.employee.count({ where: site ? { location: site } : {} }),
             db.program.count(),
             db.location.findMany({ select: { name: true } }),
             db.section.findMany({ select: { name: true } })
@@ -100,16 +106,6 @@ const getCachedTniReportData = unstable_cache(
                 departments: sections.map(s => s.name)
             }
         };
-    },
-    ['tni-reports-data'],
-    { revalidate: 3600, tags: ['tni-reports'] }
-);
-
-export async function getTniReportData() {
-    if (!await auth()) return null;
-
-    try {
-        return await getCachedTniReportData();
     } catch (error) {
         console.error('Failed to fetch report data', error);
         return null;
@@ -137,5 +133,46 @@ export async function getProgramParticipantDepth(programId: string) {
                 }
             }
         }
+    });
+}
+/**
+ * Fetch detailed participants with flexible filters (Site, Program, etc.)
+ */
+export async function getFilteredParticipantDepth(filters: { programId?: string; site?: string }) {
+    if (!await auth()) return null;
+
+    const where: any = { status: 'Pending' };
+    
+    if (filters.programId) {
+        where.programId = filters.programId;
+    }
+    
+    if (filters.site) {
+        where.employee = { location: filters.site };
+    }
+
+    return await db.nomination.findMany({
+        where,
+        include: {
+            employee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    grade: true,
+                    sectionName: true,
+                    location: true,
+                    subDepartment: true
+                }
+            },
+            program: {
+                select: {
+                    id: true,
+                    name: true,
+                    category: true
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
     });
 }

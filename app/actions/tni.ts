@@ -5,6 +5,7 @@ import { db } from '@/lib/prisma';
 import { Grade, Gender } from '@prisma/client';
 import { redirect } from 'next/navigation';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { after } from 'next/server';
 import { auth } from '@/auth';
 import { verifySecureToken } from '@/lib/security';
 
@@ -16,35 +17,35 @@ export async function checkEmployeeAccess(formData: FormData) {
     redirect(`/tni/${empId}`);
 }
 
-// CACHED: Employee Profile
-export const getEmployeeProfile = unstable_cache(
-    async (empId: string) => {
-        const employee = await db.employee.findUnique({
-            where: { id: empId },
-            include: {
-                nominations: {
-                    where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
-                    include: { program: true }
+// We need to wrap the cached function to pass the empId to the keyParts
+export const getEmployeeProfile = async (empId: string) => {
+    return unstable_cache(
+        async (id: string) => {
+            const employee = await db.employee.findUnique({
+                where: { id },
+                include: {
+                    nominations: {
+                        where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
+                        include: { program: true }
+                    }
                 }
+            });
+
+            const sections = await db.section.findMany({
+                orderBy: { name: 'asc' }
+            });
+
+            const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+            if (employee) {
+                employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
             }
-        });
 
-        // Fetch sections for the dropdown
-        const sections = await db.section.findMany({
-            orderBy: { name: 'asc' }
-        });
-
-        // Sort nominations by status: Approved > Pending > Rejected
-        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
-        if (employee) {
-            employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
-        }
-
-        return { employee, sections };
-    },
-    ['employee-profile'], // Base tag
-    { revalidate: 3600, tags: ['employee-profile'] } // Revalidate every hour or on tag invalidation
-);
+            return { employee, sections };
+        },
+        [`employee-profile-${empId}`],
+        { revalidate: 3600, tags: ['employee-profile', `employee-${empId}`] }
+    )(empId);
+};
 
 export async function updateEmployeeProfile(empId: string, data: {
     name: string;
@@ -68,7 +69,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 email: data.email.substring(0, 100),
                 grade: (() => {
                     if (!data.grade) throw new Error("Grade is required");
-                    return data.grade as any;
+                    return data.grade as Grade;
                 })(),
                 sectionName: data.sectionName.substring(0, 100),
                 location: data.location.substring(0, 100),
@@ -84,7 +85,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 id: empId.substring(0, 50),
                 name: data.name.substring(0, 100),
                 email: data.email.substring(0, 100),
-                grade: data.grade as any,
+                grade: data.grade as Grade,
                 sectionName: data.sectionName.substring(0, 100),
                 location: data.location.substring(0, 100),
                 gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
@@ -107,63 +108,67 @@ export async function updateEmployeeProfile(empId: string, data: {
 }
 
 // CACHED: Available Programs
-export const getAvailablePrograms = unstable_cache(
-    async (grade?: Grade, sectionName?: string) => {
-        const where: any = {
-            AND: []
-        };
+export const getAvailablePrograms = async (grade?: Grade, sectionName?: string) => {
+    return unstable_cache(
+        async (g?: Grade, s?: string) => {
+            const where: { AND: any[] } = {
+                AND: []
+            };
 
-        if (grade) {
-            where.AND.push({ targetGrades: { has: grade } });
-        }
+            if (g) {
+                where.AND.push({ targetGrades: { has: g } });
+            }
 
-        if (sectionName) {
-            where.AND.push({
-                OR: [
-                    { category: { not: 'FUNCTIONAL' } },
-                    {
-                        category: 'FUNCTIONAL',
-                        sections: { some: { name: sectionName } }
-                    }
-                ]
+            if (s) {
+                where.AND.push({
+                    OR: [
+                        { category: { not: 'FUNCTIONAL' } },
+                        {
+                            category: 'FUNCTIONAL',
+                            sections: { some: { name: s } }
+                        }
+                    ]
+                });
+            } else {
+                where.AND.push({ category: { not: 'FUNCTIONAL' } });
+            }
+
+            return await db.program.findMany({
+                where,
+                orderBy: { name: 'asc' },
+                include: { sections: true }
             });
-        } else {
-            where.AND.push({ category: { not: 'FUNCTIONAL' } });
-        }
-
-        return await db.program.findMany({
-            where,
-            orderBy: { name: 'asc' },
-            include: { sections: true }
-        });
-    },
-    ['available-programs'],
-    { revalidate: 86400, tags: ['programs'] } // Cache for 24h
-);
+        },
+        [`available-programs-${grade || 'all'}-${sectionName || 'all'}`],
+        { revalidate: 86400, tags: ['programs'] }
+    )(grade, sectionName);
+};
 
 // CACHED: Manager Approval Data
-export const getManagerApprovalData = unstable_cache(
-    async (empId: string) => {
-        const employee = await db.employee.findUnique({
-            where: { id: empId },
-            include: {
-                nominations: {
-                    where: { status: 'Pending' },
-                    include: { program: true }
+export const getManagerApprovalData = async (empId: string) => {
+    return unstable_cache(
+        async (id: string) => {
+            const employee = await db.employee.findUnique({
+                where: { id },
+                include: {
+                    nominations: {
+                        where: { status: 'Pending' },
+                        include: { program: true }
+                    }
                 }
+            });
+
+            const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+            if (employee) {
+                employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
             }
-        });
 
-        const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
-        if (employee) {
-            employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
-        }
-
-        return employee;
-    },
-    ['manager-approval-data'],
-    { revalidate: 3600, tags: ['manager-approval'] } // Base tag, will be dynamic in usage if needed, but here we can just use a common tag pattern or rely on specific revalidation
-);
+            return employee;
+        },
+        [`manager-approval-data-${empId}`],
+        { revalidate: 3600, tags: ['manager-approval', `manager-approval-${empId}`] }
+    )(empId);
+};
 
 import { sendTNIApprovalEmail } from '@/lib/email';
 
@@ -219,15 +224,22 @@ export async function submitTNINomination(formData: FormData) {
             });
             const programNames = programs.map(p => p.name);
 
-            // 3. Send the single consolidated email
-            await sendTNIApprovalEmail(
-                employee.managerEmail,
-                employee.managerName || 'Manager',
-                employee.name,
-                programNames,
-                safeJustification || 'No justification provided',
-                empId
-            );
+            // 3. Send the single consolidated email in the BACKGROUND
+            // Using 'after' ensures the user is redirected immediately while the email sends in the background.
+            after(async () => {
+                try {
+                    await sendTNIApprovalEmail(
+                        employee.managerEmail!,
+                        employee.managerName || 'Manager',
+                        employee.name,
+                        programNames,
+                        safeJustification || 'No justification provided',
+                        empId
+                    );
+                } catch (emailError) {
+                    console.error("Background Email Error:", emailError);
+                }
+            });
         } else {
             console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
         }
@@ -245,7 +257,7 @@ export async function submitTNINomination(formData: FormData) {
 
 export async function updateNominationStatus(nominationId: string, status: 'Approved' | 'Rejected', token?: string) {
     const session = await auth();
-    const isAdmin = (session?.user as any)?.role === 'ADMIN';
+    const isAdmin = session?.user?.role === 'ADMIN';
 
     // SECURITY CHECK: If NOT admin, must provide valid token matching nominationId or employee ID (context dependent)
     // For TNI Manager Approval, the token is signed against the ID in the URL.
