@@ -56,28 +56,29 @@ export default function LearningPathViewer({ learningPaths, onSelectSubject }: L
                                                 {index + 1}
                                             </div>
 
-                                            {/* Subject card */}
-                                            <div className="flex-1 mb-5">
+                                            {/* Subject item */}
+                                            <div className="flex-1 mb-6 mt-2.5">
                                                 <div
                                                     onClick={() => onSelectSubject?.(ps.subjectId)}
-                                                    className="bg-white rounded-xl border border-violet-100 hover:border-violet-300 hover:shadow-md transition-all cursor-pointer p-4"
+                                                    className="cursor-pointer group/subject"
                                                 >
-                                                    <p className="text-sm font-bold text-slate-800 group-hover:text-violet-700 transition-colors flex items-center gap-1.5">
-                                                        <HiOutlineBookOpen size={14} className="text-violet-500 shrink-0" />
+                                                    <p className="text-[15px] font-bold text-slate-900 group-hover/subject:text-violet-700 transition-colors flex items-center gap-2">
+                                                        <div className="p-1 bg-violet-100 text-violet-600 rounded">
+                                                            <HiOutlineBookOpen size={14} className="shrink-0" />
+                                                        </div>
                                                         {ps.subject.name}
                                                     </p>
 
                                                     {/* Modules under this subject */}
                                                     {pathModules.length > 0 && (
-                                                        <div className="mt-3 space-y-1.5 ml-5">
+                                                        <div className="mt-4 space-y-3 ml-7 border-l-2 border-violet-100/50 pl-4">
                                                             {pathModules.map((pm: any, mi: number) => (
-                                                                <div key={pm.id} className="flex items-center gap-2 text-xs text-slate-500">
-                                                                    <span className="w-4 h-4 rounded bg-violet-100 text-violet-700 text-[9px] font-bold flex items-center justify-center shrink-0">{mi + 1}</span>
-                                                                    <HiOutlineRectangleGroup size={11} className="text-violet-400 shrink-0" />
-                                                                    <span className="truncate">{pm.module.name}</span>
+                                                                <div key={pm.id} className="flex items-center gap-3 text-sm text-slate-600 group-hover/subject:text-slate-800 transition-colors">
+                                                                    <span className="w-5 h-5 rounded-md bg-white border border-violet-200 text-violet-700 text-[10px] font-bold flex items-center justify-center shrink-0 shadow-sm">{mi + 1}</span>
+                                                                    <span className="font-medium truncate">{pm.module.name}</span>
                                                                     {pm.module.pdfUrl && (
-                                                                        <a href={pm.module.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="ml-auto text-[10px] text-blue-600 font-bold flex items-center gap-0.5 px-1.5 py-0.5 bg-blue-50 rounded hover:bg-blue-100 shrink-0">
-                                                                            <HiOutlineDocumentArrowDown size={10} /> PDF
+                                                                        <a href={pm.module.pdfUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="ml-auto text-[10px] text-blue-600 font-bold flex items-center gap-1 px-2 py-1 bg-blue-50 rounded-md hover:bg-blue-600 hover:text-white transition-colors shrink-0 uppercase tracking-wider">
+                                                                            <HiOutlineDocumentArrowDown size={12} /> PDF
                                                                         </a>
                                                                     )}
                                                                 </div>

@@ -24,30 +24,22 @@ export default function SendInvitationButton({ sessionId, emailsSent, participan
         router.refresh();
     };
 
-    if (hasSent) {
-        return (
-            <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl border border-blue-200 shadow-sm font-bold text-sm">
-                <HiOutlineCheckCircle size={16} />
-                <span>Invites Sent</span>
-            </div>
-        );
-    }
-
     return (
         <>
             <button
                 onClick={() => setShowModal(true)}
                 disabled={participantCount === 0 || !isLocked}
-                title={!isLocked ? "Batch must be confirmed/locked before sending invites" : participantCount === 0 ? "No participants in batch" : "Send Invites"}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl shadow-md border border-slate-700 font-bold text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={!isLocked ? "Batch must be confirmed/locked before sending invites" : participantCount === 0 ? "No participants in batch" : hasSent ? "Send Reminders" : "Send Invites"}
+                className={`flex items-center gap-2 px-4 py-2 ${hasSent ? 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-slate-800 hover:bg-slate-900 text-white border-slate-700'} rounded-xl shadow-md border font-bold text-sm transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
-                <HiOutlinePaperAirplane size={16} className="-rotate-45" />
-                <span>Send Invites</span>
+                <HiOutlinePaperAirplane size={16} className={hasSent ? "" : "-rotate-45"} />
+                <span>{hasSent ? "Send Reminders" : "Send Invites"}</span>
             </button>
 
             {showModal && (
                 <EmailRecipientModal
                     sessionId={sessionId}
+                    isReminder={hasSent}
                     onClose={() => setShowModal(false)}
                     onSuccess={handleSuccess}
                 />

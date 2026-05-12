@@ -149,30 +149,34 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
     }
 
     return (
-        <div className="space-y-5 animate-in fade-in duration-300">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-air overflow-hidden animate-in fade-in duration-300">
             {/* ── Header ──────────────────────────────────────── */}
-            <div className="bg-white rounded-[1.5rem] border border-slate-200 shadow-air p-6">
-                <div className="flex items-center gap-4">
-                    <button
-                        onClick={onBack}
-                        className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors"
-                        title="Back to subjects"
-                    >
-                        <HiOutlineArrowLeft size={20} />
-                    </button>
-                    <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-sm border border-slate-100">
-                        <HiOutlineBookOpen size={24} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <h2 className="text-2xl font-black text-slate-900 truncate tracking-tight">{subjectName}</h2>
-                        <p className="text-sm font-medium text-slate-500 mt-1">{linkedModules.length} module{linkedModules.length !== 1 ? 's' : ''} in this subject</p>
+            <div className="p-6 md:p-8 border-b border-slate-100 bg-gradient-to-br from-white to-slate-50/50">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+                    <div className="flex items-center gap-4 flex-1">
+                        <button
+                            onClick={onBack}
+                            className="p-2.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-colors shrink-0"
+                            title="Back to subjects"
+                        >
+                            <HiOutlineArrowLeft size={20} />
+                        </button>
+                        <div className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-200 shrink-0">
+                            <HiOutlineBookOpen size={24} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h2 className="text-2xl font-black text-slate-900 truncate tracking-tight">{subjectName}</h2>
+                            <p className="text-sm font-bold uppercase tracking-widest text-slate-500 mt-1 flex items-center gap-2">
+                                {linkedModules.length} module{linkedModules.length !== 1 ? 's' : ''} in this subject
+                            </p>
+                        </div>
                     </div>
 
                     {/* Preview Button */}
                     {onPreview && (
                         <button
                             onClick={onPreview}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-sm shadow-blue-200"
+                            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-sm shadow-blue-200 shrink-0"
                         >
                             <HiOutlineBookOpen size={18} />
                             Preview Syllabus
@@ -183,7 +187,7 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
 
             {/* ── Add/Link Module (Admin) ──────────────────────── */}
             {isAdmin && (
-                <div className="bg-slate-50 rounded-[1.5rem] border border-slate-200 overflow-hidden shadow-sm">
+                <div className="bg-slate-50/50 border-b border-slate-100">
                     <div className="flex border-b border-slate-200 bg-white/50">
                         <button
                             onClick={() => setMode('link')}
@@ -199,57 +203,61 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
                         </button>
                     </div>
                     
-                    <div className="p-5 space-y-4">
+                    <div className="p-6 md:p-8 space-y-4">
                         {mode === 'link' ? (
-                            <div className="flex items-center gap-3">
-                                <HiOutlineLink size={18} className="text-blue-500 shrink-0" />
-                                <select
-                                    value={moduleToLink}
-                                    onChange={(e) => setModuleToLink(e.target.value)}
-                                    className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm"
-                                >
-                                    <option value="">Link a module to &quot;{subjectName}&quot;...</option>
-                                    {availableModules.map((m) => (
-                                        <option key={m.id} value={m.id}>{m.name}</option>
-                                    ))}
-                                </select>
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <div className="flex-1 w-full relative">
+                                    <HiOutlineLink size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                                    <select
+                                        value={moduleToLink}
+                                        onChange={(e) => setModuleToLink(e.target.value)}
+                                        className="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm font-medium text-slate-700"
+                                    >
+                                        <option value="">Link a module to "{subjectName}"...</option>
+                                        {availableModules.map((m) => (
+                                            <option key={m.id} value={m.id}>{m.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
                                 <button
                                     onClick={handleLinkModule}
                                     disabled={!moduleToLink || isPending}
-                                    className="px-5 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+                                    className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200 disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
                                 >
-                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlineLink size={16} />}
+                                    {isPending ? <HiOutlineArrowPath className="animate-spin" size={18} /> : <HiOutlineLink size={18} />}
                                     Link
                                 </button>
                             </div>
                         ) : (
                             <div className="space-y-4">
-                                <div className="flex items-center gap-3">
-                                    <HiOutlinePlus size={18} className="text-blue-500 shrink-0" />
-                                    <input
-                                        type="text"
-                                        value={newModuleName}
-                                        onChange={(e) => setNewModuleName(e.target.value)}
-                                        placeholder="Enter new module name..."
-                                        className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm"
-                                        onKeyDown={(e) => e.key === 'Enter' && handleCreateModule()}
-                                    />
+                                <div className="flex flex-col sm:flex-row items-center gap-4">
+                                    <div className="flex-1 w-full relative">
+                                        <HiOutlinePlus size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-blue-500" />
+                                        <input
+                                            type="text"
+                                            value={newModuleName}
+                                            onChange={(e) => setNewModuleName(e.target.value)}
+                                            placeholder="Enter new module name..."
+                                            className="w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm font-medium text-slate-700"
+                                            onKeyDown={(e) => e.key === 'Enter' && handleCreateModule()}
+                                        />
+                                    </div>
                                     <button
                                         onClick={handleCreateModule}
                                         disabled={!newModuleName.trim() || isPending}
-                                        className="px-5 py-3 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+                                        className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200 disabled:opacity-50 flex items-center justify-center gap-2 shrink-0"
                                     >
-                                        {isPending ? <HiOutlineArrowPath className="animate-spin" size={16} /> : <HiOutlinePlus size={16} />}
+                                        {isPending ? <HiOutlineArrowPath className="animate-spin" size={18} /> : <HiOutlinePlus size={18} />}
                                         Create & Link
                                     </button>
                                 </div>
-                                <div className="ml-8 pl-1">
+                                <div>
                                     <input
                                         type="text"
                                         value={newModulePdf}
                                         onChange={(e) => setNewModulePdf(e.target.value)}
                                         placeholder="PDF URL (optional)"
-                                        className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm"
+                                        className="w-full px-4 py-3.5 border border-slate-200 rounded-xl text-sm bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none shadow-sm font-medium text-slate-700"
                                     />
                                 </div>
                             </div>
@@ -259,31 +267,32 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
             )}
 
             {/* ── Module List ─────────────────────────────────── */}
-            {filteredModules.length === 0 ? (
-                <div className="py-16 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
-                        <HiOutlineRectangleGroup size={28} className="text-slate-400" />
+            <div>
+                {filteredModules.length === 0 ? (
+                    <div className="py-16 text-center bg-slate-50/30">
+                        <div className="w-16 h-16 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4">
+                            <HiOutlineRectangleGroup size={28} className="text-slate-400" />
+                        </div>
+                        <h3 className="text-lg font-bold text-slate-700 mb-1">
+                            {searchQuery ? 'No Matching Modules' : 'No Modules Yet'}
+                        </h3>
+                        <p className="text-slate-500 text-sm">
+                            {searchQuery
+                                ? 'Try a different search term.'
+                                : isAdmin ? 'Use the toolbar above to add modules to this subject.' : 'Modules for this subject haven\'t been added yet.'}
+                        </p>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-700 mb-1">
-                        {searchQuery ? 'No Matching Modules' : 'No Modules Yet'}
-                    </h3>
-                    <p className="text-slate-500 text-sm">
-                        {searchQuery
-                            ? 'Try a different search term.'
-                            : isAdmin ? 'Use the toolbar above to add modules to this subject.' : 'Modules for this subject haven\'t been added yet.'}
-                    </p>
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {filteredModules.map((lm, index) => (
-                        <div
-                            key={lm.id}
-                            className="group bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-air-md hover:border-blue-300 transition-all duration-300 overflow-hidden cursor-pointer"
-                            onClick={() => {
-                                if (!editingModuleId) onSelectModule(lm);
-                            }}
-                        >
-                            <div className="flex items-center gap-5 p-5">
+                ) : (
+                    <div className="divide-y divide-slate-100">
+                        {filteredModules.map((lm, index) => (
+                            <div
+                                key={lm.id}
+                                className="group hover:bg-slate-50/80 transition-all duration-300 cursor-pointer"
+                                onClick={() => {
+                                    if (!editingModuleId) onSelectModule(lm);
+                                }}
+                            >
+                                <div className="flex items-center gap-5 p-6">
                                 {/* Index */}
                                 <div className="w-12 h-12 rounded-xl bg-slate-50 flex items-center justify-center text-slate-500 font-black text-sm shrink-0 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors border border-slate-100 shadow-sm">
                                     {index + 1}
@@ -392,6 +401,7 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
                     ))}
                 </div>
             )}
+            </div>
         </div>
     );
 }

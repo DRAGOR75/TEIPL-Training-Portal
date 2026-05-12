@@ -389,6 +389,64 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     </div>
                 </div>
 
+                {/* 3. Email Logs */}
+                <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                    <div className="p-6 border-b border-slate-100">
+                        <h3 className="font-bold text-slate-900 text-lg">Communication Logs</h3>
+                        <p className="text-sm text-slate-500">History of invitations and reminders sent.</p>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto">
+                        {!session.emailLogs || session.emailLogs.length === 0 ? (
+                            <div className="p-8 text-center text-slate-500 text-sm">
+                                No emails have been logged for this session yet.
+                            </div>
+                        ) : (
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-slate-50 text-slate-600 font-medium sticky top-0">
+                                    <tr>
+                                        <th className="p-4">Recipient</th>
+                                        <th className="p-4">Type</th>
+                                        <th className="p-4">Subject</th>
+                                        <th className="p-4">Status</th>
+                                        <th className="p-4 text-right">Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100">
+                                    {session.emailLogs.map((log: any) => (
+                                        <tr key={log.id} className="hover:bg-slate-50">
+                                            <td className="p-4">
+                                                <div className="font-medium text-slate-900">{log.recipientEmail}</div>
+                                                <div className="text-[10px] text-slate-500 uppercase tracking-wider">{log.recipientType}</div>
+                                            </td>
+                                            <td className="p-4">
+                                                <span className="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-medium">
+                                                    {log.emailType}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-slate-600 truncate max-w-[200px]" title={log.subject}>
+                                                {log.subject}
+                                            </td>
+                                            <td className="p-4">
+                                                <span className={`px-2 py-1 rounded text-[10px] font-black uppercase tracking-widest border ${log.status === 'Sent'
+                                                    ? 'bg-green-50 text-green-700 border-green-100'
+                                                    : 'bg-red-50 text-red-700 border-red-100'
+                                                }`} title={log.errorMessage || undefined}>
+                                                    {log.status}
+                                                </span>
+                                            </td>
+                                            <td className="p-4 text-right text-slate-500 text-xs whitespace-nowrap">
+                                                {new Date(log.createdAt).toLocaleString('en-IN', {
+                                                    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                                                })}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </div>
+
                 <div className="flex justify-end gap-3">
                     {session.nominationBatch && (
                         <>

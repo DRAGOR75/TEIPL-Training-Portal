@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { generateSecureToken } from '@/lib/security';
+import { db } from '@/lib/prisma';
 
 /**
  * Creates a Gmail API Client using OAuth2.
@@ -44,7 +45,7 @@ const getBaseUrl = () => {
 /**
  * CORE SENDER FUNCTION
  */
-export async function sendEmail({ to, subject, html, cc, bcc }: { to: string, subject: string, html: string, cc?: string, bcc?: string }) {
+export async function sendEmail({ to, subject, html, cc, bcc }: { to?: string, subject: string, html: string, cc?: string, bcc?: string }) {
   try {
     const gmail = getGmailClient();
     const userEmail = clean(process.env.EMAIL_USER);
@@ -58,7 +59,7 @@ export async function sendEmail({ to, subject, html, cc, bcc }: { to: string, su
 
     const str = [
       `From: "Training Thriveni" <${userEmail}>`,
-      `To: ${to}`,
+      to ? `To: ${to}` : '',
       options?.cc ? `Cc: ${options.cc}` : '',
       options?.bcc ? `Bcc: ${options.bcc}` : '',
       `Subject: ${encodedSubject}`,
@@ -82,7 +83,7 @@ export async function sendEmail({ to, subject, html, cc, bcc }: { to: string, su
       },
     });
 
-    console.log(`✅ Email sent via API to ${to}: ${res.data.id}`);
+    console.log(`✅ Email sent via API to ${to || cc || bcc}: ${res.data.id}`);
     return { success: true, id: res.data.id };
   } catch (error: any) {
     console.error('❌ Email failed via API:', error);
@@ -90,6 +91,38 @@ export async function sendEmail({ to, subject, html, cc, bcc }: { to: string, su
     const message = error.response?.data?.error?.message || error.message || error;
     return { success: false, error: message };
   }
+}
+
+/**
+ * WRAPPER: Send an email and track its status in the EmailLog table.
+ */
+export async function sendTrackedEmail(
+  { to, subject, html, cc, bcc }: { to?: string, subject: string, html: string, cc?: string, bcc?: string },
+  trackingData: {
+    recipientType: string;
+    emailType: string;
+    sessionId?: string;
+  }
+) {
+  const result = await sendEmail({ to, subject, html, cc, bcc });
+
+  try {
+    await db.emailLog.create({
+      data: {
+        recipientEmail: to || cc || bcc || 'unknown',
+        recipientType: trackingData.recipientType,
+        emailType: trackingData.emailType,
+        subject: subject,
+        status: result.success ? "Sent" : "Failed",
+        errorMessage: result.error || null,
+        sessionId: trackingData.sessionId || null,
+      }
+    });
+  } catch (dbError) {
+    console.error("Failed to write to EmailLog:", dbError);
+  }
+
+  return result;
 }
 
 /**
@@ -521,7 +554,9 @@ export async function sendBatchInvitationEmail(
   trainerName: string = "Internal/External",
   participants: { empId: string; name: string; designation: string | null }[],
   customHtml?: string,
-  customSubject?: string
+  customSubject?: string,
+  sessionId?: string,
+  isReminder: boolean = false
 ) {
   const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants);
 
@@ -530,9 +565,6 @@ export async function sendBatchInvitationEmail(
   const validCc = ccEmails.filter(e => e && e.includes('@'));
 
   if (validTo.length === 0) return { success: false, error: "No valid participants found." };
-
-  const toStr = validTo.join(', ');
-  const ccStr = validCc.join(', ');
 
   const dateFormatter = new Intl.DateTimeFormat('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -544,10 +576,49 @@ export async function sendBatchInvitationEmail(
 
   const subject = customSubject || `Invitation: ${programName} from ${dateStr}`;
 
-  return await sendEmail({
-    to: toStr,
-    cc: ccStr,
-    subject: subject,
-    html
-  });
+  let allSuccess = true;
+  let errors: string[] = [];
+
+  // Send to Participants Individually for tracking
+  for (const email of validTo) {
+    const result = await sendTrackedEmail(
+      { to: email, subject, html },
+      {
+        recipientType: 'Participant',
+        emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
+        sessionId
+      }
+    );
+    if (!result.success) {
+      allSuccess = false;
+      errors.push(`Failed for ${email}: ${result.error}`);
+    }
+    // Rate limit prevention (Gmail API allows ~2.5 msgs/sec)
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  // Send to Managers (CC list) Individually
+  for (const email of validCc) {
+    const result = await sendTrackedEmail(
+      { cc: email, subject, html },
+      {
+        recipientType: 'Manager',
+        emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
+        sessionId
+      }
+    );
+    if (!result.success) {
+      allSuccess = false;
+      errors.push(`Failed for ${email}: ${result.error}`);
+    }
+    // Rate limit prevention
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  if (allSuccess) {
+    return { success: true };
+  } else {
+    return { success: false, error: errors.join('; ') };
+  }
 }
+
