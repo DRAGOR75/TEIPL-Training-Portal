@@ -23,16 +23,19 @@ export async function getManualSubjects() {
 
 export async function getManualModules(subjectId: number) {
     try {
+        const id = Number(subjectId);
+        if (isNaN(id)) throw new Error(`Invalid subjectId: ${subjectId}`);
+        
         const subjectModules = await db.subjectModule.findMany({
-            where: { subjectId },
+            where: { subjectId: id },
             include: {
                 module: true
             },
             orderBy: { viewSeq: 'asc' }
         });
         return { success: true, data: subjectModules };
-    } catch (e) {
-        console.error('Error fetching modules:', e);
+    } catch (e: any) {
+        console.error('Error fetching modules for subject:', subjectId, e.message || e);
         return { success: false, error: 'Failed to fetch modules' };
     }
 }

@@ -51,7 +51,12 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
     useEffect(() => {
         setLoading(true);
         getManualModules(subjectId).then((res) => {
-            if (res.success && res.data) setLinkedModules(res.data);
+            if (res.success && res.data) {
+                setLinkedModules(res.data);
+            } else {
+                console.error('Failed to load modules:', res.error);
+                alert('Error loading modules: ' + res.error);
+            }
             setLoading(false);
         });
     }, [subjectId]);
@@ -59,7 +64,12 @@ export default function ModuleList({ subjectId, subjectName, moduleLib, topicLib
     function refreshModules() {
         setLoading(true);
         getManualModules(subjectId).then((res) => {
-            if (res.success && res.data) setLinkedModules(res.data);
+            if (res.success && res.data) {
+                setLinkedModules(res.data);
+            } else {
+                console.error('Failed to load modules:', res.error);
+                alert('Error loading modules: ' + res.error);
+            }
             setLoading(false);
         });
     }
