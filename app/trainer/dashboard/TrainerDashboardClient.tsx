@@ -270,6 +270,49 @@ export default function TrainerDashboardClient({
                                 </div>
                             </div>
                         </div>
+
+                        {/* Performance Insights Card */}
+                        <div className="bg-slate-900 text-white rounded-3xl p-6 shadow-lg relative overflow-hidden flex flex-col justify-between">
+                            <HiOutlineUser className="absolute -right-8 -bottom-8 text-white/5" size={150} />
+
+                            <div className="relative z-10">
+                                <div className="flex justify-between items-start mb-6">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <HiOutlineCheckCircle size={18} className="text-emerald-400" /> Trainer Insights
+                                    </h3>
+                                    <button
+                                        onClick={() => router.push('/training-manuals')}
+                                        className="text-[10px] font-black uppercase tracking-widest bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-white/10"
+                                    >
+                                        Manuals <HiOutlineArrowTopRightOnSquare size={12} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-8">
+                                    {/* Total Programs */}
+                                    <div>
+                                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Programs</p>
+                                        <h3 className="text-4xl font-black">
+                                            {initialMetadata.length}
+                                        </h3>
+                                        <div className="mt-2 text-[10px] font-medium opacity-60">
+                                            Handled
+                                        </div>
+                                    </div>
+
+                                    {/* Pending Approvals */}
+                                    <div className="border-l border-slate-800 pl-8">
+                                        <p className="text-orange-300 text-[10px] font-black uppercase tracking-widest mb-1">Pending Approvals</p>
+                                        <h3 className="text-4xl font-black text-orange-200">
+                                            {initialPendingReviews}
+                                        </h3>
+                                        <div className="mt-2 text-[10px] font-medium opacity-80 text-orange-200/70">
+                                            Manager Review
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Sessions List */}

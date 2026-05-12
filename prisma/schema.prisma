@@ -157,6 +157,7 @@ model TrainingSession {
   // Relations
   nominationBatch NominationBatch? @relation(fields: [nominationBatchId], references: [id])
   cohortProgram   CohortProgram? // If this session is part of a cohort
+  emailLogs       EmailLog[]
 
   @@unique([programName, startDate, endDate, trainerName])
   @@index([startDate])
@@ -620,3 +621,25 @@ model LearningPathModule {
   @@unique([learningPathSubjectId, moduleId])
   @@map("learning_path_modules")
 }
+
+// --- EMAIL TRACKING SYSTEM ---
+
+model EmailLog {
+  id             String   @id @default(uuid())
+  recipientEmail String   @map("recipient_email")
+  recipientType  String   // e.g., "Participant", "Manager", "Trainer"
+  emailType      String   // e.g., "BatchInvitation", "FeedbackReminder", "GeneralReminder"
+  subject        String
+  status         String   // "Sent" or "Failed"
+  errorMessage   String?  @db.Text @map("error_message")
+  sessionId      String?  @map("session_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  // Relations
+  session        TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([recipientEmail])
+  @@map("email_logs")
+}
+

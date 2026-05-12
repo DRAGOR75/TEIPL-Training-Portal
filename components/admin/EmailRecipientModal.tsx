@@ -4,11 +4,12 @@ import { getBatchInvitationPreview, sendBatchInvitation } from '@/app/actions/se
 
 interface EmailRecipientModalProps {
     sessionId: string;
+    isReminder?: boolean;
     onClose: () => void;
     onSuccess: () => void;
 }
 
-export default function EmailRecipientModal({ sessionId, onClose, onSuccess }: EmailRecipientModalProps) {
+export default function EmailRecipientModal({ sessionId, isReminder = false, onClose, onSuccess }: EmailRecipientModalProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
 
@@ -32,7 +33,8 @@ export default function EmailRecipientModal({ sessionId, onClose, onSuccess }: E
                 setCcDisplay(result.cc.join(', '));
                 setHtmlContent(result.html || '');
 
-                const defaultSub = result.sessionData ? `Invitation: ${result.sessionData.programName} (${new Date(result.sessionData.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${new Date(result.sessionData.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })})` : '';
+                const baseSubject = result.sessionData ? `Invitation: ${result.sessionData.programName} (${new Date(result.sessionData.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${new Date(result.sessionData.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })})` : '';
+                const defaultSub = isReminder ? `Reminder: ${baseSubject}` : baseSubject;
                 setSubject(defaultSub);
                 setDefaultContent({ html: result.html || '', subject: defaultSub });
 
@@ -73,18 +75,19 @@ export default function EmailRecipientModal({ sessionId, onClose, onSuccess }: E
         const finalHtml = contentRef.current?.innerHTML || htmlContent;
 
         const CHUNK_SIZE = 5;
-        const totalBatches = Math.ceil(toList.length / CHUNK_SIZE);
+        const maxEmails = Math.max(toList.length, ccList.length);
+        const totalBatches = Math.max(1, Math.ceil(maxEmails / CHUNK_SIZE));
 
         setProgress({ current: 0, total: totalBatches });
 
         try {
-            for (let i = 0; i < toList.length; i += CHUNK_SIZE) {
-                const batchTo = toList.slice(i, i + CHUNK_SIZE);
-                const batchCc = i === 0 ? ccList : [];
+            for (let i = 0; i < totalBatches; i++) {
+                const batchTo = toList.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+                const batchCc = ccList.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
 
-                setProgress({ current: i / CHUNK_SIZE + 1, total: totalBatches });
+                setProgress({ current: i + 1, total: totalBatches });
 
-                const result = await sendBatchInvitation(sessionId, batchTo, batchCc, finalHtml, subject);
+                const result = await sendBatchInvitation(sessionId, batchTo, batchCc, finalHtml, subject, isReminder);
 
                 if (!result.success) {
                     setError(`Failed to send to some recipients.`);
@@ -108,7 +111,7 @@ export default function EmailRecipientModal({ sessionId, onClose, onSuccess }: E
                 {/* Header */}
                 <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                     <div className="flex items-center gap-4">
-                        <h3 className="font-bold text-slate-800">Review Invitation</h3>
+                        <h3 className="font-bold text-slate-800">{isReminder ? "Review Reminder" : "Review Invitation"}</h3>
                         <p className="text-[10px] bg-blue-100 text-blue-700 font-black px-2 py-0.5 rounded uppercase tracking-wider">Direct Edit Mode</p>
                     </div>
                     <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-200 transition-colors">

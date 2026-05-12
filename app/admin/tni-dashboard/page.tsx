@@ -3,11 +3,11 @@ import SectionManager from '@/components/admin/SectionManager';
 import ProgramManager from '@/components/admin/ProgramManager';
 import EmployeeManager from '@/components/admin/EmployeeManager';
 import LocationManager from '@/components/admin/LocationManager';
-import { 
-    getCachedAdminSections, 
-    getCachedAdminPrograms, 
-    getCachedAdminEmployees, 
-    getCachedAdminLocations 
+import {
+    getCachedAdminSections,
+    getCachedAdminPrograms,
+    getCachedAdminEmployees,
+    getCachedAdminLocations
 } from '@/lib/cache-master-data';
 import { Metadata } from 'next';
 
@@ -40,7 +40,7 @@ export default async function MasterDataPage() {
 
                 {/* Header */}
                 <div>
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">TNI Dashboard</h1>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">TNI Control Panel</h1>
                     <p className="text-slate-500 mt-2 font-medium">Manage essential system data: Sections, Programs, and Employee records.</p>
                 </div>
 

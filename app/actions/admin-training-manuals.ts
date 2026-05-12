@@ -131,8 +131,8 @@ export async function updateManualModule(id: string, data: { name: string; modul
             where: { id },
             data: {
                 name: data.name,
-                moduleCode: data.moduleCode,
-                pdfUrl: data.pdfUrl
+                moduleCode: data.moduleCode || null,
+                pdfUrl: data.pdfUrl || null
             }
         });
 

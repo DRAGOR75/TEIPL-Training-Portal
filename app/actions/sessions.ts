@@ -5,6 +5,7 @@ import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache'; // A
 import { sendEmail, sendFeedbackRequestEmail, sendManagerRejectionNotification, sendFeedbackReviewRequestEmail, sendManagerSessionApprovalEmail, sendBatchInvitationEmail, generateBatchInvitationHtml } from '@/lib/email';
 import { SessionWithDetails } from '@/types/sessions';
 import { auth } from "@/auth";
+import { after } from 'next/server';
 
 export async function getBatchInvitationPreview(sessionId: string) {
     const session = await auth();
@@ -100,7 +101,7 @@ export async function generateBatchInvitationPreview(
     }
 }
 
-export async function sendBatchInvitation(sessionId: string, customTo?: string[], customCc?: string[], customHtml?: string, customSubject?: string) {
+export async function sendBatchInvitation(sessionId: string, customTo?: string[], customCc?: string[], customHtml?: string, customSubject?: string, isReminder: boolean = false) {
     const session = await auth();
     if (!session?.user?.email) {
         return { success: false, error: "Unauthorized" };
@@ -153,34 +154,41 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
             managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(email => email !== null))] as string[];
         }
 
-        // Send Email
-        const result = await sendBatchInvitationEmail(
-            toEmails,
-            managerEmails,
-            trainingSession.programName,
-            trainingSession.startDate,
-            trainingSession.endDate,
-            trainingSession.startTime || "8:30 am",
-            trainingSession.endTime || "6:00 pm",
-            trainingSession.location || "Training classroom, TRC",
-            trainingSession.trainerName || "Internal/External",
-            participants,
-            customHtml,
-            customSubject
-        );
+        // Update DB immediately so UI is responsive
+        await db.trainingSession.update({
+            where: { id: sessionId },
+            data: { emailsSent: true } // Mark as sent
+        });
+        
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
 
-        if (result.success) {
-            await db.trainingSession.update({
-                where: { id: sessionId },
-                data: { emailsSent: true } // Mark as sent
-            });
-            revalidatePath(`/admin/sessions/${sessionId}/manage`);
-            revalidateTag('sessions-list', 'max');
-            revalidateTag('session-details', 'max');
-            return { success: true };
-        } else {
-            return { success: false, error: result.error || "Failed to send email." };
-        }
+        // Send Email in the background to avoid Vercel timeouts
+        after(async () => {
+            try {
+                await sendBatchInvitationEmail(
+                    toEmails,
+                    managerEmails,
+                    trainingSession.programName,
+                    trainingSession.startDate,
+                    trainingSession.endDate,
+                    trainingSession.startTime || "8:30 am",
+                    trainingSession.endTime || "6:00 pm",
+                    trainingSession.location || "Training classroom, TRC",
+                    trainingSession.trainerName || "Internal/External",
+                    participants,
+                    customHtml,
+                    customSubject,
+                    sessionId,
+                    isReminder
+                );
+            } catch (err) {
+                console.error("Background email send failed:", err);
+            }
+        });
+
+        return { success: true };
 
     } catch (error) {
         console.error("Send Invitation Error:", error);
@@ -340,6 +348,9 @@ export const getSessionById = unstable_cache(
                         },
                         program: true
                     }
+                },
+                emailLogs: {
+                    orderBy: { createdAt: 'desc' }
                 }
             }
         });
