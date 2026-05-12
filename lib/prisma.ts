@@ -21,11 +21,12 @@ function createPrismaClient() {
         max: process.env.NODE_ENV === 'production' ? 5 : 100, // On Vercel (Prod), keep per-lambda pool small
         idleTimeoutMillis: 30000,
         connectionTimeoutMillis: 15000, // Increased to 15s to allow for SSL handshakes in high-latency environments
-        ssl: connectionString.includes('sslmode=disable') 
-            ? false 
-            : (connectionString.includes('sslmode=verify-full') 
-                ? { rejectUnauthorized: true } 
-                : { rejectUnauthorized: false })
+        ssl: (connectionString.includes('sslmode=require') || 
+              connectionString.includes('sslmode=verify-full') || 
+              connectionString.includes('sslmode=verify-ca') ||
+              connectionString.includes('neon.tech')) 
+            ? { rejectUnauthorized: connectionString.includes('sslmode=verify-full') } 
+            : false
     })
     
     pool.on('error', (err) => {
