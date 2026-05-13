@@ -46,8 +46,8 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                         <HiOutlineSquare3Stack3D size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">Departments / Sections</h3>
-                        <p className="text-xs text-slate-500">{sections.length} Active Sections</p>
+                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-800">Departments & Sections</h3>
+                        <p className="text-[10px] text-slate-500 font-medium">{sections.length} Active Records</p>
                     </div>
                 </div>
                 <div className="text-blue-600">

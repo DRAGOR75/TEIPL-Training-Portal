@@ -67,8 +67,8 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         <HiOutlineBookOpen size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">Training Programs</h3>
-                        <p className="text-xs text-slate-500">{programs.length} Active Courses</p>
+                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-800">Training Programs</h3>
+                        <p className="text-[10px] text-slate-500 font-medium">{programs.length} Active Courses</p>
                     </div>
                 </div>
                 <div className="text-blue-600">
@@ -79,7 +79,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
             {isExpanded && (
                 <div className="p-5 pt-0 border-t border-slate-100 animate-in fade-in slide-in-from-top-1">
                     <form ref={formRef} action={handleAdd} className="mt-4 bg-slate-50 p-6 rounded-2xl space-y-4">
-                        <h4 className="text-sm font-bold text-slate-700">Add New Program</h4>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Creation Tool</p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>

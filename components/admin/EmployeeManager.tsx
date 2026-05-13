@@ -136,8 +136,8 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                         <HiOutlineUsers size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">Employee Directory</h3>
-                        <p className="text-xs text-slate-500">{employees.length} Employees Registered</p>
+                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-800">Employee Directory</h3>
+                        <p className="text-[10px] text-slate-500 font-medium">{employees.length} Records Synthesized</p>
                     </div>
                 </div>
                 <div className="text-blue-600">
@@ -153,9 +153,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                         {/* LEFT: Manual Add */}
                         <div className="space-y-4">
-                            <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <HiOutlinePlus size={16} /> Manual Entry
-                            </h4>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Manual Entry</p>
                             <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
                                 <div className="grid grid-cols-2 gap-3">
                                     <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
@@ -196,9 +194,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                         {/* RIGHT: Bulk Upload */}
                         <div className="space-y-4">
-                            <h4 className="text-sm font-bold text-slate-700 flex items-center gap-2">
-                                <HiOutlineArrowUpTray size={16} /> Bulk Upload (CSV)
-                            </h4>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bulk Upload (CSV)</p>
                             <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
                                 {uploading ? (
                                     <div className="text-center w-full max-w-xs">
@@ -264,7 +260,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                     {/* RECENT EMPLOYEES LIST (Limited) */}
                     <div className="mt-8">
-                        <h4 className="text-sm font-bold text-slate-700 mb-3">Recently Added Employees (Last 20)</h4>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Audit Log: Recently Synchronized (Last 20)</p>
                         <div className="overflow-x-auto border border-slate-200 rounded-xl">
                             <table className="w-full text-left text-sm">
                                 <thead className="bg-slate-100 text-slate-500 font-bold uppercase text-xs">

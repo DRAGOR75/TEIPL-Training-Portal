@@ -576,49 +576,54 @@ export async function sendBatchInvitationEmail(
 
   const subject = customSubject || `Invitation: ${programName} from ${dateStr}`;
 
-  let allSuccess = true;
-  let errors: string[] = [];
+  // Send ONE group email to everyone (Participants in TO, Managers in CC)
+  const result = await sendEmail({
+    to: validTo.join(', '),
+    cc: validCc.length > 0 ? validCc.join(', ') : undefined,
+    subject,
+    html
+  });
 
-  // Send to Participants Individually for tracking
+  // Record individual logs for tracking, even though it was one physical email
+  const logPromises = [];
+
+  // Log for Participants
   for (const email of validTo) {
-    const result = await sendTrackedEmail(
-      { to: email, subject, html },
-      {
-        recipientType: 'Participant',
-        emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
-        sessionId
-      }
+    logPromises.push(
+      db.emailLog.create({
+        data: {
+          recipientEmail: email,
+          recipientType: 'Participant',
+          emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
+          subject: subject,
+          status: result.success ? "Sent" : "Failed",
+          errorMessage: result.error || null,
+          sessionId: sessionId || null,
+        }
+      }).catch(err => console.error(`Log failed for ${email}:`, err))
     );
-    if (!result.success) {
-      allSuccess = false;
-      errors.push(`Failed for ${email}: ${result.error}`);
-    }
-    // Rate limit prevention (Gmail API allows ~2.5 msgs/sec)
-    await new Promise(resolve => setTimeout(resolve, 300));
   }
 
-  // Send to Managers (CC list) Individually
+  // Log for Managers
   for (const email of validCc) {
-    const result = await sendTrackedEmail(
-      { cc: email, subject, html },
-      {
-        recipientType: 'Manager',
-        emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
-        sessionId
-      }
+    logPromises.push(
+      db.emailLog.create({
+        data: {
+          recipientEmail: email,
+          recipientType: 'Manager',
+          emailType: isReminder ? 'BatchReminder' : 'BatchInvitation',
+          subject: subject,
+          status: result.success ? "Sent" : "Failed",
+          errorMessage: result.error || null,
+          sessionId: sessionId || null,
+        }
+      }).catch(err => console.error(`Log failed for ${email}:`, err))
     );
-    if (!result.success) {
-      allSuccess = false;
-      errors.push(`Failed for ${email}: ${result.error}`);
-    }
-    // Rate limit prevention
-    await new Promise(resolve => setTimeout(resolve, 300));
   }
 
-  if (allSuccess) {
-    return { success: true };
-  } else {
-    return { success: false, error: errors.join('; ') };
-  }
+  // Wait for all logging to finish in the background
+  await Promise.all(logPromises);
+
+  return result;
 }
 
