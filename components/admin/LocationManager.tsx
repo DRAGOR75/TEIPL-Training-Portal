@@ -44,8 +44,8 @@ export default function LocationManager({ locations }: { locations: Location[] }
                         <HiOutlineMapPin size={20} />
                     </div>
                     <div>
-                        <h3 className="text-lg font-bold text-slate-800">Training Locations</h3>
-                        <p className="text-xs text-slate-500">{locations.length} Registered Locations</p>
+                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-800">Training Venues</h3>
+                        <p className="text-[10px] text-slate-500 font-medium">{locations.length} Active Sites</p>
                     </div>
                 </div>
                 <div className="text-blue-600">

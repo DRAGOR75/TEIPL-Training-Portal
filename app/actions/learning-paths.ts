@@ -68,14 +68,17 @@ export async function deleteLearningPath(id: string) {
 export async function addSubjectToPath(pathId: string, subjectId: number, seq: number) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
+        const id = Number(subjectId);
+        if (isNaN(id)) throw new Error(`Invalid subjectId: ${subjectId}`);
+
         // Create the path-subject link
         const pathSubject = await db.learningPathSubject.create({
-            data: { learningPathId: pathId, subjectId, seq }
+            data: { learningPathId: pathId, subjectId: id, seq }
         });
 
         // Auto-populate: copy all modules from the global subject-module links
         const globalModules = await db.subjectModule.findMany({
-            where: { subjectId },
+            where: { subjectId: id },
             orderBy: { viewSeq: 'asc' },
         });
 
@@ -94,7 +97,7 @@ export async function addSubjectToPath(pathId: string, subjectId: number, seq: n
         revalidateTag('manuals', 'max');
         return { success: true };
     } catch (e: any) {
-        console.error(e);
+        console.error('Error adding subject to path:', e);
         if (e.code === 'P2002') return { error: 'This subject is already in the learning path.' };
         return { error: 'Failed to add subject to path' };
     }

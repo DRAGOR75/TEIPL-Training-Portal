@@ -93,6 +93,14 @@ export const getCachedLearningPaths = async (isAdmin: boolean) => {
                             include: {
                                 subject: {
                                     select: { id: true, name: true, imageUrl: true, keywords: true }
+                                },
+                                modules: {
+                                    orderBy: { seq: 'asc' },
+                                    include: {
+                                        module: {
+                                            select: { id: true, name: true, moduleCode: true, pdfUrl: true }
+                                        }
+                                    }
                                 }
                             }
                         }
