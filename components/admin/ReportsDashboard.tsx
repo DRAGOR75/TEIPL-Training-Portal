@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-    PieChart, Pie, Cell, Sector, Treemap
+    PieChart, Pie, Cell, Sector, Treemap, RadialBarChart, RadialBar
 } from 'recharts';
-import { HiOutlineArrowDownTray, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark } from 'react-icons/hi2';
+import { HiOutlineArrowDownTray, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
 import * as XLSX from 'xlsx';
 import { getFilteredParticipantDepth, getTniReportData } from '@/app/actions/reports';
 
@@ -25,12 +25,32 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [dashboardData, setDashboardData] = useState(data);
     const [isDataLoading, setIsDataLoading] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
 
     // Filters (State)
     const [filters, setFilters] = useState({
         site: 'All',
         dept: 'All'
     });
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        // Silence Recharts "width(-1)" warning which is a known noisy issue in development
+        const originalError = console.error;
+        console.error = (...args: any[]) => {
+            if (typeof args[0] === 'string' && args[0].includes('The width(-1) and height(-1) of chart should be greater than 0')) {
+                return;
+            }
+            originalError(...args);
+        };
+
+        const timer = setTimeout(() => setIsMounted(true), 200);
+        return () => {
+            console.error = originalError;
+            clearTimeout(timer);
+        };
+    }, []);
 
     if (!data) return <div className="p-10 text-center text-slate-500 font-medium">No report data available.</div>;
 
@@ -129,6 +149,25 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
         setSelectedSite(null);
         setDepthData([]);
         setDashboardData(data); // Reset to global data
+        setCurrentPage(1);
+    };
+
+    // Filtered programs based on search
+    const filteredPrograms = dashboardData.topPrograms.filter((p: any) => 
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredPrograms.length / itemsPerPage);
+    const paginatedPrograms = filteredPrograms.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset page on search or site change
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
     };
 
     return (
@@ -212,28 +251,30 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                 <span className="w-2 h-6 bg-blue-600 rounded-full mr-1"></span>
                                 TNI Status Distribution
                             </h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={dashboardData.statusCounts}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={100}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                        >
-                                            {dashboardData.statusCounts.map((entry: any, index: number) => (
-                                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip 
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        />
-                                        <Legend verticalAlign="bottom" height={36}/>
-                                    </PieChart>
-                                </ResponsiveContainer>
+                            <div className="h-[300px] w-full relative">
+                                {isMounted && (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
+                                        <PieChart>
+                                            <Pie
+                                                data={dashboardData.statusCounts}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={100}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                            >
+                                                {dashboardData.statusCounts.map((entry: any, index: number) => (
+                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip 
+                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            />
+                                            <Legend verticalAlign="bottom" height={36}/>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
 
@@ -243,41 +284,43 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                 <span className="w-2 h-6 bg-emerald-600 rounded-full mr-1"></span>
                                 Site Distribution
                             </h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={dashboardData.siteDemand}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={100}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            onClick={(data) => data && handleSiteClick(data.name)}
-                                            className="cursor-pointer outline-none"
-                                        >
-                                            {dashboardData.siteDemand.map((entry: any, index: number) => (
-                                                <Cell 
-                                                    key={`cell-${index}`} 
-                                                    fill={COLORS[index % COLORS.length]} 
-                                                    stroke={selectedSite === entry.name ? '#000' : 'none'}
-                                                    strokeWidth={2}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip 
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        />
-                                        <Legend 
-                                            verticalAlign="bottom" 
-                                            height={36}
-                                            onClick={(data) => data && handleSiteClick(data.value)}
-                                            className="cursor-pointer"
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                            <div className="h-[300px] w-full relative">
+                                {isMounted && (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
+                                        <PieChart>
+                                            <Pie
+                                                data={dashboardData.siteDemand}
+                                                cx="50%"
+                                                cy="50%"
+                                                innerRadius={60}
+                                                outerRadius={100}
+                                                paddingAngle={5}
+                                                dataKey="value"
+                                                nameKey="name"
+                                                onClick={(data) => data && handleSiteClick(data.name)}
+                                                className="cursor-pointer outline-none"
+                                            >
+                                                {dashboardData.siteDemand.map((entry: any, index: number) => (
+                                                    <Cell 
+                                                        key={`cell-${index}`} 
+                                                        fill={COLORS[index % COLORS.length]} 
+                                                        stroke={selectedSite === entry.name ? '#000' : 'none'}
+                                                        strokeWidth={2}
+                                                    />
+                                                ))}
+                                            </Pie>
+                                            <Tooltip 
+                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            />
+                                            <Legend 
+                                                verticalAlign="bottom" 
+                                                height={36}
+                                                onClick={(data) => data && handleSiteClick(data.value)}
+                                                className="cursor-pointer"
+                                            />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                             {selectedSite && (
                                 <div className="mt-4 flex justify-center">
@@ -296,67 +339,112 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                 <>
                     {/* PLANNING VIEW */}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        {/* Demand by Grade */}
+                        {/* Demand by Grade - Horizontal for variety */}
                         <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                             <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
                                 <HiOutlineAcademicCap className="text-indigo-500" />
                                 Demand by Employee Grade
                             </h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart data={dashboardData.gradeDemand}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                        <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} />
-                                        <YAxis axisLine={false} tickLine={false} />
-                                        <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}/>
-                                        <Bar dataKey="value" fill="#6366f1" radius={[10, 10, 0, 0]} />
-                                    </BarChart>
-                                </ResponsiveContainer>
+                            <div className="h-[300px] w-full relative">
+                                {isMounted && (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
+                                        <BarChart layout="vertical" data={dashboardData.gradeDemand} margin={{ left: 40 }}>
+                                            <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} stroke="#f1f5f9" />
+                                            <XAxis type="number" hide />
+                                            <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 700 }} />
+                                            <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}/>
+                                            <Bar dataKey="value" fill="#6366f1" radius={[0, 10, 10, 0]} barSize={20} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                )}
                             </div>
                         </div>
 
-                        {/* Demand by Site (Interactive Pie/Donut) */}
-                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                            <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
-                                <HiOutlineMap className="text-emerald-500" />
-                                Demand by Project Site
+                        {/* Radial Bar Chart: Site Demand Focus */}
+                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-pink-500/5 rounded-full -mr-16 -mt-16 transition-transform group-hover:scale-110"></div>
+                            <h3 className="text-lg font-black text-slate-900 mb-2 flex items-center gap-2 tracking-tight relative z-10">
+                                <HiOutlineMap className="text-pink-500" />
+                                Site Demand Radial Focus
                             </h3>
-                            <div className="h-[300px] w-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={dashboardData.siteDemand}
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={60}
-                                            outerRadius={100}
-                                            paddingAngle={5}
-                                            dataKey="value"
-                                            nameKey="name"
-                                            onClick={(data) => data && handleSiteClick(data.name)}
-                                            className="cursor-pointer outline-none"
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-6 relative z-10">
+                                Click a ring to focus site metrics
+                            </p>
+                            
+                            <div className="h-[320px] w-full relative">
+                                {isMounted && (
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
+                                        <RadialBarChart 
+                                            cx="50%" 
+                                            cy="50%" 
+                                            innerRadius="30%" 
+                                            outerRadius="100%" 
+                                            barSize={15} 
+                                            data={dashboardData.siteDemand.map((s: any, i: number) => ({
+                                                ...s,
+                                                fill: selectedSite === s.name ? COLORS[i % COLORS.length] : `${COLORS[i % COLORS.length]}88`
+                                            }))}
                                         >
-                                            {dashboardData.siteDemand.map((entry: any, index: number) => (
-                                                <Cell 
-                                                    key={`cell-${index}`} 
-                                                    fill={COLORS[index % COLORS.length]} 
-                                                    stroke={selectedSite === entry.name ? '#000' : 'none'}
-                                                    strokeWidth={2}
-                                                />
-                                            ))}
-                                        </Pie>
-                                        <Tooltip 
-                                            contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
-                                        />
-                                        <Legend 
-                                            verticalAlign="bottom" 
-                                            height={36}
-                                            onClick={(data) => data && handleSiteClick(data.value)}
-                                            className="cursor-pointer"
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
+                                            <RadialBar
+                                                label={{ position: 'insideStart', fill: '#fff', fontSize: 10, fontWeight: 800 }}
+                                                background
+                                                dataKey="value"
+                                                cornerRadius={15}
+                                                onClick={(data) => handleSiteClick(data.name)}
+                                                className="cursor-pointer transition-all duration-300"
+                                            />
+                                            <Tooltip 
+                                                cursor={{ fill: 'transparent' }}
+                                                contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                            />
+                                            <Legend 
+                                                iconSize={10} 
+                                                layout="vertical" 
+                                                verticalAlign="middle" 
+                                                align="right"
+                                                onClick={(data) => handleSiteClick(data.value)}
+                                                className="cursor-pointer"
+                                                wrapperStyle={{ fontSize: '10px', fontWeight: 'bold' }}
+                                            />
+                                        </RadialBarChart>
+                                    </ResponsiveContainer>
+                                )}
+                                {/* Center Label for Focused Site */}
+                                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                                    <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                                        {selectedSite ? 'Focused' : 'All Sites'}
+                                    </div>
+                                    <div className="text-xl font-black text-slate-900 leading-none">
+                                        {selectedSite ? dashboardData.siteDemand.find((s:any) => s.name === selectedSite)?.value : dashboardData.summary.totalNominations}
+                                    </div>
+                                    <div className="text-[8px] font-bold text-slate-500 uppercase tracking-tighter mt-1">
+                                        Needs
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* Category-wise Demand Treemap */}
+                    <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
+                        <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
+                            <HiOutlineAcademicCap className="text-purple-500" />
+                            Program Category Demand Density
+                        </h3>
+                        <div className="h-[300px] w-full relative">
+                            {isMounted && (
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
+                                    <Treemap
+                                        data={dashboardData.categoryDemand}
+                                        dataKey="value"
+                                        aspectRatio={4 / 3}
+                                        stroke="#fff"
+                                        fill="#8b5cf6"
+                                    >
+                                        <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}/>
+                                    </Treemap>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
 
@@ -366,8 +454,9 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                             <HiOutlineFunnel className="text-amber-500" />
                             Departmental Demand Breakdown
                         </h3>
-                        <div className="h-[400px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
+                        <div className="h-[400px] w-full relative">
+                            {isMounted && (
+                                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0} debounce={100}>
                                     <BarChart data={dashboardData.deptDemand}>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                         <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 600 }} />
@@ -375,7 +464,8 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                         <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}/>
                                         <Bar dataKey="value" fill="#f59e0b" radius={[10, 10, 0, 0]} />
                                     </BarChart>
-                            </ResponsiveContainer>
+                                </ResponsiveContainer>
+                            )}
                         </div>
                     </div>
                 </>
@@ -398,15 +488,13 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                             type="text"
                             placeholder="Search programs..."
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                             className="block w-full pl-10 pr-3 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all outline-none"
                         />
                     </div>
 
                     <div className="flex-1 overflow-y-auto pr-2 space-y-2">
-                        {dashboardData.topPrograms
-                            .filter((p: any) => p.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                            .map((prog: any) => (
+                        {paginatedPrograms.map((prog: any) => (
                             <button
                                 key={prog.id}
                                 onClick={() => handleProgramClick(prog.id)}
@@ -421,7 +509,33 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                 </div>
                             </button>
                         ))}
+                        {filteredPrograms.length === 0 && (
+                            <div className="text-center text-slate-400 text-xs py-10 italic">No programs found.</div>
+                        )}
                     </div>
+
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                        <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-between">
+                            <button
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                                className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <HiOutlineChevronLeft size={16} className="text-slate-600" />
+                            </button>
+                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                Page {currentPage} of {totalPages}
+                            </span>
+                            <button
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                                className="p-2 rounded-lg hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                                <HiOutlineChevronRight size={16} className="text-slate-600" />
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 {/* Depth: Participant List for Selected Program/Site */}

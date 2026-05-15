@@ -19,7 +19,8 @@ export async function getTniReportData(site?: string) {
             totalEmployees,
             totalUniquePrograms,
             locations,
-            sections
+            sections,
+            categoryDemand
         ] = await Promise.all([
             // 1. Top 15 Programs by Pending nominations
             db.nomination.groupBy({
@@ -29,8 +30,7 @@ export async function getTniReportData(site?: string) {
                     ...(site ? { employee: { location: site } } : {})
                 },
                 _count: { id: true },
-                orderBy: { _count: { id: 'desc' } },
-                take: 15
+                orderBy: { _count: { id: 'desc' } }
             }),
             // 2. Overall Status Breakdown
             db.nomination.groupBy({
@@ -72,7 +72,20 @@ export async function getTniReportData(site?: string) {
             db.employee.count({ where: site ? { location: site } : {} }),
             db.program.count(),
             db.location.findMany({ select: { name: true } }),
-            db.section.findMany({ select: { name: true } })
+            db.section.findMany({ select: { name: true } }),
+            // 7. Category-wise Demand
+            db.program.groupBy({
+                by: ['category'],
+                where: { 
+                    nominations: { 
+                        some: { 
+                            status: 'Pending',
+                            ...(site ? { employee: { location: site } } : {})
+                        } 
+                    }
+                },
+                _count: { id: true }
+            })
         ]);
 
         // Resolve Program Names for Top 15
@@ -101,6 +114,7 @@ export async function getTniReportData(site?: string) {
                 totalNominations: statusCounts.reduce((acc, curr) => acc + curr._count.id, 0),
                 completionRate: (statusCounts.find(s => s.status === 'Completed')?._count.id || 0) / (statusCounts.reduce((acc, curr) => acc + curr._count.id, 0) || 1) * 100
             },
+            categoryDemand: categoryDemand.map(c => ({ name: c.category || 'COMMON', value: c._count.id })),
             filters: {
                 locations: locations.map(l => l.name),
                 departments: sections.map(s => s.name)
