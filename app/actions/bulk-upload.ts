@@ -34,9 +34,9 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
     const existingPrograms = await db.program.findMany({
         select: { id: true, name: true, category: true }
     });
-    
+
     // Create a map for quick lookup (case-insensitive)
-    const programMap = new Map<string, {id: string, category: TrainingCategory}>();
+    const programMap = new Map<string, { id: string, category: TrainingCategory }>();
     existingPrograms.forEach(p => {
         programMap.set(p.name.toLowerCase().trim(), { id: p.id, category: p.category });
     });
@@ -50,7 +50,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 errors.push(`Row missing Employee ID: Skipping`);
                 continue;
             }
-            
+
             const empId = empIdRaw.toString().trim();
             const empName = (row['Emp.Name'] || row.name || '').toString().trim();
 
@@ -100,12 +100,12 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             // 2. Process TNI Nominations
             const tniSource = row['TNI Source'] ? row['TNI Source'].toString().trim() : 'BULK';
-            
+
             // Map Status
             const rawStatus = row['Status-Completed/Cancelled/Open'] ? row['Status-Completed/Cancelled/Open'].toString().trim().toUpperCase() : 'OPEN';
             let tniStatus = 'Pending';
             let managerApprovalStatus = 'BULK_UPLOADED';
-            
+
             if (rawStatus === 'COMPLETED') {
                 tniStatus = 'Completed';
                 managerApprovalStatus = 'Approved';
@@ -117,19 +117,19 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             // Extract programs from 'Separated  TNI (Technical)' or 'Training Need Identified'
             let programsString = row['Separated  TNI (Technical)'] || row['Training Need Identified'] || '';
             programsString = programsString.toString();
-            
+
             if (programsString) {
                 // Split by commas or # (as seen in the sample)
                 const programParts = programsString.split(/,|#/);
-                
+
                 for (let rawProgName of programParts) {
                     // Clean up string like "Additional Programs" or "(1 Days)"
                     let progName = rawProgName.trim();
                     if (!progName || progName.includes('(1 Days)') || progName.includes('(2 Days)')) continue;
-                    
+
                     // Remove leading/trailing artifacts
                     progName = progName.replace(/["']/g, ''); // Remove quotes
-                    
+
                     if (progName.toLowerCase().startsWith('additional programs') || progName.toLowerCase().startsWith('computer skills')) {
                         // The CSV format sometimes prefixes the category like "Additional Programs # 5S...".
                         continue;
@@ -138,7 +138,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     // Check if Program Exists
                     const progKey = progName.toLowerCase();
                     let programId = '';
-                    
+
                     if (programMap.has(progKey)) {
                         programId = programMap.get(progKey)!.id;
                     } else {
@@ -148,7 +148,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         if (tGroup.includes('functional') || programsString.toLowerCase().includes('technical')) {
                             newCategory = 'FUNCTIONAL';
                         }
-                        
+
                         // Create missing program dynamically
                         const newProg = await db.program.create({
                             data: {
@@ -184,7 +184,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     }
                 }
             }
-            
+
             successCount++;
         } catch (e: any) {
             errors.push(`Row Error (${row['Emp.Id'] || 'Unknown ID'}): ${e.message}`);
@@ -196,3 +196,4 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
     revalidateTag('tni-reports', 'max');
     return { success: true, count: successCount, errors };
 }
+

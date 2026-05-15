@@ -83,7 +83,7 @@ export default async function AdminHubPage() {
 
                     {/* Card 5: Training Cohorts - Indigo */}
                     <AdminCard
-                        href="/wip"
+                        href="/admin/cohorts"
                         title="Cohort Control Panel"
                         description="Create structured multi-program learning paths for specialized employee groups."
                         icon={<HiOutlineAcademicCap size={24} />}
@@ -127,7 +127,7 @@ export default async function AdminHubPage() {
 
                 <div className="mt-20 text-center">
                     <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.25em]">
-                        Thriveni Earthmovers &copy; {new Date().getFullYear()}
+                        Thriveni Earthmovers and infra &copy; {new Date().getFullYear()}
                     </p>
                 </div>
             </div>
