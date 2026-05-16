@@ -143,7 +143,7 @@ export async function getProgramParticipantDepth(programId: string) {
                     grade: true,
                     sectionName: true,
                     location: true,
-                    subDepartment: true
+                    projectLocation: true
                 }
             }
         }
@@ -176,7 +176,7 @@ export async function getFilteredParticipantDepth(filters: { programId?: string;
                     grade: true,
                     sectionName: true,
                     location: true,
-                    subDepartment: true
+                    projectLocation: true
                 }
             },
             program: {

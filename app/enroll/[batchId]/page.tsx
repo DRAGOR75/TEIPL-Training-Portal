@@ -60,7 +60,7 @@ export default function JoinPage() {
         grade: 'EXECUTIVE',
         location: '',
         yearsOfExperience: '',
-        subDepartment: '',
+        projectLocation: '',
         managerName: '',
         managerEmail: ''
     });
@@ -279,15 +279,15 @@ export default function JoinPage() {
                                     />
                                 </div>
                             </div>
-                            {/* <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 uppercase">Sub-Dept</label>
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-bold text-slate-700 uppercase">Project Location</label>
                                 <input
-                                    placeholder="e.g. Mines"
-                                    value={regData.subDepartment}
-                                    onChange={e => setRegData({ ...regData, subDepartment: e.target.value })}
-                                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="e.g. Project Site A"
+                                    value={regData.projectLocation}
+                                    onChange={e => setRegData({ ...regData, projectLocation: e.target.value })}
+                                    className="w-full p-4 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium"
                                 />
-                            </div> */}
+                            </div>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">

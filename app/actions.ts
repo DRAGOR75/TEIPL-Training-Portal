@@ -254,14 +254,41 @@ export async function submitManagerReview(formData: FormData) {
                 managerName: true,
                 managerEmail: true,
                 employeeName: true,
+                employeeEmail: true,
+                empId: true,
                 session: {
                     select: {
                         programName: true,
-                        trainerName: true
+                        trainerName: true,
+                        nominationBatchId: true
                     }
                 }
             }
         });
+
+        // 🟢 NEW: Close the TNI/Nomination loop
+        if (agree !== 'No' && updatedEnrollment.session?.nominationBatchId) {
+            let effectiveEmpId = updatedEnrollment.empId;
+            
+            // If empId is missing in enrollment, find it by email
+            if (!effectiveEmpId) {
+                const emp = await db.employee.findUnique({
+                    where: { email: updatedEnrollment.employeeEmail },
+                    select: { id: true }
+                });
+                effectiveEmpId = emp?.id ?? null;
+            }
+
+            if (effectiveEmpId) {
+                await db.nomination.updateMany({
+                    where: {
+                        empId: effectiveEmpId,
+                        batchId: updatedEnrollment.session.nominationBatchId
+                    },
+                    data: { status: 'Completed' }
+                });
+            }
+        }
 
 
         if (agree === 'No') {

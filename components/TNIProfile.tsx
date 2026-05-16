@@ -27,7 +27,7 @@ type Employee = {
     mobile: string | null;
     designation: string | null;
     yearsOfExperience: string | null;
-    subDepartment: string | null;
+    projectLocation: string | null;
     gender: string | null;
     managerName: string | null;
     managerEmail: string | null;
@@ -67,7 +67,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         mobile: employee.mobile || '',
         designation: employee.designation || '',
         yearsOfExperience: employee.yearsOfExperience || '',
-        subDepartment: employee.subDepartment || '',
+        projectLocation: employee.projectLocation || '',
         managerName: employee.managerName || '',
         managerEmail: employee.managerEmail || ''
     });
@@ -93,7 +93,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             mobile: formData.mobile,
             designation: formData.designation,
             yearsOfExperience: formData.yearsOfExperience,
-            subDepartment: formData.subDepartment,
+            projectLocation: formData.projectLocation,
             managerName: formData.managerName,
             managerEmail: formData.managerEmail
         });
@@ -208,17 +208,15 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         />
                     </div>
 
-                    {/* 
                     <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Sub-Department</label>
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Project Location</label>
                         <input
                             className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="e.g. Maintenance"
-                            value={formData.subDepartment}
-                            onChange={e => setFormData({ ...formData, subDepartment: e.target.value })}
+                            placeholder="e.g. Project Site A"
+                            value={formData.projectLocation}
+                            onChange={e => setFormData({ ...formData, projectLocation: e.target.value })}
                         />
-                    </div> 
-                    */}
+                    </div>
 
                     <div className="space-y-1.5">
                         <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Email</label>
@@ -337,7 +335,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
                         <div className="text-sm font-semibold text-slate-900">
                             {formData.sectionName || 'Not Set'}
-                            {/* {formData.subDepartment && <span className="text-slate-400 font-normal"> • {formData.subDepartment}</span>} */}
+                            {formData.projectLocation && <span className="text-slate-400 font-normal"> • {formData.projectLocation}</span>}
                         </div>
                     </div>
                 </div>
