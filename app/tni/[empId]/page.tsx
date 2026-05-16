@@ -18,7 +18,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
         mobile: '',
         designation: '',
         yearsOfExperience: '',
-        subDepartment: '',
+        projectLocation: '',
         managerName: '',
         managerEmail: '',
         nominations: []

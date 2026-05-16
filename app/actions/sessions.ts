@@ -641,7 +641,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
     grade: 'EXECUTIVE' | 'WORKMAN';
     location: string;
     yearsOfExperience: string;
-    subDepartment: string;
+    projectLocation: string;
     managerName: string;
     managerEmail: string;
 }) {
@@ -684,7 +684,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
                 grade: formData.grade,
                 location: formData.location?.substring(0, 100),
                 yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
-                subDepartment: formData.subDepartment?.substring(0, 100),
+                projectLocation: formData.projectLocation?.substring(0, 100),
                 managerName: formData.managerName?.substring(0, 100),
                 managerEmail: formData.managerEmail.substring(0, 100)
             },
@@ -698,7 +698,7 @@ export async function registerAndJoinBatch(batchId: string, formData: {
                 grade: formData.grade,
                 location: formData.location?.substring(0, 100),
                 yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
-                subDepartment: formData.subDepartment?.substring(0, 100),
+                projectLocation: formData.projectLocation?.substring(0, 100),
                 managerName: formData.managerName?.substring(0, 100),
                 managerEmail: formData.managerEmail.substring(0, 100)
             }

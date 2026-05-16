@@ -29,7 +29,7 @@ export default function ParticipantTableClient({ participants, sessionName }: Pa
             'Grade': p.grade || '-',
             'Designation': p.designation || '-',
             'Section / Department': p.sectionName || '-',
-            'Project Site': p.subDepartment || '-',
+            'Project Location': p.projectLocation || '-',
             'Location': p.location || '-',
             'Years of Experience': p.yearsOfExperience || '-',
             'Manager Name': p.managerName || '-',
@@ -113,7 +113,7 @@ export default function ParticipantTableClient({ participants, sessionName }: Pa
                                     </td>
                                     <td className="p-4">
                                         <div className="font-medium text-slate-800">{p.sectionName || '-'}</div>
-                                        <div className="text-xs text-slate-500">{p.subDepartment || '-'} • {p.location || '-'}</div>
+                                        <div className="text-xs text-slate-500">{p.projectLocation || '-'} • {p.location || '-'}</div>
                                     </td>
                                     <td className="p-4 text-slate-600">
                                         {p.yearsOfExperience ? `${p.yearsOfExperience} years` : '-'}

@@ -18,7 +18,7 @@ model Employee {
   mobile            String?
   designation       String?
   yearsOfExperience String?   @map("years_of_experience")
-  subDepartment     String?   @map("sub_department")
+  projectLocation   String?   @map("project_location")
   gender            Gender?
   managerName       String?   @map("manager_name")
   managerEmail      String?   @map("manager_email")

@@ -12,7 +12,7 @@ interface EmployeeImportRow {
     'Grade'?: string;
     'Designation'?: string;
     'Department'?: string;
-    'Project Name'?: string; // Mapped to subDepartment
+    'Project Name'?: string; // Mapped to projectLocation
     'Site'?: string; // Mapped to location
     'Training Group'?: string;
     'Training Need Identified'?: string;
@@ -78,7 +78,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 grade: gradeEnum,
                 designation: row['Designation'] ? row['Designation'].toString().substring(0, 100) : null,
                 sectionName: row['Department'] ? row['Department'].toString().substring(0, 100) : null,
-                subDepartment: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
+                projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
                 location: row['Site'] ? row['Site'].toString().substring(0, 100) : null,
             };
 

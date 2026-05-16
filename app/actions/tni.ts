@@ -57,7 +57,7 @@ export async function updateEmployeeProfile(empId: string, data: {
     mobile?: string;
     designation?: string;
     yearsOfExperience?: string;
-    subDepartment?: string;
+    projectLocation?: string;
     managerName?: string;
     managerEmail?: string;
 }) {
@@ -77,7 +77,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 mobile: data.mobile?.substring(0, 15),
                 designation: data.designation?.substring(0, 100),
                 yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
-                subDepartment: data.subDepartment?.substring(0, 100),
+                projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
             },
@@ -92,7 +92,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 mobile: data.mobile?.substring(0, 15),
                 designation: data.designation?.substring(0, 100),
                 yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
-                subDepartment: data.subDepartment?.substring(0, 100),
+                projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
             }
