@@ -19,7 +19,6 @@ interface BulkEmailPreviewModalProps {
 export default function BulkEmailPreviewModal({ isOpen, onClose, onConfirm, sampleData }: BulkEmailPreviewModalProps) {
     const [subject, setSubject] = useState('LMS: User Id and Password');
     const [htmlContent, setHtmlContent] = useState('');
-    const contentRef = useRef<HTMLDivElement>(null);
 
     const defaultTemplate = `
     <div style="font-family: Georgia, serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; max-width: 600px; margin: 0 auto;">
@@ -42,29 +41,21 @@ export default function BulkEmailPreviewModal({ isOpen, onClose, onConfirm, samp
     useEffect(() => {
         if (isOpen && !htmlContent) {
             setHtmlContent(defaultTemplate);
-            if (contentRef.current) {
-                contentRef.current.innerHTML = defaultTemplate;
-            }
         }
     }, [isOpen]);
 
     const handleReset = () => {
         if (confirm("Reset to default template?")) {
             setHtmlContent(defaultTemplate);
-            if (contentRef.current) {
-                contentRef.current.innerHTML = defaultTemplate;
-            }
         }
     };
 
     const handleConfirm = () => {
-        const finalHtml = contentRef.current?.innerHTML || htmlContent;
-        onConfirm(subject, finalHtml);
+        onConfirm(subject, htmlContent);
     };
 
     const getPreviewHtml = () => {
-        const currentTemplate = contentRef.current?.innerHTML || htmlContent;
-        return currentTemplate
+        return htmlContent
             .replace(/{name}/g, sampleData.name || 'Sample Name')
             .replace(/{empId}/g, sampleData.empId || '000000')
             .replace(/{password}/g, sampleData.password || '******')
@@ -112,13 +103,10 @@ export default function BulkEmailPreviewModal({ isOpen, onClose, onConfirm, samp
                             </div>
                         </div>
 
-                        <div
-                            className="flex-1 p-4 overflow-y-auto outline-none font-mono text-sm bg-slate-50 focus:bg-white transition-colors"
-                            ref={contentRef}
-                            contentEditable={true}
-                            suppressContentEditableWarning={true}
-                            dangerouslySetInnerHTML={{ __html: htmlContent }}
-                            onInput={(e) => setHtmlContent(e.currentTarget.innerHTML)}
+                        <textarea
+                            className="flex-1 p-4 overflow-y-auto outline-none font-mono text-sm bg-slate-50 focus:bg-white transition-colors resize-none"
+                            value={htmlContent}
+                            onChange={(e) => setHtmlContent(e.target.value)}
                         />
                     </div>
 
