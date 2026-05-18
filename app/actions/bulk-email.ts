@@ -1,6 +1,6 @@
 'use server';
 
-import { sendEmail } from '@/lib/email';
+import { sendTrackedEmail } from '@/lib/email';
 
 export interface BulkEmailResult {
     email: string;
@@ -45,10 +45,13 @@ export async function sendBulkUserCredentials(
     const subject = customSubject || 'Your Login Credentials - Thriveni Training Portal';
 
     try {
-        const result = await sendEmail({
+        const result = await sendTrackedEmail({
             to: email,
             subject,
             html,
+        }, {
+            recipientType: 'User',
+            emailType: 'BulkCredentials'
         });
 
         if (result.success) {
