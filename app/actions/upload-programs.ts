@@ -73,10 +73,10 @@ export async function processProgramBatch(records: ProgramRecord[]) {
             }
         }
 
-        revalidateTag('programs');
-        revalidateTag('admin-programs');
-        revalidateTag('sections');
-        revalidateTag('admin-sections');
+        revalidateTag('programs', 'max');
+        revalidateTag('admin-programs', 'max');
+        revalidateTag('sections', 'max');
+        revalidateTag('admin-sections', 'max');
 
         return { success: true };
     } catch (error: any) {
@@ -90,8 +90,8 @@ export async function clearProgramCatalog() {
         // Delete all programs. This will cascade and delete any nominations linked to them.
         const result = await db.program.deleteMany({});
         
-        revalidateTag('programs');
-        revalidateTag('admin-programs');
+        revalidateTag('programs', 'max');
+        revalidateTag('admin-programs', 'max');
         
         return { success: true, count: result.count };
     } catch (error: any) {

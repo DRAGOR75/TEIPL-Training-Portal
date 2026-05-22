@@ -31,7 +31,7 @@ export default async function TrainerEmployeeTNIPage({ searchParams }: { searchP
         orderBy: { name: 'asc' }
     });
 
-    let currentEmployee = null;
+    let currentEmployee: any = null;
     let programs: any = [];
     let sections: any = [];
     let nominations: any = [];
@@ -79,16 +79,16 @@ export default async function TrainerEmployeeTNIPage({ searchParams }: { searchP
                 {empId ? (
                     <div className="space-y-8">
                         {/* 1. Profile Card (Full Width) */}
-                        <TNIProfile key={`profile-${currentEmployee.id}`} employee={currentEmployee as any} sections={sections} />
+                        <TNIProfile key={`profile-${currentEmployee?.id}`} employee={currentEmployee as any} sections={sections} />
 
                         {/* 2. Dashboard lists & inline nomination form (Full Width) */}
-                        {currentEmployee.name ? (
+                        {currentEmployee?.name ? (
                             <TNIDashboardClient
-                                key={`dashboard-${currentEmployee.id}`}
+                                key={`dashboard-${currentEmployee?.id}`}
                                 nominations={nominations}
                                 programs={programs as any}
                                 empId={empId}
-                                trainingHistory={currentEmployee.trainingHistory || []}
+                                trainingHistory={currentEmployee?.trainingHistory || []}
                             />
                         ) : (
                             <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl text-amber-800 text-center">
