@@ -2,16 +2,22 @@
 import { useState, useEffect } from 'react';
 import { updateEmployeeProfile } from '@/app/actions/tni';
 import {
-    HiOutlineUser,
-    HiOutlineEnvelope,
-    HiOutlineMapPin,
-    HiOutlineBriefcase,
-    HiOutlineUserCircle,
     HiOutlinePencil,
     HiOutlineCheck,
     HiOutlineXMark,
-    HiOutlineChevronUp,
-    HiOutlineChevronDown
+    HiOutlineBriefcase,
+    HiOutlineBuildingOffice2,
+    HiOutlineIdentification,
+    HiOutlineEnvelope,
+    HiOutlinePhone,
+    HiOutlineCalendar,
+    HiOutlineShieldCheck,
+    HiOutlineMapPin,
+    HiOutlineMap,
+    HiOutlineUsers,
+    HiOutlineUserCircle,
+    HiOutlineChevronDown,
+    HiOutlineChevronUp
 } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 import SearchableSelect from './ui/SearchableSelect';
@@ -31,6 +37,7 @@ type Employee = {
     gender: string | null;
     managerName: string | null;
     managerEmail: string | null;
+    status: string | null;
 };
 
 type Section = {
@@ -42,6 +49,17 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(!employee.name);
     const [loading, setLoading] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const initials = employee.name
+        ? employee.name
+            .trim()
+            .split(/\s+/)
+            .map(n => n[0])
+            .join('')
+            .slice(0, 2)
+            .toUpperCase()
+        : 'EMP';
 
     // Options for searchable selects
     const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
@@ -69,16 +87,14 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         yearsOfExperience: employee.yearsOfExperience || '',
         projectLocation: employee.projectLocation || '',
         managerName: employee.managerName || '',
-        managerEmail: employee.managerEmail || ''
+        managerEmail: employee.managerEmail || '',
+        status: employee.status || 'Active'
     });
-
-    const [showDetails, setShowDetails] = useState(false);
 
     async function handleSave() {
         setLoading(true);
-        // Basic validation
         if (!formData.name || !formData.email || !formData.sectionName || !formData.grade) {
-            alert('Please fill all required fields');
+            alert('Please fill all required fields (Name, Email, Grade, and Department)');
             setLoading(false);
             return;
         }
@@ -95,58 +111,67 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             yearsOfExperience: formData.yearsOfExperience,
             projectLocation: formData.projectLocation,
             managerName: formData.managerName,
-            managerEmail: formData.managerEmail
+            managerEmail: formData.managerEmail,
+            status: formData.status
         });
 
         if (res.error) {
             alert(res.error);
         } else {
             setIsEditing(false);
-            router.refresh(); // Refresh server data
+            router.refresh();
         }
         setLoading(false);
     }
 
     if (isEditing) {
         return (
-            <div className="bg-white rounded-xl shadow-air-md p-6 border border-slate-100 h-full">
-                <div className="flex justify-between items-center mb-6 border-b border-slate-100 pb-4">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                            <HiOutlinePencil size={20} />
-                        </div>
-                        <h2 className="text-xl font-bold text-slate-900">Edit Profile</h2>
+            <div className="w-full bg-white p-6 border border-slate-200 rounded-3xl shadow-sm transition-all duration-300">
+                <div className="flex justify-between items-center mb-6 border-b border-slate-200 pb-3">
+                    <div>
+                        <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Edit Profile Details</h2>
+                        <p className="text-xs text-slate-500 font-medium">Provide updated information below</p>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wide">Employee ID</label>
-                        <div className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-sm">{employee.id}</div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[60vh] overflow-y-auto pr-1 pb-4" style={{ scrollbarWidth: 'thin' }}>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Employee ID</label>
+                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs">{employee.id}</div>
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Full Name</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="Your Full Name"
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Full Name"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Mobile Number</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="+91..."
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Email Address"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                        <input
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Mobile"
                             value={formData.mobile}
                             onChange={e => setFormData({ ...formData, mobile: e.target.value })}
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Gender</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
                         <SearchableSelect
                             options={[
                                 { label: 'Male', value: 'MALE' },
@@ -156,37 +181,36 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.gender}
                             onChange={(val) => setFormData({ ...formData, gender: val })}
                             placeholder="Select Gender"
+                            className="text-xs"
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Designation</label>
-                        <div className="relative">
-                            <SearchableSelect
-                                options={designationOptions}
-                                value={formData.designation}
-                                onChange={(val) => setFormData({ ...formData, designation: typeof val === 'string' ? val : String(val) })}
-                                placeholder="Select Role"
-                                searchPlaceholder="Search..."
-                                className="w-full"
-                            />
-                        </div>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                        <SearchableSelect
+                            options={designationOptions}
+                            value={formData.designation}
+                            onChange={(val) => setFormData({ ...formData, designation: typeof val === 'string' ? val : String(val) })}
+                            placeholder="Select Designation"
+                            searchPlaceholder="Search Designations..."
+                            className="w-full text-xs font-medium"
+                        />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Years of Exp.</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Years of Exp.</label>
                         <input
                             type="text"
                             inputMode="numeric"
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="e.g. 5"
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Years of Experience"
                             value={formData.yearsOfExperience}
                             onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value.replace(/[^0-9]/g, '') })}
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Grade / Level</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade / Level *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'EXECUTIVE', value: 'EXECUTIVE' },
@@ -195,217 +219,257 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.grade}
                             onChange={(val) => setFormData({ ...formData, grade: val })}
                             placeholder="Select Grade"
+                            className="text-xs"
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Department</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department *</label>
                         <SearchableSelect
                             options={sections.map(sec => ({ label: sec.name, value: sec.name }))}
                             value={formData.sectionName}
                             onChange={(val) => setFormData({ ...formData, sectionName: val })}
-                            placeholder="Select Section"
+                            placeholder="Select Department"
+                            className="text-xs"
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Project Location</label>
-                        <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="e.g. Project Site A"
-                            value={formData.projectLocation}
-                            onChange={e => setFormData({ ...formData, projectLocation: e.target.value })}
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employment Status</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'Active', value: 'Active' },
+                                { label: 'Inactive', value: 'Inactive' }
+                            ]}
+                            value={formData.status}
+                            onChange={(val) => setFormData({ ...formData, status: val })}
+                            placeholder="Select Status"
+                            className="text-xs"
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Email</label>
-                        <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
-                            placeholder="Your Email"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Base Office Location</label>
+                        <SearchableSelect
+                            options={locationOptions}
+                            value={formData.location}
+                            onChange={(val) => setFormData({ ...formData, location: typeof val === 'string' ? val : String(val) })}
+                            placeholder="Select Location"
+                            searchPlaceholder="Search location..."
+                            className="w-full text-xs"
                         />
                     </div>
 
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Location</label>
-                        <div className="relative">
-                            <SearchableSelect
-                                options={locationOptions}
-                                value={formData.location}
-                                onChange={(val) => setFormData({ ...formData, location: typeof val === 'string' ? val : String(val) })}
-                                placeholder="Select Site"
-                                searchPlaceholder="Search locations..."
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Name</label>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerName}
-                            placeholder="Your Manager Name"
+                            placeholder="Manager Name"
                             onChange={e => setFormData({ ...formData, managerName: e.target.value })}
                         />
                     </div>
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wide">Manager Email</label>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
                         <input
-                            className="w-full text-sm p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all placeholder-slate-400 text-slate-900 font-medium"
+                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerEmail}
-                            placeholder="Your Manager Email"
+                            placeholder="Manager Email"
                             onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
                         />
                     </div>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-slate-100 flex justify-center gap-3  bg-white z-10">
+                <div className="mt-5 pt-3 border-t border-slate-200 flex justify-end gap-2">
                     <button
                         onClick={() => setIsEditing(false)}
-                        className="flex items-center gap-2 text-slate-500 text-sm font-medium hover:text-slate-800 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="flex items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
                     >
-                        <HiOutlineXMark size={16} /> Cancel
+                        <HiOutlineXMark size={14} /> Cancel
                     </button>
                     <button
                         onClick={handleSave}
                         disabled={loading}
-                        className="flex items-center gap-2 bg-slate-900 text-white text-sm font-medium px-6 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 transition-all shadow-sm"
+                        className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200"
                     >
-                        <HiOutlineCheck size={16} /> {loading ? 'Saving...' : 'Save Changes'}
+                        <HiOutlineCheck size={14} /> {loading ? 'Saving...' : 'Save Profile'}
                     </button>
                 </div>
             </div >
         );
     }
 
-
     return (
-        <div className="bg-white rounded-xl shadow-air border border-slate-100 h-full overflow-hidden hover:shadow-air-md transition-shadow duration-300 flex flex-col">
-            <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-start bg-gradient-to-tr from-slate-50 to-white">
-                <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 md:w-16 md:h-16 rounded-full bg-slate-100 flex items-center justify-center border-2 border-white shadow-sm text-slate-400">
-                        <HiOutlineUserCircle size={32} className="md:hidden" strokeWidth={1.5} />
-                        <HiOutlineUserCircle size={40} className="hidden md:block" strokeWidth={1.5} />
-                    </div>
-                    <div>
-                        <h2 className="text-lg md:text-xl font-bold text-slate-900">{employee.name || 'Set Full Name'}</h2>
-                        <div className="flex flex-col gap-1 mt-1">
-                            <p className="text-sm text-slate-500 font-medium flex items-center gap-1.5">
-                                <span className="bg-slate-100 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-slate-600 font-bold border border-slate-200">
-                                    {employee.id}
-                                </span>
-                                {employee.grade && (
-                                    <span className="bg-blue-50 px-2 py-0.5 rounded text-xs uppercase tracking-wide text-blue-700 font-bold border border-blue-100">
-                                        {employee.grade}
-                                    </span>
-                                )}
-                            </p>
-                            {employee.designation && (
-                                <p className="text-xs font-semibold text-slate-600">
-                                    {employee.designation}
-                                </p>
-                            )}
-                        </div>
+        <div className="w-full bg-white p-6 border border-slate-200 rounded-3xl shadow-sm flex flex-col gap-5">
+            {/* Header Row */}
+            <div
+                className="flex justify-between items-center border-b border-slate-200 pb-3 cursor-pointer group"
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
+                <div className="flex items-center gap-2">
+                    <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase flex items-center gap-2 group-hover:text-blue-600 transition-colors">
+                        <HiOutlineIdentification size={20} className="text-thriveni-blue shrink-0" />
+                        Employee Profile
+                    </h2>
+                    <div className="text-slate-400 group-hover:text-blue-600 transition-colors ml-2">
+                        {isExpanded ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
                     </div>
                 </div>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                        <HiOutlinePencil size={18} />
-                    </button>
-                    <button
-                        onClick={() => setShowDetails(!showDetails)}
-                        className="md:hidden p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                    >
-                        {showDetails ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
-                    </button>
-                </div>
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                    }}
+                    className="flex items-center gap-1.5 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 transition text-xs cursor-pointer shadow-sm shadow-slate-100"
+                >
+                    <HiOutlinePencil size={12} className="text-slate-500" />
+                    <span>Edit Profile</span>
+                </button>
             </div>
 
-            <div className={`p-4 md:p-6 space-y-3 md:space-y-5 ${showDetails ? 'block' : 'hidden md:block'}`}>
-
-                <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-blue-500 transition-colors"><HiOutlineBriefcase size={18} /></div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Department</label>
-                        <div className="text-sm font-semibold text-slate-900">
-                            {formData.sectionName || 'Not Set'}
-                            {formData.projectLocation && <span className="text-slate-400 font-normal"> • {formData.projectLocation}</span>}
+            {isExpanded && (
+                <>
+                    {/* Beautiful Profile Summary Card */}
+                    <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5 bg-slate-50/50 p-5 rounded-2xl border border-slate-100">
+                        {/* Initials Avatar */}
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 font-black rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-sm border border-blue-100">
+                            {initials}
                         </div>
-                    </div>
-                </div>
 
-                <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-amber-500 transition-colors"><HiOutlineEnvelope size={18} /></div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Email</label>
-                        <div className="text-sm font-semibold text-slate-900">{formData.email}</div>
-                    </div>
-                </div>
-
-                <div className="flex items-start gap-3 group">
-                    <div className="mt-0.5 text-slate-400 group-hover:text-emerald-500 transition-colors"><HiOutlineMapPin size={18} /></div>
-                    <div>
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Location</label>
-                        <div className="text-sm font-semibold text-slate-900">{formData.location || 'Not Set'}</div>
-                    </div>
-                </div>
-
-                {formData.gender && (
-                    <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><HiOutlineUser size={18} /></div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Gender</label>
-                            <div className="text-sm font-semibold text-slate-900">
-                                {formData.gender ? formData.gender.charAt(0) + formData.gender.slice(1).toLowerCase() : 'Not Set'}
+                        {/* Name & Primary organizational info */}
+                        <div className="flex-1 text-center sm:text-left min-w-0">
+                            <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight block truncate">
+                                {employee.name || 'Not Set'}
+                            </h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mt-1.5 text-xs text-slate-500 font-medium">
+                                <span className="flex items-center justify-center sm:justify-start gap-1 text-blue-600 font-bold">
+                                    <HiOutlineBriefcase className="shrink-0" size={14} />
+                                    {employee.designation || 'Designation Not Set'}
+                                </span>
+                                <span className="hidden sm:inline text-slate-300">•</span>
+                                <span className="flex items-center justify-center sm:justify-start gap-1">
+                                    <HiOutlineBuildingOffice2 className="shrink-0" size={14} />
+                                    {employee.sectionName || 'Department Not Set'}
+                                </span>
                             </div>
                         </div>
                     </div>
-                )}
 
-                {formData.mobile && (
-                    <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-teal-500 transition-colors"><HiOutlineUser size={18} /></div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Mobile</label>
-                            <div className="text-sm font-semibold text-slate-900">{formData.mobile}</div>
+                    {/* Detailed Profile Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Employee ID */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineIdentification className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employee ID</span>
+                                <span className="text-xs font-bold text-slate-900 font-mono block truncate" title={employee.id}>{employee.id}</span>
+                            </div>
+                        </div>
+
+                        {/* Email Address */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineEnvelope className="text-emerald-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.email}>{employee.email}</span>
+                            </div>
+                        </div>
+
+                        {/* Mobile Number */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-emerald-600 rounded-xl shrink-0">
+                                <HiOutlinePhone className="text-amber-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mobile Number</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.mobile || 'Not Set'}>{employee.mobile || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Total Experience */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineCalendar className="text-red-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Experience</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.yearsOfExperience ? `${employee.yearsOfExperience} Years` : 'Not Set'}>
+                                    {employee.yearsOfExperience ? `${employee.yearsOfExperience} Years` : 'Not Set'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Grade / Level */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineShieldCheck className="text-yellow-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Grade / Level</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.grade || 'Not Set'}>{employee.grade || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Base Office Location */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineMapPin className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employee Region</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.location || 'Not Set'}>{employee.location || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className={`p-2 rounded-xl shrink-0 ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                <HiOutlineCheck size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employment Status</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.status || 'Active'}>
+                                    {employee.status || 'Active'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Gender */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers className="text-cyan-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}>
+                                    {employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Reporting Manager */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUserCircle className="text-green-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Reporting Manager</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.managerName ? `${employee.managerName} ${employee.managerEmail ? `(${employee.managerEmail})` : ''}` : 'Not Set'}>
+                                    {employee.managerName || 'Not Set'}
+                                </span>
+                                {employee.managerEmail && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerEmail}>
+                                        {employee.managerEmail}
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </div>
-                )}
-
-                {/* Experience */}
-                {formData.yearsOfExperience && (
-                    <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-orange-500 transition-colors"><HiOutlineBriefcase size={18} /></div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Experience</label>
-                            <div className="text-sm font-semibold text-slate-900">{formData.yearsOfExperience}</div>
-                        </div>
-                    </div>
-                )}
-
-                <div className="pt-4 border-t border-slate-50">
-                    <div className="flex items-start gap-3 group">
-                        <div className="mt-0.5 text-slate-400 group-hover:text-purple-500 transition-colors"><HiOutlineUser size={18} /></div>
-                        <div>
-                            <label className="text-xs font-bold text-slate-400 uppercase tracking-wide block mb-0.5">Manager Details</label>
-                            <div className="text-sm font-semibold text-slate-900">{formData.managerName || 'Not Set'}</div>
-                            <div className="text-xs text-slate-500">{formData.managerEmail || ''}</div>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            {!showDetails && (
-                <div onClick={() => setShowDetails(true)} className="md:hidden p-3 bg-slate-50 text-center text-xs font-bold text-slate-500 uppercase tracking-wide border-t border-slate-100 cursor-pointer hover:bg-slate-100 transition-colors">
-                    View More Details
-                </div>
+                </>
             )}
         </div>
     );
