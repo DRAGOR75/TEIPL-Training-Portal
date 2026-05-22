@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { PrismaClient, TrainingCategory, Grade } from '@prisma/client';
 import { db as prisma } from '../lib/prisma';
 
@@ -302,7 +303,7 @@ function parseData() {
              finalSection = '';
         }
         
-        programs.push({ name: name.trim(), category, section: finalSection });
+        programs.push({ code: code.trim(), name: name.trim(), category, section: finalSection });
     }
     return programs;
 }
@@ -311,7 +312,11 @@ async function main() {
     console.log('🚀 Starting deep seed process...');
     const PROGRAM_DATA = parseData();
 
-    // 1. Sections
+    // 1. Clear Existing Programs (Clean Slate for new IDs)
+    console.log('🧹 Clearing existing programs to ensure custom codes are used as IDs...');
+    await prisma.program.deleteMany({});
+
+    // 2. Sections
     const uniqueSectionNames = Array.from(new Set(PROGRAM_DATA.map(p => p.section).filter(Boolean)));
     const sectionMap = new Map<string, string>();
 
@@ -325,8 +330,8 @@ async function main() {
         sectionMap.set(name, sec.id);
     }
 
-    // 2. Programs
-    console.log(`📝 Ensuring ${PROGRAM_DATA.length} programs...`);
+    // 3. Programs
+    console.log(`📝 Ensuring ${PROGRAM_DATA.length} programs with custom codes...`);
     for (const p of PROGRAM_DATA) {
         const sectionData = p.section ? { connect: [{ id: sectionMap.get(p.section) }] } : undefined;
         
@@ -337,6 +342,7 @@ async function main() {
                 sections: p.section ? { set: [{ id: sectionMap.get(p.section) }] } : { set: [] }
             },
             create: {
+                id: p.code,
                 name: p.name,
                 category: p.category as TrainingCategory,
                 targetGrades: [Grade.EXECUTIVE, Grade.WORKMAN],
