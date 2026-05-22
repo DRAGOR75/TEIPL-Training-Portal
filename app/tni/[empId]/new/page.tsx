@@ -65,54 +65,54 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
 
                             {/* Program Selection - Broken into Categories */}
 
-                            {/* 1. FOUNDATIONAL */}
+                            {/* 1. SAFETY_PROGRAMS */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Foundational Programs
                                 </label>
                                 <TNIProgramSelect 
-                                    name="programId_FOUNDATIONAL"
+                                    name="programId_SAFETY_PROGRAMS"
                                     programs={programs}
-                                    category="FOUNDATIONAL"
+                                    category="SAFETY_PROGRAMS"
                                     placeholder="-- Select Foundational Program --"
                                 />
                             </div>
 
-                            {/* 2. FUNCTIONAL */}
+                            {/* 2. HEMM_PROGRAMS */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Functional Programs
                                 </label>
                                 <TNIProgramSelect 
-                                    name="programId_FUNCTIONAL"
+                                    name="programId_HEMM_PROGRAMS"
                                     programs={programs}
-                                    category="FUNCTIONAL"
+                                    category="HEMM_PROGRAMS"
                                     placeholder="-- Select Functional Program --"
                                 />
                             </div>
 
-                            {/* 3. BEHAVIOURAL */}
+                            {/* 3. BEHAVIOURAL_PROGRAMS */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Behavioural Programs
                                 </label>
                                 <TNIProgramSelect 
-                                    name="programId_BEHAVIOURAL"
+                                    name="programId_BEHAVIOURAL_PROGRAMS"
                                     programs={programs}
-                                    category="BEHAVIOURAL"
+                                    category="BEHAVIOURAL_PROGRAMS"
                                     placeholder="-- Select Behavioural Program --"
                                 />
                             </div>
 
-                            {/* 4. COMMON */}
+                            {/* 4. OTHER_PROGRAMS */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-bold text-slate-900 uppercase tracking-wide">
                                     Common Programs
                                 </label>
                                 <TNIProgramSelect 
-                                    name="programId_COMMON"
+                                    name="programId_OTHER_PROGRAMS"
                                     programs={programs}
-                                    category="COMMON"
+                                    category="OTHER_PROGRAMS"
                                     placeholder="-- Select Common Program --"
                                 />
                             </div>

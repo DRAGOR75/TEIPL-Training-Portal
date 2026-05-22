@@ -27,6 +27,9 @@ export const getEmployeeProfile = async (empId: string) => {
                     nominations: {
                         where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
                         include: { program: true }
+                    },
+                    trainingHistory: {
+                        orderBy: { startDate: 'desc' }
                     }
                 }
             });
@@ -60,6 +63,7 @@ export async function updateEmployeeProfile(empId: string, data: {
     projectLocation?: string;
     managerName?: string;
     managerEmail?: string;
+    status?: string;
 }) {
     try {
         const updated = await db.employee.upsert({
@@ -80,6 +84,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
+                status: data.status,
             },
             create: {
                 id: empId.substring(0, 50),
@@ -95,6 +100,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
+                status: data.status || 'Active',
             }
         });
 
@@ -122,15 +128,15 @@ export const getAvailablePrograms = async (grade?: Grade, sectionName?: string) 
             if (s) {
                 where.AND.push({
                     OR: [
-                        { category: { not: 'FUNCTIONAL' } },
+                        { category: { not: 'HEMM_PROGRAMS' } },
                         {
-                            category: 'FUNCTIONAL',
+                            category: 'HEMM_PROGRAMS',
                             sections: { some: { name: s } }
                         }
                     ]
                 });
             } else {
-                where.AND.push({ category: { not: 'FUNCTIONAL' } });
+                where.AND.push({ category: { not: 'HEMM_PROGRAMS' } });
             }
 
             return await db.program.findMany({
@@ -175,21 +181,25 @@ import { sendTNIApprovalEmail } from '@/lib/email';
 export async function submitTNINomination(formData: FormData) {
     const empId = formData.get('empId') as string;
     const justification = formData.get('justification') as string;
+    const bypassEmail = formData.get('bypassEmail') === 'on';
 
     // Collect all selected program IDs
     const programIds: string[] = [];
 
-    const p1 = formData.get('programId_FOUNDATIONAL') as string;
+    const p1 = formData.get('programId_SAFETY_PROGRAMS') as string;
     if (p1) programIds.push(p1);
 
-    const p2 = formData.get('programId_FUNCTIONAL') as string;
+    const p2 = formData.get('programId_HEMM_PROGRAMS') as string;
     if (p2) programIds.push(p2);
 
-    const p3 = formData.get('programId_BEHAVIOURAL') as string;
+    const p3 = formData.get('programId_BEHAVIOURAL_PROGRAMS') as string;
     if (p3) programIds.push(p3);
 
-    const p4 = formData.get('programId_COMMON') as string;
+    const p4 = formData.get('programId_OTHER_PROGRAMS') as string;
     if (p4) programIds.push(p4);
+
+    const p5 = formData.get('programId_OPERATOR_PROGRAMS') as string;
+    if (p5) programIds.push(p5);
 
     if (!empId || empId.length > 50 || programIds.length === 0) {
         throw new Error("Employee ID (max 50) and at least one Program are required");
@@ -216,32 +226,33 @@ export async function submitTNINomination(formData: FormData) {
             select: { name: true, managerEmail: true, managerName: true }
         });
 
-        if (employee && employee.managerEmail) {
-            // 2. Fetch Program Names for the email
-            const programs = await db.program.findMany({
-                where: { id: { in: programIds } },
-                select: { name: true }
-            });
-            const programNames = programs.map(p => p.name);
+        if (!bypassEmail) {
+            if (employee && employee.managerEmail) {
+                // 2. Fetch Program Names for the email
+                const programs = await db.program.findMany({
+                    where: { id: { in: programIds } },
+                    select: { name: true }
+                });
+                const programNames = programs.map(p => p.name);
 
-            // 3. Send the single consolidated email in the BACKGROUND
-            // Using 'after' ensures the user is redirected immediately while the email sends in the background.
-            after(async () => {
-                try {
-                    await sendTNIApprovalEmail(
-                        employee.managerEmail!,
-                        employee.managerName || 'Manager',
-                        employee.name,
-                        programNames,
-                        safeJustification || 'No justification provided',
-                        empId
-                    );
-                } catch (emailError) {
-                    console.error("Background Email Error:", emailError);
-                }
-            });
-        } else {
-            console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
+                // 3. Send the single consolidated email in the BACKGROUND
+                after(async () => {
+                    try {
+                        await sendTNIApprovalEmail(
+                            employee.managerEmail!,
+                            employee.managerName || 'Manager',
+                            employee.name,
+                            programNames,
+                            safeJustification || 'No justification provided',
+                            empId
+                        );
+                    } catch (emailError) {
+                        console.error("Background Email Error:", emailError);
+                    }
+                });
+            } else {
+                console.warn(`Manager email not found for employee ${empId}, skipping email notification.`);
+            }
         }
 
         revalidateTag('employee-profile', 'max');

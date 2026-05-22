@@ -142,11 +142,12 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     if (programMap.has(progKey)) {
                         programId = programMap.get(progKey)!.id;
                     } else {
-                        // Determine category (default to COMMON or FUNCTIONAL based on CSV)
-                        let newCategory: TrainingCategory = 'COMMON';
-                        const tGroup = row['Training Group'] ? row['Training Group'].toString().toLowerCase() : '';
-                        if (tGroup.includes('functional') || programsString.toLowerCase().includes('technical')) {
-                            newCategory = 'FUNCTIONAL';
+                        // Determine category (default to OTHER_PROGRAMS or HEMM_PROGRAMS based on CSV)
+                        let newCategory: TrainingCategory = 'OTHER_PROGRAMS';
+                        const programCategory = row['Training Group'] ? row['Training Group'].toString() : '';
+                        
+                        if (programCategory.toUpperCase().includes('HEMM') || programCategory.toUpperCase().includes('FUNCTIONAL')) {
+                            newCategory = 'HEMM_PROGRAMS';
                         }
 
                         // Create missing program dynamically

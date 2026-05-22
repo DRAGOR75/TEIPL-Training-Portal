@@ -64,7 +64,17 @@ export default async function TrainerHubPage() {
                         color="blue"
                     />
 
-                    {/* Card 3: Looker Studio - Sky (External) */}
+                    {/* Card 3: Employee TNI - Amber/Orange */}
+                    <TrainerCard
+                        href="/trainer/employee-tni"
+                        title="Employee TNI"
+                        description="Manage training needs and update employee profiles instantly."
+                        icon={<HiOutlineUsers size={28} />}
+                        tag="Management"
+                        color="amber"
+                    />
+
+                    {/* Card 4: Looker Studio - Sky (External) */}
                     <TrainerCard
                         href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd"
                         title="Looker Reports"
@@ -93,13 +103,14 @@ function TrainerCard({ href, title, description, icon, tag, color, isExternal }:
     description: string;
     icon: React.ReactNode;
     tag: string;
-    color: 'emerald' | 'blue' | 'sky';
+    color: 'emerald' | 'blue' | 'sky' | 'amber';
     isExternal?: boolean;
 }) {
     const colorStyles = {
         emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:border-emerald-500 hover:shadow-emerald-900/5',
         blue: 'bg-blue-50 border-blue-100 text-blue-600 hover:border-blue-500 hover:shadow-blue-900/5',
         sky: 'bg-sky-50 border-sky-100 text-sky-600 hover:border-sky-500 hover:shadow-sky-900/5',
+        amber: 'bg-amber-50 border-amber-100 text-amber-600 hover:border-amber-500 hover:shadow-amber-900/5',
     };
 
     const linkProps = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};

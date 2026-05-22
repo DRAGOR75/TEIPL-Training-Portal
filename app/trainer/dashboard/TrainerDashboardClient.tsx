@@ -205,10 +205,18 @@ export default function TrainerDashboardClient({
                 {/* LEFT COLUMN */}
                 <div className="w-full lg:w-1/3 space-y-8">
                     {/* Calendar */}
-                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <HiOutlineCalendar className="text-blue-700" size={20} />
-                            <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
+                    <div className="bg-white rounded-3xl shadow-sm border border-slate-200 p-4 md:p-6 mb-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-2">
+                                <HiOutlineCalendar className="text-blue-700" size={20} />
+                                <h2 className="text-lg font-bold text-slate-900">Training Schedule</h2>
+                            </div>
+                            <button
+                                onClick={() => router.push('/trainer/employee-tni')}
+                                className="text-[10px] font-black uppercase tracking-widest bg-amber-50 hover:bg-amber-100 text-amber-700 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1 border border-amber-200"
+                            >
+                                Employee TNI <HiOutlineArrowTopRightOnSquare size={12} />
+                            </button>
                         </div>
                         <div className="calendar-wrapper">
                             <Calendar

@@ -1,22 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { submitTNINomination } from '@/app/actions/tni'; // We'll keep using the same server action
-import {
-    HiOutlinePlusCircle,
-    HiOutlineQueueList,
-    HiOutlineXMark,
-    HiOutlinePaperAirplane,
-    HiOutlineBookOpen,
-    HiOutlineBriefcase,
-    HiOutlineUsers,
-    HiOutlineGlobeAlt,
-    HiOutlineDocumentText,
-    HiOutlineCheckCircle,
-    HiOutlineExclamationCircle,
-    HiOutlineClock
-} from 'react-icons/hi2';
+import { useState, useTransition } from 'react';
+import { submitTNINomination } from '@/app/actions/tni';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
+import SearchableSelect from './ui/SearchableSelect';
+import { HiOutlinePlus, HiOutlineXMark, HiOutlineClipboardDocumentList, HiOutlineAcademicCap, HiOutlineCheckCircle, HiOutlineClock, HiChevronDown, HiChevronUp } from 'react-icons/hi2';
 
 type Program = {
     id: string;
@@ -24,316 +12,450 @@ type Program = {
     category: string;
 };
 
-type Nomination = {
-    id: string;
-    program?: { name: string; category: string };
-    status: string;
-    createdAt: Date;
+type TNIDashboardClientProps = {
+    nominations: any[];
+    programs: Program[];
+    empId: string;
+    trainingHistory?: any[];
 };
 
 export default function TNIDashboardClient({
     nominations,
     programs,
-    empId
-}: {
-    nominations: any[];
-    programs: Program[];
-    empId: string;
-}) {
-    const [view, setView] = useState<'list' | 'create'>('list');
+    empId,
+    trainingHistory = []
+}: TNIDashboardClientProps) {
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(true);
+    const [isReviewedOpen, setIsReviewedOpen] = useState(true);
+    const [isPendingOpen, setIsPendingOpen] = useState(true);
+    const [isPending, startTransition] = useTransition();
 
-    // Sort nominations: Completed -> Approved/Batched -> Pending -> Rejected
-    const sortedNominations = [...nominations].sort((a, b) => {
-        const priority: Record<string, number> = {
-            'Completed': 1,
-            'Approved': 2,
-            'Batched': 2,
-            'Pending': 3,
-            'Rejected': 4
-        };
-        return (priority[a.status] || 99) - (priority[b.status] || 99);
+    // Form states
+    const [formValues, setFormValues] = useState({
+        SAFETY_PROGRAMS: '',
+        HEMM_PROGRAMS: '',
+        BEHAVIOURAL_PROGRAMS: '',
+        OTHER_PROGRAMS: '',
+        OPERATOR_PROGRAMS: '',
+        justification: ''
     });
 
-    const getStatusStyles = (nom: any) => {
+    // Split nominations
+    const reviewedNominations = nominations
+        .filter(nom =>
+            nom.managerApprovalStatus === 'Approved' ||
+            nom.managerApprovalStatus === 'Rejected' ||
+            nom.status === 'Completed' ||
+            nom.status === 'Batched'
+        )
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    const pendingNominations = nominations
+        .filter(nom =>
+            nom.managerApprovalStatus === 'Pending' ||
+            nom.status === 'Pending'
+        )
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+    // Helper status styling (clean borders, no emojis)
+    const getStatusText = (nom: any) => {
         if (nom.status === 'Approved' || (nom.status === 'Batched' && nom.managerApprovalStatus === 'Approved')) {
-            return {
-                bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                icon: <HiOutlineCheckCircle size={12} />,
-                label: nom.status === 'Batched' ? 'Scheduled (Approved)' : 'Approved'
-            };
+            return nom.status === 'Batched' ? 'Scheduled (Approved)' : 'Approved';
         }
         if (nom.status === 'Rejected' || nom.managerApprovalStatus === 'Rejected') {
-            return {
-                bg: 'bg-red-50 text-red-700 border-red-200',
-                icon: <HiOutlineExclamationCircle size={12} />,
-                label: 'Rejected'
-            };
+            return 'Rejected';
         }
         if (nom.status === 'Batched') {
-            return {
-                bg: 'bg-blue-50 text-blue-700 border-blue-200',
-                icon: <HiOutlineClock size={12} />,
-                label: 'Scheduled (Waitlist)'
-            };
+            return 'Scheduled (Waitlist)';
         }
         if (nom.status === 'Completed') {
-            return {
-                bg: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-                icon: <HiOutlineCheckCircle size={12} />,
-                label: 'Completed'
-            };
+            return 'Completed';
         }
-        return {
-            bg: 'bg-amber-50 text-amber-700 border-amber-200',
-            icon: <HiOutlineClock size={12} />,
-            label: 'Pending'
-        };
+        return 'Pending';
     };
 
-    if (view === 'create') {
-        return (
-            <div className="bg-white rounded-xl shadow-air-md border border-slate-100 overflow-hidden transition-all duration-300">
-                <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-                    <div className="flex items-center gap-2">
-                        <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                            <HiOutlinePlusCircle size={20} />
-                        </div>
-                        <h2 className="text-xl font-bold text-slate-900">New Nomination</h2>
-                    </div>
-                    <button
-                        onClick={() => setView('list')}
-                        className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                        <HiOutlineXMark size={16} /> Cancel
-                    </button>
-                </div>
+    const getStatusClass = (nom: any) => {
+        if (nom.status === 'Approved' || (nom.status === 'Batched' && nom.managerApprovalStatus === 'Approved')) {
+            return 'text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl';
+        }
+        if (nom.status === 'Rejected' || nom.managerApprovalStatus === 'Rejected') {
+            return 'text-rose-600 bg-rose-50 border border-rose-100 rounded-xl';
+        }
+        if (nom.status === 'Batched') {
+            return 'text-blue-600 bg-blue-50 border border-blue-100 rounded-xl';
+        }
+        if (nom.status === 'Completed') {
+            return 'text-blue-600 bg-blue-50 border border-blue-100 rounded-xl';
+        }
+        return 'text-amber-600 bg-amber-50 border border-amber-100 rounded-xl';
+    };
 
-                <div className="p-6">
-                    <form action={submitTNINomination} className="space-y-8">
-                        <input type="hidden" name="empId" value={empId} />
+    // Programs mapped for searchable selects
+    const mapPrograms = (cat: string) =>
+        programs
+            .filter(p => p.category === cat)
+            .map(p => ({ label: p.name, value: p.id }));
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            {/* 1. FOUNDATIONAL */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-bold text-slate-900 uppercase tracking-wide">
-                                    <HiOutlineBookOpen size={16} className="text-indigo-500" /> Foundational Programs
-                                </label>
-                                <div className="relative">
-                                    <select
-                                        name="programId_FOUNDATIONAL"
-                                        className="w-full p-3 pl-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all bg-slate-50 hover:bg-white text-slate-900 cursor-pointer appearance-none shadow-sm"
-                                    >
-                                        <option value="">Select Program...</option>
-                                        {programs.filter(p => p.category === 'FOUNDATIONAL').map(prog => (
-                                            <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                            </div>
-
-                            {/* 2. FUNCTIONAL */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-bold text-slate-900 uppercase tracking-wide">
-                                    <HiOutlineBriefcase size={16} className="text-blue-500" /> Functional Programs
-                                </label>
-                                <select
-                                    name="programId_FUNCTIONAL"
-                                    className="w-full p-3 pl-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all bg-slate-50 hover:bg-white text-slate-900 cursor-pointer shadow-sm"
-                                >
-                                    <option value="">Select Program...</option>
-                                    {programs.filter(p => p.category === 'FUNCTIONAL').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 3. BEHAVIOURAL */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-bold text-slate-900 uppercase tracking-wide">
-                                    <HiOutlineUsers size={16} className="text-purple-500" /> Behavioural Programs
-                                </label>
-                                <select
-                                    name="programId_BEHAVIOURAL"
-                                    className="w-full p-3 pl-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-all bg-slate-50 hover:bg-white text-slate-900 cursor-pointer shadow-sm"
-                                >
-                                    <option value="">Select Program...</option>
-                                    {programs.filter(p => p.category === 'BEHAVIOURAL').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* 4. COMMON */}
-                            <div className="space-y-3">
-                                <label className="flex items-center gap-2 text-sm font-bold text-slate-900 uppercase tracking-wide">
-                                    <HiOutlineGlobeAlt size={16} className="text-emerald-500" /> Common Programs
-                                </label>
-                                <select
-                                    name="programId_COMMON"
-                                    className="w-full p-3 pl-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none transition-all bg-slate-50 hover:bg-white text-slate-900 cursor-pointer shadow-sm"
-                                >
-                                    <option value="">Select Program...</option>
-                                    {programs.filter(p => p.category === 'COMMON').map(prog => (
-                                        <option key={prog.id} value={prog.id}>{prog.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Justification */}
-                        <div className="space-y-3 pt-4 border-t border-slate-100">
-                            <label htmlFor="justification" className="flex items-center gap-2 text-sm font-bold text-slate-900">
-                                <HiOutlineDocumentText size={16} className="text-slate-400" /> Justification / Reason <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                name="justification"
-                                id="justification"
-                                required
-                                placeholder="Explain why this training is needed..."
-                                rows={4}
-                                className="w-full p-4 border border-slate-200 rounded-lg focus:ring-2 focus:ring-slate-900 focus:border-slate-900 outline-none transition-all placeholder-slate-400 text-slate-900 bg-slate-50 hover:bg-white shadow-sm resize-none"
-                            ></textarea>
-                        </div>
-
-                        <div className="pt-2">
-                            <FormSubmitButton className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-6 rounded-xl transition-all flex items-center justify-center gap-3 shadow-md hover:shadow-lg transform active:scale-[0.99] duration-200">
-                                <HiOutlinePaperAirplane size={20} /> Submit Nomination
-                            </FormSubmitButton>
-                        </div>
-
-                    </form>
-                </div>
-            </div>
-        );
-    }
+    // Reset creation form
+    const resetForm = () => {
+        setFormValues({
+            SAFETY_PROGRAMS: '',
+            HEMM_PROGRAMS: '',
+            BEHAVIOURAL_PROGRAMS: '',
+            OTHER_PROGRAMS: '',
+            OPERATOR_PROGRAMS: '',
+            justification: ''
+        });
+        setIsFormOpen(false);
+    };
 
     return (
-        <div className="bg-white rounded-xl shadow-air border border-slate-100 overflow-hidden">
-            <div className="p-4 md:p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-                <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-100 rounded-lg text-slate-600">
-                        <HiOutlineQueueList size={20} />
-                    </div>
-                    <h2 className="text-xl font-bold text-slate-900">Current Nominations</h2>
-                </div>
+        <div className="space-y-10">
 
 
-                <button
-                    onClick={() => setView('create')}
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 md:px-5 md:py-2.5 rounded-lg font-semibold transition-all shadow-sm hover:shadow-md active:transform active:scale-95"
+
+            {/* 1. Training History Table */}
+            <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+                <div 
+                    className="flex justify-between items-center cursor-pointer select-none" 
+                    onClick={() => setIsHistoryOpen(!isHistoryOpen)}
                 >
-                    <HiOutlinePlusCircle size={18} />
-                    <span className="hidden md:inline">Add New</span>
-                    <span className="md:hidden">Add</span>
-                </button>
+                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineAcademicCap size={18} className="text-amber-600 shrink-0" />
+                        Training History
+                    </h3>
+                    <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                        {isHistoryOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
+                    </button>
+                </div>
+                {isHistoryOpen && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {trainingHistory.length === 0 ? (
+                            <div className="p-8 border border-slate-200 rounded-3xl text-center text-xs text-slate-500 bg-slate-50 shadow-sm font-medium">
+                                No training history records found.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
+                                <table className="w-full text-xs text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Schedule Details</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Duration</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Location</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {trainingHistory.map((record: any, idx: number) => (
+                                            <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{record.programName}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{record.progCategory || '-'}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-semibold text-slate-700">
+                                                    {new Date(record.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                                    {record.endDate && new Date(record.startDate).getTime() !== new Date(record.endDate).getTime() && (
+                                                        <span className="text-slate-400 font-medium"> to {new Date(record.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium">{record.trainingDays ? `${record.trainingDays} Days` : '-'}</td>
+
+                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-700 font-medium">{record.location || record.region || '-'}</td>
+                                                <td className="px-4 py-3 text-center">
+                                                    <span className="inline-flex px-3 py-1 rounded-xl text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                                        Completed
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
-            <div className="overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-
-                {/* Mobile Card View (Visible on small screens) */}
-                <div className="md:hidden space-y-4 p-4">
-                    {sortedNominations.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center gap-3 p-8 text-center text-slate-500 bg-slate-50 rounded-lg border border-slate-100">
-                            <div className="p-4 bg-white rounded-full shadow-sm">
-                                <HiOutlineQueueList size={32} className="text-slate-300" />
-                            </div>
-                            <p>No nominations found.</p>
-                            <button onClick={() => setView('create')} className="text-blue-600 font-medium hover:underline text-sm">
-                                Start your first nomination
-                            </button>
-                        </div>
-                    ) : (
-                        sortedNominations.map((nom: any) => (
-                            <div key={nom.id} className="bg-white p-4 rounded-lg border border-slate-100 shadow-air flex flex-col gap-3">
-                                <div>
-                                    <h3 className="font-bold text-slate-900 leading-snug">
-                                        {nom.program?.name || 'Unknown Program'}
-                                    </h3>
-                                </div>
-                                <div className="flex flex-wrap items-center gap-2">
-                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200 uppercase tracking-wide">
-                                        {nom.program?.category === 'FOUNDATIONAL' && <HiOutlineBookOpen size={10} />}
-                                        {nom.program?.category === 'FUNCTIONAL' && <HiOutlineBriefcase size={10} />}
-                                        {nom.program?.category === 'BEHAVIOURAL' && <HiOutlineUsers size={10} />}
-                                        {nom.program?.category === 'COMMON' && <HiOutlineGlobeAlt size={10} />}
-                                        {nom.program?.category}
-                                    </span>
-                                    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold border ${getStatusStyles(nom).bg}`}>
-                                        {getStatusStyles(nom).icon}
-                                        {getStatusStyles(nom).label}
-                                    </span>
-                                </div>
-                                <div className="pt-3 border-t border-slate-50 flex items-center justify-between text-xs text-slate-400 font-medium">
-                                    <span>Submitted on</span>
-                                    <span>
-                                        {new Date(nom.createdAt).toLocaleDateString(undefined, {
-                                            month: 'short', day: 'numeric', year: 'numeric'
-                                        })}
-                                    </span>
-                                </div>
-                            </div>
-                        ))
-                    )}
-                </div>
-
-                {/* Desktop Table View (Hidden on mobile) */}
-                <table className="hidden md:table w-full text-left">
-                    <thead className="bg-slate-50 text-slate-500 font-semibold text-xs uppercase tracking-wider border-b border-slate-200 sticky top-0 z-10 shadow-sm">
-                        <tr>
-                            <th className="p-5 bg-slate-50">Program Name</th>
-                            <th className="p-5 bg-slate-50">Category</th>
-                            <th className="p-5 bg-slate-50">Status</th>
-                            <th className="p-5 bg-slate-50">Submitted On</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                        {sortedNominations.length === 0 ? (
-                            <tr>
-                                <td colSpan={4} className="p-12 text-center text-slate-500">
-                                    <div className="flex flex-col items-center justify-center gap-3">
-                                        <div className="p-4 bg-slate-50 rounded-full">
-                                            <HiOutlineQueueList size={32} className="text-slate-300" />
-                                        </div>
-                                        <p>No recent nominations found.</p>
-                                        <button onClick={() => setView('create')} className="text-blue-600 font-medium hover:underline">
-                                            Start your first nomination
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+            {/* Add Training Need */}
+            <div className="flex flex-col gap-4">
+                <div className="flex justify-end">
+                    <button
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                        className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-200 text-xs cursor-pointer"
+                    >
+                        {isFormOpen ? (
+                            <>
+                                <HiOutlineXMark size={14} className="stroke-[2.5]" />
+                                <span>Close Nomination Form</span>
+                            </>
                         ) : (
-                            sortedNominations.map((nom: any) => (
-                                <tr key={nom.id} className="group hover:bg-slate-50/80 transition-colors">
-                                    <td className="p-5">
-                                        <div className="font-semibold text-slate-900 group-hover:text-blue-700 transition-colors">
-                                            {nom.program?.name || 'Unknown Program'}
-                                        </div>
-                                    </td>
-                                    <td className="p-5">
-                                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-                                            {nom.program?.category === 'FOUNDATIONAL' && <HiOutlineBookOpen size={12} />}
-                                            {nom.program?.category === 'FUNCTIONAL' && <HiOutlineBriefcase size={12} />}
-                                            {nom.program?.category === 'BEHAVIOURAL' && <HiOutlineUsers size={12} />}
-                                            {nom.program?.category === 'COMMON' && <HiOutlineGlobeAlt size={12} />}
-                                            {nom.program?.category}
-                                        </span>
-                                    </td>
-                                    <td className="p-5">
-                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyles(nom).bg}`}>
-                                            {getStatusStyles(nom).icon}
-                                            {getStatusStyles(nom).label}
-                                        </span>
-                                    </td>
-                                    <td className="p-5 text-slate-500 text-sm font-medium">
-                                        {new Date(nom.createdAt).toLocaleDateString(undefined, {
-                                            month: 'short', day: 'numeric', year: 'numeric'
-                                        })}
-                                    </td>
-                                </tr>
-                            ))
+                            <>
+                                <HiOutlinePlus size={14} className="stroke-[2.5]" />
+                                <span>Add Training Need</span>
+                            </>
                         )}
-                    </tbody>
-                </table>
+                    </button>
+                </div>
+                
+                {isFormOpen && (
+                    <div className="p-6 border border-slate-200 bg-white rounded-3xl shadow-sm flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="border-b border-slate-200 pb-3">
+                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submit Training Nomination</h4>
+                            <p className="text-xs text-slate-500 font-medium">Select relevant courses and provide justification details below</p>
+                        </div>
+
+                        <form action={async (formData) => {
+                            startTransition(async () => {
+                                await submitTNINomination(formData);
+                                resetForm();
+                            });
+                        }} className="space-y-4">
+                            <input type="hidden" name="empId" value={empId} />
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                {/* Foundational */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Safety Program</label>
+                                    <SearchableSelect
+                                        name="programId_SAFETY_PROGRAMS"
+                                        options={mapPrograms('SAFETY_PROGRAMS')}
+                                        value={formValues.SAFETY_PROGRAMS}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, SAFETY_PROGRAMS: val }))}
+                                        placeholder="Search Safety..."
+                                        className="w-full text-xs"
+                                    />
+                                </div>
+
+                                {/* Functional */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">HEMM Program</label>
+                                    <SearchableSelect
+                                        name="programId_HEMM_PROGRAMS"
+                                        options={mapPrograms('HEMM_PROGRAMS')}
+                                        value={formValues.HEMM_PROGRAMS}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, HEMM_PROGRAMS: val }))}
+                                        placeholder="Search HEMM..."
+                                        className="w-full text-xs"
+                                    />
+                                </div>
+
+                                {/* Behavioural */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Behavioural Program</label>
+                                    <SearchableSelect
+                                        name="programId_BEHAVIOURAL_PROGRAMS"
+                                        options={mapPrograms('BEHAVIOURAL_PROGRAMS')}
+                                        value={formValues.BEHAVIOURAL_PROGRAMS}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, BEHAVIOURAL_PROGRAMS: val }))}
+                                        placeholder="Search Behavioural..."
+                                        className="w-full text-xs"
+                                    />
+                                </div>
+
+                                {/* Common */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Other Program</label>
+                                    <SearchableSelect
+                                        name="programId_OTHER_PROGRAMS"
+                                        options={mapPrograms('OTHER_PROGRAMS')}
+                                        value={formValues.OTHER_PROGRAMS}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, OTHER_PROGRAMS: val }))}
+                                        placeholder="Search Other..."
+                                        className="w-full text-xs"
+                                    />
+                                </div>
+
+                                {/* Operators */}
+                                <div className="space-y-1">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Operators Program</label>
+                                    <SearchableSelect
+                                        name="programId_OPERATOR_PROGRAMS"
+                                        options={mapPrograms('OPERATOR_PROGRAMS')}
+                                        value={formValues.OPERATOR_PROGRAMS}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, OPERATOR_PROGRAMS: val }))}
+                                        placeholder="Search Operators..."
+                                        className="w-full text-xs"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <label htmlFor="justification" className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Justification / Goal *</label>
+                                <textarea
+                                    name="justification"
+                                    id="justification"
+                                    required
+                                    value={formValues.justification}
+                                    onChange={(e) => setFormValues(prev => ({ ...prev, justification: e.target.value }))}
+                                    placeholder="Explain how this training supports operational requirements or individual development..."
+                                    rows={3}
+                                    className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-xs text-slate-800 resize-none"
+                                ></textarea>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                                <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
+                                <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
+                            </div>
+
+                            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                                <button
+                                    type="button"
+                                    onClick={resetForm}
+                                    className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200">
+                                    Submit Request
+                                </FormSubmitButton>
+                            </div>
+                        </form>
+                    </div>
+                )}
+            </div>
+
+            {/* 2. Approved or Rejected Manager Table */}
+            <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+                <div 
+                    className="flex justify-between items-center cursor-pointer select-none pb-2" 
+                    onClick={() => setIsReviewedOpen(!isReviewedOpen)}
+                >
+                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineCheckCircle size={18} className="text-blue-600 shrink-0" />
+                        Reviewed Nominations
+                    </h3>
+                    <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                        {isReviewedOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
+                    </button>
+                </div>
+                
+                {isReviewedOpen && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {reviewedNominations.length === 0 ? (
+                            <div className="p-8 border border-slate-200 rounded-3xl text-center text-xs text-slate-500 bg-slate-50 shadow-sm font-medium">
+                                No reviewed nominations found.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
+                                <table className="w-full text-xs text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Justification</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Manager Approval</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {reviewedNominations.map((nom: any, idx: number) => (
+                                            <tr key={nom.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{nom.program?.name || 'Unknown Program'}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{nom.program?.category || '-'}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium italic max-w-xs truncate" title={nom.justification}>
+                                                    {nom.justification || '-'}
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-slate-200">
+                                                    {(() => {
+                                                        const isRejected = nom.managerApprovalStatus === 'Rejected' || nom.status === 'Rejected';
+                                                        const label = isRejected ? 'Rejected' : 'Approved';
+                                                        const badgeClass = isRejected ? 'text-rose-600 bg-rose-50 border border-rose-100 rounded-xl' : 'text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl';
+                                                        return (
+                                                            <div className="flex flex-col gap-0.5">
+                                                                <span className={`inline-flex px-3 py-1 font-bold w-fit text-[10px] ${badgeClass}`}>
+                                                                    {label}
+                                                                </span>
+                                                                {isRejected && nom.managerRejectionReason && (
+                                                                    <span className="text-[9px] text-rose-500 font-bold max-w-[150px] truncate block" title={nom.managerRejectionReason}>
+                                                                        Reason: {nom.managerRejectionReason}
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </td>
+
+                                                <td className="px-4 py-3 text-slate-400 font-semibold">
+                                                    {new Date(nom.createdAt).toLocaleDateString(undefined, {
+                                                        month: 'short', day: 'numeric', year: 'numeric'
+                                                    })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+
+            {/* 3. Pending Table */}
+            <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+                <div 
+                    className="flex justify-between items-center cursor-pointer select-none pb-2" 
+                    onClick={() => setIsPendingOpen(!isPendingOpen)}
+                >
+                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineClock size={18} className="text-thriveni-blue shrink-0" />
+                        Pending Nominations
+                    </h3>
+                    <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                        {isPendingOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
+                    </button>
+                </div>
+                {isPendingOpen && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        {pendingNominations.length === 0 ? (
+                            <div className="p-8 border border-slate-200 rounded-3xl text-center text-xs text-slate-500 bg-slate-50 shadow-sm font-medium">
+                                No pending nominations found.
+                            </div>
+                        ) : (
+                            <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
+                                <table className="w-full text-xs text-left border-collapse">
+                                    <thead>
+                                        <tr className="bg-slate-50 border-b border-slate-200">
+                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Justification</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Manager Status</th>
+                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-200">
+                                        {pendingNominations.map((nom: any, idx: number) => (
+                                            <tr key={nom.id} className="hover:bg-slate-50/50 transition-colors">
+                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{nom.program?.name || 'Unknown Program'}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{nom.program?.category || '-'}</td>
+                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium italic max-w-xs truncate" title={nom.justification}>
+                                                    {nom.justification || '-'}
+                                                </td>
+                                                <td className="px-4 py-3 border-r border-slate-200">
+                                                    <span className={`inline-flex px-3 py-1 text-[10px] font-bold ${getStatusClass(nom)}`}>
+                                                        {getStatusText(nom)}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-400 font-semibold">
+                                                    {new Date(nom.createdAt).toLocaleDateString(undefined, {
+                                                        month: 'short', day: 'numeric', year: 'numeric'
+                                                    })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
