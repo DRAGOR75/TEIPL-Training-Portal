@@ -121,9 +121,14 @@ export default function TNIDashboardClient({
                     className="flex justify-between items-center cursor-pointer select-none" 
                     onClick={() => setIsHistoryOpen(!isHistoryOpen)}
                 >
-                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <HiOutlineAcademicCap size={18} className="text-amber-600 shrink-0" />
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineAcademicCap className="text-amber-600 shrink-0 text-lg sm:text-xl" />
                         Training History
+                        {!isHistoryOpen && (
+                            <span className="ml-1 sm:ml-2 bg-amber-100 text-amber-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
+                                {trainingHistory.length}
+                            </span>
+                        )}
                     </h3>
                     <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
                         {isHistoryOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
@@ -140,32 +145,31 @@ export default function TNIDashboardClient({
                                 <table className="w-full text-xs text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50 border-b border-slate-200">
-                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Schedule Details</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Duration</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Location</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider text-center">Status</th>
+                                            <th className="px-2 sm:px-3 py-2 sm:py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-8 sm:w-10 whitespace-nowrap">No.</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Program Course</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Schedule Details</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Duration</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Location</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
                                         {trainingHistory.map((record: any, idx: number) => (
                                             <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{record.programName}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{record.progCategory || '-'}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-semibold text-slate-700">
+                                                <td className="px-2 sm:px-3 py-1.5 sm:py-3 border-r border-slate-200 text-center text-slate-400 font-bold whitespace-nowrap">{idx + 1}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{record.programName}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-500 uppercase whitespace-nowrap">{record.progCategory || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-semibold text-slate-700 whitespace-nowrap">
                                                     {new Date(record.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
                                                     {record.endDate && new Date(record.startDate).getTime() !== new Date(record.endDate).getTime() && (
                                                         <span className="text-slate-400 font-medium"> to {new Date(record.endDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
                                                     )}
                                                 </td>
-                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium">{record.trainingDays ? `${record.trainingDays} Days` : '-'}</td>
-
-                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-700 font-medium">{record.location || record.region || '-'}</td>
-                                                <td className="px-4 py-3 text-center">
-                                                    <span className="inline-flex px-3 py-1 rounded-xl text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-600 font-medium whitespace-nowrap">{record.trainingDays ? `${record.trainingDays} Days` : '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-700 font-medium whitespace-nowrap">{record.location || record.region || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-center whitespace-nowrap">
+                                                    <span className="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl text-[9px] sm:text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
                                                         Completed
                                                     </span>
                                                 </td>
@@ -324,9 +328,14 @@ export default function TNIDashboardClient({
                     className="flex justify-between items-center cursor-pointer select-none pb-2" 
                     onClick={() => setIsReviewedOpen(!isReviewedOpen)}
                 >
-                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <HiOutlineCheckCircle size={18} className="text-blue-600 shrink-0" />
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineCheckCircle className="text-blue-600 shrink-0 text-lg sm:text-xl" />
                         Reviewed Nominations
+                        {!isReviewedOpen && (
+                            <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
+                                {reviewedNominations.length}
+                            </span>
+                        )}
                     </h3>
                     <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
                         {isReviewedOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
@@ -344,31 +353,31 @@ export default function TNIDashboardClient({
                                 <table className="w-full text-xs text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50 border-b border-slate-200">
-                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Justification</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Manager Approval</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
+                                            <th className="px-2 sm:px-3 py-2 sm:py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-8 sm:w-10 whitespace-nowrap">No.</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Program Course</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Justification</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Approval</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
                                         {reviewedNominations.map((nom: any, idx: number) => (
                                             <tr key={nom.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{nom.program?.name || 'Unknown Program'}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{nom.program?.category || '-'}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium italic max-w-xs truncate" title={nom.justification}>
-                                                    {nom.justification || '-'}
+                                                <td className="px-2 sm:px-3 py-1.5 sm:py-3 border-r border-slate-200 text-center text-slate-400 font-bold whitespace-nowrap">{idx + 1}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{nom.program?.name || 'Unknown Program'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-500 uppercase whitespace-nowrap">{nom.program?.category || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-600 font-medium italic min-w-[200px] max-w-xs sm:max-w-md" title={nom.justification}>
+                                                    <div className="line-clamp-2">{nom.justification || '-'}</div>
                                                 </td>
-                                                <td className="px-4 py-3 border-r border-slate-200">
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 whitespace-nowrap">
                                                     {(() => {
                                                         const isRejected = nom.managerApprovalStatus === 'Rejected' || nom.status === 'Rejected';
                                                         const label = isRejected ? 'Rejected' : 'Approved';
                                                         const badgeClass = isRejected ? 'text-rose-600 bg-rose-50 border border-rose-100 rounded-xl' : 'text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl';
                                                         return (
                                                             <div className="flex flex-col gap-0.5">
-                                                                <span className={`inline-flex px-3 py-1 font-bold w-fit text-[10px] ${badgeClass}`}>
+                                                                <span className={`inline-flex px-2 sm:px-3 py-0.5 sm:py-1 font-bold w-fit text-[9px] sm:text-[10px] ${badgeClass}`}>
                                                                     {label}
                                                                 </span>
                                                                 {isRejected && nom.managerRejectionReason && (
@@ -380,8 +389,7 @@ export default function TNIDashboardClient({
                                                         );
                                                     })()}
                                                 </td>
-
-                                                <td className="px-4 py-3 text-slate-400 font-semibold">
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-slate-400 font-semibold whitespace-nowrap">
                                                     {new Date(nom.createdAt).toLocaleDateString(undefined, {
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}
@@ -402,9 +410,14 @@ export default function TNIDashboardClient({
                     className="flex justify-between items-center cursor-pointer select-none pb-2" 
                     onClick={() => setIsPendingOpen(!isPendingOpen)}
                 >
-                    <h3 className="text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <HiOutlineClock size={18} className="text-thriveni-blue shrink-0" />
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlineClock className="text-thriveni-blue shrink-0 text-lg sm:text-xl" />
                         Pending Nominations
+                        {!isPendingOpen && (
+                            <span className="ml-1 sm:ml-2 bg-slate-100 text-slate-600 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
+                                {pendingNominations.length}
+                            </span>
+                        )}
                     </h3>
                     <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
                         {isPendingOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
@@ -421,29 +434,29 @@ export default function TNIDashboardClient({
                                 <table className="w-full text-xs text-left border-collapse">
                                     <thead>
                                         <tr className="bg-slate-50 border-b border-slate-200">
-                                            <th className="px-3 py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-10">No.</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Program Course</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Category</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Justification</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200">Manager Status</th>
-                                            <th className="px-4 py-3 font-bold text-slate-500 uppercase tracking-wider">Submitted</th>
+                                            <th className="px-2 sm:px-3 py-2 sm:py-3 font-bold text-slate-400 uppercase tracking-wider border-r border-slate-200 text-center w-8 sm:w-10 whitespace-nowrap">No.</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Program Course</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Justification</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Status</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
                                         {pendingNominations.map((nom: any, idx: number) => (
                                             <tr key={nom.id} className="hover:bg-slate-50/50 transition-colors">
-                                                <td className="px-3 py-3 border-r border-slate-200 text-center text-slate-400 font-bold">{idx + 1}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-900">{nom.program?.name || 'Unknown Program'}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 font-bold text-slate-500 uppercase">{nom.program?.category || '-'}</td>
-                                                <td className="px-4 py-3 border-r border-slate-200 text-slate-600 font-medium italic max-w-xs truncate" title={nom.justification}>
-                                                    {nom.justification || '-'}
+                                                <td className="px-2 sm:px-3 py-1.5 sm:py-3 border-r border-slate-200 text-center text-slate-400 font-bold whitespace-nowrap">{idx + 1}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{nom.program?.name || 'Unknown Program'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-500 uppercase whitespace-nowrap">{nom.program?.category || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-600 font-medium italic min-w-[200px] max-w-xs sm:max-w-md" title={nom.justification}>
+                                                    <div className="line-clamp-2">{nom.justification || '-'}</div>
                                                 </td>
-                                                <td className="px-4 py-3 border-r border-slate-200">
-                                                    <span className={`inline-flex px-3 py-1 text-[10px] font-bold ${getStatusClass(nom)}`}>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold ${getStatusClass(nom)}`}>
                                                         {getStatusText(nom)}
                                                     </span>
                                                 </td>
-                                                <td className="px-4 py-3 text-slate-400 font-semibold">
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-slate-400 font-semibold whitespace-nowrap">
                                                     {new Date(nom.createdAt).toLocaleDateString(undefined, {
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}

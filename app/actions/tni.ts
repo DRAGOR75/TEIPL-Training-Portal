@@ -125,19 +125,8 @@ export const getAvailablePrograms = async (grade?: Grade, sectionName?: string) 
                 where.AND.push({ targetGrades: { has: g } });
             }
 
-            if (s) {
-                where.AND.push({
-                    OR: [
-                        { category: { not: 'HEMM_PROGRAMS' } },
-                        {
-                            category: 'HEMM_PROGRAMS',
-                            sections: { some: { name: s } }
-                        }
-                    ]
-                });
-            } else {
-                where.AND.push({ category: { not: 'HEMM_PROGRAMS' } });
-            }
+            // Removed the section-based locking for HEMM programs as per request,
+            // so everyone can see all HEMM programs regardless of their section.
 
             return await db.program.findMany({
                 where,

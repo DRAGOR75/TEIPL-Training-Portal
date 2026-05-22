@@ -134,7 +134,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[60vh] overflow-y-auto pr-1 pb-4" style={{ scrollbarWidth: 'thin' }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[75vh] md:max-h-[60vh] overflow-y-auto pr-1 pb-4" style={{ scrollbarWidth: 'thin' }}>
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Employee ID</label>
                         <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs">{employee.id}</div>
@@ -143,7 +143,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
                         <input
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Full Name"
                             value={formData.name}
                             onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -153,7 +153,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
                         <input
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Email Address"
                             value={formData.email}
                             onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -163,7 +163,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
                         <input
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Mobile"
                             value={formData.mobile}
                             onChange={e => setFormData({ ...formData, mobile: e.target.value })}
@@ -181,7 +181,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.gender}
                             onChange={(val) => setFormData({ ...formData, gender: val })}
                             placeholder="Select Gender"
-                            className="text-xs"
+                            className="w-full text-base sm:text-xs"
                         />
                     </div>
 
@@ -193,7 +193,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             onChange={(val) => setFormData({ ...formData, designation: typeof val === 'string' ? val : String(val) })}
                             placeholder="Select Designation"
                             searchPlaceholder="Search Designations..."
-                            className="w-full text-xs font-medium"
+                            className="w-full text-base sm:text-xs font-medium"
                         />
                     </div>
 
@@ -202,7 +202,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         <input
                             type="text"
                             inputMode="numeric"
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Years of Experience"
                             value={formData.yearsOfExperience}
                             onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value.replace(/[^0-9]/g, '') })}
@@ -219,7 +219,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.grade}
                             onChange={(val) => setFormData({ ...formData, grade: val })}
                             placeholder="Select Grade"
-                            className="text-xs"
+                            className="w-full text-base sm:text-xs"
                         />
                     </div>
 
@@ -230,7 +230,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.sectionName}
                             onChange={(val) => setFormData({ ...formData, sectionName: val })}
                             placeholder="Select Department"
-                            className="text-xs"
+                            className="w-full text-base sm:text-xs"
                         />
                     </div>
 
@@ -244,26 +244,26 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.status}
                             onChange={(val) => setFormData({ ...formData, status: val })}
                             placeholder="Select Status"
-                            className="text-xs"
+                            className="w-full text-base sm:text-xs"
                         />
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Base Office Location</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
                         <SearchableSelect
                             options={locationOptions}
                             value={formData.location}
                             onChange={(val) => setFormData({ ...formData, location: typeof val === 'string' ? val : String(val) })}
                             placeholder="Select Location"
                             searchPlaceholder="Search location..."
-                            className="w-full text-xs"
+                            className="w-full text-base sm:text-xs"
                         />
                     </div>
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
                         <input
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerName}
                             placeholder="Manager Name"
                             onChange={e => setFormData({ ...formData, managerName: e.target.value })}
@@ -273,7 +273,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
                         <input
-                            className="w-full text-xs px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerEmail}
                             placeholder="Manager Email"
                             onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
