@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { HiOutlineBookOpen, HiOutlineArrowUpTray, HiOutlineArrowPath, HiOutlinePlus } from 'react-icons/hi2';
 
 export default function BulkUploadManager() {
@@ -27,10 +28,9 @@ export default function BulkUploadManager() {
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
                             Upload a CSV file containing multiple program definitions including categories, target grades, and sections.
                         </p>
-                        <label className="flex items-center justify-center gap-2 w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-bold text-sm cursor-pointer transition-colors border border-emerald-200 shadow-sm">
-                            <HiOutlineArrowUpTray size={18} className="stroke-[2.5]" /> Select CSV File
-                            <input type="file" className="hidden" accept=".csv" />
-                        </label>
+                        <Link href="/admin/upload-programs" className="flex items-center justify-center gap-2 w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-bold text-sm transition-colors border border-emerald-200 shadow-sm hover:shadow">
+                            Go to Program Upload
+                        </Link>
                     </div>
 
                     {/* Legacy Bulk Upload Card */}
@@ -43,10 +43,9 @@ export default function BulkUploadManager() {
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
                             Import historical training records and past participation data to maintain legacy compliance.
                         </p>
-                        <label className="flex items-center justify-center gap-2 w-full py-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-sm cursor-pointer transition-colors border border-amber-200 shadow-sm">
-                            <HiOutlineArrowUpTray size={18} className="stroke-[2.5]" /> Select CSV File
-                            <input type="file" className="hidden" accept=".csv" />
-                        </label>
+                        <Link href="/admin/upload-legacy" className="flex items-center justify-center gap-2 w-full py-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl font-bold text-sm transition-colors border border-amber-200 shadow-sm hover:shadow">
+                            Go to Legacy Upload
+                        </Link>
                     </div>
 
                     {/* TNI Bulk Upload Card */}
@@ -59,10 +58,9 @@ export default function BulkUploadManager() {
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
                             Bulk nominate employees for training programs using the standard TNI upload format.
                         </p>
-                        <label className="flex items-center justify-center gap-2 w-full py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-sm cursor-pointer transition-colors border border-blue-200 shadow-sm">
-                            <HiOutlineArrowUpTray size={18} className="stroke-[2.5]" /> Select CSV File
-                            <input type="file" className="hidden" accept=".csv" />
-                        </label>
+                        <Link href="/admin/upload-tni" className="flex items-center justify-center gap-2 w-full py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-sm transition-colors border border-blue-200 shadow-sm hover:shadow">
+                            Go to TNI Upload
+                        </Link>
                     </div>
                 </div>
             </div>
