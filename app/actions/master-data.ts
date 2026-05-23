@@ -41,6 +41,21 @@ export async function createProgram(formData: FormData) {
     const category = formData.get('category') as TrainingCategory;
     const grades = formData.getAll('targetGrades') as Grade[];
     const sectionIds = formData.getAll('sectionIds') as string[];
+    
+    // Extended fields
+    const objectives = sanitizeInput(formData.get('objectives') as string);
+    const machineModel = sanitizeInput(formData.get('machineModel') as string);
+    const status = sanitizeInput(formData.get('status') as string) || 'Active';
+    const materialPriority = sanitizeInput(formData.get('materialPriority') as string);
+    const contentResp = sanitizeInput(formData.get('contentResp') as string);
+    const targetDate = sanitizeInput(formData.get('targetDate') as string);
+    const syllabusLink = sanitizeInput(formData.get('syllabusLink') as string);
+    const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
+    const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
+    const level = sanitizeInput(formData.get('level') as string);
+    
+    const daysStr = formData.get('days') as string;
+    const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
 
     try {
         await db.program.create({
@@ -48,6 +63,17 @@ export async function createProgram(formData: FormData) {
                 name,
                 category,
                 targetGrades: grades,
+                objectives: objectives || null,
+                machineModel: machineModel || null,
+                status: status,
+                materialPriority: materialPriority || null,
+                contentResp: contentResp || null,
+                targetDate: targetDate || null,
+                syllabusLink: syllabusLink || null,
+                trainerMaterial: trainerMaterial || null,
+                participantMaterial: participantMaterial || null,
+                level: level || null,
+                days: days,
                 sections: {
                     connect: sectionIds.map(id => ({ id }))
                 }
@@ -78,22 +104,60 @@ export async function deleteProgram(id: string) {
     }
 }
 
-export async function updateProgramSections(programId: string, sectionIds: string[]) {
+export async function updateProgram(programId: string, formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };
+    
+    const name = sanitizeInput(formData.get('name') as string);
+    const category = formData.get('category') as TrainingCategory;
+    const grades = formData.getAll('targetGrades') as Grade[];
+    const sectionIds = formData.getAll('sectionIds') as string[];
+    
+    // Extended fields
+    const objectives = sanitizeInput(formData.get('objectives') as string);
+    const machineModel = sanitizeInput(formData.get('machineModel') as string);
+    const status = sanitizeInput(formData.get('status') as string) || 'Active';
+    const materialPriority = sanitizeInput(formData.get('materialPriority') as string);
+    const contentResp = sanitizeInput(formData.get('contentResp') as string);
+    const targetDate = sanitizeInput(formData.get('targetDate') as string);
+    const syllabusLink = sanitizeInput(formData.get('syllabusLink') as string);
+    const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
+    const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
+    const level = sanitizeInput(formData.get('level') as string);
+    
+    const daysStr = formData.get('days') as string;
+    const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
+
     try {
         await db.program.update({
             where: { id: programId },
             data: {
+                name,
+                category,
+                targetGrades: grades,
+                objectives: objectives || null,
+                machineModel: machineModel || null,
+                status: status,
+                materialPriority: materialPriority || null,
+                contentResp: contentResp || null,
+                targetDate: targetDate || null,
+                syllabusLink: syllabusLink || null,
+                trainerMaterial: trainerMaterial || null,
+                participantMaterial: participantMaterial || null,
+                level: level || null,
+                days: days,
                 sections: {
                     set: sectionIds.map(id => ({ id }))
                 }
             }
         });
         revalidatePath('/admin/tni-dashboard');
+        revalidateTag('programs', 'max');
+        revalidateTag('available-programs', 'max');
+        revalidateTag('tni-reports', 'max');
         return { success: true };
     } catch (error) {
-        console.error("Update Program Sections Error", error);
-        return { error: 'Failed to update program sections' };
+        console.error("Update Program Error", error);
+        return { error: 'Failed to update program' };
     }
 }
 

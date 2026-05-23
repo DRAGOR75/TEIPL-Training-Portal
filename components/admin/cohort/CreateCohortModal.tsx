@@ -82,6 +82,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
             case 'FUNCTIONAL': return 'bg-blue-50 text-blue-600';
             case 'BEHAVIOURAL': return 'bg-amber-50 text-amber-600';
             case 'COMMON': return 'bg-slate-100 text-slate-600';
+            case 'MINING_PROGRAMS': return 'bg-emerald-50 text-emerald-600';
             default: return 'bg-slate-100 text-slate-600';
         }
     };

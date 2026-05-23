@@ -32,6 +32,7 @@ export const getCachedAdminPrograms = async () => {
                     name: true,
                     category: true,
                     targetGrades: true,
+                    objectives: true,
                     sections: {
                         select: { id: true, name: true }
                     }

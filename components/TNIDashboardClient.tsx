@@ -33,11 +33,7 @@ export default function TNIDashboardClient({
 
     // Form states
     const [formValues, setFormValues] = useState({
-        SAFETY_PROGRAMS: '',
-        HEMM_PROGRAMS: '',
-        BEHAVIOURAL_PROGRAMS: '',
-        OTHER_PROGRAMS: '',
-        OPERATOR_PROGRAMS: '',
+        selectedProgramId: '',
         justification: ''
     });
 
@@ -97,14 +93,9 @@ export default function TNIDashboardClient({
             .filter(p => p.category === cat)
             .map(p => ({ label: p.name, value: p.id }));
 
-    // Reset creation form
     const resetForm = () => {
         setFormValues({
-            SAFETY_PROGRAMS: '',
-            HEMM_PROGRAMS: '',
-            BEHAVIOURAL_PROGRAMS: '',
-            OTHER_PROGRAMS: '',
-            OPERATOR_PROGRAMS: '',
+            selectedProgramId: '',
             justification: ''
         });
         setIsFormOpen(false);
@@ -219,70 +210,28 @@ export default function TNIDashboardClient({
                         }} className="space-y-4">
                             <input type="hidden" name="empId" value={empId} />
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                {/* Foundational */}
+                            <div className="grid grid-cols-1 gap-5">
+                                {/* Universal Program Selector */}
                                 <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Safety Program</label>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
                                     <SearchableSelect
-                                        name="programId_SAFETY_PROGRAMS"
-                                        options={mapPrograms('SAFETY_PROGRAMS')}
-                                        value={formValues.SAFETY_PROGRAMS}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, SAFETY_PROGRAMS: val }))}
-                                        placeholder="Search Safety..."
+                                        options={programs.map(p => ({
+                                            label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
+                                            value: p.id
+                                        }))}
+                                        value={formValues.selectedProgramId}
+                                        onChange={(val) => setFormValues(prev => ({ ...prev, selectedProgramId: val }))}
+                                        placeholder="Search by name, category, or ID..."
                                         className="w-full text-xs"
                                     />
-                                </div>
-
-                                {/* Functional */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">HEMM Program</label>
-                                    <SearchableSelect
-                                        name="programId_HEMM_PROGRAMS"
-                                        options={mapPrograms('HEMM_PROGRAMS')}
-                                        value={formValues.HEMM_PROGRAMS}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, HEMM_PROGRAMS: val }))}
-                                        placeholder="Search HEMM..."
-                                        className="w-full text-xs"
-                                    />
-                                </div>
-
-                                {/* Behavioural */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Behavioural Program</label>
-                                    <SearchableSelect
-                                        name="programId_BEHAVIOURAL_PROGRAMS"
-                                        options={mapPrograms('BEHAVIOURAL_PROGRAMS')}
-                                        value={formValues.BEHAVIOURAL_PROGRAMS}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, BEHAVIOURAL_PROGRAMS: val }))}
-                                        placeholder="Search Behavioural..."
-                                        className="w-full text-xs"
-                                    />
-                                </div>
-
-                                {/* Common */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Other Program</label>
-                                    <SearchableSelect
-                                        name="programId_OTHER_PROGRAMS"
-                                        options={mapPrograms('OTHER_PROGRAMS')}
-                                        value={formValues.OTHER_PROGRAMS}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, OTHER_PROGRAMS: val }))}
-                                        placeholder="Search Other..."
-                                        className="w-full text-xs"
-                                    />
-                                </div>
-
-                                {/* Operators */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Operators Program</label>
-                                    <SearchableSelect
-                                        name="programId_OPERATOR_PROGRAMS"
-                                        options={mapPrograms('OPERATOR_PROGRAMS')}
-                                        value={formValues.OPERATOR_PROGRAMS}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, OPERATOR_PROGRAMS: val }))}
-                                        placeholder="Search Operators..."
-                                        className="w-full text-xs"
-                                    />
+                                    
+                                    {/* Hidden input to satisfy existing backend logic without modifying it */}
+                                    {(() => {
+                                        const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
+                                        return selectedProg ? (
+                                            <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
+                                        ) : null;
+                                    })()}
                                 </div>
                             </div>
 
