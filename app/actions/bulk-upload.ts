@@ -35,10 +35,11 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
         select: { id: true, name: true, category: true }
     });
 
-    // Create a map for quick lookup (case-insensitive)
+    // Create a map for quick lookup (case-insensitive by name and ID)
     const programMap = new Map<string, { id: string, category: TrainingCategory }>();
     existingPrograms.forEach(p => {
         programMap.set(p.name.toLowerCase().trim(), { id: p.id, category: p.category });
+        programMap.set(p.id.toLowerCase().trim(), { id: p.id, category: p.category });
     });
 
     // Concurrency Control: Serial processing helps avoid deadlocks during bulk upserts
