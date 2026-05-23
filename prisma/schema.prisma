@@ -65,6 +65,19 @@ model Program {
   category     TrainingCategory // FUNCTIONAL, BEHAVIOURAL, or COMMON
   targetGrades Grade[] // Array: can be for both [EXECUTIVE, WORKMAN]
 
+  // Extended fields from master sheet
+  machineModel        String?   @map("machine_model")
+  status              String?   @default("Active")
+  materialPriority    String?   @map("material_priority")
+  contentResp         String?   @map("content_resp")
+  targetDate          String?   @map("target_date")
+  syllabusLink        String?   @map("syllabus_link")
+  trainerMaterial     String?   @map("trainer_material")
+  participantMaterial String?   @map("participant_material")
+  objectives          String?   @db.Text
+  days                Float?
+  level               String?
+
   // Many-to-Many: A program can belong to many sections
   sections Section[] @relation("ProgramToSection")
 
@@ -82,6 +95,7 @@ enum TrainingCategory {
   BEHAVIOURAL_PROGRAMS
   OTHER_PROGRAMS
   OPERATOR_PROGRAMS
+  MINING_PROGRAMS
 }
 
 // 4. Updated Nomination Table (TNI Table)
@@ -94,6 +108,7 @@ model Nomination {
   status        String  @default("Pending") // Pending, Batched, Completed
   source        String  @default("MANUAL") // MANUAL (TNI) or QR (Direct)
   justification String? @db.Text
+  
 
   batchId String? @map("batch_id")
 

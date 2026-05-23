@@ -26,7 +26,6 @@ interface Employee {
 }
 
 export default function EmployeeManager({ employees }: { employees: Employee[] }) {
-    const [isExpanded, setIsExpanded] = useState(false);
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
@@ -127,180 +126,171 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
     return (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-6">
-            <div
-                className="p-5 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors"
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
+            <div className="p-5 flex justify-between items-center bg-slate-50 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-50 rounded-xl text-purple-600">
-                        <HiOutlineUsers size={20} />
+                    <div className="p-2.5 bg-purple-100 rounded-xl text-purple-700">
+                        <HiOutlineUsers size={24} />
                     </div>
                     <div>
-                        <h3 className="text-xs font-black uppercase tracking-[0.15em] text-slate-800">Employee Directory</h3>
-                        <p className="text-[10px] text-slate-500 font-medium">{employees.length} Records Synthesized</p>
+                        <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-800">Employee Directory</h3>
+                        <p className="text-xs text-slate-500 font-medium">{employees.length} Records Synthesized</p>
                     </div>
-                </div>
-                <div className="text-blue-600">
-                    {isExpanded ? <HiOutlineChevronUp size={18} /> : <HiOutlineChevronDown size={18} />}
                 </div>
             </div>
 
-            {isExpanded && (
-                <div className="p-5 pt-0 border-t border-slate-100 animate-in fade-in slide-in-from-top-1">
+            <div className="p-6">
+                {/* TABS or SPLIT VIEW for Add vs Upload */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-2">
 
-                    {/* TABS or SPLIT VIEW for Add vs Upload */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
+                    {/* LEFT: Manual Add */}
+                    <div className="space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Manual Entry</p>
+                        <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
+                            <div className="grid grid-cols-2 gap-3">
+                                <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                <SearchableSelect
+                                    name="grade"
+                                    options={[
+                                        { label: 'Executive', value: 'EXECUTIVE' },
+                                        { label: 'Workman', value: 'WORKMAN' }
+                                    ]}
+                                    value={selectedGrade}
+                                    onChange={setSelectedGrade}
+                                    className="w-full"
+                                />
+                            </div>
+                            <input name="name" required placeholder="Full Name *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                            <input name="email" required type="email" placeholder="Email Address *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                            <div className="grid grid-cols-2 gap-3">
+                                <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                <SearchableSelect
+                                    name="gender"
+                                    options={[
+                                        { label: 'Male', value: 'MALE' },
+                                        { label: 'Female', value: 'FEMALE' },
+                                        { label: 'Other', value: 'OTHER' }
+                                    ]}
+                                    value={selectedGender}
+                                    onChange={setSelectedGender}
+                                    placeholder="Select Gender"
+                                    className="w-full"
+                                />
+                            </div>
 
-                        {/* LEFT: Manual Add */}
-                        <div className="space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Manual Entry</p>
-                            <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                    <SearchableSelect
-                                        name="grade"
-                                        options={[
-                                            { label: 'Executive', value: 'EXECUTIVE' },
-                                            { label: 'Workman', value: 'WORKMAN' }
-                                        ]}
-                                        value={selectedGrade}
-                                        onChange={setSelectedGrade}
-                                        className="w-full"
-                                    />
-                                </div>
-                                <input name="name" required placeholder="Full Name *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                <input name="email" required type="email" placeholder="Email Address *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                <div className="grid grid-cols-2 gap-3">
-                                    <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                    <SearchableSelect
-                                        name="gender"
-                                        options={[
-                                            { label: 'Male', value: 'MALE' },
-                                            { label: 'Female', value: 'FEMALE' },
-                                            { label: 'Other', value: 'OTHER' }
-                                        ]}
-                                        value={selectedGender}
-                                        onChange={setSelectedGender}
-                                        placeholder="Select Gender"
-                                        className="w-full"
-                                    />
-                                </div>
+                            <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
+                                Add Employee
+                            </FormSubmitButton>
+                        </form>
+                    </div>
 
-                                <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
-                                    Add Employee
-                                </FormSubmitButton>
-                            </form>
-                        </div>
+                    {/* RIGHT: Bulk Upload */}
+                    <div className="space-y-4">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bulk Upload (CSV)</p>
+                        <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
+                            {uploading ? (
+                                <div className="text-center w-full max-w-xs">
+                                    <div className="animate-pulse text-purple-600 font-bold text-lg mb-2">Processing CSV Data...</div>
 
-                        {/* RIGHT: Bulk Upload */}
-                        <div className="space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bulk Upload (CSV)</p>
-                            <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-                                {uploading ? (
-                                    <div className="text-center w-full max-w-xs">
-                                        <div className="animate-pulse text-purple-600 font-bold text-lg mb-2">Processing CSV Data...</div>
-
-                                        {/* Progress Bar */}
-                                        <div className="mt-2">
-                                            <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
-                                                <span>Uploading...</span>
-                                                <span>{progress}%</span>
-                                            </div>
-                                            <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                                                <div
-                                                    className="h-full bg-purple-600 transition-all duration-300 ease-out"
-                                                    style={{ width: `${progress}%` }}
-                                                />
-                                            </div>
+                                    {/* Progress Bar */}
+                                    <div className="mt-2">
+                                        <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
+                                            <span>Uploading...</span>
+                                            <span>{progress}%</span>
+                                        </div>
+                                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+                                            <div
+                                                className="h-full bg-purple-600 transition-all duration-300 ease-out"
+                                                style={{ width: `${progress}%` }}
+                                            />
                                         </div>
                                     </div>
-                                ) : (
-                                    <>
-                                        <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
-                                        <p className="text-sm text-slate-600 mb-4">
-                                            Upload CSV with Master TNI headers:<br />
-                                            <code className="text-[10px] break-all bg-slate-200 p-1 mt-1 block rounded text-slate-700">Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)</code>
-                                        </p>
-                                        <input
-                                            type="file"
-                                            accept=".csv"
-                                            ref={fileInputRef}
-                                            onChange={handleFileUpload}
-                                            className="hidden"
-                                            id="csvUpload"
-                                        />
-                                        <label
-                                            htmlFor="csvUpload"
-                                            className="cursor-pointer bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-xl shadow-sm hover:bg-slate-100 font-bold text-sm transition"
-                                        >
-                                            Select CSV File
-                                        </label>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* UPLOAD STATS RESULT */}
-                    {uploadStats && (
-                        <div className={`mt-4 p-4 rounded-xl border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-                            <p className="font-bold text-sm">Upload Complete</p>
-                            <p className="text-sm mt-1">✅ Successfully Imported: {uploadStats.success} records</p>
-                            {uploadStats.errors.length > 0 && (
-                                <div className="mt-2 text-xs text-red-600 max-h-32 overflow-y-auto">
-                                    <p className="font-bold">Errors:</p>
-                                    <ul className="list-disc pl-4">
-                                        {uploadStats.errors.slice(0, 10).map((err, i) => <li key={i}>{err}</li>)}
-                                        {uploadStats.errors.length > 10 && <li>...and {uploadStats.errors.length - 10} more</li>}
-                                    </ul>
                                 </div>
+                            ) : (
+                                <>
+                                    <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
+                                    <p className="text-sm text-slate-600 mb-4">
+                                        Upload CSV with Master TNI headers:<br />
+                                        <code className="text-[10px] break-all bg-slate-200 p-1 mt-1 block rounded text-slate-700">Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)</code>
+                                    </p>
+                                    <input
+                                        type="file"
+                                        accept=".csv"
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                        id="csvUpload"
+                                    />
+                                    <label
+                                        htmlFor="csvUpload"
+                                        className="cursor-pointer bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-xl shadow-sm hover:bg-slate-100 font-bold text-sm transition"
+                                    >
+                                        Select CSV File
+                                    </label>
+                                </>
                             )}
                         </div>
-                    )}
-
-                    {/* RECENT EMPLOYEES LIST (Limited) */}
-                    <div className="mt-8">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Audit Log: Recently Synchronized (Last 20)</p>
-                        <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                            <table className="w-full text-left text-sm">
-                                <thead className="bg-slate-100 text-slate-500 font-bold uppercase text-xs">
-                                    <tr>
-                                        <th className="p-3">ID</th>
-                                        <th className="p-3">Name</th>
-                                        <th className="p-3">Email</th>
-                                        <th className="p-3">Dept</th>
-                                        <th className="p-3 w-10"></th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-slate-100 bg-white">
-                                    {employees.slice(0, 20).map(emp => (
-                                        <tr key={emp.id} className="hover:bg-slate-50">
-                                            <td className="p-3 font-mono text-slate-600">{emp.id}</td>
-                                            <td className="p-3 font-medium text-slate-900">{emp.name}</td>
-                                            <td className="p-3 text-slate-500">{emp.email}</td>
-                                            <td className="p-3 text-slate-500">{emp.sectionName || '-'}</td>
-                                            <td className="p-3">
-                                                <button
-                                                    onClick={() => handleDelete(emp.id)}
-                                                    disabled={deletingId === emp.id}
-                                                    className="text-slate-300 hover:text-red-500 transition disabled:opacity-50"
-                                                >
-                                                    {deletingId === emp.id ? (
-                                                        <HiOutlineArrowPath className="animate-spin" size={16} />
-                                                    ) : (
-                                                        <HiOutlineTrash size={16} />
-                                                    )}
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
                     </div>
-
                 </div>
-            )}
+
+                {/* UPLOAD STATS RESULT */}
+                {uploadStats && (
+                    <div className={`mt-4 p-4 rounded-xl border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
+                        <p className="font-bold text-sm">Upload Complete</p>
+                        <p className="text-sm mt-1">✅ Successfully Imported: {uploadStats.success} records</p>
+                        {uploadStats.errors.length > 0 && (
+                            <div className="mt-2 text-xs text-red-600 max-h-32 overflow-y-auto">
+                                <p className="font-bold">Errors:</p>
+                                <ul className="list-disc pl-4">
+                                    {uploadStats.errors.slice(0, 10).map((err, i) => <li key={i}>{err}</li>)}
+                                    {uploadStats.errors.length > 10 && <li>...and {uploadStats.errors.length - 10} more</li>}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* RECENT EMPLOYEES LIST (Limited) */}
+                <div className="mt-8">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Audit Log: Recently Synchronized (Last 20)</p>
+                    <div className="overflow-x-auto border border-slate-200 rounded-xl">
+                        <table className="w-full text-left text-sm">
+                            <thead className="bg-slate-100 text-slate-500 font-bold uppercase text-xs">
+                                <tr>
+                                    <th className="p-3">ID</th>
+                                    <th className="p-3">Name</th>
+                                    <th className="p-3">Email</th>
+                                    <th className="p-3">Dept</th>
+                                    <th className="p-3 w-10"></th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100 bg-white">
+                                {employees.slice(0, 20).map(emp => (
+                                    <tr key={emp.id} className="hover:bg-slate-50 group">
+                                        <td className="p-3 font-mono text-slate-600">{emp.id}</td>
+                                        <td className="p-3 font-medium text-slate-900">{emp.name}</td>
+                                        <td className="p-3 text-slate-500">{emp.email}</td>
+                                        <td className="p-3 text-slate-500">{emp.sectionName || '-'}</td>
+                                        <td className="p-3">
+                                            <button
+                                                onClick={() => handleDelete(emp.id)}
+                                                disabled={deletingId === emp.id}
+                                                className="text-slate-300 hover:text-rose-500 transition disabled:opacity-50 opacity-0 group-hover:opacity-100"
+                                            >
+                                                {deletingId === emp.id ? (
+                                                    <HiOutlineArrowPath className="animate-spin" size={16} />
+                                                ) : (
+                                                    <HiOutlineTrash size={16} />
+                                                )}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
         </div>
     );
 }

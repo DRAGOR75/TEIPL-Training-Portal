@@ -9,8 +9,8 @@ export default async function AdminTroubleshootingPage() {
     return (
         <div className="container mx-auto p-6 max-w-7xl">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-slate-900">Troubleshooting Admin</h1>
-                <p className="text-slate-500">Manage machines, fault codes, and diagnostic sequences.</p>
+                <h1 className="text-2xl md:text-1xl font-black text-slate-900 tracking-tight">Troubleshooting Admin</h1>
+
             </div>
 
             <AdminTabs

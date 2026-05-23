@@ -146,7 +146,9 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         let newCategory: TrainingCategory = 'OTHER_PROGRAMS';
                         const programCategory = row['Training Group'] ? row['Training Group'].toString() : '';
                         
-                        if (programCategory.toUpperCase().includes('HEMM') || programCategory.toUpperCase().includes('FUNCTIONAL')) {
+                        if (programCategory.toUpperCase().includes('MINING')) {
+                            newCategory = 'MINING_PROGRAMS';
+                        } else if (programCategory.toUpperCase().includes('HEMM') || programCategory.toUpperCase().includes('FUNCTIONAL')) {
                             newCategory = 'HEMM_PROGRAMS';
                         }
 
