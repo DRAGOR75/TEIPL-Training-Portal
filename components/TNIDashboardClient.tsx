@@ -108,8 +108,8 @@ export default function TNIDashboardClient({
 
             {/* 1. Training History Table */}
             <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-                <div 
-                    className="flex justify-between items-center cursor-pointer select-none" 
+                <div
+                    className="flex justify-between items-center cursor-pointer select-none"
                     onClick={() => setIsHistoryOpen(!isHistoryOpen)}
                 >
                     <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
@@ -194,7 +194,7 @@ export default function TNIDashboardClient({
                         )}
                     </button>
                 </div>
-                
+
                 {isFormOpen && (
                     <div className="p-6 border border-slate-200 bg-white rounded-3xl shadow-sm flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="border-b border-slate-200 pb-3">
@@ -224,7 +224,7 @@ export default function TNIDashboardClient({
                                         placeholder="Search by name, category, or ID..."
                                         className="w-full text-xs"
                                     />
-                                    
+
                                     {/* Hidden input to satisfy existing backend logic without modifying it */}
                                     {(() => {
                                         const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
@@ -273,13 +273,13 @@ export default function TNIDashboardClient({
 
             {/* 2. Approved or Rejected Manager Table */}
             <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-                <div 
-                    className="flex justify-between items-center cursor-pointer select-none pb-2" 
+                <div
+                    className="flex justify-between items-center cursor-pointer select-none pb-2"
                     onClick={() => setIsReviewedOpen(!isReviewedOpen)}
                 >
                     <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
                         <HiOutlineCheckCircle className="text-blue-600 shrink-0 text-lg sm:text-xl" />
-                        Reviewed Nominations
+                        TNI Approved
                         {!isReviewedOpen && (
                             <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
                                 {reviewedNominations.length}
@@ -290,7 +290,7 @@ export default function TNIDashboardClient({
                         {isReviewedOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
                     </button>
                 </div>
-                
+
                 {isReviewedOpen && (
                     <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         {reviewedNominations.length === 0 ? (
@@ -355,13 +355,13 @@ export default function TNIDashboardClient({
 
             {/* 3. Pending Table */}
             <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-                <div 
-                    className="flex justify-between items-center cursor-pointer select-none pb-2" 
+                <div
+                    className="flex justify-between items-center cursor-pointer select-none pb-2"
                     onClick={() => setIsPendingOpen(!isPendingOpen)}
                 >
                     <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
                         <HiOutlineClock className="text-thriveni-blue shrink-0 text-lg sm:text-xl" />
-                        Pending Nominations
+                        TNI due for approval
                         {!isPendingOpen && (
                             <span className="ml-1 sm:ml-2 bg-slate-100 text-slate-600 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
                                 {pendingNominations.length}

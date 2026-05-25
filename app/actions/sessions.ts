@@ -640,10 +640,12 @@ export async function registerAndJoinBatch(batchId: string, formData: {
     mobile: string;
     grade: 'EXECUTIVE' | 'WORKMAN';
     location: string;
-    yearsOfExperience: string;
-    projectLocation: string;
     managerName: string;
     managerEmail: string;
+    managerMobile?: string;
+    doj?: string;
+    dob?: string;
+    projectLocation?: string;
 }) {
     try {
         // 1. Double check batch validity
@@ -683,10 +685,12 @@ export async function registerAndJoinBatch(batchId: string, formData: {
                 mobile: formData.mobile.substring(0, 20),
                 grade: formData.grade,
                 location: formData.location?.substring(0, 100),
-                yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
+                doj: formData.doj ? new Date(formData.doj) : undefined,
+                dob: formData.dob ? new Date(formData.dob) : undefined,
                 projectLocation: formData.projectLocation?.substring(0, 100),
                 managerName: formData.managerName?.substring(0, 100),
-                managerEmail: formData.managerEmail.substring(0, 100)
+                managerEmail: formData.managerEmail.substring(0, 100),
+                managerMobile: formData.managerMobile?.substring(0, 15)
             },
             create: {
                 id: formData.empId.substring(0, 50),
@@ -697,10 +701,12 @@ export async function registerAndJoinBatch(batchId: string, formData: {
                 mobile: formData.mobile.substring(0, 20),
                 grade: formData.grade,
                 location: formData.location?.substring(0, 100),
-                yearsOfExperience: formData.yearsOfExperience?.substring(0, 50),
+                doj: formData.doj ? new Date(formData.doj) : undefined,
+                dob: formData.dob ? new Date(formData.dob) : undefined,
                 projectLocation: formData.projectLocation?.substring(0, 100),
                 managerName: formData.managerName?.substring(0, 100),
-                managerEmail: formData.managerEmail.substring(0, 100)
+                managerEmail: formData.managerEmail.substring(0, 100),
+                managerMobile: formData.managerMobile?.substring(0, 15)
             }
         });
 

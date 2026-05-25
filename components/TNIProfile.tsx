@@ -32,11 +32,13 @@ type Employee = {
     location: string | null;
     mobile: string | null;
     designation: string | null;
-    yearsOfExperience: string | null;
+    doj: Date | null;
+    dob: Date | null;
     projectLocation: string | null;
     gender: string | null;
     managerName: string | null;
     managerEmail: string | null;
+    managerMobile: string | null;
     status: string | null;
 };
 
@@ -84,10 +86,12 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         gender: employee.gender || '',
         mobile: employee.mobile || '',
         designation: employee.designation || '',
-        yearsOfExperience: employee.yearsOfExperience || '',
+        doj: employee.doj ? new Date(employee.doj).toISOString().split('T')[0] : '',
+        dob: employee.dob ? new Date(employee.dob).toISOString().split('T')[0] : '',
         projectLocation: employee.projectLocation || '',
         managerName: employee.managerName || '',
         managerEmail: employee.managerEmail || '',
+        managerMobile: employee.managerMobile || '',
         status: employee.status || 'Active'
     });
 
@@ -108,10 +112,12 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             gender: formData.gender,
             mobile: formData.mobile,
             designation: formData.designation,
-            yearsOfExperience: formData.yearsOfExperience,
+            doj: formData.doj ? new Date(formData.doj) : null,
+            dob: formData.dob ? new Date(formData.dob) : null,
             projectLocation: formData.projectLocation,
             managerName: formData.managerName,
             managerEmail: formData.managerEmail,
+            managerMobile: formData.managerMobile,
             status: formData.status
         });
 
@@ -198,14 +204,22 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Years of Exp.</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
                         <input
-                            type="text"
-                            inputMode="numeric"
+                            type="date"
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
-                            placeholder="Years of Experience"
-                            value={formData.yearsOfExperience}
-                            onChange={e => setFormData({ ...formData, yearsOfExperience: e.target.value.replace(/[^0-9]/g, '') })}
+                            value={formData.doj}
+                            onChange={e => setFormData({ ...formData, doj: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
+                        <input
+                            type="date"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.dob}
+                            onChange={e => setFormData({ ...formData, dob: e.target.value })}
                         />
                     </div>
 
@@ -277,6 +291,16 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             value={formData.managerEmail}
                             placeholder="Manager Email"
                             onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
+                        />
+                    </div>
+                    
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerMobile}
+                            placeholder="Manager Mobile"
+                            onChange={e => setFormData({ ...formData, managerMobile: e.target.value })}
                         />
                     </div>
                 </div>
@@ -391,15 +415,39 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             </div>
                         </div>
 
-                        {/* Total Experience */}
+                        {/* Date of Joining */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
                                 <HiOutlineCalendar className="text-red-600" size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Experience</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.yearsOfExperience ? `${employee.yearsOfExperience} Years` : 'Not Set'}>
-                                    {employee.yearsOfExperience ? `${employee.yearsOfExperience} Years` : 'Not Set'}
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date of Joining / Exp</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.doj ? new Date(employee.doj).toLocaleDateString() : 'Not Set'}>
+                                    {(() => {
+                                        if (!employee.doj) return 'Not Set';
+                                        const doj = new Date(employee.doj);
+                                        const now = new Date();
+                                        let years = now.getFullYear() - doj.getFullYear();
+                                        let months = now.getMonth() - doj.getMonth();
+                                        if (months < 0) {
+                                            years--;
+                                            months += 12;
+                                        }
+                                        return `${doj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} (${years} Years, ${months} Months)`;
+                                    })()}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Date of Birth */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineCalendar className="text-purple-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date of Birth</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.dob ? new Date(employee.dob).toLocaleDateString() : 'Not Set'}>
+                                    {employee.dob ? new Date(employee.dob).toLocaleDateString() : 'Not Set'}
                                 </span>
                             </div>
                         </div>
@@ -464,6 +512,11 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                                 {employee.managerEmail && (
                                     <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerEmail}>
                                         {employee.managerEmail}
+                                    </span>
+                                )}
+                                {employee.managerMobile && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerMobile}>
+                                        {employee.managerMobile}
                                     </span>
                                 )}
                             </div>

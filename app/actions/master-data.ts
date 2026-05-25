@@ -185,6 +185,8 @@ export async function createEmployee(formData: FormData) {
                 })(),
                 managerName: sanitizeInput(formData.get('manager_name') as string),
                 managerEmail: sanitizeInput(formData.get('manager_email') as string),
+                doj: formData.get('doj') ? new Date(formData.get('doj') as string) : undefined,
+                dob: formData.get('dob') ? new Date(formData.get('dob') as string) : undefined,
             }
         });
         revalidatePath('/admin/tni-dashboard');

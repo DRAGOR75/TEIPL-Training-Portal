@@ -23,6 +23,7 @@ interface Employee {
     email: string;
     grade: string;
     sectionName: string | null;
+    managerMobile: string | null;
 }
 
 export default function EmployeeManager({ employees }: { employees: Employee[] }) {
@@ -177,6 +178,17 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 />
                             </div>
 
+                            <div className="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Date of Joining</label>
+                                    <input type="date" name="doj" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                </div>
+                                <div>
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Date of Birth</label>
+                                    <input type="date" name="dob" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
+                                </div>
+                            </div>
+
                             <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
                                 Add Employee
                             </FormSubmitButton>
@@ -260,6 +272,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     <th className="p-3">Name</th>
                                     <th className="p-3">Email</th>
                                     <th className="p-3">Dept</th>
+                                    <th className="p-3">Manager Mobile</th>
                                     <th className="p-3 w-10"></th>
                                 </tr>
                             </thead>
@@ -270,6 +283,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                         <td className="p-3 font-medium text-slate-900">{emp.name}</td>
                                         <td className="p-3 text-slate-500">{emp.email}</td>
                                         <td className="p-3 text-slate-500">{emp.sectionName || '-'}</td>
+                                        <td className="p-3 text-slate-500">{emp.managerMobile || '-'}</td>
                                         <td className="p-3">
                                             <button
                                                 onClick={() => handleDelete(emp.id)}

@@ -59,10 +59,12 @@ export async function updateEmployeeProfile(empId: string, data: {
     gender?: string;
     mobile?: string;
     designation?: string;
-    yearsOfExperience?: string;
+    doj?: Date | null;
+    dob?: Date | null;
     projectLocation?: string;
     managerName?: string;
     managerEmail?: string;
+    managerMobile?: string;
     status?: string;
 }) {
     try {
@@ -80,10 +82,12 @@ export async function updateEmployeeProfile(empId: string, data: {
                 gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
                 mobile: data.mobile?.substring(0, 15),
                 designation: data.designation?.substring(0, 100),
-                yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
+                doj: data.doj,
+                dob: data.dob,
                 projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
+                managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status,
             },
             create: {
@@ -96,10 +100,12 @@ export async function updateEmployeeProfile(empId: string, data: {
                 gender: data.gender ? (data.gender.toUpperCase() as Gender) : null,
                 mobile: data.mobile?.substring(0, 15),
                 designation: data.designation?.substring(0, 100),
-                yearsOfExperience: data.yearsOfExperience?.substring(0, 50),
+                doj: data.doj,
+                dob: data.dob,
                 projectLocation: data.projectLocation?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
+                managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status || 'Active',
             }
         });

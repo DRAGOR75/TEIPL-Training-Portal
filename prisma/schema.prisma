@@ -18,11 +18,13 @@ model Employee {
   location          String?
   mobile            String?
   designation       String?
-  yearsOfExperience String?   @map("years_of_experience")
+  doj               DateTime? @map("doj")
+  dob               DateTime? @map("dob")
   projectLocation   String?   @map("project_location")
   gender            Gender?
   managerName       String?   @map("manager_name")
   managerEmail      String?   @map("manager_email")
+  managerMobile     String?   @map("manager_mobile")
   programName       String?   @map("program_name")
   startDate         DateTime? @map("start_date")
   endDate           DateTime? @map("end_date")
