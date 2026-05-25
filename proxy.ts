@@ -67,6 +67,6 @@ export default authProxy(async (req) => {
 }) as unknown as NextProxy;
 
 export const config: ProxyConfig = {
-    // Apply proxy to all routes EXCEPT static files (next internals, etc)
-    matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+    // Apply proxy to all routes EXCEPT static files and API routes
+    matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };

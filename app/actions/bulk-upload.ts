@@ -23,6 +23,7 @@ interface EmployeeImportRow {
     id?: string;
     name?: string;
     email?: string;
+    'Subject Code'?: string;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -115,35 +116,49 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 managerApprovalStatus = 'Rejected';
             }
 
-            // Extract programs from 'Separated  TNI (Technical)' or 'Training Need Identified'
+            // Extract programs from 'Subject Code' or 'Separated  TNI (Technical)'
+            let subjectCodesString = row['Subject Code'] ? row['Subject Code'].toString().trim() : '';
             let programsString = row['Separated  TNI (Technical)'] || row['Training Need Identified'] || '';
-            programsString = programsString.toString();
+            programsString = programsString.toString().trim();
 
-            if (programsString) {
-                // Split by commas or # (as seen in the sample)
+            let programIdsToLink = new Set<string>();
+            const combinedString = `${subjectCodesString} ${programsString}`;
+            
+            // Regex to find standard UUIDs
+            const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
+            const matches = combinedString.match(uuidRegex);
+
+            if (matches && matches.length > 0) {
+                // Scenario A: We found specific Program IDs (UUIDs)
+                // We ONLY link these IDs, completely ignoring any extra text/names to prevent fragments.
+                for (const code of matches) {
+                    const key = code.toLowerCase();
+                    if (programMap.has(key)) {
+                        programIdsToLink.add(programMap.get(key)!.id);
+                    } else {
+                        errors.push(`Row Error (${empId}): Program ID '${code}' not found in database.`);
+                    }
+                }
+            } else if (programsString) {
+                // Scenario B: No IDs found. Fallback to parsing names separated by comma or hash.
                 const programParts = programsString.split(/,|#/);
 
                 for (let rawProgName of programParts) {
-                    // Clean up string like "Additional Programs" or "(1 Days)"
                     let progName = rawProgName.trim();
                     if (!progName || progName.includes('(1 Days)') || progName.includes('(2 Days)')) continue;
 
-                    // Remove leading/trailing artifacts
                     progName = progName.replace(/["']/g, ''); // Remove quotes
 
                     if (progName.toLowerCase().startsWith('additional programs') || progName.toLowerCase().startsWith('computer skills')) {
-                        // The CSV format sometimes prefixes the category like "Additional Programs # 5S...".
                         continue;
                     }
 
-                    // Check if Program Exists
                     const progKey = progName.toLowerCase();
-                    let programId = '';
 
                     if (programMap.has(progKey)) {
-                        programId = programMap.get(progKey)!.id;
+                        programIdsToLink.add(programMap.get(progKey)!.id);
                     } else {
-                        // Determine category (default to OTHER_PROGRAMS or HEMM_PROGRAMS based on CSV)
+                        // Create missing program dynamically
                         let newCategory: TrainingCategory = 'OTHER_PROGRAMS';
                         const programCategory = row['Training Group'] ? row['Training Group'].toString() : '';
                         
@@ -153,39 +168,39 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                             newCategory = 'HEMM_PROGRAMS';
                         }
 
-                        // Create missing program dynamically
                         const newProg = await db.program.create({
                             data: {
                                 name: progName,
                                 category: newCategory,
                             }
                         });
-                        programId = newProg.id;
-                        programMap.set(progKey, { id: programId, category: newCategory }); // cache it
+                        programMap.set(progKey, { id: newProg.id, category: newCategory });
+                        programIdsToLink.add(newProg.id);
                     }
+                }
+            }
 
-                    // Check if a pending nomination already exists for this employee/program to prevent duplicates
-                    const existingNomination = await db.nomination.findFirst({
-                        where: {
+            // Create Nominations for all collected Program IDs
+            for (const programId of programIdsToLink) {
+                const existingNomination = await db.nomination.findFirst({
+                    where: {
+                        empId: empId,
+                        programId: programId,
+                        status: tniStatus
+                    }
+                });
+
+                if (!existingNomination) {
+                    await db.nomination.create({
+                        data: {
                             empId: empId,
                             programId: programId,
-                            status: tniStatus
+                            source: tniSource,
+                            status: tniStatus,
+                            managerApprovalStatus: managerApprovalStatus,
+                            justification: "Bulk uploaded from TNI Master List"
                         }
                     });
-
-                    if (!existingNomination) {
-                        // Create the Nomination record
-                        await db.nomination.create({
-                            data: {
-                                empId: empId,
-                                programId: programId,
-                                source: tniSource,
-                                status: tniStatus,
-                                managerApprovalStatus: managerApprovalStatus,
-                                justification: "Bulk uploaded from TNI Master List"
-                            }
-                        });
-                    }
                 }
             }
 

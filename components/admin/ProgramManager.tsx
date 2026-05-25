@@ -228,7 +228,8 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                     <table className="w-full text-sm text-left">
                                         <thead className="bg-slate-50 text-slate-500 text-[11px] font-black uppercase tracking-wider border-b border-slate-200">
                                             <tr>
-                                                <th className="px-5 py-4 w-1/3">Program Details</th>
+                                                <th className="px-5 py-4 w-1/4">Program Details</th>
+                                                <th className="px-5 py-4">ID</th>
                                                 <th className="px-5 py-4 w-1/6">Category</th>
                                                 <th className="px-5 py-4 w-1/6">Target Grades</th>
                                                 <th className="px-5 py-4 w-1/4">Objectives</th>
@@ -243,6 +244,9 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                                         <div className="text-[10px] text-slate-500 font-medium uppercase mt-1 max-w-[250px] truncate" title={prog.sections.map(s => s.name).join(', ') || 'All Sections'}>
                                                             Sections: {prog.sections.length > 0 ? prog.sections.map(s => s.name).join(', ') : 'All'}
                                                         </div>
+                                                    </td>
+                                                    <td className="px-5 py-4">
+                                                        <span className="text-xs font-mono font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">{prog.id}</span>
                                                     </td>
                                                     <td className="px-5 py-4">
                                                         <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100">
@@ -285,7 +289,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                                 </tr>
                                             )) : (
                                                 <tr>
-                                                    <td colSpan={5} className="px-5 py-12 text-center text-slate-500 font-medium">
+                                                    <td colSpan={6} className="px-5 py-12 text-center text-slate-500 font-medium">
                                                         <div className="flex flex-col items-center gap-2">
                                                             <HiOutlineBookOpen size={32} className="text-slate-300" />
                                                             <span>No programs found matching "{searchQuery}".</span>
