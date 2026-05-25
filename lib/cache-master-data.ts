@@ -58,7 +58,8 @@ export const getCachedAdminEmployees = async () => {
                     name: true,
                     email: true,
                     grade: true,
-                    sectionName: true
+                    sectionName: true,
+                    managerMobile: true
                 }
             });
         },
