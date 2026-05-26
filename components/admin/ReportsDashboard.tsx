@@ -567,7 +567,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                 <button
                                     onClick={handleExportFiltered}
                                     title="Export to Excel"
-                                    className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"
+                                    className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-200 active:scale-95"
                                 >
                                     <HiOutlineArrowDownTray size={20} />
                                 </button>

@@ -27,12 +27,7 @@ export const getCachedAdminPrograms = async () => {
         async () => {
             return db.program.findMany({
                 orderBy: { name: 'asc' },
-                select: {
-                    id: true,
-                    name: true,
-                    category: true,
-                    targetGrades: true,
-                    objectives: true,
+                include: {
                     sections: {
                         select: { id: true, name: true }
                     }
@@ -51,16 +46,7 @@ export const getCachedAdminEmployees = async () => {
     return unstable_cache(
         async () => {
             return db.employee.findMany({
-                take: 100,
-                orderBy: { id: 'desc' },
-                select: {
-                    id: true,
-                    name: true,
-                    email: true,
-                    grade: true,
-                    sectionName: true,
-                    managerMobile: true
-                }
+                orderBy: { id: 'desc' }
             });
         },
         ['admin-employees-list'],

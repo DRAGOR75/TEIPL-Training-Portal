@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import { createProgram, deleteProgram, updateProgram } from '@/app/actions/master-data';
+import { createProgram, deleteProgram, updateProgram, toggleProgramStatus } from '@/app/actions/master-data';
 import { 
     HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown, 
     HiOutlineChevronUp, HiOutlineArrowPath, HiOutlinePencilSquare,
-    HiOutlineMagnifyingGlass, HiOutlineArrowUpTray, HiOutlineXMark
+    HiOutlineMagnifyingGlass, HiOutlineArrowUpTray, HiOutlineXMark,
+    HiOutlineArrowDownTray, HiOutlineEye, HiOutlineEyeSlash
 } from 'react-icons/hi2';
 import { TrainingCategory, Grade } from '@prisma/client';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
+import { exportToExcel } from '@/lib/export-utils';
 
 interface Program {
     id: string;
@@ -16,6 +18,16 @@ interface Program {
     category: TrainingCategory;
     targetGrades: Grade[];
     objectives?: string | null;
+    status?: string | null;
+    machineModel?: string | null;
+    materialPriority?: string | null;
+    contentResp?: string | null;
+    targetDate?: string | null;
+    syllabusLink?: string | null;
+    trainerMaterial?: string | null;
+    participantMaterial?: string | null;
+    days?: number | null;
+    level?: string | null;
     sections: { id: string, name: string }[];
 }
 
@@ -31,6 +43,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [editingProgram, setEditingProgram] = useState<Program | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
 
     // Filter and Paginate
     const filteredPrograms = useMemo(() => {
@@ -76,6 +89,13 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
         setDeletingId(id);
         await deleteProgram(id);
         setDeletingId(null);
+    }
+
+    async function handleToggleStatus(id: string, currentStatus: string | null) {
+        setTogglingId(id);
+        const result = await toggleProgramStatus(id, currentStatus);
+        if (result?.error) alert(result.error);
+        setTogglingId(null);
     }
 
     // Modal Component
@@ -183,6 +203,33 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         <p className="text-xs text-slate-500 font-medium">{programs.length} Total Registered Courses</p>
                     </div>
                 </div>
+                <button
+                    onClick={() => {
+                        const exportData = programs.map(p => ({
+                            'Program ID': p.id,
+                            'Program Name': p.name,
+                            Category: p.category.replace('_PROGRAMS', ''),
+                            'Target Grades': p.targetGrades.join(', '),
+                            Status: p.status || 'Active',
+                            'Machine Model': p.machineModel || '',
+                            'Material Priority': p.materialPriority || '',
+                            'Content Responsibility': p.contentResp || '',
+                            'Target Date': p.targetDate || '',
+                            'Syllabus Link': p.syllabusLink || '',
+                            'Trainer Material': p.trainerMaterial || '',
+                            'Participant Material': p.participantMaterial || '',
+                            Days: p.days || '',
+                            Level: p.level || '',
+                            'Objectives': p.objectives || '',
+                            Sections: p.sections.length > 0 ? p.sections.map(s => s.name).join(', ') : 'All Sections'
+                        }));
+                        exportToExcel(exportData, 'Training_Programs');
+                    }}
+                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
+                >
+                    <HiOutlineArrowDownTray size={18} />
+                    <span className="hidden sm:inline">Export to Excel</span>
+                </button>
             </div>
 
             <div className="p-6">
@@ -232,6 +279,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                                 <th className="px-5 py-4">ID</th>
                                                 <th className="px-5 py-4 w-1/6">Category</th>
                                                 <th className="px-5 py-4 w-1/6">Target Grades</th>
+                                                <th className="px-5 py-4">Status</th>
                                                 <th className="px-5 py-4 w-1/4">Objectives</th>
                                                 <th className="px-5 py-4 text-right w-24">Actions</th>
                                             </tr>
@@ -263,12 +311,27 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-4">
+                                                        <span className={`inline-flex items-center px-2 py-1 rounded-md text-[10px] font-bold border ${(!prog.status || prog.status === 'Active') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                                                            {(!prog.status || prog.status === 'Active') ? 'Active' : 'Inactive'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-5 py-4">
                                                         <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed" title={prog.objectives || ''}>
                                                             {prog.objectives || <span className="italic text-slate-400">No objectives</span>}
                                                         </p>
                                                     </td>
                                                     <td className="px-5 py-4">
                                                         <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button 
+                                                                onClick={() => handleToggleStatus(prog.id, prog.status || null)}
+                                                                disabled={togglingId === prog.id}
+                                                                className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors border border-transparent hover:border-emerald-100 disabled:opacity-50"
+                                                                title={(!prog.status || prog.status === 'Active') ? "Disable Program" : "Enable Program"}
+                                                            >
+                                                                {togglingId === prog.id ? <HiOutlineArrowPath className="animate-spin" size={18} /> : 
+                                                                    ((!prog.status || prog.status === 'Active') ? <HiOutlineEye size={18} /> : <HiOutlineEyeSlash size={18} />)
+                                                                }
+                                                            </button>
                                                             <button 
                                                                 onClick={() => setEditingProgram(prog)}
                                                                 className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"

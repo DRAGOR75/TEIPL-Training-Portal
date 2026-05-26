@@ -3,7 +3,8 @@
 import { useState, useRef } from 'react';
 import { createLocation, deleteLocation } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlineMapPin, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineMapPin, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath, HiOutlineArrowDownTray } from 'react-icons/hi2';
+import { exportToExcel } from '@/lib/export-utils';
 
 interface Location {
     id: string;
@@ -44,6 +45,19 @@ export default function LocationManager({ locations }: { locations: Location[] }
                         <p className="text-xs text-slate-500 font-medium">{locations.length} Active Sites</p>
                     </div>
                 </div>
+                <button
+                    onClick={() => {
+                        const exportData = locations.map(l => ({
+                            ID: l.id,
+                            Name: l.name
+                        }));
+                        exportToExcel(exportData, 'Training_Venues');
+                    }}
+                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
+                >
+                    <HiOutlineArrowDownTray size={18} />
+                    <span className="hidden sm:inline">Export to Excel</span>
+                </button>
             </div>
 
             <div className="p-6">
