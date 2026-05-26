@@ -1,6 +1,6 @@
 import { db } from './lib/prisma';
 async function run() {
-    const p = await db.program.findMany({ where: { name: { contains: 'Stress', mode: 'insensitive' } } });
-    console.log('Programs:', JSON.stringify(p, null, 2));
+    const d = await db.designation.findMany({ where: { name: { contains: 'Specialist' } } });
+    console.log('Designations:', JSON.stringify(d, null, 2));
 }
 run();
