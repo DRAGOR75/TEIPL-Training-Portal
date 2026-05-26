@@ -12,7 +12,6 @@ export async function createSection(formData: FormData) {
     const name = sanitizeInput(formData.get('name') as string);
     try {
         await db.section.create({ data: { name } });
-        revalidatePath('/admin/tni-dashboard');
         revalidateTag('sections', 'max');
         revalidateTag('tni-reports', 'max');
         return { success: true };
@@ -25,7 +24,6 @@ export async function deleteSection(id: string) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.section.delete({ where: { id } });
-        revalidatePath('/admin/tni-dashboard');
         revalidateTag('sections', 'max');
         revalidateTag('tni-reports', 'max');
         return { success: true };
@@ -246,7 +244,6 @@ export async function deleteLocation(id: string) {
     if (!await auth()) return { error: 'Unauthorized' };
     try {
         await db.location.delete({ where: { id } });
-        revalidatePath('/admin/tni-dashboard');
         revalidateTag('locations', 'max');
         revalidateTag('tni-reports', 'max');
         return { success: true };

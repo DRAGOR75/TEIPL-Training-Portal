@@ -46,7 +46,7 @@ export const getEmployeeProfile = async (empId: string) => {
             return { employee, sections };
         },
         [`employee-profile-${empId}`],
-        { revalidate: 3600, tags: ['employee-profile', `employee-${empId}`] }
+        { revalidate: 3600, tags: ['employee-profile', `employee-${empId}`, 'sections'] }
     )(empId);
 };
 
