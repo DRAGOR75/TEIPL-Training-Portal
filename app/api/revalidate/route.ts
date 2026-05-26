@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ message: 'Missing tag param' }, { status: 400 });
     }
 
-    revalidateTag(tag);
+    // @ts-expect-error - Next.js internal / extended signature in this project expects 2 args
+    revalidateTag(tag, 'max');
     return NextResponse.json({ revalidated: true, now: Date.now(), tag });
 }
