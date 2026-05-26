@@ -161,6 +161,23 @@ export async function updateProgram(programId: string, formData: FormData) {
     }
 }
 
+export async function toggleProgramStatus(id: string, currentStatus: string | null) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        const newStatus = (currentStatus === 'Active' || !currentStatus) ? 'Inactive' : 'Active';
+        await db.program.update({
+            where: { id },
+            data: { status: newStatus }
+        });
+        revalidatePath('/admin/tni-dashboard');
+        revalidateTag('programs', 'max');
+        revalidateTag('available-programs', 'max');
+        return { success: true, newStatus };
+    } catch (error) {
+        return { error: 'Failed to toggle status' };
+    }
+}
+
 // --- EMPLOYEES (Single) ---
 export async function createEmployee(formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };

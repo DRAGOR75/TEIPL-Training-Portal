@@ -3,7 +3,8 @@
 import { useState, useRef } from 'react';
 import { createSection, deleteSection } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlineBuildingOffice2, HiOutlinePlus, HiOutlineArrowPath } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineBuildingOffice2, HiOutlinePlus, HiOutlineArrowPath, HiOutlineArrowDownTray } from 'react-icons/hi2';
+import { exportToExcel } from '@/lib/export-utils';
 
 interface Section {
     id: string;
@@ -45,6 +46,20 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                         <p className="text-xs text-slate-500 font-medium">{sections.length} Registered Areas</p>
                     </div>
                 </div>
+                <button
+                    onClick={() => {
+                        const exportData = sections.map(s => ({
+                            ID: s.id,
+                            Name: s.name,
+                            'Programs Count': s._count?.programs || 0
+                        }));
+                        exportToExcel(exportData, 'Departments_and_Sections');
+                    }}
+                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
+                >
+                    <HiOutlineArrowDownTray size={18} />
+                    <span className="hidden sm:inline">Export to Excel</span>
+                </button>
             </div>
 
             <div className="p-6">

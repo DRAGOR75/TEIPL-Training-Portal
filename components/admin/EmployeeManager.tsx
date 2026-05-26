@@ -12,18 +12,33 @@ import {
     HiOutlineChevronUp,
     HiOutlineArrowUpTray,
     HiOutlineTableCells,
-    HiOutlineArrowPath
+    HiOutlineArrowPath,
+    HiOutlineArrowDownTray
 } from 'react-icons/hi2';
 import Papa from 'papaparse';
 import SearchableSelect from '@/components/ui/SearchableSelect';
+import { exportToExcel } from '@/lib/export-utils';
 
 interface Employee {
     id: string; // emp_id
     name: string;
     email: string;
-    grade: string;
+    grade: string | null;
+    status: string;
     sectionName: string | null;
+    location: string | null;
+    mobile: string | null;
+    designation: string | null;
+    doj: Date | null;
+    dob: Date | null;
+    projectLocation: string | null;
+    gender: string | null;
+    managerName: string | null;
+    managerEmail: string | null;
     managerMobile: string | null;
+    programName: string | null;
+    startDate: Date | null;
+    endDate: Date | null;
 }
 
 export default function EmployeeManager({ employees }: { employees: Employee[] }) {
@@ -137,6 +152,36 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                         <p className="text-xs text-slate-500 font-medium">{employees.length} Records Synthesized</p>
                     </div>
                 </div>
+                <button
+                    onClick={() => {
+                        const exportData = employees.map(e => ({
+                            'Emp ID': e.id,
+                            'Name': e.name,
+                            'Email': e.email,
+                            'Status': e.status,
+                            'Grade': e.grade || '',
+                            'Designation': e.designation || '',
+                            'Department / Section': e.sectionName || '',
+                            'Location': e.location || '',
+                            'Mobile': e.mobile || '',
+                            'Date of Joining': e.doj ? new Date(e.doj).toLocaleDateString() : '',
+                            'Date of Birth': e.dob ? new Date(e.dob).toLocaleDateString() : '',
+                            'Project Location': e.projectLocation || '',
+                            'Gender': e.gender || '',
+                            'Manager Name': e.managerName || '',
+                            'Manager Email': e.managerEmail || '',
+                            'Manager Mobile': e.managerMobile || '',
+                            'Program Name': e.programName || '',
+                            'Start Date': e.startDate ? new Date(e.startDate).toLocaleDateString() : '',
+                            'End Date': e.endDate ? new Date(e.endDate).toLocaleDateString() : ''
+                        }));
+                        exportToExcel(exportData, 'Employee_Directory');
+                    }}
+                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
+                >
+                    <HiOutlineArrowDownTray size={18} />
+                    <span className="hidden sm:inline">Export to Excel</span>
+                </button>
             </div>
 
             <div className="p-6">
