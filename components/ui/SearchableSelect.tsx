@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useDeferredValue } from 'react';
 import { HiOutlineChevronDown, HiOutlineMagnifyingGlass, HiOutlineXMark } from 'react-icons/hi2';
 
 interface Option {
@@ -63,9 +63,14 @@ export default function SearchableSelect({
         }
     }, [isOpen]);
 
+    const deferredQuery = useDeferredValue(searchQuery);
+
     const filteredOptions = options.filter(option =>
-        option.label.toLowerCase().includes(searchQuery.toLowerCase())
+        option.label.toLowerCase().includes(deferredQuery.toLowerCase())
     );
+    
+    // Performance optimization: only render up to 100 items at a time
+    const displayedOptions = filteredOptions.slice(0, 100);
 
     const selectedOption = options.find(option => String(option.value) === String(value));
 
@@ -145,9 +150,9 @@ export default function SearchableSelect({
                     ${direction === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'}
                 `}>
                         <div className="max-h-72 overflow-y-auto scroll-smooth overscroll-contain" style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent', WebkitOverflowScrolling: 'touch' }}>
-                            {filteredOptions.length > 0 ? (
+                            {displayedOptions.length > 0 ? (
                                 <div className="p-1">
-                                    {filteredOptions.map((option) => (
+                                    {displayedOptions.map((option) => (
                                         <div
                                             key={option.value}
                                             className={`

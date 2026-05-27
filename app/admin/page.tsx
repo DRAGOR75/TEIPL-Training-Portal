@@ -53,7 +53,7 @@ export default async function AdminHubPage() {
 
                     {/* Card 2: TNI Management */}
                     <AdminCard
-                        href="/admin/tni-dashboard"
+                        href="/wip"
                         title="TNI Control Panel"
                         description="Manage training programs, sections/departments, and employee database."
                         icon={<HiOutlineClipboardDocumentList size={24} />}
