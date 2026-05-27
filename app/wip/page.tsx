@@ -14,7 +14,7 @@ export default function WorkInProgressPage() {
                 </h1>
 
                 <p className="text-slate-500 font-medium mb-8 leading-relaxed">
-                    We are currently building the Nominations Management System to serve you better. Please check back soon!
+                    this page is currently under development...
                 </p>
 
                 <div className="space-y-4">
