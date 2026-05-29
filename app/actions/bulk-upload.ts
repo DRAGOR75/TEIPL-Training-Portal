@@ -5,6 +5,26 @@ import { Grade, Gender, TrainingCategory } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
+// Helper to strictly parse US Date format (MM/DD/YYYY)
+function parseUSDate(dateStr: string): Date | null {
+    if (!dateStr) return null;
+    dateStr = dateStr.trim();
+    const parts = dateStr.split(/[-/]/);
+    if (parts.length === 3) {
+        const month = parseInt(parts[0], 10);
+        const day = parseInt(parts[1], 10);
+        let year = parseInt(parts[2], 10);
+        
+        if (year < 100) year += year < 50 ? 2000 : 1900;
+
+        if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+            return new Date(Date.UTC(year, month - 1, day));
+        }
+    }
+    const fallback = new Date(dateStr);
+    return isNaN(fallback.getTime()) ? null : fallback;
+}
+
 // Interface for parsed data based on the new CSV headers
 interface EmployeeImportRow {
     'Emp.Id'?: string;
@@ -24,6 +44,19 @@ interface EmployeeImportRow {
     name?: string;
     email?: string;
     'Subject Code'?: string;
+    'DOB'?: string;
+    'DOJ'?: string;
+    'Date of Birth'?: string;
+    'D.O'?: string;
+    'D.O.J'?: string;
+    'Date of Joining'?: string;
+    'Mobile No'?: string;
+    'Mobile'?: string;
+    'Email id'?: string;
+    'Email ID'?: string;
+    'Reporting Manager'?: string;
+    'Manager Mobile No'?: string;
+    'Manager Email ID'?: string;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -57,7 +90,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             const empName = (row['Emp.Name'] || row.name || '').toString().trim();
 
             // Handle Email Placeholder
-            let emailRaw = row.email?.toString().trim();
+            let emailRaw = (row.email || row['Email id'] || row['Email ID'])?.toString().trim();
             if (!emailRaw) {
                 emailRaw = `${empId}@thriveni.com`; // Unique placeholder email string
             }
@@ -73,6 +106,18 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 else if (Object.values(Grade).includes(normalizedGrade as Grade)) gradeEnum = normalizedGrade as Grade;
             }
 
+            // Parse Dates
+            const dobRaw = row['DOB'] || row['Date of Birth'] || '';
+            const dob = parseUSDate(dobRaw);
+
+            const dojRaw = row['DOJ'] || row['D.O'] || row['D.O.J'] || row['Date of Joining'] || '';
+            const doj = parseUSDate(dojRaw);
+
+            const mobile = (row['Mobile No'] || row['Mobile'] || '')?.toString().trim();
+            const managerName = (row['Reporting Manager'] || '')?.toString().trim();
+            const managerEmail = (row['Manager Email ID'] || '')?.toString().trim();
+            const managerMobile = (row['Manager Mobile No'] || '')?.toString().trim();
+
             // Sanitized Employee Data Object
             const employeeData = {
                 name: empName.substring(0, 100),
@@ -82,6 +127,12 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 sectionName: row['Department'] ? row['Department'].toString().substring(0, 100) : null,
                 projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
                 location: row['Site'] ? row['Site'].toString().substring(0, 100) : null,
+                dob: dob,
+                doj: doj,
+                mobile: mobile || null,
+                managerName: managerName || null,
+                managerEmail: managerEmail || null,
+                managerMobile: managerMobile || null,
             };
 
             // 1. Upsert Employee
@@ -92,7 +143,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     // If the employee exists and has a real email, DON'T overwrite it with a placeholder.
                     // But Prisma upsert update doesn't have a direct "ignore if empty" without complex checks.
                     // So we conditionally exclude email from update if we generated a placeholder.
-                    ...(row.email ? { email: employeeData.email } : {})
+                    ...( (row.email || row['Email id'] || row['Email ID']) ? { email: employeeData.email } : {})
                 },
                 create: {
                     id: empId,
