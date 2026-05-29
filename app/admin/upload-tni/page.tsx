@@ -100,7 +100,7 @@ export default function UploadTNIPage() {
     };
 
     const downloadSample = () => {
-        const csvContent = "data:text/csv;charset=utf-8,Emp.Id,Emp.Name,Grade,Designation,Department,Project Name,Site,Training Group,Training Need Identified,TNI Source,Status-Completed/Cancelled/Open,Separated  TNI (Technical)\nE001,John Doe,EXECUTIVE,Manager,Mining,Project A,Site 1,Group A,Yes,Manager,Open,No";
+        const csvContent = "data:text/csv;charset=utf-8,Emp.Id,Emp.Name,Grade,Designation,Department,Project Name,Site,Training Group,Training Need Identified,TNI Source,Status-Completed/Cancelled/Open,Separated  TNI (Technical),DOB,DOJ\nE001,John Doe,EXECUTIVE,Manager,Mining,Project A,Site 1,Group A,Yes,Manager,Open,No,1990-01-01,2020-01-01";
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -169,7 +169,7 @@ export default function UploadTNIPage() {
                             {status === 'parsing' ? 'Parsing CSV...' : 'Drag & Drop CSV Here'}
                         </h3>
                         <p className="text-slate-500 font-medium max-w-sm mx-auto mb-6">
-                            Must include headers: Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)
+                            Must include headers: Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical), DOB, DOJ
                         </p>
                         <span className="text-blue-600 font-bold bg-blue-50 px-6 py-2 rounded-xl">Browse Files</span>
                     </div>
@@ -249,6 +249,8 @@ export default function UploadTNIPage() {
                                         <th className="px-6 py-4">Name</th>
                                         <th className="px-6 py-4">Department</th>
                                         <th className="px-6 py-4">Grade</th>
+                                        <th className="px-6 py-4">DOB</th>
+                                        <th className="px-6 py-4">DOJ</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -265,6 +267,12 @@ export default function UploadTNIPage() {
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
                                                 {record.Grade || record.grade || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record.DOB || record.dob || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record.DOJ || record.doj || '-'}
                                             </td>
                                         </tr>
                                     ))}
