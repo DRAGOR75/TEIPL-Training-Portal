@@ -40,7 +40,7 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === tab.id
-                            ? 'bg-white text-blue-600 shadow-sm'
+                            ? 'bg-white text-red-500 shadow-sm'
                             : 'text-slate-500 hover:text-slate-700'
                             }`}
                     >

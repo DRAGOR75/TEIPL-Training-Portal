@@ -210,7 +210,8 @@ export async function submitTNINomination(formData: FormData) {
                 empId,
                 programId,
                 justification: safeJustification,
-                status: 'Pending'
+                status: bypassEmail ? 'Approved' : 'Pending',
+                managerApprovalStatus: bypassEmail ? 'Approved' : 'Pending'
             }))
         });
 

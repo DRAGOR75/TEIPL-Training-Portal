@@ -198,8 +198,10 @@ export async function createEmployee(formData: FormData) {
                     if (!g) return null;
                     return g.toUpperCase() as Gender;
                 })(),
-                managerName: sanitizeInput(formData.get('manager_name') as string),
-                managerEmail: sanitizeInput(formData.get('manager_email') as string),
+                managerName: sanitizeInput(formData.get('managerName') as string),
+                managerEmail: sanitizeInput(formData.get('managerEmail') as string),
+                managerMobile: sanitizeInput(formData.get('managerMobile') as string),
+                designation: sanitizeInput(formData.get('designation') as string),
                 doj: formData.get('doj') ? new Date(formData.get('doj') as string) : undefined,
                 dob: formData.get('dob') ? new Date(formData.get('dob') as string) : undefined,
             }
@@ -222,6 +224,43 @@ export async function deleteEmployee(id: string) {
         return { success: true };
     } catch (error) {
         return { error: 'Failed to delete employee' };
+    }
+}
+
+export async function updateEmployee(id: string, formData: FormData) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        await db.employee.update({
+            where: { id },
+            data: {
+                name: sanitizeInput(formData.get('name') as string),
+                email: sanitizeInput(formData.get('email') as string),
+                grade: (() => {
+                    const g = formData.get('grade') as string;
+                    if (!g) throw new Error("Grade is required");
+                    return g as Grade;
+                })(),
+                sectionName: formData.get('sectionName') as string,
+                location: formData.get('location') as string,
+                gender: (() => {
+                    const g = formData.get('gender') as string;
+                    if (!g) return null;
+                    return g.toUpperCase() as Gender;
+                })(),
+                managerName: sanitizeInput(formData.get('managerName') as string) || null,
+                managerEmail: sanitizeInput(formData.get('managerEmail') as string) || null,
+                managerMobile: sanitizeInput(formData.get('managerMobile') as string) || null,
+                designation: sanitizeInput(formData.get('designation') as string) || null,
+                doj: formData.get('doj') ? new Date(formData.get('doj') as string) : null,
+                dob: formData.get('dob') ? new Date(formData.get('dob') as string) : null,
+            }
+        });
+        revalidatePath('/admin/tni-dashboard');
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('tni-reports', 'max');
+        return { success: true };
+    } catch (error) {
+        return { error: 'Failed to update employee' };
     }
 }
 

@@ -1,14 +1,13 @@
-import AdminHeader from '@/components/admin/AdminHeader';
-
 export default function AdminLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-slate-50">
-            <AdminHeader />
-            {children}
+        <div className="flex h-[calc(100vh-80px)] bg-slate-50 overflow-hidden">
+            <div className="flex-1 overflow-y-auto w-full relative">
+                {children}
+            </div>
         </div>
     );
 }
