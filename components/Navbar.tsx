@@ -2,9 +2,14 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList, HiOutlineChartBar } from 'react-icons/hi2';
+import { 
+    HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, 
+    HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList, 
+    HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers, 
+    HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown
+} from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
 
@@ -63,7 +68,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                     <div className="hidden md:flex items-center space-x-6">
                         <NavLink href="/" icon={<HiOutlineHome size={18} />} text="Home" />
                         {userRole === 'ADMIN' && (
-                            <NavLink href="/admin" icon={<HiOutlineShieldCheck size={18} />} text="Admin" />
+                            <AdminDropdown />
                         )}
                         {userRole === 'TRAINER' && (
                             <>
@@ -98,7 +103,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                     <div className="px-4 pt-2 pb-6 space-y-2">
                         <MobileNavLink href="/" onClick={() => setIsOpen(false)} text="Home" />
                         {userRole === 'ADMIN' && (
-                            <MobileNavLink href="/admin" onClick={() => setIsOpen(false)} text="Admin" />
+                            <MobileAdminMenu closeNav={() => setIsOpen(false)} />
                         )}
                         {userRole === 'TRAINER' && (
                             <>
@@ -142,5 +147,109 @@ function MobileNavLink({ href, onClick, text }: { href: string; onClick: () => v
         >
             {text}
         </Link>
+    );
+}
+
+const ADMIN_TABS = [
+    { id: 'hub', label: 'Admin Hub', href: '/admin', icon: HiOutlineSquares2X2 },
+    { id: 'feedback', label: 'Feedback', href: '/admin/dashboard', icon: HiOutlineChatBubbleBottomCenterText },
+    { id: 'tni', label: 'Master Data', href: '/admin/tni-dashboard', icon: HiOutlineClipboardDocumentList },
+    { id: 'troubleshooting', label: 'Diagnostics', href: '/admin/troubleshooting', icon: HiOutlineWrench },
+    { id: 'manuals', label: 'Manuals', href: '/training-manuals', icon: HiOutlineBookOpen },
+    { id: 'sessions', label: 'Sessions', href: '/admin/sessions', icon: HiOutlineUsers },
+    { id: 'reports', label: 'Reports', href: '/admin/reports', icon: HiOutlineChartBar },
+    { id: 'email', label: 'Bulk Email', href: '/admin/bulk-email', icon: HiOutlinePaperAirplane },
+];
+
+function AdminDropdown() {
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+    const pathname = usePathname();
+
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => setIsOpen(false), [pathname]);
+
+    return (
+        <div className="relative" ref={dropdownRef}>
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center gap-2 text-slate-600 hover:text-indigo-700 font-medium text-sm transition-colors py-2 px-3 rounded-lg hover:bg-indigo-50/50 focus:outline-none"
+            >
+                <HiOutlineBars3 size={20} />
+                <span>Admin</span>
+            </button>
+
+            {isOpen && (
+                <div className="absolute top-full mt-2 right-0 w-64 bg-white shadow-xl border border-slate-100 rounded-xl overflow-hidden animate-in fade-in slide-in-from-top-2 z-50">
+                    <div className="py-2 px-2 space-y-1">
+                        {ADMIN_TABS.map(tab => {
+                            const isActive = pathname === tab.href || (tab.id !== 'hub' && pathname.startsWith(tab.href));
+                            return (
+                                <Link
+                                    key={tab.id}
+                                    href={tab.href}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                                        isActive
+                                            ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                            : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 font-medium'
+                                    }`}
+                                >
+                                    <tab.icon size={18} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
+                                    <span className="text-sm">{tab.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function MobileAdminMenu({ closeNav }: { closeNav: () => void }) {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const pathname = usePathname();
+    return (
+        <div>
+            <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="w-full flex items-center justify-between text-lg font-semibold text-slate-800 py-3 px-2 border-b border-slate-50 hover:bg-slate-50 hover:pl-4 transition-all focus:outline-none"
+            >
+                <div className="flex items-center gap-3">
+                    <HiOutlineBars3 size={24} className="text-slate-500" />
+                    <span>Admin Menu</span>
+                </div>
+                <HiOutlineChevronDown size={20} className={`text-slate-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </button>
+            {isExpanded && (
+                <div className="bg-slate-50/50 py-2 space-y-1 animate-in slide-in-from-top-2 fade-in duration-200 border-b border-slate-50">
+                    {ADMIN_TABS.map(tab => {
+                        const isActive = pathname === tab.href || (tab.id !== 'hub' && pathname.startsWith(tab.href));
+                        return (
+                            <Link
+                                key={tab.id}
+                                href={tab.href}
+                                onClick={closeNav}
+                                className={`flex items-center gap-3 py-3 px-6 transition-colors ${
+                                    isActive ? 'text-indigo-700 font-bold bg-indigo-50/50' : 'text-slate-600 hover:text-indigo-700 font-medium'
+                                }`}
+                            >
+                                <tab.icon size={20} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
+                                <span>{tab.label}</span>
+                            </Link>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
     );
 }

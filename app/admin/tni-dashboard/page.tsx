@@ -38,32 +38,23 @@ export default async function MasterDataPage() {
     ]);
 
     return (
-        <main className="min-h-screen bg-slate-100 py-10 px-4 md:px-8">
-            <div className="max-w-7xl mx-auto space-y-8">
+        <main className="min-h-screen bg-slate-100 py-6 px-2 md:px-4 lg:px-6">
+            <div className="w-full mx-auto space-y-8">
 
-                {/* Header Section */}
-                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                    <div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight">TNI Control Panel</h1>
-
-                    </div>
-
-                    <div className="shrink-0">
+                <AdminDashboardTabs
+                    title={<span className="uppercase font-black text-slate-900 italic">TNI CONTROL <span className="text-amber-600">PANEL</span></span>}
+                    reportsLink={
                         <Link
                             href="/admin/reports"
-                            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-600 px-5 py-3 rounded-2xl font-bold text-sm transition-all shadow-sm hover:shadow-md active:scale-95 group"
+                            className="flex items-center gap-2 bg-white border border-slate-200 hover:border-blue-400 text-slate-700 hover:text-blue-600 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm hover:shadow-md active:scale-95 group"
                         >
                             <HiOutlineChartBarSquare size={20} className="text-blue-500 group-hover:scale-110 transition-transform" />
-                            View TNI Reports
+                            Reports
                         </Link>
-                    </div>
-                </div>
-
-                {/* Master Ribbon Tabs */}
-                <AdminDashboardTabs
+                    }
                     sectionManager={<SectionManager sections={sections} />}
                     locationManager={<LocationManager locations={locations} />}
-                    programManager={<ProgramManager programs={programs as any} allSections={sections} />}
+                    programManager={<ProgramManager programs={programs} allSections={sections} />}
                     employeeManager={<EmployeeManager employees={employees as any} />}
                     bulkUploadManager={<BulkUploadManager />}
                 />

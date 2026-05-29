@@ -44,34 +44,34 @@ export default async function TrainerHubPage() {
             <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 
-                    {/* Card 1: Training Sessions - Emerald */}
+                    {/* Card 1: TNI Control Panel - Amber/Orange */}
+                    <TrainerCard
+                        href="/trainer/employee-tni"
+                        title="TNI Control Panel"
+                        description="Manage training needs and update employee profiles instantly."
+                        icon={<HiOutlineUsers size={28} />}
+                        tag="TNI"
+                        color="amber"
+                    />
+
+                    {/* Card 2: Training Sessions - Emerald */}
                     <TrainerCard
                         href="/trainer/sessions"
                         title="Training Sessions"
                         description="View and manage the details of your assigned training sessions and batches."
                         icon={<HiOutlineUsers size={28} />}
-                        tag="Operations"
+                        tag="Training"
                         color="emerald"
                     />
 
-                    {/* Card 2: Training Feedback - Blue */}
+                    {/* Card 3: Training Feedback - Blue */}
                     <TrainerCard
                         href="/trainer/dashboard"
                         title="Training Feedback"
                         description="Review employee feedback and training ratings to analyze your program success."
                         icon={<HiOutlineChatBubbleBottomCenterText size={28} />}
-                        tag="Analytics"
+                        tag="Feedback"
                         color="blue"
-                    />
-
-                    {/* Card 3: Employee TNI - Amber/Orange */}
-                    <TrainerCard
-                        href="/trainer/employee-tni"
-                        title="Employee TNI"
-                        description="Manage training needs and update employee profiles instantly."
-                        icon={<HiOutlineUsers size={28} />}
-                        tag="Management"
-                        color="amber"
                     />
 
                     {/* Card 4: Looker Studio - Sky (External) */}
@@ -80,7 +80,7 @@ export default async function TrainerHubPage() {
                         title="Looker Reports"
                         description="Visualize training metrics and performance benchmarks through deep-dive dashboards."
                         icon={<SiLooker size={28} />}
-                        tag="Reporting"
+                        tag="Analytics"
                         color="sky"
                         isExternal
                     />

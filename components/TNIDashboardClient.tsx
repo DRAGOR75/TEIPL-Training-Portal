@@ -174,103 +174,6 @@ export default function TNIDashboardClient({
                 )}
             </div>
 
-            {/* Add Training Need */}
-            <div className="flex flex-col gap-4">
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => setIsFormOpen(!isFormOpen)}
-                        className="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg shadow-blue-200 text-xs cursor-pointer"
-                    >
-                        {isFormOpen ? (
-                            <>
-                                <HiOutlineXMark size={14} className="stroke-[2.5]" />
-                                <span>Close Nomination Form</span>
-                            </>
-                        ) : (
-                            <>
-                                <HiOutlinePlus size={14} className="stroke-[2.5]" />
-                                <span>Add Training Need</span>
-                            </>
-                        )}
-                    </button>
-                </div>
-
-                {isFormOpen && (
-                    <div className="p-6 border border-slate-200 bg-white rounded-3xl shadow-sm flex flex-col gap-4 animate-in fade-in slide-in-from-top-4 duration-300">
-                        <div className="border-b border-slate-200 pb-3">
-                            <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submit Training Nomination</h4>
-                            <p className="text-xs text-slate-500 font-medium">Select relevant courses and provide justification details below</p>
-                        </div>
-
-                        <form action={async (formData) => {
-                            startTransition(async () => {
-                                await submitTNINomination(formData);
-                                resetForm();
-                            });
-                        }} className="space-y-4">
-                            <input type="hidden" name="empId" value={empId} />
-
-                            <div className="grid grid-cols-1 gap-5">
-                                {/* Universal Program Selector */}
-                                <div className="space-y-1">
-                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
-                                    <SearchableSelect
-                                        options={programs.map(p => ({
-                                            label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
-                                            value: p.id
-                                        }))}
-                                        value={formValues.selectedProgramId}
-                                        onChange={(val) => setFormValues(prev => ({ ...prev, selectedProgramId: val }))}
-                                        placeholder="Search by name, category, or ID..."
-                                        className="w-full text-xs"
-                                    />
-
-                                    {/* Hidden input to satisfy existing backend logic without modifying it */}
-                                    {(() => {
-                                        const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
-                                        return selectedProg ? (
-                                            <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
-                                        ) : null;
-                                    })()}
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label htmlFor="justification" className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Justification / Goal *</label>
-                                <textarea
-                                    name="justification"
-                                    id="justification"
-                                    required
-                                    value={formValues.justification}
-                                    onChange={(e) => setFormValues(prev => ({ ...prev, justification: e.target.value }))}
-                                    placeholder="Explain how this training supports operational requirements or individual development..."
-                                    rows={3}
-                                    className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-xs text-slate-800 resize-none"
-                                ></textarea>
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
-                                <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
-                            </div>
-
-                            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                                <button
-                                    type="button"
-                                    onClick={resetForm}
-                                    className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
-                                >
-                                    Cancel
-                                </button>
-                                <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200">
-                                    Submit Request
-                                </FormSubmitButton>
-                            </div>
-                        </form>
-                    </div>
-                )}
-            </div>
-
             {/* 2. Approved or Rejected Manager Table */}
             <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
                 <div
@@ -416,6 +319,100 @@ export default function TNIDashboardClient({
                                 </table>
                             </div>
                         )}
+                    </div>
+                )}
+            </div>
+
+            {/* 4. Add Training Need (Nomination Form) */}
+            <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+                <div
+                    className="flex justify-between items-center cursor-pointer select-none"
+                    onClick={() => setIsFormOpen(!isFormOpen)}
+                >
+                    <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                        <HiOutlinePlus className="text-blue-600 shrink-0 text-lg sm:text-xl" />
+                        Add Training Need
+                    </h3>
+                    <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                        {isFormOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
+                    </button>
+                </div>
+
+                {isFormOpen && (
+                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                        <div className="p-6 border border-slate-200 bg-slate-50/50 rounded-2xl flex flex-col gap-4">
+                            <div className="border-b border-slate-200 pb-3">
+                                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submit Training Need</h4>
+                                <p className="text-xs text-slate-500 font-medium">Select relevant courses and provide justification details below</p>
+                                <p className="text-xs text-red-500 font-medium">Note: Please check the above tables before submitting your training need. You may have already been enrolled in a program that covers your requirement.</p>
+                            </div>
+
+                            <form action={async (formData) => {
+                                startTransition(async () => {
+                                    await submitTNINomination(formData);
+                                    resetForm();
+                                });
+                            }} className="space-y-4">
+                                <input type="hidden" name="empId" value={empId} />
+
+                                <div className="grid grid-cols-1 gap-5">
+                                    {/* Universal Program Selector */}
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
+                                        <SearchableSelect
+                                            options={programs.map(p => ({
+                                                label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
+                                                value: p.id
+                                            }))}
+                                            value={formValues.selectedProgramId}
+                                            onChange={(val) => setFormValues(prev => ({ ...prev, selectedProgramId: val }))}
+                                            placeholder="Search by name, category, or ID..."
+                                            className="w-full text-xs"
+                                        />
+
+                                        {/* Hidden input to satisfy existing backend logic without modifying it */}
+                                        {(() => {
+                                            const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
+                                            return selectedProg ? (
+                                                <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
+                                            ) : null;
+                                        })()}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-1">
+                                    <label htmlFor="justification" className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Justification / Goal *</label>
+                                    <textarea
+                                        name="justification"
+                                        id="justification"
+                                        required
+                                        value={formValues.justification}
+                                        onChange={(e) => setFormValues(prev => ({ ...prev, justification: e.target.value }))}
+                                        placeholder="Explain how this training supports operational requirements or individual development..."
+                                        rows={3}
+                                        className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-xs text-slate-800 resize-none"
+                                    ></textarea>
+                                </div>
+
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
+                                    <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
+                                </div>
+
+                                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                                    <button
+                                        type="button"
+                                        onClick={resetForm}
+                                        className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200">
+                                        Submit Request
+                                    </FormSubmitButton>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 )}
             </div>

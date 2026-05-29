@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { createEmployee, deleteEmployee } from '@/app/actions/master-data';
-import { processEmployeeUpload } from '@/app/actions/bulk-upload';
+import { useState, useMemo, useRef } from 'react';
+import { createEmployee, deleteEmployee, updateEmployee } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineTrash,
@@ -13,9 +12,13 @@ import {
     HiOutlineArrowUpTray,
     HiOutlineTableCells,
     HiOutlineArrowPath,
-    HiOutlineArrowDownTray
+    HiOutlineArrowDownTray,
+    HiOutlineMagnifyingGlass,
+    HiOutlineXMark,
+    HiOutlineArrowsPointingIn,
+    HiOutlineArrowsPointingOut,
+    HiOutlinePencilSquare
 } from 'react-icons/hi2';
-import Papa from 'papaparse';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { exportToExcel } from '@/lib/export-utils';
 
@@ -36,32 +39,62 @@ interface Employee {
     managerName: string | null;
     managerEmail: string | null;
     managerMobile: string | null;
-    programName: string | null;
-    startDate: Date | null;
-    endDate: Date | null;
 }
 
 export default function EmployeeManager({ employees }: { employees: Employee[] }) {
     const [loading, setLoading] = useState(false);
-    const [uploading, setUploading] = useState(false);
-    const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
-    const formRef = useRef<HTMLFormElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isFullscreen, setIsFullscreen] = useState(false);
 
+    // Pagination & Search
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    // Modals
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+
     const [selectedGrade, setSelectedGrade] = useState('EXECUTIVE');
     const [selectedGender, setSelectedGender] = useState('');
 
-    // --- MANUAL ADD ---
+    // Filter and Paginate
+    const filteredEmployees = useMemo(() => {
+        return employees.filter(e => {
+            const query = searchQuery.toLowerCase();
+            return e.name.toLowerCase().includes(query) ||
+                e.id.toLowerCase().includes(query) ||
+                (e.email && e.email.toLowerCase().includes(query)) ||
+                (e.sectionName && e.sectionName.toLowerCase().includes(query));
+        });
+    }, [employees, searchQuery]);
+
+    const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage) || 1;
+    const safeCurrentPage = Math.min(currentPage, totalPages);
+    const paginatedEmployees = filteredEmployees.slice((safeCurrentPage - 1) * itemsPerPage, safeCurrentPage * itemsPerPage);
+
+    useMemo(() => { setCurrentPage(1); }, [searchQuery, itemsPerPage]);
+
     async function handleAdd(formData: FormData) {
         setLoading(true);
         const result = await createEmployee(formData);
         setLoading(false);
         if (result?.error) alert(result.error);
         else {
-            formRef.current?.reset();
+            setIsAddModalOpen(false);
             setSelectedGrade('EXECUTIVE');
             setSelectedGender('');
+        }
+    }
+
+    async function handleEdit(formData: FormData) {
+        if (!editingEmployee) return;
+        setLoading(true);
+        const result = await updateEmployee(editingEmployee.id, formData);
+        setLoading(false);
+        if (result?.error) alert(result.error);
+        else {
+            setEditingEmployee(null);
         }
     }
 
@@ -73,283 +106,405 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
         setDeletingId(null);
     }
 
-    // --- BULK UPLOAD ---
-    const [progress, setProgress] = useState(0);
-
-    const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        setUploading(true);
-        setUploadStats(null);
-        setProgress(0);
-
-        Papa.parse(file, {
-            header: true,
-            skipEmptyLines: true,
-            complete: async (results) => {
-                const allData = results.data as any[];
-                const TOTAL_RECORDS = allData.length;
-                const CHUNK_SIZE = 500; // Client-side batch size
-
-                let successTotal = 0;
-                let allErrors: string[] = [];
-
-                try {
-                    for (let i = 0; i < TOTAL_RECORDS; i += CHUNK_SIZE) {
-                        const chunk = allData.slice(i, i + CHUNK_SIZE);
-
-                        const currentBatchNum = Math.floor(i / CHUNK_SIZE) + 1;
-                        const totalBatches = Math.ceil(TOTAL_RECORDS / CHUNK_SIZE);
-                        const currentProcessed = Math.min(i + CHUNK_SIZE, TOTAL_RECORDS);
-
-                        // Update Progress Percentage
-                        setProgress(Math.round((currentProcessed / TOTAL_RECORDS) * 100));
-
-                        const result = await processEmployeeUpload(chunk);
-
-                        if (result.success) {
-                            successTotal += result.count;
-                            if (result.errors && result.errors.length > 0) {
-                                allErrors = [...allErrors, ...result.errors];
-                            }
-                        } else {
-                            allErrors.push(`Batch ${currentBatchNum} failed completely.`);
-                        }
-                    }
-
-                    setUploadStats({
-                        success: successTotal,
-                        errors: allErrors
-                    });
-                } catch (err) {
-                    console.error(err);
-                    setUploadStats({ success: successTotal, errors: [...allErrors, "Process interrupted or failed."] });
-                } finally {
-                    setUploading(false);
-                    setProgress(0);
-                    // Reset file input
-                    if (fileInputRef.current) fileInputRef.current.value = '';
-                }
-            },
-            error: (error) => {
-                console.error(error);
-                setUploading(false);
-                setUploadStats({ success: 0, errors: ["Failed to parse CSV file."] });
-            }
-        });
-    };
-
-    return (
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-6">
-            <div className="p-5 flex justify-between items-center bg-slate-50 border-b border-slate-100">
-                <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-purple-100 rounded-xl text-purple-700">
-                        <HiOutlineUsers size={24} />
-                    </div>
-                    <div>
-                        <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-800">Employee Directory</h3>
-                        <p className="text-xs text-slate-500 font-medium">{employees.length} Records Synthesized</p>
-                    </div>
+    const EmployeeModal = ({ employee, isEdit }: { employee?: Employee | null, isEdit: boolean }) => (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
+                    <h2 className="text-xl font-black text-slate-800">
+                        {isEdit ? 'Edit Employee' : 'Add New Employee'}
+                    </h2>
+                    <button
+                        onClick={() => isEdit ? setEditingEmployee(null) : setIsAddModalOpen(false)}
+                        className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                    >
+                        <HiOutlineXMark size={24} />
+                    </button>
                 </div>
-                <button
-                    onClick={() => {
-                        const exportData = employees.map(e => ({
-                            'Emp ID': e.id,
-                            'Name': e.name,
-                            'Email': e.email,
-                            'Status': e.status,
-                            'Grade': e.grade || '',
-                            'Designation': e.designation || '',
-                            'Department / Section': e.sectionName || '',
-                            'Location': e.location || '',
-                            'Mobile': e.mobile || '',
-                            'Date of Joining': e.doj ? new Date(e.doj).toLocaleDateString() : '',
-                            'Date of Birth': e.dob ? new Date(e.dob).toLocaleDateString() : '',
-                            'Project Location': e.projectLocation || '',
-                            'Gender': e.gender || '',
-                            'Manager Name': e.managerName || '',
-                            'Manager Email': e.managerEmail || '',
-                            'Manager Mobile': e.managerMobile || '',
-                            'Program Name': e.programName || '',
-                            'Start Date': e.startDate ? new Date(e.startDate).toLocaleDateString() : '',
-                            'End Date': e.endDate ? new Date(e.endDate).toLocaleDateString() : ''
-                        }));
-                        exportToExcel(exportData, 'Employee_Directory');
-                    }}
-                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
-                >
-                    <HiOutlineArrowDownTray size={18} />
-                    <span className="hidden sm:inline">Export to Excel</span>
-                </button>
-            </div>
-
-            <div className="p-6">
-                {/* TABS or SPLIT VIEW for Add vs Upload */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-2">
-
-                    {/* LEFT: Manual Add */}
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Manual Entry</p>
-                        <form ref={formRef} action={handleAdd} className="bg-slate-50 p-6 rounded-2xl space-y-4 border border-slate-200">
-                            <div className="grid grid-cols-2 gap-3">
-                                <input name="id" required placeholder="Emp ID *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                <SearchableSelect
-                                    name="grade"
-                                    options={[
-                                        { label: 'Executive', value: 'EXECUTIVE' },
-                                        { label: 'Workman', value: 'WORKMAN' }
-                                    ]}
-                                    value={selectedGrade}
-                                    onChange={setSelectedGrade}
-                                    className="w-full"
-                                />
-                            </div>
-                            <input name="name" required placeholder="Full Name *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                            <input name="email" required type="email" placeholder="Email Address *" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                            <div className="grid grid-cols-2 gap-3">
-                                <input name="sectionName" placeholder="Department / Section" className="p-3 text-sm border border-slate-300 rounded-xl w-full placeholder-slate-500 text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                <SearchableSelect
-                                    name="gender"
-                                    options={[
-                                        { label: 'Male', value: 'MALE' },
-                                        { label: 'Female', value: 'FEMALE' },
-                                        { label: 'Other', value: 'OTHER' }
-                                    ]}
-                                    value={selectedGender}
-                                    onChange={setSelectedGender}
-                                    placeholder="Select Gender"
-                                    className="w-full"
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Date of Joining</label>
-                                    <input type="date" name="doj" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                </div>
-                                <div>
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Date of Birth</label>
-                                    <input type="date" name="dob" className="p-3 text-sm border border-slate-300 rounded-xl w-full text-slate-900 outline-none focus:ring-2 focus:ring-purple-500" />
-                                </div>
-                            </div>
-
-                            <FormSubmitButton className="w-full py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition disabled:opacity-50 shadow-lg shadow-purple-200">
-                                Add Employee
-                            </FormSubmitButton>
-                        </form>
-                    </div>
-
-                    {/* RIGHT: Bulk Upload */}
-                    <div className="space-y-4">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Bulk Upload (CSV)</p>
-                        <div className="bg-slate-50 p-6 rounded-2xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-                            {uploading ? (
-                                <div className="text-center w-full max-w-xs">
-                                    <div className="animate-pulse text-purple-600 font-bold text-lg mb-2">Processing CSV Data...</div>
-
-                                    {/* Progress Bar */}
-                                    <div className="mt-2">
-                                        <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
-                                            <span>Uploading...</span>
-                                            <span>{progress}%</span>
-                                        </div>
-                                        <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden border border-slate-200">
-                                            <div
-                                                className="h-full bg-purple-600 transition-all duration-300 ease-out"
-                                                style={{ width: `${progress}%` }}
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            ) : (
-                                <>
-                                    <HiOutlineTableCells size={32} className="text-slate-400 mb-2" />
-                                    <p className="text-sm text-slate-600 mb-4">
-                                        Upload CSV with Master TNI headers:<br />
-                                        <code className="text-[10px] break-all bg-slate-200 p-1 mt-1 block rounded text-slate-700">Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)</code>
-                                    </p>
-                                    <input
-                                        type="file"
-                                        accept=".csv"
-                                        ref={fileInputRef}
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                        id="csvUpload"
-                                    />
-                                    <label
-                                        htmlFor="csvUpload"
-                                        className="cursor-pointer bg-white border border-slate-300 text-slate-700 px-6 py-3 rounded-xl shadow-sm hover:bg-slate-100 font-bold text-sm transition"
-                                    >
-                                        Select CSV File
-                                    </label>
-                                </>
-                            )}
+                <form action={isEdit ? handleEdit : handleAdd} className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
+                            <input name="id" required defaultValue={employee?.id} disabled={isEdit} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
+                            <SearchableSelect
+                                name="grade"
+                                options={[
+                                    { label: 'Executive', value: 'EXECUTIVE' },
+                                    { label: 'Workman', value: 'WORKMAN' }
+                                ]}
+                                value={isEdit ? employee?.grade || 'EXECUTIVE' : selectedGrade}
+                                onChange={isEdit ? () => { } : setSelectedGrade}
+                                className="w-full"
+                            />
                         </div>
                     </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
+                        <input name="name" required defaultValue={employee?.name} placeholder="John Doe" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
+                        <input name="email" type="email" required defaultValue={employee?.email} placeholder="john.doe@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department / Section</label>
+                            <input name="sectionName" defaultValue={employee?.sectionName || ''} placeholder="E.g. Engineering" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                            <input name="designation" defaultValue={employee?.designation || ''} placeholder="E.g. Senior Engineer" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
+                            <input name="managerName" defaultValue={employee?.managerName || ''} placeholder="Manager Name" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
+                            <input name="managerEmail" type="email" defaultValue={employee?.managerEmail || ''} placeholder="manager@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
+                            <input name="managerMobile" defaultValue={employee?.managerMobile || ''} placeholder="+91..." className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
+                            <SearchableSelect
+                                name="gender"
+                                options={[
+                                    { label: 'Male', value: 'MALE' },
+                                    { label: 'Female', value: 'FEMALE' },
+                                    { label: 'Other', value: 'OTHER' }
+                                ]}
+                                value={isEdit ? employee?.gender || '' : selectedGender}
+                                onChange={isEdit ? () => { } : setSelectedGender}
+                                placeholder="Select Gender"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
+                            <input type="date" name="doj" defaultValue={employee?.doj ? new Date(employee.doj).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
+                            <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={() => isEdit ? setEditingEmployee(null) : setIsAddModalOpen(false)}
+                            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <FormSubmitButton className="px-8 py-2.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center gap-2">
+                            {isEdit ? 'Save Changes' : <><HiOutlinePlus size={18} /> Add Employee</>}
+                        </FormSubmitButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+
+    return (
+        <div className={isFullscreen
+            ? "fixed inset-0 z-[100] bg-slate-50 overflow-hidden flex flex-col p-2 md:p-4 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+            : "bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-6"
+        }>
+            <div className={`flex flex-col ${isFullscreen ? 'flex-1 w-full min-h-0' : 'w-full'}`}>
+
+                {/* Header & Controls Toolbar */}
+                <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 ${isFullscreen ? '' : 'p-4 sm:p-6 pb-0'}`}>
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
+                            <HiOutlineUsers size={24} />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Employee Directory</h2>
+                            <p className="text-slate-500 font-medium text-sm mt-0.5">{employees.length} Records</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Search Input */}
+                        <div className="relative w-full sm:w-64">
+                            <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                            <input
+                                type="text"
+                                placeholder="Search employees..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-slate-200 bg-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-slate-700 shadow-sm"
+                            />
+                        </div>
+                        {/* Show Dropdown */}
+                        <select
+                            value={itemsPerPage}
+                            onChange={(e) => setItemsPerPage(Number(e.target.value))}
+                            className="py-2 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-sm outline-none font-bold text-slate-700 shadow-sm cursor-pointer hidden sm:block"
+                        >
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                            <option value={20}>20</option>
+                            <option value={25}>25</option>
+                            <option value={50}>50</option>
+                            <option value={100}>100</option>
+                        </select>
+
+                        {/* Zen Mode */}
+                        <button
+                            onClick={() => {
+                                const nextState = !isFullscreen;
+                                setIsFullscreen(nextState);
+                                if (nextState && itemsPerPage === 10) setItemsPerPage(25);
+                                if (!nextState && itemsPerPage === 25) setItemsPerPage(10);
+                            }}
+                            className="p-2.5 rounded-xl text-slate-500 hover:bg-slate-100 border border-slate-200 bg-white transition-colors hidden sm:block shadow-sm"
+                            title={isFullscreen ? "Exit Zen Mode" : "Enter Zen Mode"}
+                        >
+                            {isFullscreen ? <HiOutlineArrowsPointingIn size={18} /> : <HiOutlineArrowsPointingOut size={18} />}
+                        </button>
+
+                        {/* Export Button */}
+                        <button
+                            onClick={() => {
+                                const exportData = employees.map(e => ({
+                                    'Emp ID': e.id,
+                                    'Name': e.name,
+                                    'Email': e.email,
+                                    'Status': e.status,
+                                    'Grade': e.grade || '',
+                                    'Designation': e.designation || '',
+                                    'Department / Section': e.sectionName || '',
+                                    'Location': e.location || '',
+                                    'Mobile': e.mobile || '',
+                                    'Date of Joining': e.doj ? new Date(e.doj).toLocaleDateString() : '',
+                                    'Date of Birth': e.dob ? new Date(e.dob).toLocaleDateString() : '',
+                                    'Project Location': e.projectLocation || '',
+                                    'Gender': e.gender || '',
+                                    'Manager Name': e.managerName || '',
+                                    'Manager Email': e.managerEmail || '',
+                                    'Manager Mobile': e.managerMobile || ''
+                                }));
+                                exportToExcel(exportData, 'Employee_Directory');
+                            }}
+                            className="p-2.5 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-sm"
+                            title="Export to Excel"
+                        >
+                            <HiOutlineArrowDownTray size={18} />
+                        </button>
+
+                        <button
+                            onClick={() => setIsAddModalOpen(true)}
+                            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-purple-200 text-sm"
+                        >
+                            <HiOutlinePlus size={18} className="stroke-[2.5]" />
+                            <span className="hidden sm:inline">Add Employee</span>
+                            <span className="sm:hidden">Add</span>
+                        </button>
+                    </div>
                 </div>
 
-                {/* UPLOAD STATS RESULT */}
-                {uploadStats && (
-                    <div className={`mt-4 p-4 rounded-xl border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
-                        <p className="font-bold text-sm">Upload Complete</p>
-                        <p className="text-sm mt-1">✅ Successfully Imported: {uploadStats.success} records</p>
-                        {uploadStats.errors.length > 0 && (
-                            <div className="mt-2 text-xs text-red-600 max-h-32 overflow-y-auto">
-                                <p className="font-bold">Errors:</p>
-                                <ul className="list-disc pl-4">
-                                    {uploadStats.errors.slice(0, 10).map((err, i) => <li key={i}>{err}</li>)}
-                                    {uploadStats.errors.length > 10 && <li>...and {uploadStats.errors.length - 10} more</li>}
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* RECENT EMPLOYEES LIST (Limited) */}
-                <div className="mt-8">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Audit Log: Recently Synchronized (Last 20)</p>
-                    <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                        <table className="w-full text-left text-sm">
-                            <thead className="bg-slate-100 text-slate-500 font-bold uppercase text-xs">
-                                <tr>
-                                    <th className="p-3">ID</th>
-                                    <th className="p-3">Name</th>
-                                    <th className="p-3">Email</th>
-                                    <th className="p-3">Dept</th>
-                                    <th className="p-3">Manager Mobile</th>
-                                    <th className="p-3 w-10"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-100 bg-white">
-                                {employees.slice(0, 20).map(emp => (
-                                    <tr key={emp.id} className="hover:bg-slate-50 group">
-                                        <td className="p-3 font-mono text-slate-600">{emp.id}</td>
-                                        <td className="p-3 font-medium text-slate-900">{emp.name}</td>
-                                        <td className="p-3 text-slate-500">{emp.email}</td>
-                                        <td className="p-3 text-slate-500">{emp.sectionName || '-'}</td>
-                                        <td className="p-3 text-slate-500">{emp.managerMobile || '-'}</td>
-                                        <td className="p-3">
+                {/* Table */}
+                <div className={`overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm relative ${isFullscreen ? 'flex-1 min-h-0 overflow-y-auto' : 'mx-4 sm:mx-6 mb-4 min-h-[550px]'}`}>
+                    <table className={`w-full table-fixed text-xs text-left ${isFullscreen ? 'min-w-[1400px]' : 'min-w-[1000px]'}`}>
+                        <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 shadow-sm before:content-[''] before:absolute before:inset-0 before:border-b before:border-slate-200 before:pointer-events-none">
+                            <tr>
+                                <th className="pl-3 pr-1 py-3 w-[35px] text-center">No</th>
+                                {isFullscreen ? (
+                                    <>
+                                        <th className="px-4 py-3 w-[12%]">Name</th>
+                                        <th className="px-4 py-3 w-[12%]">Email</th>
+                                    </>
+                                ) : (
+                                    <th className="px-4 py-3 w-[20%]">Employee</th>
+                                )}
+                                <th className="px-4 py-3 w-[8%]">Emp ID</th>
+                                {isFullscreen ? (
+                                    <>
+                                        <th className="px-4 py-3 w-[12%]">Department</th>
+                                        <th className="px-4 py-3 w-[12%]">Designation</th>
+                                    </>
+                                ) : (
+                                    <th className="px-4 py-3 w-[20%]">Section & Designation</th>
+                                )}
+                                <th className="px-4 py-3 w-[8%]">Grade</th>
+                                {isFullscreen ? (
+                                    <>
+                                        <th className="px-4 py-3 w-[10%]">Manager Name</th>
+                                        <th className="px-4 py-3 w-[8%]">Manager Mobile</th>
+                                    </>
+                                ) : (
+                                    <th className="px-4 py-3 w-[16%]">Manager</th>
+                                )}
+                                <th className="px-4 py-3 w-[8%]">DOJ</th>
+                                <th className="px-4 py-3 w-[6%] text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                            {paginatedEmployees.length > 0 ? paginatedEmployees.map((emp, index) => (
+                                <tr key={emp.id} className="hover:bg-slate-50/50 transition-colors group">
+                                    <td className="pl-3 pr-1 py-2 text-center text-[10px] font-bold text-slate-400">
+                                        {(safeCurrentPage - 1) * itemsPerPage + index + 1}
+                                    </td>
+                                    {isFullscreen ? (
+                                        <>
+                                            <td className="px-3 py-2">
+                                                <div className="font-bold text-slate-900 text-[11px] truncate">{emp.name}</div>
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <div className="text-[10px] text-slate-500 font-medium truncate" title={emp.email}>{emp.email}</div>
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <td className="px-3 py-2">
+                                            <div className="font-bold text-slate-900 text-[11px] truncate">{emp.name}</div>
+                                            <div className="text-[10px] text-slate-500 font-medium truncate" title={emp.email}>{emp.email}</div>
+                                        </td>
+                                    )}
+                                    <td className="px-3 py-2">
+                                        <span className="text-[9px] font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md border border-slate-200">
+                                            {emp.id}
+                                        </span>
+                                    </td>
+                                    {isFullscreen ? (
+                                        <>
+                                            <td className="px-3 py-2">
+                                                <div className="text-[10px] font-bold text-slate-700 truncate" title={emp.sectionName || ''}>{emp.sectionName || '-'}</div>
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <div className="text-[10px] text-slate-600 truncate" title={emp.designation || ''}>{emp.designation || '-'}</div>
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <td className="px-3 py-2">
+                                            <div className="text-[10px] font-bold text-slate-700 truncate" title={emp.sectionName || ''}>{emp.sectionName || '-'}</div>
+                                            <div className="text-[10px] text-slate-600 truncate" title={emp.designation || ''}>{emp.designation || '-'}</div>
+                                        </td>
+                                    )}
+                                    <td className="px-3 py-2">
+                                        {emp.grade ? (
+                                            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-purple-50 text-purple-700 border border-purple-100">
+                                                {emp.grade}
+                                            </span>
+                                        ) : <span className="text-slate-400">-</span>}
+                                    </td>
+                                    {isFullscreen ? (
+                                        <>
+                                            <td className="px-3 py-2">
+                                                <div className="text-[10px] font-bold text-slate-700 truncate" title={emp.managerName || ''}>{emp.managerName || '-'}</div>
+                                            </td>
+                                            <td className="px-3 py-2">
+                                                <div className="text-[10px] text-slate-600 truncate">{emp.managerMobile || '-'}</div>
+                                            </td>
+                                        </>
+                                    ) : (
+                                        <td className="px-3 py-2">
+                                            <div className="text-[10px] font-bold text-slate-700 truncate" title={emp.managerName || ''}>{emp.managerName || '-'}</div>
+                                            <div className="text-[10px] text-slate-600 truncate">{emp.managerMobile || '-'}</div>
+                                        </td>
+                                    )}
+                                    <td className="px-3 py-2 text-[10px] text-slate-600">
+                                        {emp.doj ? new Date(emp.doj).toLocaleDateString() : '-'}
+                                    </td>
+                                    <td className="px-3 py-2">
+                                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <button
+                                                onClick={() => setEditingEmployee(emp)}
+                                                className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100"
+                                                title="Edit Employee"
+                                            >
+                                                <HiOutlinePencilSquare size={18} />
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(emp.id)}
                                                 disabled={deletingId === emp.id}
-                                                className="text-slate-300 hover:text-rose-500 transition disabled:opacity-50 opacity-0 group-hover:opacity-100"
+                                                className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors border border-transparent hover:border-rose-100 disabled:opacity-50"
+                                                title="Delete Employee"
                                             >
-                                                {deletingId === emp.id ? (
-                                                    <HiOutlineArrowPath className="animate-spin" size={16} />
-                                                ) : (
-                                                    <HiOutlineTrash size={16} />
-                                                )}
+                                                {deletingId === emp.id ? <HiOutlineArrowPath className="animate-spin" size={18} /> : <HiOutlineTrash size={18} />}
                                             </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={11} className="px-5 py-12 text-center text-slate-500 font-medium">
+                                        <div className="flex flex-col items-center gap-2">
+                                            <HiOutlineUsers size={32} className="text-slate-300" />
+                                            <span>No employees found matching "{searchQuery}".</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
                 </div>
 
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="flex items-center justify-between pt-4 px-4 sm:px-6 pb-6">
+                        <p className="text-xs text-slate-500 font-medium">
+                            Showing <span className="font-bold text-slate-700">{(safeCurrentPage - 1) * itemsPerPage + 1}</span> to <span className="font-bold text-slate-700">{Math.min(safeCurrentPage * itemsPerPage, filteredEmployees.length)}</span> of <span className="font-bold text-slate-700">{filteredEmployees.length}</span> employees
+                        </p>
+                        <div className="flex gap-1.5">
+                            <button
+                                disabled={safeCurrentPage === 1}
+                                onClick={() => setCurrentPage(prev => prev - 1)}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors shadow-sm"
+                            >
+                                Prev
+                            </button>
+
+                            {Array.from({ length: totalPages }).map((_, i) => {
+                                if (totalPages > 5) {
+                                    if (i !== 0 && i !== totalPages - 1 && Math.abs(safeCurrentPage - 1 - i) > 1) {
+                                        if (i === 1 || i === totalPages - 2) return <span key={i} className="px-2 py-1 text-slate-400 font-bold">...</span>;
+                                        return null;
+                                    }
+                                }
+                                return (
+                                    <button
+                                        key={i}
+                                        onClick={() => setCurrentPage(i + 1)}
+                                        className={`w-8 h-8 rounded-lg text-xs font-bold transition-all shadow-sm ${safeCurrentPage === i + 1 ? 'bg-purple-600 text-white shadow-purple-200 scale-105' : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200'}`}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                );
+                            })}
+
+                            <button
+                                disabled={safeCurrentPage === totalPages}
+                                onClick={() => setCurrentPage(prev => prev + 1)}
+                                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-600 disabled:opacity-50 hover:bg-slate-50 transition-colors shadow-sm"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            {isAddModalOpen && <EmployeeModal isEdit={false} />}
+            {editingEmployee && <EmployeeModal isEdit={true} employee={editingEmployee} />}
         </div>
     );
 }

@@ -9,7 +9,7 @@ export default async function AdminTroubleshootingPage() {
     return (
         <div className="container mx-auto p-6 max-w-7xl">
             <div className="mb-8">
-                <h1 className="text-2xl md:text-1xl font-black text-slate-900 tracking-tight">Troubleshooting Admin</h1>
+                <h1 className="text-2xl uppercase italic md:text-3xl font-black text-slate-900 tracking-tight">Troubleshooting <span className="text-red-500">Admin</span></h1>
 
             </div>
 
