@@ -135,7 +135,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     { label: 'Workman', value: 'WORKMAN' }
                                 ]}
                                 value={isEdit ? employee?.grade || 'EXECUTIVE' : selectedGrade}
-                                onChange={isEdit ? () => { } : setSelectedGrade}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, grade: val } : null) : setSelectedGrade}
                                 className="w-full"
                             />
                         </div>
@@ -188,7 +188,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     { label: 'Other', value: 'OTHER' }
                                 ]}
                                 value={isEdit ? employee?.gender || '' : selectedGender}
-                                onChange={isEdit ? () => { } : setSelectedGender}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, gender: val } : null) : setSelectedGender}
                                 placeholder="Select Gender"
                                 className="w-full"
                             />
