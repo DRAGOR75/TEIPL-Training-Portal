@@ -124,7 +124,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
-                            <input name="id" required defaultValue={employee?.id} disabled={isEdit} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
+                            <input name="id" required defaultValue={employee?.id} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>

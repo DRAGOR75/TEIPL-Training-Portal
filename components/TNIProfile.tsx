@@ -78,6 +78,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
     // Form State
     const [formData, setFormData] = useState({
+        id: employee.id,
         name: employee.name,
         email: employee.email,
         grade: employee.grade || '',
@@ -104,6 +105,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
         }
 
         const res = await updateEmployeeProfile(employee.id, {
+            newId: formData.id,
             name: formData.name,
             email: formData.email,
             grade: formData.grade as any,
@@ -125,7 +127,19 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
             alert(res.error);
         } else {
             setIsEditing(false);
-            router.refresh();
+            if (res.employee?.id && res.employee.id !== employee.id) {
+                // If ID changed, and we are on a page that uses the ID in URL, we should redirect.
+                const currentPath = window.location.pathname;
+                if (currentPath.includes(`/tni/${employee.id}`)) {
+                    router.push(`/tni/${res.employee.id}`);
+                } else if (window.location.search.includes(`q=${employee.id}`)) {
+                    router.push(`${currentPath}?q=${res.employee.id}`);
+                } else {
+                    router.refresh();
+                }
+            } else {
+                router.refresh();
+            }
         }
         setLoading(false);
     }
@@ -142,8 +156,13 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[75vh] md:max-h-[60vh] overflow-y-auto pr-1 pb-4" style={{ scrollbarWidth: 'thin' }}>
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Employee ID</label>
-                        <div className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs">{employee.id}</div>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee ID *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Employee ID"
+                            value={formData.id}
+                            onChange={e => setFormData({ ...formData, id: e.target.value })}
+                        />
                     </div>
 
                     <div className="space-y-1">

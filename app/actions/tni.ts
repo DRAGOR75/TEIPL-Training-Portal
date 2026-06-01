@@ -51,6 +51,7 @@ export const getEmployeeProfile = async (empId: string) => {
 };
 
 export async function updateEmployeeProfile(empId: string, data: {
+    newId?: string;
     name: string;
     email: string;
     grade: unknown;
@@ -71,6 +72,7 @@ export async function updateEmployeeProfile(empId: string, data: {
         const updated = await db.employee.upsert({
             where: { id: empId },
             update: {
+                ...(data.newId && data.newId !== empId ? { id: data.newId } : {}),
                 name: data.name.substring(0, 100),
                 email: data.email.substring(0, 100),
                 grade: (() => {
@@ -113,8 +115,11 @@ export async function updateEmployeeProfile(empId: string, data: {
         revalidateTag('employee-profile', 'max');
         revalidatePath(`/tni/${empId}`);
         return { success: true, employee: updated };
-    } catch (error) {
+    } catch (error: any) {
         console.error('Profile Update Error:', error);
+        if (error?.code === 'P2002') {
+            return { error: 'Employee ID or Email already exists in the system.' };
+        }
         return { error: 'Failed to update profile' };
     }
 }
