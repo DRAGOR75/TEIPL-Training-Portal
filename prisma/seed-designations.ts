@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { db as prisma } from '../lib/prisma';
 
 const designationData = [
@@ -37,7 +38,17 @@ const designationData = [
     { name: "Technician", grade: "Workman" },
     { name: "Senior Technician", grade: "Workman" },
     { name: "Helper", grade: "Workman" },
+    { name: "Fitter", grade: "Workman" },
+    { name: "Electrician", grade: "Workman" },
+    { name: "Asst Electrician", grade: "Workman" },
+    { name: "Deputy Electrician", grade: "Workman" },
+    { name: "Senior Electrician", grade: "Workman" },
+    { name: "Apprentice Electrician", grade: "Workman" },
+    { name: "Specialist Electrician", grade: "Executive" },
+    { name: "Expert Electrician", grade: "Executive" },
+
     { name: "Specialist Technician", grade: "Executive" },
+    { name: "Expert Technician", grade: "Executive" },
     { name: "Senior Mechanic", grade: "Workman" },
     { name: "Technical Asst", grade: "Workman" },
     { name: "Junior Trade Engineer", grade: "Executive" },

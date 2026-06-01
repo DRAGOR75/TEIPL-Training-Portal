@@ -100,7 +100,9 @@ export default function UploadTNIPage() {
     };
 
     const downloadSample = () => {
-        const csvContent = "data:text/csv;charset=utf-8,Emp.Id,Emp.Name,Grade,Designation,Department,Project Name,Site,Training Group,Training Need Identified,TNI Source,Status-Completed/Cancelled/Open,Separated  TNI (Technical),DOB,DOJ\nE001,John Doe,EXECUTIVE,Manager,Mining,Project A,Site 1,Group A,Yes,Manager,Open,No,1990-01-01,2020-01-01";
+        const headers = ["Emp.Id", "Emp.Name", "Gender", "Grade", "Designation", "Department", "Project Name", "Site", "DOB", "DOJ", "Mobile No", "Email id", "Reporting Manager", "Manager Mobile No", "Manager Email ID", "Training Group", "Training Need Identified", "Subject Code", "TNI Source", "Status-Completed/Cancelled/Open", "Separated  TNI (Technical)"];
+        const rowData = ["10018217", "John Doe", "MALE", "EXECUTIVE", "Engineer", "AC Electrical", "Project Alpha", "TRC", "08/16/2001", "12/11/2023", "7381686824", "john@thriveni.com", "Jane Doe", "9876543210", "jane@thriveni.com", "HEMM", "Electrical Safety", "SFT05", "MANUAL", "OPEN", "Yes"];
+        const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -168,8 +170,8 @@ export default function UploadTNIPage() {
                         <h3 className="text-xl font-black text-slate-800 mb-2">
                             {status === 'parsing' ? 'Parsing CSV...' : 'Drag & Drop CSV Here'}
                         </h3>
-                        <p className="text-slate-500 font-medium max-w-sm mx-auto mb-6">
-                            Must include headers: Emp.Id, Emp.Name, Grade, Designation, Department, Project Name, Site, Training Group, Training Need Identified, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical), DOB, DOJ
+                        <p className="text-slate-500 font-medium max-w-lg mx-auto mb-6 text-sm">
+                            Supported headers: Emp.Id, Emp.Name, Gender, Grade, Designation, Department, Project Name, Site, DOB, DOJ, Mobile No, Email id, Reporting Manager, Manager Mobile No, Manager Email ID, Training Group, Training Need Identified, Subject Code, TNI Source, Status-Completed/Cancelled/Open, Separated  TNI (Technical)
                         </p>
                         <span className="text-blue-600 font-bold bg-blue-50 px-6 py-2 rounded-xl">Browse Files</span>
                     </div>
