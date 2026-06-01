@@ -14,7 +14,7 @@ function parseUSDate(dateStr: string): Date | null {
         const month = parseInt(parts[0], 10);
         const day = parseInt(parts[1], 10);
         let year = parseInt(parts[2], 10);
-        
+
         if (year < 100) year += year < 50 ? 2000 : 1900;
 
         if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
@@ -32,6 +32,8 @@ interface EmployeeImportRow {
     'Grade'?: string;
     'Designation'?: string;
     'Department'?: string;
+    'Gender'?: string;
+    'Sex'?: string;
     'Project Name'?: string; // Mapped to projectLocation
     'Site'?: string; // Mapped to location
     'Training Group'?: string;
@@ -95,6 +97,16 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 emailRaw = `${empId}@thriveni.com`; // Unique placeholder email string
             }
 
+            // Validate Gender
+            let genderEnum: Gender | null = null;
+            const genderRaw = row['Gender'] || row['Sex'] || '';
+            if (genderRaw && genderRaw.trim()) {
+                const normalizedGender = genderRaw.trim().toUpperCase();
+                if (normalizedGender.startsWith('M')) genderEnum = 'MALE';
+                else if (normalizedGender.startsWith('F')) genderEnum = 'FEMALE';
+                else genderEnum = 'OTHER';
+            }
+
             // Validate Grade
             let gradeEnum: Grade | null = null;
             const gradeRaw = row['Grade'] || '';
@@ -123,6 +135,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 name: empName.substring(0, 100),
                 email: emailRaw.substring(0, 100),
                 grade: gradeEnum,
+                gender: genderEnum,
                 designation: row['Designation'] ? row['Designation'].toString().substring(0, 100) : null,
                 sectionName: row['Department'] ? row['Department'].toString().substring(0, 100) : null,
                 projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
@@ -143,7 +156,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                     // If the employee exists and has a real email, DON'T overwrite it with a placeholder.
                     // But Prisma upsert update doesn't have a direct "ignore if empty" without complex checks.
                     // So we conditionally exclude email from update if we generated a placeholder.
-                    ...( (row.email || row['Email id'] || row['Email ID']) ? { email: employeeData.email } : {})
+                    ...((row.email || row['Email id'] || row['Email ID']) ? { email: employeeData.email } : {})
                 },
                 create: {
                     id: empId,
@@ -174,7 +187,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             let programIdsToLink = new Set<string>();
             const combinedString = `${subjectCodesString} ${programsString}`;
-            
+
             // Regex to find standard UUIDs
             const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
             const matches = combinedString.match(uuidRegex);
@@ -212,7 +225,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                         // Create missing program dynamically
                         let newCategory: TrainingCategory = 'OTHER_PROGRAMS';
                         const programCategory = row['Training Group'] ? row['Training Group'].toString() : '';
-                        
+
                         if (programCategory.toUpperCase().includes('MINING')) {
                             newCategory = 'MINING_PROGRAMS';
                         } else if (programCategory.toUpperCase().includes('HEMM') || programCategory.toUpperCase().includes('FUNCTIONAL')) {
