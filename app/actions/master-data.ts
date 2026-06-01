@@ -229,10 +229,12 @@ export async function deleteEmployee(id: string) {
 
 export async function updateEmployee(id: string, formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };
+    const newId = sanitizeInput(formData.get('id') as string);
     try {
         await db.employee.update({
             where: { id },
             data: {
+                ...(newId && newId !== id ? { id: newId } : {}),
                 name: sanitizeInput(formData.get('name') as string),
                 email: sanitizeInput(formData.get('email') as string),
                 grade: (() => {
@@ -259,7 +261,10 @@ export async function updateEmployee(id: string, formData: FormData) {
         revalidateTag('employee-profile', 'max');
         revalidateTag('tni-reports', 'max');
         return { success: true };
-    } catch (error) {
+    } catch (error: any) {
+        if (error?.code === 'P2002') {
+            return { error: 'Employee ID or Email already exists in the system.' };
+        }
         return { error: 'Failed to update employee' };
     }
 }
