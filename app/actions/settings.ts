@@ -32,7 +32,7 @@ export async function updateSystemSetting(key: string, value: string) {
             create: { key, value }
         });
         
-        revalidateTag('system-settings');
+        revalidateTag('system-settings', 'max');
         return { success: true };
     } catch (error) {
         console.error('Failed to update system setting:', error);
