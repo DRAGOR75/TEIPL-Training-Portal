@@ -6,7 +6,8 @@ import {
     HiOutlineMapPin,
     HiOutlineBookOpen,
     HiOutlineUsers,
-    HiOutlineArrowUpTray
+    HiOutlineArrowUpTray,
+    HiOutlineCog
 } from 'react-icons/hi2';
 
 interface AdminDashboardTabsProps {
@@ -17,6 +18,7 @@ interface AdminDashboardTabsProps {
     programManager: React.ReactNode;
     employeeManager: React.ReactNode;
     bulkUploadManager: React.ReactNode;
+    systemSettingsManager?: React.ReactNode;
 }
 
 export default function AdminDashboardTabs({
@@ -26,9 +28,10 @@ export default function AdminDashboardTabs({
     locationManager,
     programManager,
     employeeManager,
-    bulkUploadManager
+    bulkUploadManager,
+    systemSettingsManager
 }: AdminDashboardTabsProps) {
-    const [activeTab, setActiveTab] = useState<'DEPARTMENTS' | 'VENUES' | 'PROGRAMS' | 'EMPLOYEES' | 'BULK_UPLOADS'>('PROGRAMS');
+    const [activeTab, setActiveTab] = useState<'DEPARTMENTS' | 'VENUES' | 'PROGRAMS' | 'EMPLOYEES' | 'BULK_UPLOADS' | 'SETTINGS'>('PROGRAMS');
 
     const tabs = [
         { id: 'DEPARTMENTS', label: 'Departments', icon: HiOutlineBuildingOffice2 },
@@ -36,6 +39,7 @@ export default function AdminDashboardTabs({
         { id: 'PROGRAMS', label: 'Subjects Menu', icon: HiOutlineBookOpen },
         { id: 'EMPLOYEES', label: 'Employees', icon: HiOutlineUsers },
         { id: 'BULK_UPLOADS', label: 'Bulk Import', icon: HiOutlineArrowUpTray },
+        { id: 'SETTINGS', label: 'Settings', icon: HiOutlineCog },
     ] as const;
 
     return (
@@ -87,6 +91,7 @@ export default function AdminDashboardTabs({
                 {activeTab === 'PROGRAMS' && programManager}
                 {activeTab === 'EMPLOYEES' && employeeManager}
                 {activeTab === 'BULK_UPLOADS' && bulkUploadManager}
+                {activeTab === 'SETTINGS' && systemSettingsManager}
             </div>
         </div>
     );

@@ -136,7 +136,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                         <th className="px-6 py-4 font-bold text-slate-600">Employee</th>
                                         <th className="px-6 py-4 font-bold text-slate-600">Feedback Rating</th>
                                         <th className="px-6 py-4 font-bold text-slate-600 w-64">Additional Comments</th>
-                                        <th className="px-6 py-4 font-bold text-slate-600">Status</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600">Feedback Status</th>
                                         <th className="px-6 py-4 font-bold text-slate-600">Post training (30 days) performance feedback</th>
                                         <th className="px-6 py-4 font-bold text-slate-600">Manager Review</th>
                                     </tr>

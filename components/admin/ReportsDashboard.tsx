@@ -7,7 +7,7 @@ import {
 } from 'recharts';
 import { HiOutlineArrowDownTray, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
 import * as XLSX from 'xlsx';
-import { getFilteredParticipantDepth, getTniReportData } from '@/app/actions/reports';
+import { getFilteredParticipantDepth, getTniReportData, getAllNominationsForExport } from '@/app/actions/reports';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const RADIAN = Math.PI / 180;
@@ -54,28 +54,57 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
 
     if (!data) return <div className="p-10 text-center text-slate-500 font-medium">No report data available.</div>;
 
-    const handleExport = () => {
-        const workbook = XLSX.utils.book_new();
+    const handleExport = async () => {
+        setIsDataLoading(true);
+        try {
+            const rawData = await getAllNominationsForExport();
+            if (!rawData) return;
 
-        // 1. Summary Sheet
-        const summaryData = [
-            { Metric: 'Total Employees', Value: dashboardData.summary.totalEmployees },
-            { Metric: 'Total Unique Programs', Value: dashboardData.summary.totalUniquePrograms },
-            { Metric: 'Total Nominations', Value: dashboardData.summary.totalNominations },
-            { Metric: 'Completion Rate %', Value: dashboardData.summary.completionRate.toFixed(2) }
-        ];
-        const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-        XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary Metrics");
+            const workbook = XLSX.utils.book_new();
 
-        // 2. Site Demand
-        const siteSheet = XLSX.utils.json_to_sheet(dashboardData.siteDemand);
-        XLSX.utils.book_append_sheet(workbook, siteSheet, "Site Demand");
+            // 1. Raw Data Sheet
+            const exportData = rawData.map(item => ({
+                EmployeeID: item.employee?.id || '',
+                EmployeeName: item.employee?.name || '',
+                Designation: item.employee?.designation || '',
+                Grade: item.employee?.grade || '',
+                Department: item.employee?.sectionName || '',
+                Location: item.employee?.location || '',
+                ManagerName: item.employee?.managerName || '',
+                ProgramName: item.program?.name || '',
+                ProgramCategory: item.program?.category || '',
+                Status: item.status,
+                Justification: item.justification || '',
+                Date: new Date(item.createdAt).toLocaleDateString()
+            }));
 
-        // 3. Departmental Demand
-        const deptSheet = XLSX.utils.json_to_sheet(dashboardData.deptDemand);
-        XLSX.utils.book_append_sheet(workbook, deptSheet, "Department Demand");
+            const dataSheet = XLSX.utils.json_to_sheet(exportData);
+            XLSX.utils.book_append_sheet(workbook, dataSheet, "All TNI Records");
 
-        XLSX.writeFile(workbook, `TNI_Master_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+            // 2. Summary Sheet
+            const summaryData = [
+                { Metric: 'Total Employees', Value: dashboardData.summary.totalEmployees },
+                { Metric: 'Total Unique Programs', Value: dashboardData.summary.totalUniquePrograms },
+                { Metric: 'Total Nominations', Value: dashboardData.summary.totalNominations },
+                { Metric: 'Completion Rate %', Value: dashboardData.summary.completionRate.toFixed(2) }
+            ];
+            const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+            XLSX.utils.book_append_sheet(workbook, summarySheet, "Summary Metrics");
+
+            // 3. Site Demand
+            const siteSheet = XLSX.utils.json_to_sheet(dashboardData.siteDemand);
+            XLSX.utils.book_append_sheet(workbook, siteSheet, "Site Demand");
+
+            // 4. Departmental Demand
+            const deptSheet = XLSX.utils.json_to_sheet(dashboardData.deptDemand);
+            XLSX.utils.book_append_sheet(workbook, deptSheet, "Department Demand");
+
+            XLSX.writeFile(workbook, `TNI_Master_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+        } catch (error) {
+            console.error("Export failed", error);
+        } finally {
+            setIsDataLoading(false);
+        }
     };
 
     const handleExportFiltered = () => {

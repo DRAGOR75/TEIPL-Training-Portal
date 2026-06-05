@@ -210,9 +210,85 @@ export async function submitEmployeeFeedback(formData: FormData) {
                 managerEmail: true,
                 managerName: true, // 🟢 Added managerName
                 employeeName: true,
-                session: { select: { programName: true } }
+                employeeEmail: true,
+                empId: true,
+                session: { 
+                    select: { 
+                        id: true,
+                        programName: true,
+                        nominationBatchId: true,
+                        startDate: true,
+                        endDate: true,
+                        trainerName: true,
+                        location: true
+                    } 
+                }
             }
         });
+
+        // 🟢 NEW: Close the TNI/Nomination loop and add to Training History upon Employee Feedback
+        if (updatedEnrollment.session?.nominationBatchId) {
+            let effectiveEmpId = updatedEnrollment.empId;
+            let empLocation = null;
+            let progCategory = null;
+            
+            // 1. Get Employee Details
+            if (!effectiveEmpId) {
+                const emp = await db.employee.findUnique({
+                    where: { email: updatedEnrollment.employeeEmail },
+                    select: { id: true, location: true }
+                });
+                effectiveEmpId = emp?.id ?? null;
+                empLocation = emp?.location ?? null;
+            } else {
+                const emp = await db.employee.findUnique({
+                    where: { id: effectiveEmpId },
+                    select: { location: true }
+                });
+                empLocation = emp?.location ?? null;
+            }
+
+            // 2. Get Program Category
+            const prog = await db.program.findUnique({
+                where: { name: updatedEnrollment.session.programName },
+                select: { category: true }
+            });
+            progCategory = prog?.category ?? null;
+
+            // 3. Calculate Training Days
+            const start = new Date(updatedEnrollment.session.startDate);
+            const end = new Date(updatedEnrollment.session.endDate);
+            const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+
+            if (effectiveEmpId) {
+                // A. Close the TNI Loop
+                await db.nomination.updateMany({
+                    where: {
+                        empId: effectiveEmpId,
+                        batchId: updatedEnrollment.session.nominationBatchId
+                    },
+                    data: { status: 'Completed' }
+                });
+
+                // B. Add to Training History
+                await db.trainingHistory.create({
+                    data: {
+                        empId: effectiveEmpId,
+                        employeeName: updatedEnrollment.employeeName,
+                        programName: updatedEnrollment.session.programName,
+                        startDate: updatedEnrollment.session.startDate,
+                        endDate: updatedEnrollment.session.endDate,
+                        trainingDays: trainingDays > 0 ? trainingDays : null,
+                        location: updatedEnrollment.session.location || empLocation,
+                        progCategory: progCategory,
+                        source: 'SYSTEM',
+                        sessionId: updatedEnrollment.session.id,
+                        trainerName: updatedEnrollment.session.trainerName,
+                        averageRating: average
+                    }
+                });
+            }
+        }
 
         // 2. Send Email to Manager
         await sendFeedbackReviewRequestEmail(
@@ -266,29 +342,7 @@ export async function submitManagerReview(formData: FormData) {
             }
         });
 
-        // 🟢 NEW: Close the TNI/Nomination loop
-        if (agree !== 'No' && updatedEnrollment.session?.nominationBatchId) {
-            let effectiveEmpId = updatedEnrollment.empId;
-            
-            // If empId is missing in enrollment, find it by email
-            if (!effectiveEmpId) {
-                const emp = await db.employee.findUnique({
-                    where: { email: updatedEnrollment.employeeEmail },
-                    select: { id: true }
-                });
-                effectiveEmpId = emp?.id ?? null;
-            }
-
-            if (effectiveEmpId) {
-                await db.nomination.updateMany({
-                    where: {
-                        empId: effectiveEmpId,
-                        batchId: updatedEnrollment.session.nominationBatchId
-                    },
-                    data: { status: 'Completed' }
-                });
-            }
-        }
+        // Manager Review completes here, but TNI Loop is already closed via Employee Feedback
 
 
         if (agree === 'No') {

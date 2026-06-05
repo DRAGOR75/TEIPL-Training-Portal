@@ -190,3 +190,32 @@ export async function getFilteredParticipantDepth(filters: { programId?: string;
         orderBy: { createdAt: 'desc' }
     });
 }
+
+export async function getAllNominationsForExport() {
+    if (!await auth()) return null;
+
+    return await db.nomination.findMany({
+        include: {
+            employee: {
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    grade: true,
+                    sectionName: true,
+                    location: true,
+                    projectLocation: true,
+                    designation: true,
+                    managerName: true
+                }
+            },
+            program: {
+                select: {
+                    name: true,
+                    category: true
+                }
+            }
+        },
+        orderBy: { createdAt: 'desc' }
+    });
+}

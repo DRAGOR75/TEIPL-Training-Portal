@@ -58,7 +58,11 @@ interface EmployeeImportRow {
     'Email ID'?: string;
     'Reporting Manager'?: string;
     'Manager Mobile No'?: string;
+    'ManagerMobile No'?: string;
     'Manager Email ID'?: string;
+    'ManagerEmail ID'?: string;
+    'Mobile No '?: string;
+    'Location'?: string;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -127,19 +131,18 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             const mobile = (row['Mobile No'] || row['Mobile'] || '')?.toString().trim();
             const managerName = (row['Reporting Manager'] || '')?.toString().trim();
-            const managerEmail = (row['Manager Email ID'] || '')?.toString().trim();
-            const managerMobile = (row['Manager Mobile No'] || '')?.toString().trim();
+            const managerEmail = (row['Manager Email ID'] || row['ManagerEmail ID'] || '')?.toString().trim();
+            const managerMobile = (row['Manager Mobile No'] || row['ManagerMobile No'] || '')?.toString().trim();
 
-            // Sanitized Employee Data Object
+            // Sanitized Employee Data Object (excluding email)
             const employeeData = {
                 name: empName.substring(0, 100),
-                email: emailRaw.substring(0, 100),
                 grade: gradeEnum,
                 gender: genderEnum,
                 designation: row['Designation'] ? row['Designation'].toString().substring(0, 100) : null,
                 sectionName: row['Department'] ? row['Department'].toString().substring(0, 100) : null,
                 projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
-                location: row['Site'] ? row['Site'].toString().substring(0, 100) : null,
+                location: row['Site'] ? row['Site'].toString().substring(0, 100) : row['Location'] ? row['Location'].toString().substring(0, 100) : null,
                 dob: dob,
                 doj: doj,
                 mobile: mobile || null,
@@ -154,12 +157,12 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 update: {
                     ...employeeData,
                     // If the employee exists and has a real email, DON'T overwrite it with a placeholder.
-                    // But Prisma upsert update doesn't have a direct "ignore if empty" without complex checks.
-                    // So we conditionally exclude email from update if we generated a placeholder.
-                    ...((row.email || row['Email id'] || row['Email ID']) ? { email: employeeData.email } : {})
+                    // So we conditionally include email in update only if it was provided in the upload row.
+                    ...((row.email || row['Email id'] || row['Email ID']) ? { email: emailRaw.substring(0, 100) } : {})
                 },
                 create: {
                     id: empId,
+                    email: emailRaw.substring(0, 100),
                     ...employeeData
                 }
             });
@@ -170,7 +173,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             // Map Status
             const rawStatus = row['Status-Completed/Cancelled/Open'] ? row['Status-Completed/Cancelled/Open'].toString().trim().toUpperCase() : 'OPEN';
             let tniStatus = 'Pending';
-            let managerApprovalStatus = 'BULK_UPLOADED';
+            let managerApprovalStatus = 'Approved'; // Always approve manager status for bulk uploads
 
             if (rawStatus === 'COMPLETED') {
                 tniStatus = 'Completed';

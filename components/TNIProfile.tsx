@@ -47,11 +47,11 @@ type Section = {
     name: string;
 };
 
-export default function TNIProfile({ employee, sections }: { employee: Employee, sections: Section[] }) {
+export default function TNIProfile({ employee, sections, employeeView = false }: { employee: Employee, sections: Section[], employeeView?: boolean }) {
     const router = useRouter();
     const [isEditing, setIsEditing] = useState(!employee.name);
     const [loading, setLoading] = useState(false);
-    const [isExpanded, setIsExpanded] = useState(false);
+    const [isExpanded, setIsExpanded] = useState(true);
 
     const initials = employee.name
         ? employee.name
@@ -312,7 +312,7 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
                         />
                     </div>
-                    
+
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
                         <input
@@ -359,17 +359,27 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                         {isExpanded ? <HiOutlineChevronUp size={20} /> : <HiOutlineChevronDown size={20} />}
                     </div>
                 </div>
-                <button
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        setIsEditing(true);
-                    }}
-                    className="flex items-center gap-1.5 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 transition text-xs cursor-pointer shadow-sm shadow-slate-100"
-                >
-                    <HiOutlinePencil size={12} className="text-slate-500" />
-                    <span>Edit Profile</span>
-                </button>
+                {!employeeView && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setIsEditing(true);
+                        }}
+                        className="flex items-center gap-1.5 bg-white text-slate-700 border border-slate-200 px-4 py-2 rounded-xl font-bold hover:bg-slate-50 transition text-xs cursor-pointer shadow-sm shadow-slate-100"
+                    >
+                        <HiOutlinePencil size={12} className="text-slate-500" />
+                        <span>Edit Profile</span>
+                    </button>
+                )}
             </div>
+
+            {employeeView && (
+                <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200/60 rounded-xl px-4 py-2.5 font-bold">
+                    Note:*This information is  only used  for  training purposes .
+                    <br />
+                    *If you find any discrepancies in your profile please mail <span className="font-bold text-slate-900">cyn@thriveni.com</span>,from your oficial mail id to update your details
+                </div>
+            )}
 
             {isExpanded && (
                 <>
@@ -387,13 +397,13 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
                             </h3>
                             <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-3 mt-1.5 text-xs text-slate-500 font-medium">
                                 <span className="flex items-center justify-center sm:justify-start gap-1 text-blue-600 font-bold">
-                                    <HiOutlineBriefcase className="shrink-0" size={14} />
-                                    {employee.designation || 'Designation Not Set'}
+                                    <HiOutlineIdentification className="shrink-0" size={14} />
+                                    {employee.id}
                                 </span>
                                 <span className="hidden sm:inline text-slate-300">•</span>
                                 <span className="flex items-center justify-center sm:justify-start gap-1">
-                                    <HiOutlineBuildingOffice2 className="shrink-0" size={14} />
-                                    {employee.sectionName || 'Department Not Set'}
+                                    <HiOutlineEnvelope className="shrink-0" size={14} />
+                                    {employee.email || 'Email Not Set'}
                                 </span>
                             </div>
                         </div>
@@ -401,25 +411,25 @@ export default function TNIProfile({ employee, sections }: { employee: Employee,
 
                     {/* Detailed Profile Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {/* Employee ID */}
+                        {/* Designation */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineIdentification className="text-blue-600" size={18} />
+                                <HiOutlineBriefcase className="text-blue-600" size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employee ID</span>
-                                <span className="text-xs font-bold text-slate-900 font-mono block truncate" title={employee.id}>{employee.id}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Designation</span>
+                                <span className="text-xs font-bold text-slate-900 block truncate" title={employee.designation || 'Not Set'}>{employee.designation || 'Not Set'}</span>
                             </div>
                         </div>
 
-                        {/* Email Address */}
+                        {/* Section / Department */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineEnvelope className="text-emerald-600" size={18} />
+                                <HiOutlineBuildingOffice2 className="text-emerald-600" size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Email Address</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.email}>{employee.email}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
                             </div>
                         </div>
 
