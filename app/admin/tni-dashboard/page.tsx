@@ -5,6 +5,8 @@ import EmployeeManager from '@/components/admin/EmployeeManager';
 import LocationManager from '@/components/admin/LocationManager';
 import AdminDashboardTabs from '@/components/admin/AdminDashboardTabs';
 import BulkUploadManager from '@/components/admin/BulkUploadManager';
+import SystemSettingsManager from '@/components/admin/SystemSettingsManager';
+import { getSystemSetting } from '@/app/actions/settings';
 import {
     getCachedAdminSections,
     getCachedAdminPrograms,
@@ -30,12 +32,15 @@ export default async function MasterDataPage() {
     }
 
     // Parallel Fetching for Performance using cached wrappers
-    const [sections, programs, employees, locations] = await Promise.all([
+    const [sections, programs, employees, locations, isTniEnabledStr] = await Promise.all([
         getCachedAdminSections(),
         getCachedAdminPrograms(),
         getCachedAdminEmployees(),
-        getCachedAdminLocations()
+        getCachedAdminLocations(),
+        getSystemSetting('enable_employee_tni_add', 'true')
     ]);
+
+    const isTniEnabled = isTniEnabledStr === 'true';
 
     return (
         <main className="min-h-screen bg-slate-100 py-6 px-2 md:px-4 lg:px-6">
@@ -57,6 +62,7 @@ export default async function MasterDataPage() {
                     programManager={<ProgramManager programs={programs} allSections={sections} />}
                     employeeManager={<EmployeeManager employees={employees as any} />}
                     bulkUploadManager={<BulkUploadManager />}
+                    systemSettingsManager={<SystemSettingsManager initialTniEnabled={isTniEnabled} />}
                 />
 
             </div>

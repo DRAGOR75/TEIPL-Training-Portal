@@ -113,7 +113,7 @@ describe('Sessions & Batching Logic', () => {
             });
             (db.nomination.findFirst as any).mockResolvedValue(null); // Not already enrolled
             (db.nominationBatch.findUnique as any).mockResolvedValue({
-                id: batchId, programId: 'prog-1', trainingSession: { startDate: new Date(), endDate: new Date() }, program: { name: 'Python' }
+                id: batchId, programId: 'prog-1', trainingSession: { startDate: new Date(), endDate: new Date(), requireManagerApproval: true }, program: { name: 'Python' }
             });
             (db.nomination.create as any).mockResolvedValue({ id: 'nom-1' });
 

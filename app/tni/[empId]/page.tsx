@@ -2,6 +2,7 @@ import { getEmployeeProfile, getAvailablePrograms } from '@/app/actions/tni';
 import Link from 'next/link';
 import TNIProfile from '@/components/TNIProfile';
 import TNIDashboardClient from '@/components/TNIDashboardClient';
+import { getSystemSetting } from '@/app/actions/settings';
 import {
     HiOutlineArrowRightOnRectangle,
     HiOutlineChevronRight,
@@ -43,6 +44,10 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
     );
 
     const nominations = currentEmployee.nominations || [];
+
+    // Fetch System Setting for Add TNI feature
+    const isTniEnabledStr = await getSystemSetting('enable_employee_tni_add', 'true');
+    const isAddTNIDisabled = isTniEnabledStr === 'false';
 
     return (
 
@@ -102,7 +107,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 space-y-8">
                 {/* 1. Profile Card (Full Width) */}
-                <TNIProfile employee={currentEmployee as any} sections={sections} />
+                <TNIProfile employee={currentEmployee as any} sections={sections} employeeView={true} />
 
                 {/* 2. Dashboard lists & inline nomination form (Full Width) */}
                 <TNIDashboardClient
@@ -110,6 +115,9 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     programs={programs as any}
                     empId={empId}
                     trainingHistory={currentEmployee.trainingHistory || []}
+                    managerEmail={currentEmployee.managerEmail || undefined}
+                    managerName={currentEmployee.managerName || undefined}
+                    isAddTNIDisabled={isAddTNIDisabled}
                 />
             </div>
         </div>

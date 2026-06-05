@@ -600,7 +600,8 @@ export async function joinBatch(batchId: string, empId: string) {
                 batchId,
                 status: 'Batched',
                 source: 'QR',
-                justification: 'Self-Enrollment via QR Scan'
+                justification: 'Self-Enrollment via QR Scan',
+                managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
             }
         });
 
@@ -718,7 +719,8 @@ export async function registerAndJoinBatch(batchId: string, formData: {
                 batchId,
                 status: 'Batched',
                 source: 'QR',
-                justification: 'JIT Registration via QR Scan'
+                justification: 'JIT Registration via QR Scan',
+                managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
             }
         });
 

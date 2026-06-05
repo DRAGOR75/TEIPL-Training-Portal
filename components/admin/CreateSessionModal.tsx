@@ -34,13 +34,13 @@ export default function CreateSessionModal({
     const [customLocation, setCustomLocation] = useState<string>('');
     const [assessmentDate, setAssessmentDate] = useState<string>('');
 
-    // Auto-calculate Feedback Date (+25 days)
+    // Auto-calculate Feedback Date (+30 days)
     const handleEndDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const endStr = e.target.value;
         const end = new Date(endStr);
         if (!isNaN(end.getTime())) {
-            // Auto-calculate Assessment Date (+20 days)
-            const assessment = new Date(end.getTime() + 20 * 24 * 60 * 60 * 1000);
+            // Auto-calculate Assessment Date (+30 days)
+            const assessment = new Date(end.getTime() + 30 * 24 * 60 * 60 * 1000);
             const year = assessment.getFullYear();
             const month = String(assessment.getMonth() + 1).padStart(2, '0');
             const day = String(assessment.getDate()).padStart(2, '0');
@@ -191,7 +191,7 @@ export default function CreateSessionModal({
                         {/* ROW 3.5: Post Training Assessment Date */}
                         <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
                             <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date</label>
-                            <p className="text-[10px] text-blue-600 mb-2 font-medium">Auto-calculated (+20 days from end date) but can be changed.</p>
+                            <p className="text-[10px] text-blue-600 mb-2 font-medium">Auto-calculated (+30 days from end date) but can be changed.</p>
                             <input
                                 name="assessmentDate"
                                 type="date"

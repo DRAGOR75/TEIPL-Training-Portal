@@ -185,21 +185,11 @@ export async function submitTNINomination(formData: FormData) {
 
     // Collect all selected program IDs
     const programIds: string[] = [];
-
-    const p1 = formData.get('programId_SAFETY_PROGRAMS') as string;
-    if (p1) programIds.push(p1);
-
-    const p2 = formData.get('programId_HEMM_PROGRAMS') as string;
-    if (p2) programIds.push(p2);
-
-    const p3 = formData.get('programId_BEHAVIOURAL_PROGRAMS') as string;
-    if (p3) programIds.push(p3);
-
-    const p4 = formData.get('programId_OTHER_PROGRAMS') as string;
-    if (p4) programIds.push(p4);
-
-    const p5 = formData.get('programId_OPERATOR_PROGRAMS') as string;
-    if (p5) programIds.push(p5);
+    for (const [key, value] of formData.entries()) {
+        if (key.startsWith('programId_') && value) {
+            programIds.push(value as string);
+        }
+    }
 
     if (!empId || empId.length > 50 || programIds.length === 0) {
         throw new Error("Employee ID (max 50) and at least one Program are required");

@@ -17,13 +17,19 @@ type TNIDashboardClientProps = {
     programs: Program[];
     empId: string;
     trainingHistory?: any[];
+    managerEmail?: string;
+    managerName?: string;
+    isAddTNIDisabled?: boolean;
 };
 
 export default function TNIDashboardClient({
     nominations,
     programs,
     empId,
-    trainingHistory = []
+    trainingHistory = [],
+    managerEmail,
+    managerName,
+    isAddTNIDisabled = false
 }: TNIDashboardClientProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -43,14 +49,16 @@ export default function TNIDashboardClient({
             nom.managerApprovalStatus === 'Approved' ||
             nom.managerApprovalStatus === 'Rejected' ||
             nom.status === 'Completed' ||
-            nom.status === 'Batched'
+            nom.status === 'Batched' ||
+            nom.status === 'Rejected'
         )
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const pendingNominations = nominations
         .filter(nom =>
-            nom.managerApprovalStatus === 'Pending' ||
-            nom.status === 'Pending'
+            nom.managerApprovalStatus === 'Pending' &&
+            nom.status !== 'Rejected' &&
+            nom.status !== 'Completed'
         )
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
@@ -182,7 +190,7 @@ export default function TNIDashboardClient({
                 >
                     <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
                         <HiOutlineCheckCircle className="text-blue-600 shrink-0 text-lg sm:text-xl" />
-                        TNI Approved
+                        TNI Approved / Rejected
                         {!isReviewedOpen && (
                             <span className="ml-1 sm:ml-2 bg-blue-100 text-blue-800 text-[10px] sm:text-xs px-2 py-0.5 rounded-full font-bold">
                                 {reviewedNominations.length}
@@ -198,7 +206,7 @@ export default function TNIDashboardClient({
                     <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         {reviewedNominations.length === 0 ? (
                             <div className="p-8 border border-slate-200 rounded-3xl text-center text-xs text-slate-500 bg-slate-50 shadow-sm font-medium">
-                                No reviewed nominations found.
+                                No reviewed TNI found.
                             </div>
                         ) : (
                             <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
@@ -279,7 +287,7 @@ export default function TNIDashboardClient({
                     <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
                         {pendingNominations.length === 0 ? (
                             <div className="p-8 border border-slate-200 rounded-3xl text-center text-xs text-slate-500 bg-slate-50 shadow-sm font-medium">
-                                No pending nominations found.
+                                No pending TNI found.
                             </div>
                         ) : (
                             <div className="overflow-x-auto border border-slate-200 rounded-2xl bg-white shadow-sm">
@@ -290,7 +298,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Program Course</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Justification</th>
-                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Status</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Approval</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
                                         </tr>
                                     </thead>
@@ -304,8 +312,8 @@ export default function TNIDashboardClient({
                                                     <div className="line-clamp-2">{nom.justification || '-'}</div>
                                                 </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 whitespace-nowrap">
-                                                    <span className={`inline-flex px-2 sm:px-3 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold ${getStatusClass(nom)}`}>
-                                                        {getStatusText(nom)}
+                                                    <span className="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 font-bold w-fit text-[9px] sm:text-[10px] text-amber-600 bg-amber-50 border border-amber-100 rounded-xl">
+                                                        Pending
                                                     </span>
                                                 </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-slate-400 font-semibold whitespace-nowrap">
@@ -324,98 +332,111 @@ export default function TNIDashboardClient({
             </div>
 
             {/* 4. Add Training Need (Nomination Form) */}
-            <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
-                <div
-                    className="flex justify-between items-center cursor-pointer select-none"
-                    onClick={() => setIsFormOpen(!isFormOpen)}
-                >
-                    <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
-                        <HiOutlinePlus className="text-blue-600 shrink-0 text-lg sm:text-xl" />
-                        Add Training Need
-                    </h3>
-                    <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
-                        {isFormOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
-                    </button>
-                </div>
-
-                {isFormOpen && (
-                    <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                        <div className="p-6 border border-slate-200 bg-slate-50/50 rounded-2xl flex flex-col gap-4">
-                            <div className="border-b border-slate-200 pb-3">
-                                <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submit Training Need</h4>
-                                <p className="text-xs text-slate-500 font-medium">Select relevant courses and provide justification details below</p>
-                                <p className="text-xs text-red-500 font-medium">Note: Please check the above tables before submitting your training need. You may have already been enrolled in a program that covers your requirement.</p>
-                            </div>
-
-                            <form action={async (formData) => {
-                                startTransition(async () => {
-                                    await submitTNINomination(formData);
-                                    resetForm();
-                                });
-                            }} className="space-y-4">
-                                <input type="hidden" name="empId" value={empId} />
-
-                                <div className="grid grid-cols-1 gap-5">
-                                    {/* Universal Program Selector */}
-                                    <div className="space-y-1">
-                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
-                                        <SearchableSelect
-                                            options={programs.map(p => ({
-                                                label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
-                                                value: p.id
-                                            }))}
-                                            value={formValues.selectedProgramId}
-                                            onChange={(val) => setFormValues(prev => ({ ...prev, selectedProgramId: val }))}
-                                            placeholder="Search by name, category, or ID..."
-                                            className="w-full text-xs"
-                                        />
-
-                                        {/* Hidden input to satisfy existing backend logic without modifying it */}
-                                        {(() => {
-                                            const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
-                                            return selectedProg ? (
-                                                <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
-                                            ) : null;
-                                        })()}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <label htmlFor="justification" className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Justification / Goal *</label>
-                                    <textarea
-                                        name="justification"
-                                        id="justification"
-                                        required
-                                        value={formValues.justification}
-                                        onChange={(e) => setFormValues(prev => ({ ...prev, justification: e.target.value }))}
-                                        placeholder="Explain how this training supports operational requirements or individual development..."
-                                        rows={3}
-                                        className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-xs text-slate-800 resize-none"
-                                    ></textarea>
-                                </div>
-
-                                <div className="flex items-center gap-2">
-                                    <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
-                                    <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
-                                </div>
-
-                                <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
-                                    <button
-                                        type="button"
-                                        onClick={resetForm}
-                                        className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200">
-                                        Submit Request
-                                    </FormSubmitButton>
-                                </div>
-                            </form>
-                        </div>
+            {!isAddTNIDisabled && (
+                <div className="space-y-3 bg-white p-4 rounded-3xl border border-slate-200 shadow-sm">
+                    <div
+                        className="flex justify-between items-center cursor-pointer select-none"
+                        onClick={() => setIsFormOpen(!isFormOpen)}
+                    >
+                        <h3 className="text-base sm:text-lg font-bold text-slate-800 uppercase tracking-tight flex items-center gap-2">
+                            <HiOutlinePlus className="text-blue-600 shrink-0 text-lg sm:text-xl" />
+                            Add Training Need
+                        </h3>
+                        <button className="p-1 rounded-full hover:bg-slate-100 text-slate-500 transition-colors">
+                            {isFormOpen ? <HiChevronUp size={20} /> : <HiChevronDown size={20} />}
+                        </button>
                     </div>
-                )}
-            </div>
+
+                    {isFormOpen && (
+                        <div className="pt-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="p-6 border border-slate-200 bg-slate-50/50 rounded-2xl flex flex-col gap-4">
+                                <div className="border-b border-slate-200 pb-3">
+                                    <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Submit Training Need</h4>
+                                    <p className="text-xs text-slate-500 font-medium">Select relevant courses and provide justification details below</p>
+                                    <p className="text-xs text-red-500 font-medium">Note: Please check the above tables before submitting your training need. You may have already been enrolled in a program that covers your requirement.</p>
+                                </div>
+
+                                <form action={async (formData) => {
+                                    const bypassEmail = formData.get('bypassEmail') === 'on';
+                                    if (!bypassEmail) {
+                                        const confirmMsg = managerEmail && managerName
+                                            ? `An approval mail will be sent to your manager, ${managerName} (${managerEmail}). Do you want to proceed?`
+                                            : managerEmail
+                                                ? `An approval mail will be sent to this mail id: ${managerEmail}. Do you want to proceed?`
+                                                : `An approval mail will be sent to your manager. Do you want to proceed?`;
+                                        if (!window.confirm(confirmMsg)) {
+                                            return;
+                                        }
+                                    }
+                                    startTransition(async () => {
+                                        await submitTNINomination(formData);
+                                        resetForm();
+                                    });
+                                }} className="space-y-4">
+                                    <input type="hidden" name="empId" value={empId} />
+
+                                    <div className="grid grid-cols-1 gap-5">
+                                        {/* Universal Program Selector */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
+                                            <SearchableSelect
+                                                options={programs.map(p => ({
+                                                    label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
+                                                    value: p.id
+                                                }))}
+                                                value={formValues.selectedProgramId}
+                                                onChange={(val) => setFormValues(prev => ({ ...prev, selectedProgramId: val }))}
+                                                placeholder="Search by name, category, or ID..."
+                                                className="w-full text-xs"
+                                            />
+
+                                            {/* Hidden input to satisfy existing backend logic without modifying it */}
+                                            {(() => {
+                                                const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
+                                                return selectedProg ? (
+                                                    <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
+                                                ) : null;
+                                            })()}
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label htmlFor="justification" className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Justification / Goal *</label>
+                                        <textarea
+                                            name="justification"
+                                            id="justification"
+                                            required
+                                            value={formValues.justification}
+                                            onChange={(e) => setFormValues(prev => ({ ...prev, justification: e.target.value }))}
+                                            placeholder="Explain how this training supports operational requirements or individual development..."
+                                            rows={3}
+                                            className="w-full px-4 py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-xs text-slate-800 resize-none"
+                                        ></textarea>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
+                                        <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
+                                    </div>
+
+                                    <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+                                        <button
+                                            type="button"
+                                            onClick={resetForm}
+                                            className="px-4 py-2 border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl font-bold transition text-xs cursor-pointer shadow-sm"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <FormSubmitButton className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl transition text-xs cursor-pointer shadow-lg shadow-blue-200">
+                                            Submit Request
+                                        </FormSubmitButton>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }
