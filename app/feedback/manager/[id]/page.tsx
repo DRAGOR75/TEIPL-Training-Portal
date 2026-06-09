@@ -12,7 +12,8 @@ import {
     HiOutlineBriefcase,
     HiOutlineAcademicCap,
     HiOutlineArrowTrendingUp,
-    HiOutlineCheckCircle
+    HiOutlineCheckCircle,
+    HiOutlineStar
 } from 'react-icons/hi2';
 
 export default async function ManagerFeedbackPage({
@@ -135,6 +136,22 @@ export default async function ManagerFeedbackPage({
                             <div className={`mt-2 p-3 rounded-xl text-center font-bold text-sm ${growth > 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-600'}`}>
                                 {growth > 0 ? `Self-reported +${growth.toFixed(1)} improvement` : 'No significant change reported'}
                             </div>
+                        </div>
+                    </div>
+
+                    {/* SECTION 1.5: DAY 0 FEEDBACK */}
+                    <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                        <div className="flex items-center gap-3 mb-6 border-b border-slate-100 pb-4">
+                            <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                                <HiOutlineStar size={20} />
+                            </div>
+                            <h3 className="font-bold text-slate-800 text-sm uppercase tracking-wider">Employee Feedback</h3>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <MiniRatingDisplay label="Overall Training" score={enrollment.trainingRating} />
+                            <MiniRatingDisplay label="Content Relevance" score={enrollment.contentRating} />
+                            <MiniRatingDisplay label="Trainer Delivery" score={enrollment.trainerRating} />
+                            <MiniRatingDisplay label="Materials Quality" score={enrollment.materialRating} />
                         </div>
                     </div>
 
@@ -265,6 +282,18 @@ const RatingDisplay = ({ label, score }: { label: string, score: number | null }
                 }`}>
                 {score ?? 'N/A'} <span className="text-xs font-normal opacity-50">/ 5</span>
             </div>
+        </div>
+    </div>
+);
+
+const MiniRatingDisplay = ({ label, score }: { label: string, score: number | null }) => (
+    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col items-center justify-center text-center hover:border-amber-200 transition-colors">
+        <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wide h-8">{label}</p>
+        <div className={`text-2xl font-black ${score === null ? 'text-slate-300' :
+                score < 3 ? 'text-red-500' :
+                    score < 5 ? 'text-amber-500' : 'text-emerald-500'
+            }`}>
+            {score ?? '-'} <span className="text-[10px] font-normal opacity-50">/ 5</span>
         </div>
     </div>
 );

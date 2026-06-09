@@ -116,7 +116,12 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                     </button>
                 </div>
                 <form action={isEdit ? handleEdit : handleAdd} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Subject ID (Optional)</label>
+                            <input name="id" disabled={isEdit} defaultValue={isEdit ? program?.id : ''} placeholder="Leave blank to auto-generate" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
+                        </div>
+
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Subject Name *</label>
                             <input name="name" required defaultValue={program?.name} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />

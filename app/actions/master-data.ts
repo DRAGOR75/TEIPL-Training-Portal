@@ -41,6 +41,7 @@ export async function createProgram(formData: FormData) {
     const sectionIds = formData.getAll('sectionIds') as string[];
     
     // Extended fields
+    const id = sanitizeInput(formData.get('id') as string);
     const objectives = sanitizeInput(formData.get('objectives') as string);
     const machineModel = sanitizeInput(formData.get('machineModel') as string);
     const status = sanitizeInput(formData.get('status') as string) || 'Active';
@@ -58,6 +59,7 @@ export async function createProgram(formData: FormData) {
     try {
         await db.program.create({
             data: {
+                ...(id ? { id } : {}),
                 name,
                 category,
                 targetGrades: grades,
