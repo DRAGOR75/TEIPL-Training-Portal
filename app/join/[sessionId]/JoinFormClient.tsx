@@ -18,10 +18,11 @@ interface Props {
     sessionId: string;
     participants: Participant[];
     allowWalkIns: boolean;
+    defaultEmpId?: string;
 }
 
-export default function JoinFormClient({ sessionId, participants, allowWalkIns }: Props) {
-    const [selectedEmpId, setSelectedEmpId] = useState<string>('');
+export default function JoinFormClient({ sessionId, participants, allowWalkIns, defaultEmpId }: Props) {
+    const [selectedEmpId, setSelectedEmpId] = useState<string>(defaultEmpId || '');
     const isWalkIn = selectedEmpId === 'WALKIN';
 
     return (

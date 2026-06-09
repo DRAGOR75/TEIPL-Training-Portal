@@ -8,10 +8,12 @@ import {
     HiOutlineClock,
     HiOutlineExclamationCircle,
     HiOutlineBookOpen,
-    HiOutlineStar
+    HiOutlineStar,
+    HiOutlineArrowTopRightOnSquare
 } from 'react-icons/hi2';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { generateSecureToken } from '@/lib/security';
 
 export default async function SessionDetailsPage({ params }: { params: Promise<{ sessionId: string }> }) {
     const { sessionId } = await params;
@@ -139,6 +141,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                         <th className="px-6 py-4 font-bold text-slate-600">Feedback Status</th>
                                         <th className="px-6 py-4 font-bold text-slate-600">Post training (30 days) performance feedback</th>
                                         <th className="px-6 py-4 font-bold text-slate-600">Manager Review</th>
+                                        <th className="px-6 py-4 font-bold text-slate-600 text-right">Admin Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -230,12 +233,34 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                         )}
                                                     </div>
                                                 </td>
+                                                <td className="px-6 py-4 text-right align-middle">
+                                                    <div className="flex flex-col gap-2 items-end">
+                                                        {e.status === 'Pending' && (
+                                                            <a href={`/feedback/employee/${e.id}?token=${generateSecureToken(e.id)}`} target="_blank" className="text-xs text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1 font-medium bg-blue-50 px-2 py-1 rounded transition-colors w-fit whitespace-nowrap">
+                                                                Fill User Feedback <HiOutlineArrowTopRightOnSquare size={12}/>
+                                                            </a>
+                                                        )}
+                                                        {e.status === 'Pending Manager' && (
+                                                            <a href={`/feedback/manager/${e.id}?token=${generateSecureToken(e.id)}`} target="_blank" className="text-xs text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1 font-medium bg-indigo-50 px-2 py-1 rounded transition-colors w-fit whitespace-nowrap">
+                                                                Fill Manager Feedback <HiOutlineArrowTopRightOnSquare size={12}/>
+                                                            </a>
+                                                        )}
+                                                        {e.status === 'Not Submitted' && (
+                                                            <a href={`/join/${session.id}?empId=${e.empId}`} target="_blank" className="text-xs text-emerald-600 hover:text-emerald-800 hover:underline flex items-center gap-1 font-medium bg-emerald-50 px-2 py-1 rounded transition-colors w-fit whitespace-nowrap">
+                                                                Fill Initial Feedback <HiOutlineArrowTopRightOnSquare size={12}/>
+                                                            </a>
+                                                        )}
+                                                        {e.status !== 'Pending' && e.status !== 'Pending Manager' && e.status !== 'Not Submitted' && (
+                                                            <span className="text-xs text-slate-300">-</span>
+                                                        )}
+                                                    </div>
+                                                </td>
                                             </tr>
                                         )
                                     })}
                                     {enrollments.length === 0 && (
                                         <tr>
-                                            <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
+                                            <td colSpan={7} className="px-6 py-12 text-center text-slate-400 italic">
                                                 No participants enrolled yet.
                                             </td>
                                         </tr>

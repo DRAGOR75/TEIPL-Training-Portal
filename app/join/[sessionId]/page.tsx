@@ -14,9 +14,16 @@ import {
 } from 'react-icons/hi2';
 import JoinFormClient from './JoinFormClient';
 
-export default async function JoinSessionPage({ params }: { params: Promise<{ sessionId: string }> }) {
+export default async function JoinSessionPage({
+    params,
+    searchParams
+}: {
+    params: Promise<{ sessionId: string }>;
+    searchParams: Promise<{ empId?: string }>;
+}) {
     // Await params in Next.js 15+
     const { sessionId } = await params;
+    const { empId: defaultEmpId } = await searchParams;
 
     // 1. Fetch Session Info
     const session = await db.trainingSession.findUnique({
@@ -122,6 +129,7 @@ export default async function JoinSessionPage({ params }: { params: Promise<{ se
                     sessionId={sessionId}
                     participants={participants}
                     allowWalkIns={session.allowWalkIns}
+                    defaultEmpId={defaultEmpId}
                 />
 
             </div>
