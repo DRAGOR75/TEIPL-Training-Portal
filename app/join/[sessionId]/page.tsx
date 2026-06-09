@@ -19,11 +19,12 @@ export default async function JoinSessionPage({
     searchParams
 }: {
     params: Promise<{ sessionId: string }>;
-    searchParams: Promise<{ empId?: string }>;
+    searchParams: Promise<{ empId?: string; admin?: string }>;
 }) {
     // Await params in Next.js 15+
     const { sessionId } = await params;
-    const { empId: defaultEmpId } = await searchParams;
+    const { empId: defaultEmpId, admin } = await searchParams;
+    const isAdmin = admin === 'true';
 
     // 1. Fetch Session Info
     const session = await db.trainingSession.findUnique({
@@ -130,6 +131,7 @@ export default async function JoinSessionPage({
                     participants={participants}
                     allowWalkIns={session.allowWalkIns}
                     defaultEmpId={defaultEmpId}
+                    isAdmin={isAdmin}
                 />
 
             </div>
