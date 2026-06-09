@@ -19,7 +19,7 @@ export default async function JoinSessionPage({
     searchParams
 }: {
     params: Promise<{ sessionId: string }>;
-    searchParams: Promise<{ empId?: string }>;
+    searchParams: Promise<{ empId?: string; admin?: string }>;
 }) {
     // Await params in Next.js 15+
     const { sessionId } = await params;
