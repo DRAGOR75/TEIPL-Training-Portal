@@ -19,15 +19,17 @@ interface Props {
     participants: Participant[];
     allowWalkIns: boolean;
     defaultEmpId?: string;
+    isAdmin?: boolean;
 }
 
-export default function JoinFormClient({ sessionId, participants, allowWalkIns, defaultEmpId }: Props) {
+export default function JoinFormClient({ sessionId, participants, allowWalkIns, defaultEmpId, isAdmin }: Props) {
     const [selectedEmpId, setSelectedEmpId] = useState<string>(defaultEmpId || '');
     const isWalkIn = selectedEmpId === 'WALKIN';
 
     return (
         <form action={selfEnroll} className="p-5 md:p-10 space-y-8 md:space-y-10">
             <input type="hidden" name="sessionId" value={sessionId} />
+            {isAdmin && <input type="hidden" name="isAdmin" value="true" />}
 
             {/* SECTION 1: Identity Selection */}
             <section className="space-y-6">

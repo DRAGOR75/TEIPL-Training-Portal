@@ -246,7 +246,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                             </a>
                                                         )}
                                                         {e.status === 'Not Submitted' && (
-                                                            <a href={`/join/${session.id}?empId=${e.empId}`} target="_blank" className="text-xs text-emerald-600 hover:text-emerald-800 hover:underline flex items-center gap-1 font-medium bg-emerald-50 px-2 py-1 rounded transition-colors w-fit whitespace-nowrap">
+                                                            <a href={`/join/${session.id}?empId=${e.empId}&admin=true`} target="_blank" className="text-xs text-emerald-600 hover:text-emerald-800 hover:underline flex items-center gap-1 font-medium bg-emerald-50 px-2 py-1 rounded transition-colors w-fit whitespace-nowrap">
                                                                 Fill Initial Feedback <HiOutlineArrowTopRightOnSquare size={12}/>
                                                             </a>
                                                         )}

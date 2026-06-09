@@ -87,18 +87,20 @@ export async function selfEnroll(formData: FormData) {
         });
 
         // 5. Send Acknowledgment Email (Non-blocking)
-        await sendFeedbackAcknowledgmentEmail(finalEmail, finalName, session.programName, {
-            preTraining: data.preTrainingRating,
-            postTraining: data.postTrainingRating,
-            training: data.trainingRating,
-            content: data.contentRating,
-            trainer: data.trainerRating,
-            material: data.materialRating,
-            recommendation: data.recommendationRating,
-            topicsLearned: data.topicsLearned,
-            actionPlan: data.actionPlan,
-            suggestions: data.suggestions
-        }).catch(err => console.error("Ack Email failed", err));
+        if (formData.get('isAdmin') !== 'true') {
+            await sendFeedbackAcknowledgmentEmail(finalEmail, finalName, session.programName, {
+                preTraining: data.preTrainingRating,
+                postTraining: data.postTrainingRating,
+                training: data.trainingRating,
+                content: data.contentRating,
+                trainer: data.trainerRating,
+                material: data.materialRating,
+                recommendation: data.recommendationRating,
+                topicsLearned: data.topicsLearned,
+                actionPlan: data.actionPlan,
+                suggestions: data.suggestions
+            }).catch(err => console.error("Ack Email failed", err));
+        }
 
     } catch (error) {
         console.error("Enrollment Failed", error);
