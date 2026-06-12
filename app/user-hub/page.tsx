@@ -3,6 +3,7 @@ import {
     HiOutlineClipboardDocumentList,
     HiOutlineWrench,
     HiOutlineArrowRight,
+    HiOutlineCalendar,
 } from 'react-icons/hi2';
 
 export default function UserHubPage() {
@@ -26,19 +27,29 @@ export default function UserHubPage() {
             </div>
 
             <div className="container mx-auto px-6 py-12 max-w-7xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-                    {/* Card 1: TNI Management - Amber */}
+                    {/* Card 1: Training Management - Amber */}
                     <UserCard
                         href="/tni"
-                        title="TNI Management"
+                        title="Training Management"
                         description="Identify your training needs, submit nominations, and track your learning journey."
                         icon={<HiOutlineClipboardDocumentList size={32} />}
                         tag="Personal Growth"
                         color="amber"
                     />
 
-                    {/* Card 2: Troubleshooting - Red */}
+                    {/* Card 2: Training Calendar - Emerald */}
+                    <UserCard
+                        href="/calendar"
+                        title="Training Calendar"
+                        description="Browse upcoming pre-scheduled training programs and self-nominate for a date that suits you."
+                        icon={<HiOutlineCalendar size={32} />}
+                        tag="Schedule"
+                        color="emerald"
+                    />
+
+                    {/* Card 3: Troubleshooting - Red */}
                     <UserCard
                         href="/troubleshoot"
                         title="Troubleshooting Library"
@@ -66,11 +77,12 @@ function UserCard({ href, title, description, icon, tag, color }: {
     description: string;
     icon: React.ReactNode;
     tag: string;
-    color: 'amber' | 'red';
+    color: 'amber' | 'red' | 'emerald';
 }) {
     const colorStyles = {
         amber: 'bg-amber-50 border-amber-100 text-amber-600 hover:border-amber-500 hover:shadow-amber-900/5',
         red: 'bg-red-50 border-red-100 text-red-600 hover:border-red-500 hover:shadow-red-900/5',
+        emerald: 'bg-emerald-50 border-emerald-100 text-emerald-600 hover:border-emerald-500 hover:shadow-emerald-900/5',
     };
 
     return (

@@ -6,7 +6,10 @@ import LocationManager from '@/components/admin/LocationManager';
 import AdminDashboardTabs from '@/components/admin/AdminDashboardTabs';
 import BulkUploadManager from '@/components/admin/BulkUploadManager';
 import SystemSettingsManager from '@/components/admin/SystemSettingsManager';
+import TrainingCalendarManager from '@/components/admin/TrainingCalendarManager';
 import { getSystemSetting } from '@/app/actions/settings';
+import { getCalendarEvents } from '@/app/actions/calendar';
+import { getTrainers } from '@/app/actions/trainers';
 import {
     getCachedAdminSections,
     getCachedAdminPrograms,
@@ -32,12 +35,15 @@ export default async function MasterDataPage() {
     }
 
     // Parallel Fetching for Performance using cached wrappers
-    const [sections, programs, employees, locations, isTniEnabledStr] = await Promise.all([
+    const [sections, programs, employees, locations, isTniEnabledStr, calendarEvents, trainers, allSessions] = await Promise.all([
         getCachedAdminSections(),
         getCachedAdminPrograms(),
         getCachedAdminEmployees(),
         getCachedAdminLocations(),
-        getSystemSetting('enable_employee_tni_add', 'true')
+        getSystemSetting('enable_employee_tni_add', 'true'),
+        getCalendarEvents(false),
+        getTrainers(),
+        db.trainingSession.findMany({ select: { id: true, programName: true, trainerName: true, location: true, startDate: true, endDate: true, enrollments: { select: { id: true } } } })
     ]);
 
     const isTniEnabled = isTniEnabledStr === 'true';
@@ -62,6 +68,7 @@ export default async function MasterDataPage() {
                     programManager={<ProgramManager programs={programs} allSections={sections} />}
                     employeeManager={<EmployeeManager employees={employees as any} />}
                     bulkUploadManager={<BulkUploadManager />}
+                    calendarManager={<TrainingCalendarManager calendarEvents={calendarEvents} programs={programs} trainers={trainers} allSessions={allSessions} />}
                     systemSettingsManager={<SystemSettingsManager initialTniEnabled={isTniEnabled} />}
                 />
 

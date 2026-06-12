@@ -53,7 +53,6 @@ export async function submitManagerNominationDecision(nominationId: string, deci
         revalidatePath(`/manager/approval/${nominationId}`);
         revalidatePath('/admin/sessions');
 
-        // Revalidate Tags
         revalidateTag('employee-profile', 'max');
         revalidateTag('manager-approval', 'max');
         revalidateTag('sessions-list', 'max');

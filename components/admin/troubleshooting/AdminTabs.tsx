@@ -29,7 +29,7 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
         { id: 'faults', label: 'Fault Manager', icon: HiOutlineExclamationTriangle },
         { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
         // { id: 'causes', label: 'Cause Library', icon: HiOutlineClipboardDocumentCheck }, // Hidden per user request
-        { id: 'import', label: 'Bulk Import', icon: HiOutlineCloudArrowUp },
+        { id: 'import', label: 'Bulk Upload', icon: HiOutlineCloudArrowUp },
     ];
 
     return (

@@ -1,60 +1,28 @@
-import EventCalendar, { CalendarEvent } from '@/components/ui/EventCalendar';
-import AdminHeader from '@/components/admin/AdminHeader';
+import { getCalendarEvents } from '@/app/actions/calendar';
+import { auth } from '@/auth';
+import { redirect } from 'next/navigation';
+import EmployeeCalendarClient from '@/components/user/EmployeeCalendarClient';
 
-export const metadata = {
-    title: 'Training Schedule',
-};
-
-// Mock events for demonstration
-const sampleEvents: CalendarEvent[] = [
-    {
-        id: 1,
-        title: 'Safety Training L1',
-        date: new Date().toISOString(), // Today
-        time: '09:00 AM',
-        color: 'emerald',
-    },
-    {
-        id: 2,
-        title: 'Leadership Workshop',
-        date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
-        time: '01:00 PM',
-        color: 'blue',
-    },
-    {
-        id: 3,
-        title: 'Emergency Drill',
-        date: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString(),
-        time: '10:30 AM',
-        color: 'rose',
-    },
-    {
-        id: 4,
-        title: 'New Hire Orientation',
-        date: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(),
-        color: 'violet',
-    },
-    {
-        id: 5,
-        title: 'Equipment Maintenance',
-        date: new Date(new Date().setDate(new Date().getDate() + 2)).toISOString(),
-        time: '04:00 PM',
-        color: 'amber',
+export default async function EmployeeCalendarPage() {
+    const session = await auth();
+    if (!session?.user?.email) {
+        redirect('/api/auth/signin');
     }
-];
 
-export default function CalendarPage() {
+    // Pass forUser = true to only get 'Forming' (open) batches
+    const events = await getCalendarEvents(true);
+
     return (
-        <div className="min-h-screen bg-slate-50">
-            <AdminHeader />
-            <main className="max-w-[1400px] mx-auto px-4 sm:px-6 py-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">Master Schedule</h1>
-                    <p className="text-slate-500 font-medium mt-1">Overview of all upcoming training sessions and events.</p>
+        <main className="min-h-screen bg-slate-50 py-12 px-6">
+            <div className="max-w-6xl mx-auto">
+                <div className="mb-10">
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Training Calendar</h1>
+                    <p className="text-slate-500 font-medium mt-2">Browse pre-scheduled training programs and nominate yourself.</p>
                 </div>
                 
-                <EventCalendar events={sampleEvents} />
-            </main>
-        </div>
+                {/* Need to pass down empId? Wait, the employee record needs to be linked to user email. */}
+                <EmployeeCalendarClient events={events} userEmail={session.user.email} />
+            </div>
+        </main>
     );
 }

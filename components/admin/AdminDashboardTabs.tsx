@@ -7,7 +7,8 @@ import {
     HiOutlineBookOpen,
     HiOutlineUsers,
     HiOutlineArrowUpTray,
-    HiOutlineCog
+    HiOutlineCog,
+    HiOutlineCalendar
 } from 'react-icons/hi2';
 
 interface AdminDashboardTabsProps {
@@ -18,6 +19,7 @@ interface AdminDashboardTabsProps {
     programManager: React.ReactNode;
     employeeManager: React.ReactNode;
     bulkUploadManager: React.ReactNode;
+    calendarManager?: React.ReactNode;
     systemSettingsManager?: React.ReactNode;
 }
 
@@ -29,16 +31,18 @@ export default function AdminDashboardTabs({
     programManager,
     employeeManager,
     bulkUploadManager,
+    calendarManager,
     systemSettingsManager
 }: AdminDashboardTabsProps) {
-    const [activeTab, setActiveTab] = useState<'DEPARTMENTS' | 'VENUES' | 'PROGRAMS' | 'EMPLOYEES' | 'BULK_UPLOADS' | 'SETTINGS'>('PROGRAMS');
+    const [activeTab, setActiveTab] = useState<'DEPARTMENTS' | 'VENUES' | 'PROGRAMS' | 'EMPLOYEES' | 'BULK_UPLOADS' | 'CALENDAR' | 'SETTINGS'>('PROGRAMS');
 
     const tabs = [
         { id: 'DEPARTMENTS', label: 'Departments', icon: HiOutlineBuildingOffice2 },
         { id: 'VENUES', label: 'Venues', icon: HiOutlineMapPin },
         { id: 'PROGRAMS', label: 'Subjects Menu', icon: HiOutlineBookOpen },
         { id: 'EMPLOYEES', label: 'Employees', icon: HiOutlineUsers },
-        { id: 'BULK_UPLOADS', label: 'Bulk Import', icon: HiOutlineArrowUpTray },
+        { id: 'BULK_UPLOADS', label: 'Bulk Upload', icon: HiOutlineArrowUpTray },
+        { id: 'CALENDAR', label: 'Calendar', icon: HiOutlineCalendar },
         { id: 'SETTINGS', label: 'Settings', icon: HiOutlineCog },
     ] as const;
 
@@ -91,6 +95,7 @@ export default function AdminDashboardTabs({
                 {activeTab === 'PROGRAMS' && programManager}
                 {activeTab === 'EMPLOYEES' && employeeManager}
                 {activeTab === 'BULK_UPLOADS' && bulkUploadManager}
+                {activeTab === 'CALENDAR' && calendarManager}
                 {activeTab === 'SETTINGS' && systemSettingsManager}
             </div>
         </div>

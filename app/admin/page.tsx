@@ -31,9 +31,7 @@ export default async function AdminHubPage() {
                         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
                             Admin <span className="text-indigo-600">Panel</span>
                         </h1>
-                        <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed">
-                            Manage your workspace, training programs, and monitor system performance.
-                        </p>
+
                     </div>
                 </div>
             </div>
@@ -51,10 +49,10 @@ export default async function AdminHubPage() {
                         color="blue"
                     />
 
-                    {/* Card 2: TNI Management */}
+                    {/* Card 2: Master Data Management */}
                     <AdminCard
                         href="/admin/tni-dashboard"
-                        title="TNI Control Panel"
+                        title="Master Data Management"
                         description="Manage training programs, sections/departments, and employee database."
                         icon={<HiOutlineClipboardDocumentList size={24} />}
                         tag="Master Data"
@@ -83,7 +81,7 @@ export default async function AdminHubPage() {
 
                     {/* Card 5: Training Cohorts - Indigo */}
                     <AdminCard
-                        href="/admin/cohorts"
+                        href="/wip"
                         title="Cohort Control Panel"
                         description="Create structured multi-program learning paths for specialized employee groups."
                         icon={<HiOutlineAcademicCap size={24} />}
@@ -114,7 +112,7 @@ export default async function AdminHubPage() {
 
                     {/* Card 8: Training Manuals */}
                     <AdminCard
-                        href="/training-manuals"
+                        href="/wip"
                         title="Training Manuals"
                         description="Upload and manage training manuals."
                         icon={<HiOutlineDocumentText size={24} />}

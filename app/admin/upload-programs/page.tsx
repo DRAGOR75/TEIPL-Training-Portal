@@ -253,7 +253,7 @@ export default function UploadProgramsPage() {
                                         <th className="px-6 py-4">Subject Code</th>
                                         <th className="px-6 py-4">Training Name</th>
                                         <th className="px-6 py-4">Program Group (Mapped)</th>
-                                        <th className="px-6 py-4">Department / Section</th>
+                                        <th className="px-6 py-4">Department</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">

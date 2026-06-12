@@ -7,7 +7,8 @@ import {
 } from 'recharts';
 import { HiOutlineArrowDownTray, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
 import * as XLSX from 'xlsx';
-import { getFilteredParticipantDepth, getTniReportData, getAllNominationsForExport } from '@/app/actions/reports';
+import { getFilteredParticipantDepth, getTniReportData, getAllNominationsForExport, getUntrainedPendingTrainees } from '@/app/actions/reports';
+import UntrainedPendingReport from '@/components/admin/UntrainedPendingReport';
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 const RADIAN = Math.PI / 180;
@@ -21,7 +22,9 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
     const [selectedSite, setSelectedSite] = useState<string | null>(null);
     const [depthData, setDepthData] = useState<any[]>([]);
     const [isDepthLoading, setIsDepthLoading] = useState(false);
-    const [activeTab, setActiveTab] = useState<'overview' | 'planning'>('overview');
+    const [activeTab, setActiveTab] = useState<'overview' | 'planning' | 'untrained'>('overview');
+    const [untrainedData, setUntrainedData] = useState<any[] | null>(null);
+    const [isUntrainedLoading, setIsUntrainedLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [dashboardData, setDashboardData] = useState(data);
     const [isDataLoading, setIsDataLoading] = useState(false);
@@ -51,6 +54,24 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
             clearTimeout(timer);
         };
     }, []);
+
+    useEffect(() => {
+        if (activeTab === 'untrained' && untrainedData === null) {
+            const fetchUntrained = async () => {
+                setIsUntrainedLoading(true);
+                try {
+                    const data = await getUntrainedPendingTrainees();
+                    setUntrainedData(data || []);
+                } catch (error) {
+                    console.error("Failed to fetch untrained data", error);
+                    setUntrainedData([]);
+                } finally {
+                    setIsUntrainedLoading(false);
+                }
+            };
+            fetchUntrained();
+        }
+    }, [activeTab, untrainedData]);
 
     if (!data) return <div className="p-10 text-center text-slate-500 font-medium">No report data available.</div>;
 
@@ -233,9 +254,26 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                 >
                     Resource Planning
                 </button>
+                <button
+                    onClick={() => setActiveTab('untrained')}
+                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'untrained' ? 'bg-white text-blue-700 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    Untrained Pending
+                </button>
             </div>
 
-            {activeTab === 'overview' ? (
+            {activeTab === 'untrained' ? (
+                <div className="mt-8 relative min-h-[400px]">
+                    {isUntrainedLoading ? (
+                        <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-20 rounded-3xl flex flex-col items-center justify-center border border-slate-200">
+                            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mb-4"></div>
+                            <p className="text-slate-500 font-bold animate-pulse">Analyzing training records...</p>
+                        </div>
+                    ) : (
+                        <UntrainedPendingReport employees={untrainedData || []} />
+                    )}
+                </div>
+            ) : activeTab === 'overview' ? (
                 <>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
                         {isDataLoading && (

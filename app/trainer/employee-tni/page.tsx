@@ -91,6 +91,7 @@ export default async function TrainerEmployeeTNIPage({ searchParams }: { searchP
                                 trainingHistory={currentEmployee?.trainingHistory || []}
                                 managerEmail={currentEmployee?.managerEmail || undefined}
                                 managerName={currentEmployee?.managerName || undefined}
+                                isTrainerView={true}
                             />
                         ) : (
                             <div className="bg-amber-50 border border-amber-200 p-6 rounded-2xl text-amber-800 text-center">

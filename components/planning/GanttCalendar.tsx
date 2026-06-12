@@ -16,6 +16,7 @@ interface Session {
     startDate: Date;
     endDate: Date;
     status?: string;
+    location?: string;
 }
 
 interface GanttCalendarProps {
@@ -48,6 +49,17 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
     // To keep it clean, let's show all programs, or maybe just ones with activity. 
     // For a planning board, showing all active programs is best so you can schedule on empty ones.
     const activeTrainers = [...trainers, { id: 'unassigned', name: 'Unassigned' }]; 
+
+    const trainerColors = [
+        'from-blue-500 to-blue-600',
+        'from-emerald-500 to-emerald-600',
+        'from-amber-500 to-amber-600',
+        'from-rose-500 to-rose-600',
+        'from-purple-500 to-purple-600',
+        'from-cyan-500 to-cyan-600',
+        'from-pink-500 to-pink-600',
+        'from-orange-500 to-orange-600',
+    ];
 
     // Helper: Safely calculate bar positions
     const getBarStyles = (session: Session) => {
@@ -85,7 +97,7 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
     };
 
     return (
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col h-[800px]">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col">
             
             {/* Toolbar */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 bg-slate-50 shrink-0">
@@ -119,12 +131,12 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
 
             {/* Gantt Container (Scrollable horizontally and vertically) */}
             <div className="flex-1 overflow-auto bg-slate-50 relative">
-                <div className="min-w-[1200px] flex flex-col">
+                <div className="min-w-[800px] flex flex-col">
                     
                     {/* Header Row (Days) */}
                     <div className="flex sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
                         {/* Y-Axis Label Area */}
-                        <div className="w-[300px] shrink-0 border-r border-slate-200 p-4 flex items-center bg-slate-50">
+                        <div className="w-[180px] shrink-0 border-r border-slate-200 p-4 flex items-center bg-slate-50">
                             <span className="text-xs font-black uppercase text-slate-400 tracking-widest">Trainer Name</span>
                         </div>
                         {/* X-Axis Days */}
@@ -134,12 +146,12 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
                                 return (
                                     <div 
                                         key={day} 
-                                        className={`flex-1 border-r border-slate-100 py-3 flex flex-col items-center justify-center min-w-[40px] ${isToday ? 'bg-indigo-50/50' : ''}`}
+                                        className={`flex-1 border-r border-slate-100 py-2 flex flex-col items-center justify-center min-w-[28px] ${isToday ? 'bg-indigo-50/50' : ''}`}
                                     >
-                                        <span className={`text-xs font-bold ${isToday ? 'text-indigo-600' : 'text-slate-400'}`}>
+                                        <span className={`text-[10px] font-bold ${isToday ? 'text-indigo-600' : 'text-slate-400'}`}>
                                             {new Date(year, month, day).toLocaleDateString('default', { weekday: 'narrow' })}
                                         </span>
-                                        <span className={`text-sm font-black ${isToday ? 'text-indigo-700 bg-indigo-100 rounded-full w-6 h-6 flex items-center justify-center mt-1' : 'text-slate-700 mt-1'}`}>
+                                        <span className={`text-xs font-black ${isToday ? 'text-indigo-700 bg-indigo-100 rounded-full w-5 h-5 flex items-center justify-center mt-0.5' : 'text-slate-700 mt-0.5'}`}>
                                             {day}
                                         </span>
                                     </div>
@@ -149,22 +161,26 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
                     </div>
 
                     {/* Timeline Rows inside scrollable area */}
-                    <div className="flex-1">
-                        {activeTrainers.map(trainer => {
+                    <div className="flex-1 pb-48">
+                        {activeTrainers.map((trainer, index) => {
                             // Find sessions belonging to this trainer
                             const tSessions = sessions.filter(s => 
                                 (trainer.name === 'Unassigned' && (!s.trainerName || s.trainerName === 'Unassigned')) || 
                                 (s.trainerName === trainer.name)
                             );
                             
+                            const colorClass = trainer.name === 'Unassigned' 
+                                ? 'from-slate-400 to-slate-500' 
+                                : trainerColors[index % trainerColors.length];
+
                             return (
                                 <div key={trainer.id} className="flex border-b border-slate-200 bg-white hover:bg-slate-50/50 transition-colors group">
                                     {/* Y-Axis Trainer Name */}
-                                    <div className="w-[300px] shrink-0 border-r border-slate-200 p-4 sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 transition-colors">
-                                        <h3 className="text-sm font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-700 transition-colors">
+                                    <div className="w-[180px] shrink-0 border-r border-slate-200 p-4 sticky left-0 z-10 bg-white group-hover:bg-slate-50/80 transition-colors">
+                                        <h3 className="text-xs font-bold text-slate-800 line-clamp-2 leading-snug group-hover:text-indigo-700 transition-colors">
                                             {trainer.name}
                                         </h3>
-                                        <p className="text-xs font-semibold text-slate-400 mt-1">
+                                        <p className="text-[10px] font-semibold text-slate-400 mt-0.5">
                                             {tSessions.length} Session(s)
                                         </p>
                                     </div>
@@ -197,7 +213,7 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
                                                     <div 
                                                         key={session.id}
                                                         style={styles}
-                                                        className="absolute top-2 bottom-2 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-lg shadow-md pointer-events-auto cursor-pointer hover:shadow-lg hover:scale-[1.01] transition-all flex items-center px-3 overflow-hidden group/bar"
+                                                        className={`absolute top-2 bottom-2 bg-gradient-to-r ${colorClass} rounded-lg shadow-md pointer-events-auto cursor-pointer flex items-center px-3 group/bar`}
                                                         onClick={() => alert(`Details for session: ${session.programName} by ${session.trainerName || 'TBD'}`)}
                                                     >
                                                         {/* Bar Content */}
@@ -207,10 +223,25 @@ export default function GanttCalendar({ programs, sessions, trainers, locations 
                                                             </p>
                                                         </div>
                                                         
-                                                        {/* Tooltip on hover */}
-                                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs font-bold px-3 py-1.5 rounded-lg opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none whitespace-nowrap shadow-xl z-30">
-                                                            {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}
-                                                            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+                                                        {/* Detailed Tooltip on hover */}
+                                                        <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white p-3 rounded-xl opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none w-max max-w-[250px] shadow-2xl z-[60] flex flex-col gap-1.5 border border-slate-700">
+                                                            <div className="font-black text-sm text-indigo-200 truncate">{session.programName}</div>
+                                                            
+                                                            <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
+                                                                <span className="text-slate-400 font-medium">Dates:</span>
+                                                                <span className="font-bold">{new Date(session.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })} - {new Date(session.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                                                                
+                                                                <span className="text-slate-400 font-medium">Location:</span>
+                                                                <span className="font-bold">{session.location || 'TBD'}</span>
+                                                                
+                                                                <span className="text-slate-400 font-medium">Trainer:</span>
+                                                                <span className="font-bold">{session.trainerName || 'TBD'}</span>
+                                                                
+                                                                <span className="text-slate-400 font-medium">Status:</span>
+                                                                <span className={`font-bold ${session.status === 'Forming' ? 'text-amber-400' : 'text-emerald-400'}`}>{session.status || 'Scheduled'}</span>
+                                                            </div>
+
+                                                            <div className="absolute -top-2 left-1/2 -translate-x-1/2 border-4 border-transparent border-b-slate-800" />
                                                         </div>
                                                     </div>
                                                 );

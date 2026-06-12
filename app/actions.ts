@@ -226,64 +226,25 @@ export async function submitEmployeeFeedback(formData: FormData) {
             }
         });
 
-        // 🟢 NEW: Close the TNI/Nomination loop and add to Training History upon Employee Feedback
-        if (updatedEnrollment.session?.nominationBatchId) {
+        // 🟢 NEW: Update the Training History with the final L3 rating
+        if (updatedEnrollment.session?.id) {
             let effectiveEmpId = updatedEnrollment.empId;
-            let empLocation = null;
-            let progCategory = null;
-            
-            // 1. Get Employee Details
             if (!effectiveEmpId) {
                 const emp = await db.employee.findUnique({
                     where: { email: updatedEnrollment.employeeEmail },
-                    select: { id: true, location: true }
+                    select: { id: true }
                 });
                 effectiveEmpId = emp?.id ?? null;
-                empLocation = emp?.location ?? null;
-            } else {
-                const emp = await db.employee.findUnique({
-                    where: { id: effectiveEmpId },
-                    select: { location: true }
-                });
-                empLocation = emp?.location ?? null;
             }
 
-            // 2. Get Program Category
-            const prog = await db.program.findUnique({
-                where: { name: updatedEnrollment.session.programName },
-                select: { category: true }
-            });
-            progCategory = prog?.category ?? null;
-
-            // 3. Calculate Training Days
-            const start = new Date(updatedEnrollment.session.startDate);
-            const end = new Date(updatedEnrollment.session.endDate);
-            const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
-
             if (effectiveEmpId) {
-                // A. Close the TNI Loop
-                await db.nomination.updateMany({
+                // Update existing Training History with L3 rating
+                await db.trainingHistory.updateMany({
                     where: {
                         empId: effectiveEmpId,
-                        batchId: updatedEnrollment.session.nominationBatchId
+                        sessionId: updatedEnrollment.session.id
                     },
-                    data: { status: 'Completed' }
-                });
-
-                // B. Add to Training History
-                await db.trainingHistory.create({
                     data: {
-                        empId: effectiveEmpId,
-                        employeeName: updatedEnrollment.employeeName,
-                        programName: updatedEnrollment.session.programName,
-                        startDate: updatedEnrollment.session.startDate,
-                        endDate: updatedEnrollment.session.endDate,
-                        trainingDays: trainingDays > 0 ? trainingDays : null,
-                        location: updatedEnrollment.session.location || empLocation,
-                        progCategory: progCategory,
-                        source: 'SYSTEM',
-                        sessionId: updatedEnrollment.session.id,
-                        trainerName: updatedEnrollment.session.trainerName,
                         averageRating: average
                     }
                 });

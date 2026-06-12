@@ -4,8 +4,7 @@ import { db } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { unstable_cache } from 'next/cache';
 
-export async function getTniReportData(site?: string) {
-    if (!await auth()) return null;
+const getCachedTniReportData = unstable_cache(async (site?: string) => {
 
     try {
         // Parallel fetching for performance
@@ -30,7 +29,8 @@ export async function getTniReportData(site?: string) {
                     ...(site ? { employee: { location: site } } : {})
                 },
                 _count: { id: true },
-                orderBy: { _count: { id: 'desc' } }
+                orderBy: { _count: { id: 'desc' } },
+                take: 15
             }),
             // 2. Overall Status Breakdown
             db.nomination.groupBy({
@@ -124,6 +124,11 @@ export async function getTniReportData(site?: string) {
         console.error('Failed to fetch report data', error);
         return null;
     }
+}, ['tni-report-data'], { revalidate: 300, tags: ['reports'] });
+
+export async function getTniReportData(site?: string) {
+    if (!await auth()) return null;
+    return getCachedTniReportData(site);
 }
 
 /**
@@ -218,4 +223,53 @@ export async function getAllNominationsForExport() {
         },
         orderBy: { createdAt: 'desc' }
     });
+}
+
+export async function getUntrainedPendingTrainees() {
+    if (!await auth()) return null;
+
+    const rawData = await db.$queryRaw<any[]>`
+        SELECT 
+            e.emp_id as "id", e.name, e.email, e.grade, e.section_name as "sectionName", e.location, e.project_location as "projectLocation", e.manager_name as "managerName",
+            n.id as "nomId", n.status,
+            p.name as "programName", p.category
+        FROM "employees" e
+        INNER JOIN "nominations" n ON e.emp_id = n.emp_id
+        INNER JOIN "programs" p ON n.program_id = p.id
+        WHERE n.status = 'Pending'
+        AND NOT EXISTS (
+            SELECT 1 FROM "training_history" th WHERE th.emp_id = e.emp_id
+        )
+        ORDER BY e.name ASC
+    `;
+
+    // Group by employee ID in memory
+    const employeeMap = new Map<string, any>();
+
+    for (const row of rawData) {
+        if (!employeeMap.has(row.id)) {
+            employeeMap.set(row.id, {
+                id: row.id,
+                name: row.name,
+                email: row.email,
+                grade: row.grade,
+                sectionName: row.sectionName,
+                location: row.location,
+                projectLocation: row.projectLocation,
+                managerName: row.managerName,
+                nominations: []
+            });
+        }
+        
+        employeeMap.get(row.id).nominations.push({
+            id: row.nomId,
+            status: row.status,
+            program: {
+                name: row.programName,
+                category: row.category
+            }
+        });
+    }
+
+    return Array.from(employeeMap.values());
 }
