@@ -39,8 +39,13 @@ export default async function ManageSessionPage({ params }: PageProps) {
                     </Link>
 
                     <div>
-                        <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full w-fit mb-3">
-                            {session.nominationBatch.program.category}
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-md w-fit">
+                                {session.nominationBatch.program.category}
+                            </div>
+                            <div className="bg-slate-200 text-slate-700 text-xs font-mono font-bold px-3 py-1 rounded-md w-fit">
+                                ID: {session.nominationBatch.program.id}
+                            </div>
                         </div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">
                             {session.programName}

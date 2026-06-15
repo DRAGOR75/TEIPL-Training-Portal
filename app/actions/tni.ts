@@ -156,7 +156,7 @@ export const getManagerApprovalData = async (empId: string) => {
         where: { id: empId },
         include: {
             nominations: {
-                where: { status: 'Pending' },
+                where: { managerApprovalStatus: 'Pending' },
                 include: { program: true }
             }
         }
@@ -164,7 +164,7 @@ export const getManagerApprovalData = async (empId: string) => {
 
     const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
     if (employee) {
-        employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
+        employee.nominations.sort((a, b) => (priority[a.managerApprovalStatus] || 99) - (priority[b.managerApprovalStatus] || 99));
     }
 
     return employee;

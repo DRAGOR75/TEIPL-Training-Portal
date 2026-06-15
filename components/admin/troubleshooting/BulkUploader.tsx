@@ -33,26 +33,26 @@ export default function BulkUploader() {
                     const headers = results.meta.fields || [];
 
                     // Helper to find the first matching header from a list of aliases
-                    const findHeader = (aliases: string[]) => headers.find(h => aliases.some(alias => h.toLowerCase() === alias.toLowerCase()));
+                    const findHeader = (aliases: string[]) => headers.find(h => aliases.some(alias => h.toLowerCase().replace(/[^a-z0-9]/g, '') === alias.toLowerCase().replace(/[^a-z0-9]/g, '')));
 
                     const mapHeader = {
-                        machineName: findHeader(['Machine Model', 'ProductName', 'Machine']),
-                        productSeq: findHeader(['ProdViewSeq']),
-                        keywords: findHeader(['Key Words to filter']),
-                        productId: findHeader(['ProdID']),
+                        machineName: findHeader(['Machine Model', 'ProductName', 'Machine', 'Model', 'Product', 'Equipment']),
+                        productSeq: findHeader(['ProdViewSeq', 'ProductSeq', 'Product Sequence']),
+                        keywords: findHeader(['Key Words to filter', 'Keywords', 'Tags']),
+                        productId: findHeader(['ProdID', 'ProductID']),
 
-                        faultName: findHeader(['Fault Name', 'Fault/Complaint /Failure/ Fault Code', 'FaultName']),
+                        faultName: findHeader(['Fault Name', 'Fault/Complaint /Failure/ Fault Code', 'FaultName', 'Fault', 'Issue', 'Complaint', 'Failure', 'Problem']),
                         faultId: findHeader(['FaultID']),
-                        faultCode: findHeader(['Fault Code']),
-                        faultViewSeq: findHeader(['FaultViewSeq']),
+                        faultCode: findHeader(['Fault Code', 'FaultCode', 'Code']),
+                        faultViewSeq: findHeader(['FaultViewSeq', 'Fault Sequence']),
 
-                        causeName: findHeader(['Cause', '"Cause"', 'Check Description', 'Possible Causes', 'Check']),
-                        action: findHeader(['Action', 'Remedy Action', 'Action/Remedy', 'Remedy']),
-                        justification: findHeader(['Justification', 'Why', 'Reason', 'Explanation']),
+                        causeName: findHeader(['Cause', '"Cause"', 'Check Description', 'Possible Causes', 'Check', 'Description', 'Reason']),
+                        action: findHeader(['Action', 'Remedy Action', 'Action/Remedy', 'Remedy', 'Solution', 'Fix']),
+                        justification: findHeader(['Justification', 'Why', 'Reason', 'Explanation', 'Details']),
 
-                        symptoms: findHeader(['Symptoms']),
-                        manualRef: findHeader(['Reference', 'Procedures/References']),
-                        seq: findHeader(['Sequence', 'CauseViewSeq', 'CauseSeq'])
+                        symptoms: findHeader(['Symptoms', 'Symptom', 'Signs']),
+                        manualRef: findHeader(['Reference', 'Procedures/References', 'Ref', 'Manual', 'ManualRef']),
+                        seq: findHeader(['Sequence', 'CauseViewSeq', 'CauseSeq', 'Step'])
                     };
 
                     let lastMachineName: string | undefined;
@@ -106,7 +106,14 @@ export default function BulkUploader() {
                     }).filter((r: any) => r.machineName || r.faultId || r.productId);
 
                     if (rows.length === 0) {
-                        setStats({ error: 'No valid rows found. Check column headers.' });
+                        const detectedHeaders = headers.join(', ');
+                        if (headers.length === 1) {
+                            setStats({ error: `Formatting Error: The file appears to have all data in a single column. Detected header: "${headers[0]}". Please ensure it's saved as a standard Comma Delimited CSV.` });
+                        } else if (!mapHeader.machineName && !mapHeader.productId && !mapHeader.faultId) {
+                            setStats({ error: `Missing required columns. We need "Machine Model" or "FaultID". The columns we detected in your file were: [${detectedHeaders}]. Please check your column names.` });
+                        } else {
+                            setStats({ error: `No valid rows with data found. Detected headers: [${detectedHeaders}]. Are the rows empty under the Machine/Fault columns?` });
+                        }
                         return;
                     }
 

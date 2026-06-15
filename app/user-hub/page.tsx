@@ -39,15 +39,6 @@ export default function UserHubPage() {
                         color="amber"
                     />
 
-                    {/* Card 2: Training Calendar - Emerald */}
-                    <UserCard
-                        href="/calendar"
-                        title="Training Calendar"
-                        description="Browse upcoming pre-scheduled training programs and self-nominate for a date that suits you."
-                        icon={<HiOutlineCalendar size={32} />}
-                        tag="Schedule"
-                        color="emerald"
-                    />
 
                     {/* Card 3: Troubleshooting - Red */}
                     <UserCard
