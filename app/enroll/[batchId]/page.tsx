@@ -2,7 +2,7 @@
 
 
 import { useState, useEffect } from 'react';
-import { joinBatch, registerAndJoinBatch } from '@/app/actions/sessions'; // Import both
+import { joinBatch, registerAndJoinBatch, getBatchBasicDetails } from '@/app/actions/sessions';
 import { getSections, getDesignations, getLocations } from '@/app/actions/master-data';
 import {
     HiOutlineArrowPath,
@@ -33,6 +33,24 @@ export default function JoinPage() {
     const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
     const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
 
+    // Batch Details State
+    const [batchDetails, setBatchDetails] = useState<{ programName?: string, startDate?: Date, endDate?: Date } | null>(null);
+
+    useEffect(() => {
+        async function fetchBatchDetails() {
+            if (batchId) {
+                const res = await getBatchBasicDetails(batchId);
+                if (res.success) {
+                    setBatchDetails({
+                        programName: res.programName,
+                        startDate: res.startDate,
+                        endDate: res.endDate
+                    });
+                }
+            }
+        }
+        fetchBatchDetails();
+    }, [batchId]);
 
     useEffect(() => {
         async function fetchOptions() {
@@ -368,7 +386,19 @@ export default function JoinPage() {
             <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full space-y-6">
                 <div className="text-center space-y-2">
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">Quick Join</h1>
-                    <p className="text-slate-500">Enter your Employee ID to join the session.</p>
+                    {batchDetails?.programName ? (
+                        <div className="bg-blue-50 text-blue-800 p-3 rounded-xl border border-blue-100 my-4 inline-block max-w-full text-center mx-auto">
+                            <p className="font-bold text-sm">{batchDetails.programName}</p>
+                            {batchDetails.startDate && (
+                                <p className="text-xs font-semibold mt-1 opacity-80">
+                                    {new Date(batchDetails.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                    {batchDetails.endDate && ` - ${new Date(batchDetails.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`}
+                                </p>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-slate-500">Enter your Employee ID to join the session.</p>
+                    )}
                 </div>
 
                 {status === 'error' && (

@@ -53,7 +53,7 @@ export default async function MasterDataPage() {
             <div className="w-full mx-auto space-y-8">
 
                 <AdminDashboardTabs
-                    title={<span className="uppercase font-black text-slate-900 italic">TNI CONTROL <span className="text-amber-600">PANEL</span></span>}
+                    title={<span className="uppercase font-black text-slate-900 italic">MASTER <span className="text-amber-600">DATA</span></span>}
                     reportsLink={
                         <Link
                             href="/admin/reports"
@@ -68,7 +68,7 @@ export default async function MasterDataPage() {
                     programManager={<ProgramManager programs={programs} allSections={sections} />}
                     employeeManager={<EmployeeManager employees={employees as any} />}
                     bulkUploadManager={<BulkUploadManager />}
-                    calendarManager={<TrainingCalendarManager calendarEvents={calendarEvents} programs={programs} trainers={trainers} allSessions={allSessions} />}
+                    calendarManager={<TrainingCalendarManager programs={programs} trainers={trainers} allSessions={allSessions} locations={locations} />}
                     systemSettingsManager={<SystemSettingsManager initialTniEnabled={isTniEnabled} />}
                 />
 
