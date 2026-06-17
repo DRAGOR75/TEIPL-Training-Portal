@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
+import Link from 'next/link';
 import { createProgram, deleteProgram, updateProgram, toggleProgramStatus } from '@/app/actions/master-data';
 import {
     HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown,
@@ -257,6 +258,14 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                             {isFullscreen ? <HiOutlineArrowsPointingIn size={18} /> : <HiOutlineArrowsPointingOut size={18} />}
                         </button>
 
+                        <Link
+                            href="/admin/upload-programs"
+                            className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 px-4 py-2 rounded-xl font-bold transition shadow-sm text-sm"
+                        >
+                            <HiOutlinePlus size={18} className="stroke-[2.5]" />
+                            <span className="hidden sm:inline">Bulk Upload</span>
+                            <span className="sm:hidden">Upload</span>
+                        </Link>
                         <button
                             onClick={() => setIsAddModalOpen(true)}
                             className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-blue-200 text-sm"

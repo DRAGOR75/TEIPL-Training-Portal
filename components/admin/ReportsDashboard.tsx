@@ -290,7 +290,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                         </div>
                         <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm hover:border-blue-300 transition-all">
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Active TNI Needs</p>
-                            <h3 className="text-3xl font-black text-slate-900">{(dashboardData.statusCounts.find((s: any) => s.name === 'Pending')?.value || 0).toLocaleString()}</h3>
+                            <h3 className="text-3xl font-black text-slate-900">{((dashboardData.statusCounts.find((s: any) => s.name === 'Pending')?.value || 0) + (dashboardData.statusCounts.find((s: any) => s.name === 'Approved')?.value || 0)).toLocaleString()}</h3>
                             <div className="mt-2 text-xs text-amber-600 font-medium flex items-center gap-1">
                                 <HiOutlineAcademicCap /> Pending fulfillment
                             </div>
@@ -617,7 +617,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                  'Participant Depth'}
                             </h3>
                             <p className="text-xs text-slate-400 font-medium">
-                                {selectedSite || selectedProgram ? `Showing pending nominations matching your filters.` : 'Click a program or site chart to see participants.'}
+                                {selectedSite || selectedProgram ? `Showing eligible nominations matching your filters.` : 'Click a program or site chart to see participants.'}
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
@@ -658,7 +658,7 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                             </div>
                         ) : depthData.length === 0 ? (
                             <div className="h-full flex items-center justify-center text-slate-500 italic text-sm">
-                                No pending participants found.
+                                No eligible participants found.
                             </div>
                         ) : (
                             <table className="w-full text-left text-sm whitespace-nowrap">

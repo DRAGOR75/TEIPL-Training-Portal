@@ -25,7 +25,7 @@ const getCachedTniReportData = unstable_cache(async (site?: string) => {
             db.nomination.groupBy({
                 by: ['programId'],
                 where: { 
-                    status: 'Pending',
+                    status: { in: ['Pending', 'Approved'] },
                     ...(site ? { employee: { location: site } } : {})
                 },
                 _count: { id: true },
@@ -42,7 +42,7 @@ const getCachedTniReportData = unstable_cache(async (site?: string) => {
             db.employee.groupBy({
                 by: ['sectionName'],
                 where: { 
-                    nominations: { some: { status: 'Pending' } },
+                    nominations: { some: { status: { in: ['Pending', 'Approved'] } } },
                     ...(site ? { location: site } : {})
                 },
                 _count: { id: true }
@@ -50,14 +50,14 @@ const getCachedTniReportData = unstable_cache(async (site?: string) => {
             // 4. Site-wise Demand (Always global for the chart, or filtered if needed)
             db.employee.groupBy({
                 by: ['location'],
-                where: { nominations: { some: { status: 'Pending' } } },
+                where: { nominations: { some: { status: { in: ['Pending', 'Approved'] } } } },
                 _count: { id: true }
             }),
             // 5. Grade-wise Demand
             db.employee.groupBy({
                 by: ['grade'],
                 where: { 
-                    nominations: { some: { status: 'Pending' } },
+                    nominations: { some: { status: { in: ['Pending', 'Approved'] } } },
                     ...(site ? { location: site } : {})
                 },
                 _count: { id: true }
@@ -79,7 +79,7 @@ const getCachedTniReportData = unstable_cache(async (site?: string) => {
                 where: { 
                     nominations: { 
                         some: { 
-                            status: 'Pending',
+                            status: { in: ['Pending', 'Approved'] },
                             ...(site ? { employee: { location: site } } : {})
                         } 
                     }
@@ -138,7 +138,7 @@ export async function getProgramParticipantDepth(programId: string) {
     if (!await auth()) return null;
 
     return await db.nomination.findMany({
-        where: { programId, status: 'Pending' },
+        where: { programId, status: { in: ['Pending', 'Approved'] } },
         include: {
             employee: {
                 select: {
@@ -160,7 +160,7 @@ export async function getProgramParticipantDepth(programId: string) {
 export async function getFilteredParticipantDepth(filters: { programId?: string; site?: string }) {
     if (!await auth()) return null;
 
-    const where: any = { status: 'Pending' };
+    const where: any = { status: { in: ['Pending', 'Approved'] } };
     
     if (filters.programId) {
         where.programId = filters.programId;
@@ -236,7 +236,7 @@ export async function getUntrainedPendingTrainees() {
         FROM "employees" e
         INNER JOIN "nominations" n ON e.emp_id = n.emp_id
         INNER JOIN "programs" p ON n.program_id = p.id
-        WHERE n.status = 'Pending'
+        WHERE n.status IN ('Pending', 'Approved')
         AND NOT EXISTS (
             SELECT 1 FROM "training_history" th WHERE th.emp_id = e.emp_id
         )

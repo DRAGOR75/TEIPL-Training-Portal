@@ -4,10 +4,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
-import { 
-    HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, 
-    HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList, 
-    HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers, 
+import {
+    HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck,
+    HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList,
+    HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers,
     HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown,
     HiOutlineCalendarDays
 } from 'react-icons/hi2';
@@ -22,11 +22,11 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
     const isTroubleshootHost = hostname.toLowerCase().startsWith('troubleshoot') || hostname.toLowerCase().includes('hemmts');
 
     // Hide Navbar on Troubleshooting Subdomain or specific paths
-    const isTroubleshootPage = isTroubleshootHost || 
-                               pathname?.startsWith('/join') || 
-                               pathname?.startsWith('/feedback') || 
-                               pathname?.startsWith('/tni') || 
-                               pathname?.startsWith('/troubleshoot');
+    const isTroubleshootPage = isTroubleshootHost ||
+        pathname?.startsWith('/join') ||
+        pathname?.startsWith('/feedback') ||
+        pathname?.startsWith('/tni') ||
+        pathname?.startsWith('/troubleshoot');
 
     if (isTroubleshootPage) {
         return null;
@@ -73,7 +73,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                         )}
                         {userRole === 'TRAINER' && (
                             <>
-                                <NavLink href="/trainer/dashboard" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                                <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
                                 <NavLink href="/calendar" icon={<HiOutlineCalendarDays size={18} />} text="Calendar" />
                                 <NavLink href="/trainer/reports" icon={<HiOutlineChartBar size={18} />} text="Reports" />
                             </>
@@ -109,7 +109,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                         )}
                         {userRole === 'TRAINER' && (
                             <>
-                                <MobileNavLink href="/trainer/dashboard" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                                <MobileNavLink href="/trainer" onClick={() => setIsOpen(false)} text="Trainer Hub" />
                                 <MobileNavLink href="/calendar" onClick={() => setIsOpen(false)} text="Calendar" />
                                 <MobileNavLink href="/trainer/reports" onClick={() => setIsOpen(false)} text="Reports" />
                             </>
@@ -201,11 +201,10 @@ function AdminDropdown() {
                                 <Link
                                     key={tab.id}
                                     href={tab.href}
-                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
-                                        isActive
-                                            ? 'bg-indigo-50 text-indigo-700 font-bold'
-                                            : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 font-medium'
-                                    }`}
+                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${isActive
+                                        ? 'bg-indigo-50 text-indigo-700 font-bold'
+                                        : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600 font-medium'
+                                        }`}
                                 >
                                     <tab.icon size={18} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
                                     <span className="text-sm">{tab.label}</span>
@@ -243,9 +242,8 @@ function MobileAdminMenu({ closeNav }: { closeNav: () => void }) {
                                 key={tab.id}
                                 href={tab.href}
                                 onClick={closeNav}
-                                className={`flex items-center gap-3 py-3 px-6 transition-colors ${
-                                    isActive ? 'text-indigo-700 font-bold bg-indigo-50/50' : 'text-slate-600 hover:text-indigo-700 font-medium'
-                                }`}
+                                className={`flex items-center gap-3 py-3 px-6 transition-colors ${isActive ? 'text-indigo-700 font-bold bg-indigo-50/50' : 'text-slate-600 hover:text-indigo-700 font-medium'
+                                    }`}
                             >
                                 <tab.icon size={20} className={isActive ? 'text-indigo-600' : 'text-slate-400'} />
                                 <span>{tab.label}</span>
