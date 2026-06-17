@@ -26,7 +26,7 @@ export const getEmployeeProfile = async (empId: string) => {
                 include: {
                     nominations: {
                         where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
-                        include: { program: true }
+                        include: { program: true, batch: true }
                     },
                     trainingHistory: {
                         orderBy: { startDate: 'desc' }
@@ -152,28 +152,22 @@ export const getAvailablePrograms = async (grade?: Grade, sectionName?: string) 
 
 // CACHED: Manager Approval Data
 export const getManagerApprovalData = async (empId: string) => {
-    return unstable_cache(
-        async (id: string) => {
-            const employee = await db.employee.findUnique({
-                where: { id },
-                include: {
-                    nominations: {
-                        where: { status: 'Pending' },
-                        include: { program: true }
-                    }
-                }
-            });
-
-            const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
-            if (employee) {
-                employee.nominations.sort((a, b) => (priority[a.status] || 99) - (priority[b.status] || 99));
+    const employee = await db.employee.findUnique({
+        where: { id: empId },
+        include: {
+            nominations: {
+                where: { managerApprovalStatus: 'Pending' },
+                include: { program: true }
             }
+        }
+    });
 
-            return employee;
-        },
-        [`manager-approval-data-${empId}`],
-        { revalidate: 3600, tags: ['manager-approval', `manager-approval-${empId}`] }
-    )(empId);
+    const priority: Record<string, number> = { 'Approved': 1, 'Pending': 2, 'Rejected': 3 };
+    if (employee) {
+        employee.nominations.sort((a, b) => (priority[a.managerApprovalStatus] || 99) - (priority[b.managerApprovalStatus] || 99));
+    }
+
+    return employee;
 };
 
 import { sendTNIApprovalEmail } from '@/lib/email';

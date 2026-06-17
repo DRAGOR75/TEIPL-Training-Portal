@@ -8,7 +8,8 @@ import {
     HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck, 
     HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList, 
     HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers, 
-    HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown
+    HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown,
+    HiOutlineCalendarDays
 } from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
@@ -73,6 +74,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                         {userRole === 'TRAINER' && (
                             <>
                                 <NavLink href="/trainer/dashboard" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
+                                <NavLink href="/calendar" icon={<HiOutlineCalendarDays size={18} />} text="Calendar" />
                                 <NavLink href="/trainer/reports" icon={<HiOutlineChartBar size={18} />} text="Reports" />
                             </>
                         )}
@@ -108,6 +110,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                         {userRole === 'TRAINER' && (
                             <>
                                 <MobileNavLink href="/trainer/dashboard" onClick={() => setIsOpen(false)} text="Trainer Hub" />
+                                <MobileNavLink href="/calendar" onClick={() => setIsOpen(false)} text="Calendar" />
                                 <MobileNavLink href="/trainer/reports" onClick={() => setIsOpen(false)} text="Reports" />
                             </>
                         )}
@@ -157,6 +160,7 @@ const ADMIN_TABS = [
     { id: 'troubleshooting', label: 'Diagnostics', href: '/admin/troubleshooting', icon: HiOutlineWrench },
     { id: 'manuals', label: 'Manuals', href: '/training-manuals', icon: HiOutlineBookOpen },
     { id: 'sessions', label: 'Sessions', href: '/admin/sessions', icon: HiOutlineUsers },
+    { id: 'planning', label: 'Calendar', href: '/admin/planning', icon: HiOutlineCalendarDays },
     { id: 'reports', label: 'Reports', href: '/admin/reports', icon: HiOutlineChartBar },
     { id: 'email', label: 'Bulk Email', href: '/admin/bulk-email', icon: HiOutlinePaperAirplane },
 ];

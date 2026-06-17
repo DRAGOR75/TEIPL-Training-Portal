@@ -20,6 +20,7 @@ type TNIDashboardClientProps = {
     managerEmail?: string;
     managerName?: string;
     isAddTNIDisabled?: boolean;
+    isTrainerView?: boolean;
 };
 
 export default function TNIDashboardClient({
@@ -29,7 +30,8 @@ export default function TNIDashboardClient({
     trainingHistory = [],
     managerEmail,
     managerName,
-    isAddTNIDisabled = false
+    isAddTNIDisabled = false,
+    isTrainerView = false
 }: TNIDashboardClientProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -218,6 +220,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Justification</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Approval</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">TNI Status</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
                                         </tr>
                                     </thead>
@@ -233,7 +236,7 @@ export default function TNIDashboardClient({
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 whitespace-nowrap">
                                                     {(() => {
                                                         const isRejected = nom.managerApprovalStatus === 'Rejected' || nom.status === 'Rejected';
-                                                        const label = isRejected ? 'Rejected' : 'Approved';
+                                                        const label = isRejected ? 'Rejected' : (nom.managerApprovalStatus === 'Approved' ? 'Approved' : 'Pending');
                                                         const badgeClass = isRejected ? 'text-rose-600 bg-rose-50 border border-rose-100 rounded-xl' : 'text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl';
                                                         return (
                                                             <div className="flex flex-col gap-0.5">
@@ -248,6 +251,18 @@ export default function TNIDashboardClient({
                                                             </div>
                                                         );
                                                     })()}
+                                                </td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 whitespace-nowrap">
+                                                    <div className="flex flex-col gap-0.5">
+                                                        <span className={`inline-flex px-2 sm:px-3 py-0.5 sm:py-1 font-bold w-fit text-[9px] sm:text-[10px] ${getStatusClass(nom)}`}>
+                                                            {getStatusText(nom)}
+                                                        </span>
+                                                        {nom.status === 'Batched' && nom.batch?.createdAt && (
+                                                            <span className="text-[9px] text-slate-500 font-medium block mt-1">
+                                                                On: {new Date(nom.batch.createdAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' })}
+                                                            </span>
+                                                        )}
+                                                    </div>
                                                 </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-slate-400 font-semibold whitespace-nowrap">
                                                     {new Date(nom.createdAt).toLocaleDateString(undefined, {
@@ -414,10 +429,12 @@ export default function TNIDashboardClient({
                                         ></textarea>
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
-                                        <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
-                                    </div>
+                                    {isTrainerView && (
+                                        <div className="flex items-center gap-2">
+                                            <input type="checkbox" id="bypassEmail" name="bypassEmail" className="w-4 h-4 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 cursor-pointer" />
+                                            <label htmlFor="bypassEmail" className="text-xs font-bold text-slate-600 cursor-pointer select-none">Bypass Manager Approval Mail (Do not send email)</label>
+                                        </div>
+                                    )}
 
                                     <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
                                         <button

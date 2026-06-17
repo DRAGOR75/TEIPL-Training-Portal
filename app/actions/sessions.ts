@@ -245,6 +245,52 @@ export async function lockSessionBatch(sessionId: string) {
 }
 
 
+export async function unlockSessionBatch(sessionId: string) {
+    const session = await auth();
+    if (!session?.user?.email) {
+        return { success: false, error: "Unauthorized" };
+    }
+    try {
+        const trainingSession = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            select: { nominationBatchId: true }
+        });
+
+        if (!trainingSession || !trainingSession.nominationBatchId) {
+            return { success: false, error: "Session or Batch not found" };
+        }
+
+        const result = await db.nominationBatch.updateMany({
+            where: {
+                id: trainingSession.nominationBatchId,
+                status: 'Scheduled' // Guard: Only unlock if currently Scheduled
+            },
+            data: { status: 'Forming' }
+        });
+
+        if (result.count === 0) {
+            const currentBatch = await db.nominationBatch.findUnique({
+                where: { id: trainingSession.nominationBatchId },
+                select: { status: true }
+            });
+
+            if (currentBatch?.status === 'Completed') {
+                return { success: false, error: "Cannot unlock a Completed batch." };
+            }
+        }
+
+        revalidatePath(`/admin/dashboard/session/${sessionId}`);
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/sessions');
+        revalidateTag('sessions-list', 'max');
+        revalidateTag('session-details', 'max');
+        return { success: true };
+    } catch (error) {
+        console.error("Unlock Batch Error:", error);
+        return { success: false, error: "Database error" };
+    }
+}
+
 export async function createSession(formData: FormData) {
     const session = await auth();
     // Align with auth.ts middleware bypass in development
@@ -284,7 +330,8 @@ export async function createSession(formData: FormData) {
             data: {
                 name: `${programName} - ${startDate.toLocaleDateString()}`,
                 programId: program.id,
-                status: 'Forming'
+                status: 'Forming',
+                capacity: formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 20
             }
         });
 
@@ -629,6 +676,32 @@ export async function joinBatch(batchId: string, empId: string) {
     } catch (error) {
         console.error('Join Batch Error:', error);
         return { error: 'Failed to join session. Please try again.' };
+    }
+}
+
+export async function getBatchBasicDetails(batchId: string) {
+    try {
+        const batch = await db.nominationBatch.findUnique({
+            where: { id: batchId },
+            include: {
+                trainingSession: true,
+                program: true
+            }
+        });
+
+        if (!batch) {
+            return { success: false, error: 'Batch not found' };
+        }
+
+        return {
+            success: true,
+            programName: batch.program?.name || batch.trainingSession?.programName,
+            startDate: batch.trainingSession?.startDate,
+            endDate: batch.trainingSession?.endDate
+        };
+    } catch (error) {
+        console.error('Get Batch Basic Details Error:', error);
+        return { success: false, error: 'System error' };
     }
 }
 

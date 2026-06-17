@@ -99,7 +99,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
     async function handleSave() {
         setLoading(true);
         if (!formData.name || !formData.email || !formData.sectionName || !formData.grade) {
-            alert('Please fill all required fields (Name, Email, Grade, and Department)');
+            alert('Please fill all required fields (Name, Email, Grade, and Section)');
             setLoading(false);
             return;
         }
@@ -257,12 +257,12 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department *</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section *</label>
                         <SearchableSelect
                             options={sections.map(sec => ({ label: sec.name, value: sec.name }))}
                             value={formData.sectionName}
                             onChange={(val) => setFormData({ ...formData, sectionName: val })}
-                            placeholder="Select Department"
+                            placeholder="Select Section"
                             className="w-full text-base sm:text-xs"
                         />
                     </div>
@@ -428,7 +428,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 <HiOutlineBuildingOffice2 className="text-emerald-600" size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Section</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
                             </div>
                         </div>

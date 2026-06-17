@@ -193,23 +193,21 @@ export default function FaultManager({ faults: globalFaults, products }: FaultMa
         const { active, over } = event;
 
         if (over && active.id !== over.id) {
-            setLinkedFaults((items) => {
-                const oldIndex = items.findIndex((i) => i.id === active.id);
-                const newIndex = items.findIndex((i) => i.id === over.id);
-                const newItems = arrayMove(items, oldIndex, newIndex);
+            const oldIndex = linkedFaults.findIndex((i) => i.id === active.id);
+            const newIndex = linkedFaults.findIndex((i) => i.id === over.id);
+            const newItems = arrayMove(linkedFaults, oldIndex, newIndex);
 
-                // Calculate new viewSeqs
-                const updates = newItems.map((item, index) => ({
-                    id: item.id,
-                    viewSeq: index + 1
-                }));
+            // Calculate new viewSeqs
+            const updates = newItems.map((item, index) => ({
+                id: item.id,
+                viewSeq: index + 1
+            }));
 
-                // Call Server Action
-                reorderProductFaults(updates);
+            // Optimistic Update
+            setLinkedFaults(newItems.map((item, index) => ({ ...item, viewSeq: index + 1 })));
 
-                // Optimistic Update
-                return newItems.map((item, index) => ({ ...item, viewSeq: index + 1 }));
-            });
+            // Call Server Action
+            await reorderProductFaults(updates);
         }
     }
 

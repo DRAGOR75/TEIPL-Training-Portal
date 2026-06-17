@@ -82,7 +82,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                         {/* Centered Title */}
                         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center w-full max-w-[120px] md:max-w-none pointer-events-none">
                             <h1 className="text-sm md:text-2xl font-black text-slate-900 tracking-wide leading-tight truncate uppercase">
-                                TNI Dashboard
+                                Training Dashboard
                             </h1>
                         </div>
 

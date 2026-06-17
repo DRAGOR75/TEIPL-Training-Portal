@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { HiOutlineBookOpen, HiOutlineArrowUpTray, HiOutlineArrowPath, HiOutlinePlus } from 'react-icons/hi2';
+import { HiOutlineBookOpen, HiOutlineArrowUpTray, HiOutlineArrowPath, HiOutlinePlus, HiOutlineCalendar } from 'react-icons/hi2';
 
 export default function BulkUploadManager() {
     return (
@@ -17,16 +17,16 @@ export default function BulkUploadManager() {
             </div>
 
             <div className="p-8 bg-slate-50/50">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     {/* Program Bulk Upload Card */}
                     <div className="border border-slate-200 rounded-3xl p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
                         <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-500"></div>
                         <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <HiOutlineBookOpen size={28} />
                         </div>
-                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Program Upload</h3>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Subjects Upload</h3>
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
-                            Upload a CSV file containing multiple program definitions including categories, target grades, and sections.
+                            Upload a CSV file containing multiple subjects,  including categories, target grades, and sections.
                         </p>
                         <Link href="/admin/upload-programs" className="flex items-center justify-center gap-2 w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-bold text-sm transition-colors border border-emerald-200 shadow-sm hover:shadow">
                             Go to Program Upload
@@ -60,6 +60,21 @@ export default function BulkUploadManager() {
                         </p>
                         <Link href="/admin/upload-tni" className="flex items-center justify-center gap-2 w-full py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-sm transition-colors border border-blue-200 shadow-sm hover:shadow">
                             Go to TNI Upload
+                        </Link>
+                    </div>
+
+                    {/* Training Calendar Upload Card */}
+                    <div className="border border-slate-200 rounded-3xl p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
+                        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <HiOutlineCalendar size={28} />
+                        </div>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Program Schedule Upload</h3>
+                        <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
+                            Upload your training program schedule CSV to automatically bulk-schedule sessions into the system.
+                        </p>
+                        <Link href="/admin/upload-calendar" className="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold text-sm transition-colors border border-indigo-200 shadow-sm hover:shadow">
+                            Go to Calendar Upload
                         </Link>
                     </div>
                 </div>

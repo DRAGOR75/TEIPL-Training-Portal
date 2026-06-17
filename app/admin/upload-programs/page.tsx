@@ -60,7 +60,7 @@ export default function UploadProgramsPage() {
 
             try {
                 const result = await processProgramBatch(batch);
-                
+
                 if (!result.success) {
                     throw new Error(result.error || 'Unknown error during batch processing');
                 }
@@ -74,7 +74,7 @@ export default function UploadProgramsPage() {
                 }
             } catch (err: any) {
                 setStatus('error');
-                setErrorMessage(`Failed at batch ${Math.floor(i/BATCH_SIZE) + 1}: ${err.message}`);
+                setErrorMessage(`Failed at batch ${Math.floor(i / BATCH_SIZE) + 1}: ${err.message}`);
                 setIsProcessing(false);
                 return;
             }
@@ -90,7 +90,7 @@ export default function UploadProgramsPage() {
             setProgress({ current: 0, total: 0 });
             setStatus('idle');
             setErrorMessage('');
-            
+
             const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
@@ -136,7 +136,7 @@ export default function UploadProgramsPage() {
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Administrative Hub</p>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bulk Upload Programs</h1>
-                        <p className="text-slate-500 mt-2 font-medium">Upload a CSV to batch import or update training programs and departments.</p>
+                        <p className="text-slate-500 mt-2 font-medium">Upload a CSV to batch import or update training programs and sections.</p>
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -203,10 +203,10 @@ export default function UploadProgramsPage() {
                                         {records.length.toLocaleString()} Programs Ready
                                     </h3>
                                     <p className="text-slate-500 font-medium">
-                                        This will dynamically create any missing departments and map the categories.
+                                        This will dynamically create any missing sections and map the categories.
                                     </p>
                                 </div>
-                                
+
                                 {status === 'completed' ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-3 rounded-xl font-bold border border-emerald-200 shadow-sm">
                                         <HiCheckCircle className="w-6 h-6" />
@@ -253,7 +253,7 @@ export default function UploadProgramsPage() {
                                         <th className="px-6 py-4">Subject Code</th>
                                         <th className="px-6 py-4">Training Name</th>
                                         <th className="px-6 py-4">Program Group (Mapped)</th>
-                                        <th className="px-6 py-4">Department / Section</th>
+                                        <th className="px-6 py-4">Section</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">

@@ -16,7 +16,8 @@ import {
     HiOutlineChevronDown,
     HiOutlineChevronLeft,
 
-    HiOutlineChartBar
+    HiOutlineChartBar,
+    HiOutlineCalendarDays
 } from 'react-icons/hi2';
 
 const ADMIN_TABS = [
@@ -26,6 +27,7 @@ const ADMIN_TABS = [
     { id: 'troubleshooting', label: 'Diagnostics', href: '/admin/troubleshooting', icon: HiOutlineWrench },
     { id: 'manuals', label: 'Manuals', href: '/training-manuals', icon: HiOutlineBookOpen },
     { id: 'sessions', label: 'Sessions', href: '/admin/sessions', icon: HiOutlineUsers },
+    { id: 'planning', label: 'Calendar', href: '/admin/planning', icon: HiOutlineCalendarDays },
     { id: 'reports', label: 'Reports', href: '/admin/reports', icon: HiOutlineChartBar },
     { id: 'email', label: 'Bulk Email', href: '/admin/bulk-email', icon: HiOutlinePaperAirplane },
 ];

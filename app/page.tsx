@@ -113,7 +113,7 @@ export default function Home() {
             </div>
             <div className="relative z-10 max-w-sm">
               <p className="text-slate-500 text-lg md:text-xl font-medium leading-relaxed mb-8">
-                Global management of departments, master records, bulk communications, and system-wide visibility.
+                Global management of sections, master records, bulk communications, and system-wide visibility.
               </p>
               <div className="inline-flex items-center gap-4 text-indigo-600 font-bold uppercase tracking-widest text-sm group-hover:gap-6 transition-all">
                 <span>Access Control</span>

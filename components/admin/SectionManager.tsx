@@ -49,7 +49,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                             <HiOutlineBuildingOffice2 size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Departments & Sections</h2>
+                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Sections</h2>
                             <p className="text-slate-500 font-medium text-sm mt-0.5">{sections.length} Areas</p>
                         </div>
                     </div>

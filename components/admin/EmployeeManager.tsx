@@ -47,6 +47,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
     // Pagination & Search
     const [searchQuery, setSearchQuery] = useState('');
+    const [selectedRegion, setSelectedRegion] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(10);
 
@@ -62,18 +63,29 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     const filteredEmployees = useMemo(() => {
         return employees.filter(e => {
             const query = searchQuery.toLowerCase();
-            return e.name.toLowerCase().includes(query) ||
+            const matchesSearch = e.name.toLowerCase().includes(query) ||
                 e.id.toLowerCase().includes(query) ||
                 (e.email && e.email.toLowerCase().includes(query)) ||
                 (e.sectionName && e.sectionName.toLowerCase().includes(query));
+            
+            // Assume location or projectLocation serves as Region
+            const regionVal = e.location || e.projectLocation;
+            const matchesRegion = selectedRegion ? regionVal === selectedRegion : true;
+
+            return matchesSearch && matchesRegion;
         });
-    }, [employees, searchQuery]);
+    }, [employees, searchQuery, selectedRegion]);
+
+    const regions = useMemo(() => {
+        const uniqueRegions = Array.from(new Set(employees.map(e => e.location || e.projectLocation).filter(Boolean)));
+        return uniqueRegions.sort() as string[];
+    }, [employees]);
 
     const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage) || 1;
     const safeCurrentPage = Math.min(currentPage, totalPages);
     const paginatedEmployees = filteredEmployees.slice((safeCurrentPage - 1) * itemsPerPage, safeCurrentPage * itemsPerPage);
 
-    useMemo(() => { setCurrentPage(1); }, [searchQuery, itemsPerPage]);
+    useMemo(() => { setCurrentPage(1); }, [searchQuery, itemsPerPage, selectedRegion]);
 
     async function handleAdd(formData: FormData) {
         setLoading(true);
@@ -153,7 +165,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department / Section</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
                             <input name="sectionName" defaultValue={employee?.sectionName || ''} placeholder="E.g. Engineering" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                         </div>
                         <div className="space-y-1">
@@ -254,6 +266,17 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 className="w-full pl-10 pr-4 py-2 border border-slate-200 bg-white rounded-xl text-sm outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all text-slate-700 shadow-sm"
                             />
                         </div>
+                        {/* Region Filter */}
+                        <select
+                            value={selectedRegion}
+                            onChange={(e) => setSelectedRegion(e.target.value)}
+                            className="py-2 pl-3 pr-8 border border-slate-200 bg-white rounded-xl text-sm outline-none text-slate-700 shadow-sm cursor-pointer"
+                        >
+                            <option value="">All Regions</option>
+                            {regions.map(region => (
+                                <option key={region} value={region}>{region}</option>
+                            ))}
+                        </select>
                         {/* Show Dropdown */}
                         <select
                             value={itemsPerPage}
@@ -292,7 +315,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     'Status': e.status,
                                     'Grade': e.grade || '',
                                     'Designation': e.designation || '',
-                                    'Department / Section': e.sectionName || '',
+                                    'Section': e.sectionName || '',
                                     'Location': e.location || '',
                                     'Mobile': e.mobile || '',
                                     'Date of Joining': e.doj ? new Date(e.doj).toLocaleDateString() : '',
@@ -339,7 +362,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 <th className="px-4 py-3 w-[8%]">Emp ID</th>
                                 {isFullscreen ? (
                                     <>
-                                        <th className="px-4 py-3 w-[12%]">Department</th>
+                                        <th className="px-4 py-3 w-[12%]">Section</th>
                                         <th className="px-4 py-3 w-[12%]">Designation</th>
                                     </>
                                 ) : (

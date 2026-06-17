@@ -43,15 +43,9 @@ export const getCachedAdminPrograms = async () => {
  * Cached version of the Employees query (Limited to latest 100) for Master Data page.
  */
 export const getCachedAdminEmployees = async () => {
-    return unstable_cache(
-        async () => {
-            return db.employee.findMany({
-                orderBy: { id: 'desc' }
-            });
-        },
-        ['admin-employees-list'],
-        { tags: ['employees'], revalidate: 3600 }
-    )();
+    return db.employee.findMany({
+        orderBy: { id: 'desc' }
+    });
 };
 
 /**

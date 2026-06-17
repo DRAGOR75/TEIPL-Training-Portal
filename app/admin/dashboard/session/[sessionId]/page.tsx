@@ -14,6 +14,8 @@ import {
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { generateSecureToken } from '@/lib/security';
+import ExportSessionDataButton from '@/components/admin/ExportSessionDataButton';
+
 
 export default async function SessionDetailsPage({ params }: { params: Promise<{ sessionId: string }> }) {
     const { sessionId } = await params;
@@ -82,7 +84,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                         <Link href="/admin/dashboard" className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors">
                             <HiOutlineArrowLeft size={20} />
                         </Link>
-                        <div>
+                        <div className="flex-1">
                             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 <HiOutlineBookOpen size={20} className="text-blue-600" />
                                 {session.programName}
@@ -91,6 +93,9 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                 <span className="flex items-center gap-1"><HiOutlineUser size={12} /> {session.trainerName}</span>
                                 <span className="flex items-center gap-1"><HiOutlineCalendar size={12} /> {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}</span>
                             </div>
+                        </div>
+                        <div>
+                            <ExportSessionDataButton session={session} participants={allParticipants} />
                         </div>
                     </div>
                 </div>

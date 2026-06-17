@@ -9,22 +9,29 @@ datasource db {
 
 // 1. Master Employee Table (For initial ID verification)
 model Employee {
-  id                String    @id @map("emp_id") // Your official Employee ID
-  name              String
-  email             String    @unique
-  status            String    @default("Active") // e.g., "Active", "Inactive"
-  grade             Grade? // EXECUTIVE or WORKMAN
-  sectionName       String?   @map("section_name") // Their home department
-  location          String?
-  mobile            String?
-  designation       String?
-  doj               DateTime? @map("doj")
-  dob               DateTime? @map("dob")
-  projectLocation   String?   @map("project_location")
-  gender            Gender?
-  managerName       String?   @map("manager_name")
-  managerEmail      String?   @map("manager_email")
-  managerMobile     String?   @map("manager_mobile")
+  id                   String    @id @map("emp_id") // Your official Employee ID
+  name                 String
+  email                String    @unique
+  status               String    @default("Active") // e.g., "Active", "Inactive"
+  grade                Grade? // EXECUTIVE or WORKMAN
+  sectionName          String?   @map("section_name") // Their home department
+  location             String?
+  mobile               String?
+  designation          String?
+  doj                  DateTime? @map("doj")
+  dob                  DateTime? @map("dob")
+  projectLocation      String?   @map("project_location")
+  gender               Gender?
+  managerName          String?   @map("manager_name")
+  managerEmail         String?   @map("manager_email")
+  managerMobile        String?   @map("manager_mobile")
+  
+  // New Columns
+  region               String?
+  organization         String?
+  highestQualification String?   @map("highest_qualification")
+  department           String?
+  departmentGroup      String? @map("department_group")
 
   // Relations
   nominations       Nomination[] // Links to their training requests
@@ -45,6 +52,8 @@ enum Gender {
   FEMALE
   OTHER
 }
+
+
 
 // 2. Section Table (Departments)
 model Section {
@@ -135,6 +144,14 @@ model NominationBatch {
 
   status    String   @default("Forming") // Forming, Scheduled, Completed
   createdAt DateTime @default(now()) @map("created_at")
+
+  // Calendar Pre-scheduling fields
+  proposedStartDate DateTime? @map("proposed_start_date")
+  proposedEndDate   DateTime? @map("proposed_end_date")
+  proposedTrainer   String?   @map("proposed_trainer")
+  proposedLocation  String?   @map("proposed_location")
+  publishToCalendar Boolean   @default(false) @map("publish_to_calendar")
+  capacity          Int?
 
   // Relations
   program         Program          @relation(fields: [programId], references: [id])
