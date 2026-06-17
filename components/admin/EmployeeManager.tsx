@@ -165,7 +165,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
                             <input name="sectionName" defaultValue={employee?.sectionName || ''} placeholder="E.g. Engineering" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                         </div>
                         <div className="space-y-1">
@@ -315,7 +315,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     'Status': e.status,
                                     'Grade': e.grade || '',
                                     'Designation': e.designation || '',
-                                    'Department': e.sectionName || '',
+                                    'Section': e.sectionName || '',
                                     'Location': e.location || '',
                                     'Mobile': e.mobile || '',
                                     'Date of Joining': e.doj ? new Date(e.doj).toLocaleDateString() : '',
@@ -362,11 +362,11 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 <th className="px-4 py-3 w-[8%]">Emp ID</th>
                                 {isFullscreen ? (
                                     <>
-                                        <th className="px-4 py-3 w-[12%]">Department</th>
+                                        <th className="px-4 py-3 w-[12%]">Section</th>
                                         <th className="px-4 py-3 w-[12%]">Designation</th>
                                     </>
                                 ) : (
-                                    <th className="px-4 py-3 w-[20%]">Department & Designation</th>
+                                    <th className="px-4 py-3 w-[20%]">Section & Designation</th>
                                 )}
                                 <th className="px-4 py-3 w-[8%]">Grade</th>
                                 {isFullscreen ? (

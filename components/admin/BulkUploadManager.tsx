@@ -24,9 +24,9 @@ export default function BulkUploadManager() {
                         <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <HiOutlineBookOpen size={28} />
                         </div>
-                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Program Upload</h3>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Subjects Upload</h3>
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
-                            Upload a CSV file containing multiple program definitions including categories, target grades, and departments.
+                            Upload a CSV file containing multiple subjects,  including categories, target grades, and sections.
                         </p>
                         <Link href="/admin/upload-programs" className="flex items-center justify-center gap-2 w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl font-bold text-sm transition-colors border border-emerald-200 shadow-sm hover:shadow">
                             Go to Program Upload
@@ -69,9 +69,9 @@ export default function BulkUploadManager() {
                         <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <HiOutlineCalendar size={28} />
                         </div>
-                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Calendar Upload</h3>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Program Schedule Upload</h3>
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
-                            Upload your training calendar CSV to automatically bulk-schedule sessions into the system.
+                            Upload your training program schedule CSV to automatically bulk-schedule sessions into the system.
                         </p>
                         <Link href="/admin/upload-calendar" className="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold text-sm transition-colors border border-indigo-200 shadow-sm hover:shadow">
                             Go to Calendar Upload

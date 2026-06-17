@@ -148,10 +148,10 @@ export default function UntrainedPendingReport({ employees }: { employees: Emplo
                     </div>
                 </div>
 
-                {/* Top Departments Bar Chart */}
+                {/* Top Sections Bar Chart */}
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                     <h4 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2">
-                        <span className="w-2 h-4 bg-blue-500 rounded-full"></span> Top Departments
+                        <span className="w-2 h-4 bg-blue-500 rounded-full"></span> Top Sections
                     </h4>
                     <div className="h-[200px] w-full">
                         <ResponsiveContainer width="100%" height="100%">

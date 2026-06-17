@@ -330,7 +330,8 @@ export async function createSession(formData: FormData) {
             data: {
                 name: `${programName} - ${startDate.toLocaleDateString()}`,
                 programId: program.id,
-                status: 'Forming'
+                status: 'Forming',
+                capacity: formData.get('capacity') ? parseInt(formData.get('capacity') as string) : 20
             }
         });
 

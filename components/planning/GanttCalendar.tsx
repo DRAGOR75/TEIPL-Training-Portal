@@ -28,9 +28,10 @@ interface GanttCalendarProps {
     onViewDateChange?: (date: Date) => void;
     selectedTrainer?: string | null;
     onTrainerSelect?: (trainerName: string | null) => void;
+    readOnly?: boolean;
 }
 
-export default function GanttCalendar({ programs, sessions, trainers, locations, viewDate, onViewDateChange, selectedTrainer, onTrainerSelect }: GanttCalendarProps) {
+export default function GanttCalendar({ programs, sessions, trainers, locations, viewDate, onViewDateChange, selectedTrainer, onTrainerSelect, readOnly }: GanttCalendarProps) {
     const [localViewDate, setLocalViewDate] = useState(new Date());
     const currentDate = viewDate || localViewDate;
 
@@ -235,12 +236,14 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
                                             {daysList.map(day => (
                                                 <div
                                                     key={day}
-                                                    onClick={() => handleGridClick(trainer.name, day)}
-                                                    className="flex-1 border-r border-slate-100 h-full hover:bg-indigo-50/30 cursor-crosshair transition-colors group/cell"
+                                                    onClick={() => !readOnly && handleGridClick(trainer.name, day)}
+                                                    className={`flex-1 border-r border-slate-100 h-full transition-colors group/cell ${!readOnly ? 'hover:bg-indigo-50/30 cursor-crosshair' : ''}`}
                                                 >
-                                                    <div className="w-full h-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100">
-                                                        <HiOutlinePlus className="text-indigo-300" />
-                                                    </div>
+                                                    {!readOnly && (
+                                                        <div className="w-full h-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100">
+                                                            <HiOutlinePlus className="text-indigo-300" />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>
@@ -255,8 +258,10 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
                                                     <div
                                                         key={session.id}
                                                         style={styles}
-                                                        className={`absolute top-2 bottom-2 bg-gradient-to-r ${colorClass} rounded-lg shadow-md pointer-events-auto cursor-pointer flex items-center px-3 group/bar`}
-                                                        onClick={() => window.open(`/admin/sessions/${session.id}/manage`, '_blank')}
+                                                        className={`absolute top-2 bottom-2 bg-gradient-to-r ${colorClass} rounded-lg shadow-md pointer-events-auto flex items-center px-3 group/bar ${!readOnly ? 'cursor-pointer' : 'cursor-default'}`}
+                                                        onClick={() => {
+                                                            if (!readOnly) window.open(`/admin/sessions/${session.id}/manage`, '_blank');
+                                                        }}
                                                     >
                                                         {/* Bar Content */}
                                                         <div className="min-w-0 pr-2">

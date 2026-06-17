@@ -160,7 +160,7 @@ export default function DesignSystemPage() {
                         <span className="text-blue-600">04.</span> Components
                     </h2>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         {/* Containers */}
                         <div className="space-y-4">
                             <p className="font-bold text-slate-900">Containers</p>
@@ -196,6 +196,33 @@ export default function DesignSystemPage() {
                                 <p className="text-xs text-slate-400 font-mono mt-2">px-4 py-3 rounded-xl bg-slate-50</p>
                             </div>
                         </div>
+                    </div>
+
+                    {/* Ribbon Sub-Navigation */}
+                    <div className="space-y-4">
+                        <p className="font-bold text-slate-900">Ribbon Sub-Navigation</p>
+                        <p className="text-sm text-slate-500 max-w-3xl">
+                            Used for switching between related pages or views within a specific dashboard or section. It relies on horizontal scrolling for overflow and uses optimistic UI for instant visual feedback.
+                        </p>
+                        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+                            <div className="bg-slate-200/50 p-1.5 rounded-2xl inline-flex overflow-x-auto max-w-full shadow-inner border border-slate-200/60">
+                                <div className="flex items-center gap-1 min-w-max">
+                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 bg-white text-amber-600 shadow-sm border border-slate-200/50">
+                                        <HiOutlineSquares2X2 size={18} className="stroke-[2.5]" />
+                                        Active Tab
+                                    </div>
+                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent">
+                                        <HiOutlineUser size={18} />
+                                        Inactive Tab
+                                    </div>
+                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-200 text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent">
+                                        <HiOutlineCalendar size={18} />
+                                        Another Tab
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <p className="text-xs text-slate-400 font-mono mt-2">bg-slate-200/50 p-1.5 rounded-2xl shadow-inner border border-slate-200/60</p>
                     </div>
                 </section>
 

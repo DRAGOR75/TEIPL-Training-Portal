@@ -167,7 +167,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         </div>
 
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Applicable Departments (Ctrl+Click)</label>
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Applicable Sections (Ctrl+Click)</label>
                             <select
                                 name="sectionIds"
                                 multiple
@@ -282,7 +282,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                 ) : (
                                     <th className="px-4 py-3 w-[28%]">Subject Details</th>
                                 )}
-                                <th className="px-4 py-3 w-[15%]">Departments</th>
+                                <th className="px-4 py-3 w-[15%]">Sections</th>
                                 {isFullscreen ? (
                                     <>
                                         <th className="px-4 py-3 w-[12%]">Category</th>
@@ -322,7 +322,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                         </td>
                                     )}
                                     <td className="px-3 py-2">
-                                        <div className="text-[10px] text-slate-500 font-medium truncate" title={prog.sections.map(s => s.name).join(', ') || 'All Departments'}>
+                                        <div className="text-[10px] text-slate-500 font-medium truncate" title={prog.sections.map(s => s.name).join(', ') || 'All Sections'}>
                                             {prog.sections.length > 0 ? prog.sections.map(s => s.name).join(', ') : 'All'}
                                         </div>
                                     </td>

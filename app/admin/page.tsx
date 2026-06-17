@@ -53,7 +53,7 @@ export default async function AdminHubPage() {
                     <AdminCard
                         href="/admin/tni-dashboard"
                         title="Master Data Management"
-                        description="Manage training programs, sections/departments, and employee database."
+                        description="Manage training programs, sections, and employee database."
                         icon={<HiOutlineClipboardDocumentList size={24} />}
                         tag="Master Data"
                         color="amber"

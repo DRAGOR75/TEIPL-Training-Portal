@@ -136,7 +136,7 @@ export default function UploadProgramsPage() {
                     <div>
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600 mb-2">Administrative Hub</p>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight">Bulk Upload Programs</h1>
-                        <p className="text-slate-500 mt-2 font-medium">Upload a CSV to batch import or update training programs and departments.</p>
+                        <p className="text-slate-500 mt-2 font-medium">Upload a CSV to batch import or update training programs and sections.</p>
                     </div>
                     <div className="flex gap-3">
                         <button
@@ -203,7 +203,7 @@ export default function UploadProgramsPage() {
                                         {records.length.toLocaleString()} Programs Ready
                                     </h3>
                                     <p className="text-slate-500 font-medium">
-                                        This will dynamically create any missing departments and map the categories.
+                                        This will dynamically create any missing sections and map the categories.
                                     </p>
                                 </div>
                                 
@@ -253,7 +253,7 @@ export default function UploadProgramsPage() {
                                         <th className="px-6 py-4">Subject Code</th>
                                         <th className="px-6 py-4">Training Name</th>
                                         <th className="px-6 py-4">Program Group (Mapped)</th>
-                                        <th className="px-6 py-4">Department</th>
+                                        <th className="px-6 py-4">Section</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">

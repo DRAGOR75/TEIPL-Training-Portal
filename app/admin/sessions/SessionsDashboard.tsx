@@ -236,6 +236,12 @@ export default function SessionsDashboard({
                                     <span className="text-slate-500">Start Date</span>
                                 </div>
                             </div>
+                            <div className="mt-6 pt-4 border-t border-slate-100">
+                                <Link href="/admin/tni-dashboard/calendar" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-slate-50 hover:bg-blue-50 text-slate-600 hover:text-blue-700 font-semibold text-sm rounded-xl transition-colors border border-slate-200 hover:border-blue-200">
+                                    <span>Click to view the full calendar</span>
+                                    <HiOutlineArrowTopRightOnSquare className="w-4 h-4" />
+                                </Link>
+                            </div>
                         </div>
                     </div>
                     <TrainerManager trainers={initialTrainers} />

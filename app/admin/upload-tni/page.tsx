@@ -249,7 +249,7 @@ export default function UploadTNIPage() {
                                     <tr>
                                         <th className="px-6 py-4">Emp.Id</th>
                                         <th className="px-6 py-4">Name</th>
-                                        <th className="px-6 py-4">Department</th>
+                                        <th className="px-6 py-4">Section</th>
                                         <th className="px-6 py-4">Grade</th>
                                         <th className="px-6 py-4">DOB</th>
                                         <th className="px-6 py-4">DOJ</th>

@@ -515,11 +515,11 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                         </div>
                     </div>
 
-                    {/* Departmental Demand (Full Width) */}
+                    {/* Section Demand (Full Width) */}
                     <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
                         <h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2 tracking-tight">
                             <HiOutlineFunnel className="text-amber-500" />
-                            Departmental Demand Breakdown
+                            Section Demand Breakdown
                         </h3>
                         <div className="h-[400px] w-full relative">
                             {isMounted && (

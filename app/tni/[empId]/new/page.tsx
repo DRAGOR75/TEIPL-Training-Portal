@@ -43,7 +43,7 @@ export default async function NewNominationPage({ params }: { params: Promise<{ 
                                     <div className="font-semibold text-slate-900">{employee.name}</div>
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Department</label>
+                                    <label className="block text-xs font-bold text-slate-900 uppercase tracking-wider mb-1">Section</label>
                                     <div className="font-semibold text-slate-900">{employee.sectionName || 'N/A'}</div>
                                 </div>
                                 <div>

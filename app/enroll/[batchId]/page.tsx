@@ -121,7 +121,7 @@ export default function JoinPage() {
         // Validation for SearchableSelect fields (Location, Department, Designation)
         if (!regData.location || !regData.sectionName || !regData.designation) {
             setStatus('error');
-            setResult({ error: "Please select a valid Location, Department, and Designation." });
+            setResult({ error: "Please select a valid Location, Section, and Designation." });
             return;
         }
 
@@ -284,14 +284,14 @@ export default function JoinPage() {
 
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 uppercase">Department <span className='text-red-500'>*</span></label>
+                                <label className="text-xs font-bold text-slate-700 uppercase">Section <span className='text-red-500'>*</span></label>
                                 <div className="relative">
                                     <SearchableSelect
                                         options={sectionOptions}
                                         value={regData.sectionName}
                                         onChange={(val) => setRegData({ ...regData, sectionName: typeof val === 'string' ? val : String(val) })}
                                         placeholder="Select Dept"
-                                        searchPlaceholder="Search departments..."
+                                        searchPlaceholder="Search sections..."
                                         icon={<HiOutlineBriefcase className="w-5 h-5" />}
                                         className="w-full"
                                     />

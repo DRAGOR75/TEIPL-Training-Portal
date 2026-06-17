@@ -280,7 +280,14 @@ export default function CreateSessionModal({
                             )}
                         </div>
 
-                        {/* ROW 5: Topics */}
+                        {/* ROW 5: Capacity */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants)</label>
+                            <input name="capacity" type="number" min="1" defaultValue="20" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <p className="text-xs text-slate-400 mt-1">Maximum number of self-enrollments allowed</p>
+                        </div>
+
+                        {/* ROW 6: Topics */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned</label>
                             <textarea

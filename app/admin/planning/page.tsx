@@ -25,6 +25,7 @@ export default async function PlanningPage() {
         trainerName: session.trainerName,
         startDate: session.startDate,
         endDate: session.endDate,
+        location: session.location,
         // Calculate status internally if needed based on dates
     }));
 

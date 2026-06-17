@@ -29,7 +29,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
     }
 
     async function handleDelete(id: string) {
-        if (!confirm('Delete department?')) return;
+        if (!confirm('Delete section?')) return;
         setDeletingId(id);
         await deleteSection(id);
         setDeletingId(null);
@@ -49,14 +49,14 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                             <HiOutlineBuildingOffice2 size={24} />
                         </div>
                         <div>
-                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Departments</h2>
+                            <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Sections</h2>
                             <p className="text-slate-500 font-medium text-sm mt-0.5">{sections.length} Areas</p>
                         </div>
                     </div>
                     
                     <div className="flex flex-wrap items-center gap-3">
                         <form ref={formRef} action={handleAdd} className="flex items-center gap-2">
-                            <input name="name" required placeholder="New Department Name..." className="w-full sm:w-48 px-3 py-2 border border-slate-200 bg-white rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-700 shadow-sm" />
+                            <input name="name" required placeholder="New Section Name..." className="w-full sm:w-48 px-3 py-2 border border-slate-200 bg-white rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none text-slate-700 shadow-sm" />
                             <FormSubmitButton className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 flex items-center gap-2 text-sm">
                                 <HiOutlinePlus size={16} className="stroke-[2.5]" /> Add
                             </FormSubmitButton>
@@ -77,7 +77,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                         <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 shadow-sm before:content-[''] before:absolute before:inset-0 before:border-b before:border-slate-200 before:pointer-events-none">
                             <tr>
                                 <th className="px-4 py-3 w-[10%] text-center">#</th>
-                                <th className="px-4 py-3 w-[45%]">Department Name</th>
+                                <th className="px-4 py-3 w-[45%]">Section Name</th>
                                 <th className="px-4 py-3 w-[25%]">Programs</th>
                                 <th className="px-4 py-3 w-[20%] text-right">Actions</th>
                             </tr>
@@ -101,7 +101,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                                             onClick={() => handleDelete(sec.id)}
                                             disabled={deletingId === sec.id}
                                             className="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-2 rounded-lg transition disabled:opacity-50 opacity-0 group-hover:opacity-100"
-                                            title="Delete Department"
+                                            title="Delete Section"
                                         >
                                             {deletingId === sec.id ? (
                                                 <HiOutlineArrowPath className="animate-spin" size={18} />
