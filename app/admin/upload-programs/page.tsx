@@ -60,7 +60,7 @@ export default function UploadProgramsPage() {
 
             try {
                 const result = await processProgramBatch(batch);
-                
+
                 if (!result.success) {
                     throw new Error(result.error || 'Unknown error during batch processing');
                 }
@@ -74,7 +74,7 @@ export default function UploadProgramsPage() {
                 }
             } catch (err: any) {
                 setStatus('error');
-                setErrorMessage(`Failed at batch ${Math.floor(i/BATCH_SIZE) + 1}: ${err.message}`);
+                setErrorMessage(`Failed at batch ${Math.floor(i / BATCH_SIZE) + 1}: ${err.message}`);
                 setIsProcessing(false);
                 return;
             }
@@ -90,7 +90,7 @@ export default function UploadProgramsPage() {
             setProgress({ current: 0, total: 0 });
             setStatus('idle');
             setErrorMessage('');
-            
+
             const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
@@ -206,7 +206,7 @@ export default function UploadProgramsPage() {
                                         This will dynamically create any missing sections and map the categories.
                                     </p>
                                 </div>
-                                
+
                                 {status === 'completed' ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-3 rounded-xl font-bold border border-emerald-200 shadow-sm">
                                         <HiCheckCircle className="w-6 h-6" />
