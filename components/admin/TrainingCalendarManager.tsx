@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useTransition } from 'react';
 import { HiOutlineCalendar, HiOutlinePlus, HiOutlineCheckCircle, HiOutlineTableCells, HiOutlineCalendarDays, HiOutlineTrash, HiOutlinePencilSquare } from 'react-icons/hi2';
+import Link from 'next/link';
 import GanttCalendar from '@/components/planning/GanttCalendar';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import EditSessionModal from '@/components/admin/EditSessionModal';
@@ -76,19 +77,28 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                     <h3 className="text-xl font-black text-slate-800">
                         Scheduled Programs {selectedTrainer ? `- ${selectedTrainer}` : `- ${viewDate.toLocaleDateString('default', { month: 'long', year: 'numeric' })}`}
                     </h3>
-                    <CreateSessionModal
-                        trainers={trainers}
-                        programs={programs}
-                        locations={locations || []}
-                        triggerComponent={
-                            <button
-                                className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95"
-                            >
-                                <HiOutlinePlus size={18} />
-                                Add Program
-                            </button>
-                        }
-                    />
+                    <div className="flex items-center gap-3">
+                        <Link
+                            href="/admin/upload-calendar"
+                            className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 border border-slate-200"
+                        >
+                            <HiOutlinePlus size={18} />
+                            Bulk Upload
+                        </Link>
+                        <CreateSessionModal
+                            trainers={trainers}
+                            programs={programs}
+                            locations={locations || []}
+                            triggerComponent={
+                                <button
+                                    className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-md active:scale-95"
+                                >
+                                    <HiOutlinePlus size={18} />
+                                    Add Program
+                                </button>
+                            }
+                        />
+                    </div>
                 </div>
 
                 <div className="overflow-x-auto">
