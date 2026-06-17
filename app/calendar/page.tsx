@@ -31,7 +31,7 @@ export default async function EmployeeCalendarPage() {
         trainerName: s.trainerName,
         startDate: s.startDate,
         endDate: s.endDate,
-        location: s.location,
+        location: s.location ?? undefined,
     }));
 
     // Map upcoming actual sessions for the enrollment table
