@@ -176,6 +176,7 @@ export async function submitTNINomination(formData: FormData) {
     const empId = formData.get('empId') as string;
     const justification = formData.get('justification') as string;
     const bypassEmail = formData.get('bypassEmail') === 'on';
+    const redirectUrl = formData.get('redirectUrl') as string;
 
     // Collect all selected program IDs
     const programIds: string[] = [];
@@ -248,7 +249,11 @@ export async function submitTNINomination(formData: FormData) {
         throw new Error("Failed to submit nominations");
     }
 
-    redirect(`/tni/${empId}`);
+    if (redirectUrl) {
+        redirect(redirectUrl);
+    } else {
+        redirect(`/tni/${empId}`);
+    }
 }
 
 export async function updateNominationStatus(nominationId: string, status: 'Approved' | 'Rejected', token?: string) {

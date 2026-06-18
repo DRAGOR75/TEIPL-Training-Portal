@@ -21,6 +21,7 @@ type TNIDashboardClientProps = {
     managerName?: string;
     isAddTNIDisabled?: boolean;
     isTrainerView?: boolean;
+    sections?: { id: string; name: string }[];
 };
 
 export default function TNIDashboardClient({
@@ -31,7 +32,8 @@ export default function TNIDashboardClient({
     managerEmail,
     managerName,
     isAddTNIDisabled = false,
-    isTrainerView = false
+    isTrainerView = false,
+    sections = []
 }: TNIDashboardClientProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(true);
@@ -42,7 +44,8 @@ export default function TNIDashboardClient({
     // Form states
     const [formValues, setFormValues] = useState({
         selectedProgramId: '',
-        justification: ''
+        justification: '',
+        selectedSectionId: ''
     });
 
     // Split nominations
@@ -106,10 +109,19 @@ export default function TNIDashboardClient({
     const resetForm = () => {
         setFormValues({
             selectedProgramId: '',
-            justification: ''
+            justification: '',
+            selectedSectionId: ''
         });
         setIsFormOpen(false);
     };
+
+    // Filter programs based on selected section
+    const filteredPrograms = programs.filter(p => {
+        if (!formValues.selectedSectionId) return true;
+        // The program object includes 'sections' array if fetched with include: { sections: true }
+        const progSections = (p as any).sections || [];
+        return progSections.some((s: any) => s.id === formValues.selectedSectionId);
+    });
 
     return (
         <div className="space-y-10">
@@ -389,13 +401,31 @@ export default function TNIDashboardClient({
                                     });
                                 }} className="space-y-4">
                                     <input type="hidden" name="empId" value={empId} />
+                                    <input type="hidden" name="redirectUrl" value={isTrainerView ? `/trainer/employee-tni?empId=${empId}` : `/tni/${empId}`} />
 
-                                    <div className="grid grid-cols-1 gap-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                        {/* Section Filter */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Filter by Section</label>
+                                            <SearchableSelect
+                                                options={[
+                                                    { label: 'All Sections', value: '' },
+                                                    ...sections.map(s => ({ label: s.name, value: s.id }))
+                                                ]}
+                                                value={formValues.selectedSectionId}
+                                                onChange={(val) => {
+                                                    setFormValues(prev => ({ ...prev, selectedSectionId: val, selectedProgramId: '' }));
+                                                }}
+                                                placeholder="Select a section to filter programs..."
+                                                className="w-full text-xs"
+                                            />
+                                        </div>
+
                                         {/* Universal Program Selector */}
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
                                             <SearchableSelect
-                                                options={programs.map(p => ({
+                                                options={filteredPrograms.map(p => ({
                                                     label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
                                                     value: p.id
                                                 }))}
