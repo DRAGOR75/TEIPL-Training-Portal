@@ -118,6 +118,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     managerEmail={currentEmployee.managerEmail || undefined}
                     managerName={currentEmployee.managerName || undefined}
                     isAddTNIDisabled={isAddTNIDisabled}
+                    sections={sections}
                 />
             </div>
         </div>
