@@ -16,15 +16,17 @@ function createPrismaClient() {
         return new PrismaClient();
     }
     console.log(`[Prisma] Initializing with URL: ${connectionString.substring(0, 25)}...`);
+    
+    // Using standard pg pool for GCP Postgres
     const pool = new Pool({ 
         connectionString,
-        max: process.env.NODE_ENV === 'production' ? 5 : 100, // On Vercel (Prod), keep per-lambda pool small
+        max: process.env.NODE_ENV === 'production' ? 10 : 100, // Adjust depending on if you deploy to Serverless or a long-running Server
         idleTimeoutMillis: 30000,
-        connectionTimeoutMillis: 15000, // Increased to 15s to allow for SSL handshakes in high-latency environments
+        connectionTimeoutMillis: 15000, 
+        keepAlive: true, // IMPORTANT: Prevents GCP/Firewalls from dropping idle TCP connections silently
         ssl: (connectionString.includes('sslmode=require') || 
               connectionString.includes('sslmode=verify-full') || 
-              connectionString.includes('sslmode=verify-ca') ||
-              connectionString.includes('neon.tech')) 
+              connectionString.includes('sslmode=verify-ca')) 
             ? { rejectUnauthorized: connectionString.includes('sslmode=verify-full') } 
             : false
     })
