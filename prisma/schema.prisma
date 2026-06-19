@@ -9,27 +9,27 @@ datasource db {
 
 // 1. Master Employee Table (For initial ID verification)
 model Employee {
-  id                   String    @id @map("emp_id") // Your official Employee ID
-  name                 String
-  email                String    @unique
-  status               String    @default("Active") // e.g., "Active", "Inactive"
-  grade                Grade? // EXECUTIVE or WORKMAN
-  sectionName          String?   @map("section_name") // Their home department
-  location             String?
-  mobile               String?
-  designation          String?
-  doj                  DateTime? @map("doj")
-  dob                  DateTime? @map("dob")
-  projectLocation      String?   @map("project_location")
-  gender               Gender?
-  managerName          String?   @map("manager_name")
-  managerEmail         String?   @map("manager_email")
-  managerMobile        String?   @map("manager_mobile")
-  
+  id              String    @id @map("emp_id") // Your official Employee ID
+  name            String
+  email           String    @unique
+  status          String    @default("Active") // e.g., "Active", "Inactive"
+  grade           Grade? // EXECUTIVE or WORKMAN
+  sectionName     String?   @map("section_name") // Their home department
+  location        String?
+  mobile          String?
+  designation     String?
+  doj             DateTime? @map("doj")
+  dob             DateTime? @map("dob")
+  projectLocation String?   @map("project_location")
+  gender          Gender?
+  managerName     String?   @map("manager_name")
+  managerEmail    String?   @map("manager_email")
+  managerMobile   String?   @map("manager_mobile")
+
   // New Columns
   region               String?
   organization         String?
-  highestQualification String?   @map("highest_qualification")
+  highestQualification String? @map("highest_qualification")
   department           String?
   departmentGroup      String? @map("department_group")
 
@@ -38,6 +38,7 @@ model Employee {
   cohortMemberships CohortMember[] // Cohort journeys
   cohortFeedbacks   CohortFeedback[] // Cohort-level feedback
   trainingHistory   TrainingHistory[] // Unified ledger for all completed training (legacy + modern)
+  attendanceRecords AttendanceRecord[]
 
   @@map("employees")
 }
@@ -52,8 +53,6 @@ enum Gender {
   FEMALE
   OTHER
 }
-
-
 
 // 2. Section Table (Departments)
 model Section {
@@ -74,15 +73,15 @@ model Program {
   targetGrades Grade[] // Array: can be for both [EXECUTIVE, WORKMAN]
 
   // Extended fields from master sheet
-  machineModel        String?   @map("machine_model")
-  status              String?   @default("Active")
-  materialPriority    String?   @map("material_priority")
-  contentResp         String?   @map("content_resp")
-  targetDate          String?   @map("target_date")
-  syllabusLink        String?   @map("syllabus_link")
-  trainerMaterial     String?   @map("trainer_material")
-  participantMaterial String?   @map("participant_material")
-  objectives          String?   @db.Text
+  machineModel        String? @map("machine_model")
+  status              String? @default("Active")
+  materialPriority    String? @map("material_priority")
+  contentResp         String? @map("content_resp")
+  targetDate          String? @map("target_date")
+  syllabusLink        String? @map("syllabus_link")
+  trainerMaterial     String? @map("trainer_material")
+  participantMaterial String? @map("participant_material")
+  objectives          String? @db.Text
   days                Float?
   level               String?
 
@@ -116,7 +115,6 @@ model Nomination {
   status        String  @default("Pending") // Pending, Batched, Completed
   source        String  @default("MANUAL") // MANUAL (TNI) or QR (Direct)
   justification String? @db.Text
-  
 
   batchId String? @map("batch_id")
 
@@ -182,6 +180,9 @@ model TrainingSession {
   // NEW fields for Assessment tracking
   assessmentDate     DateTime? @map("assessment_date")
   feedbackEmailsSent Boolean   @default(false) @map("feedback_emails_sent")
+
+  classDates        DateTime[]         @map("class_dates") // Track specific days of training
+  attendanceRecords AttendanceRecord[]
 
   nominationBatchId String? @unique @map("nomination_batch_id")
 
@@ -631,8 +632,8 @@ model LearningPathSubject {
   createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  learningPath LearningPath  @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
-  subject      ManualSubject @relation(fields: [subjectId], references: [id])
+  learningPath LearningPath         @relation(fields: [learningPathId], references: [id], onDelete: Cascade)
+  subject      ManualSubject        @relation(fields: [subjectId], references: [id])
   modules      LearningPathModule[]
 
   @@unique([learningPathId, subjectId])
@@ -661,16 +662,16 @@ model LearningPathModule {
 model EmailLog {
   id             String   @id @default(uuid())
   recipientEmail String   @map("recipient_email")
-  recipientType  String   // e.g., "Participant", "Manager", "Trainer"
-  emailType      String   // e.g., "BatchInvitation", "FeedbackReminder", "GeneralReminder"
+  recipientType  String // e.g., "Participant", "Manager", "Trainer"
+  emailType      String // e.g., "BatchInvitation", "FeedbackReminder", "GeneralReminder"
   subject        String
-  status         String   // "Sent" or "Failed"
-  errorMessage   String?  @db.Text @map("error_message")
+  status         String // "Sent" or "Failed"
+  errorMessage   String?  @map("error_message") @db.Text
   sessionId      String?  @map("session_id")
   createdAt      DateTime @default(now()) @map("created_at")
 
   // Relations
-  session        TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  session TrainingSession? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId])
   @@index([recipientEmail])
@@ -679,27 +680,27 @@ model EmailLog {
 
 // --- TRAINING HISTORY LEDGER (Legacy + Completed Modern Sessions) ---
 model TrainingHistory {
-  id             String   @id @default(uuid())
-  empId          String   @map("emp_id")
-  employeeName   String   @map("employee_name")
-  programName    String   @map("program_name")
-  startDate      DateTime @map("start_date")
-  endDate        DateTime @map("end_date")
-  trainingDays   Int?     @map("training_days")
-  region         String?
-  location       String?
-  progCategory   String?  @map("prog_category")
-  
-  // Fields for Modern System Sync
-  source         String   @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)
-  sessionId      String?  @map("session_id")
-  trainerName    String?  @map("trainer_name")
-  averageRating  Float?   @map("average_rating")
+  id           String   @id @default(uuid())
+  empId        String   @map("emp_id")
+  employeeName String   @map("employee_name")
+  programName  String   @map("program_name")
+  startDate    DateTime @map("start_date")
+  endDate      DateTime @map("end_date")
+  trainingDays Int?     @map("training_days")
+  region       String?
+  location     String?
+  progCategory String?  @map("prog_category")
 
-  createdAt      DateTime @default(now()) @map("created_at")
+  // Fields for Modern System Sync
+  source        String  @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)
+  sessionId     String? @map("session_id")
+  trainerName   String? @map("trainer_name")
+  averageRating Float?  @map("average_rating")
+
+  createdAt DateTime @default(now()) @map("created_at")
 
   // Relations
-  employee       Employee @relation(fields: [empId], references: [id])
+  employee Employee @relation(fields: [empId], references: [id])
 
   @@index([empId])
   @@map("training_history")
@@ -717,3 +718,22 @@ model SystemSetting {
   @@map("system_settings")
 }
 
+// --- DAILY ATTENDANCE SYSTEM ---
+model AttendanceRecord {
+  id        String   @id @default(uuid())
+  sessionId String   @map("session_id")
+  empId     String   @map("emp_id")
+  date      DateTime @db.Date
+  status    String   @default("Present") // Present, Absent
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  session  TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  employee Employee        @relation(fields: [empId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, empId, date])
+  @@index([sessionId])
+  @@index([empId])
+  @@map("attendance_records")
+}

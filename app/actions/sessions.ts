@@ -317,6 +317,17 @@ export async function createSession(formData: FormData) {
 
     const feedbackCreationDate = assessmentDate; // Keep them in sync for now
 
+    // Generate default class dates (all dates between start and end inclusive)
+    const classDates: Date[] = [];
+    const currentDate = new Date(startDate);
+    currentDate.setHours(0, 0, 0, 0);
+    const endD = new Date(endDate);
+    endD.setHours(0, 0, 0, 0);
+    while (currentDate <= endD) {
+        classDates.push(new Date(currentDate));
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
     try {
         const program = await db.program.findUnique({
             where: { name: programName }
@@ -347,6 +358,7 @@ export async function createSession(formData: FormData) {
                 topics: formData.get('topics') as string,
                 assessmentDate,
                 feedbackCreationDate,
+                classDates,
                 nominationBatchId: batch.id
             }
         });
@@ -398,7 +410,8 @@ export const getSessionById = unstable_cache(
                 },
                 emailLogs: {
                     orderBy: { createdAt: 'desc' }
-                }
+                },
+                attendanceRecords: true
             }
         });
     },
