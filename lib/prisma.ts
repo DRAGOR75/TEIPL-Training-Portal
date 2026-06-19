@@ -28,8 +28,7 @@ function createPrismaClient() {
 
     if (isNeon) {
         console.log('[Prisma] Using Neon Serverless Adapter');
-        const pool = new NeonPool({ connectionString })
-        const adapter = new PrismaNeon(pool)
+        const adapter = new PrismaNeon({ connectionString })
         return new PrismaClient({ adapter, log: ['query', 'error', 'warn'] })
     } else {
         console.log('[Prisma] Using standard pg pool with keepAlive for GCP');
