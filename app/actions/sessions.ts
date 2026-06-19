@@ -439,7 +439,10 @@ export async function getTrainingSessionsForDate(dateStr: string, trainerName?: 
         };
 
         if (trainerName) {
-            whereClause.trainerName = trainerName;
+            whereClause.trainerName = {
+                contains: trainerName,
+                mode: 'insensitive'
+            };
         }
 
         return await db.trainingSession.findMany({
