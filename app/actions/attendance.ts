@@ -60,7 +60,7 @@ export async function updateSessionClassDates(sessionId: string, classDates: Dat
         });
 
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
-        revalidateTag('session-details');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error("Failed to update class dates", error);
