@@ -28,7 +28,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const [selectedNominations, setSelectedNominations] = useState<Set<string>>(new Set());
     const [isAdding, setIsAdding] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
-    const [requireApproval, setRequireApproval] = useState(session.requireManagerApproval ?? true);
+    const [requireApproval, setRequireApproval] = useState(session.requireManagerApproval ?? false);
     const [allowWalkIns, setAllowWalkIns] = useState(session.allowWalkIns ?? false);
 
     const [isToggling, setIsToggling] = useState(false);
@@ -36,7 +36,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const [searchQuery, setSearchQuery] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
     const [designationFilter, setDesignationFilter] = useState('');
-    const [activeTab, setActiveTab] = useState<'overview' | 'attendance' | 'settings'>('overview');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const isLocked = session.nominationBatch?.status === 'Scheduled' || session.nominationBatch?.status === 'Completed';
 
@@ -127,145 +127,136 @@ export default function ManagementClient({ session, pendingNominations, batchId 
 
     return (
         <div className="space-y-6">
-            <div className="bg-slate-100/70 p-1.5 rounded-2xl inline-flex gap-1 w-full sm:w-auto overflow-x-auto shadow-inner border border-slate-200/60 mb-2">
-                <button 
-                    onClick={() => setActiveTab('overview')}
-                    className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${activeTab === 'overview' ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'}`}
+            <div className="flex justify-start">
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className={`p-2.5 rounded-xl border flex items-center gap-2 transition-all font-bold text-sm ${isSidebarOpen ? 'bg-slate-800 text-white border-slate-800 shadow-md' : 'bg-white text-slate-700 border-slate-200 shadow-sm hover:bg-slate-50'}`}
                 >
-                    Overview
-                </button>
-
-                <button 
-                    onClick={() => setActiveTab('settings')}
-                    className={`px-5 py-2.5 text-sm font-bold rounded-xl transition-all whitespace-nowrap flex-1 sm:flex-none ${activeTab === 'settings' ? 'bg-white text-blue-600 shadow-sm border border-slate-200/50' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50 border border-transparent'}`}
-                >
-                    Settings
+                    <HiOutlineBars3 className="w-5 h-5" />
+                    {isSidebarOpen ? 'Hide Controls' : 'Show Controls'}
                 </button>
             </div>
 
-            {/* Settings Tab */}
-            {activeTab === 'settings' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center space-y-4">
-                        <div className="bg-blue-50 p-2 rounded-xl inline-block">
-                            <HiOutlineQrCode className="w-6 h-6 text-blue-600" />
-                        </div>
-                        <h3 className="font-bold text-slate-900">Direct Enrollment</h3>
-                        <p className="text-sm text-slate-500">Scan to join this batch directly.</p>
+            <div className={`grid grid-cols-1 ${isSidebarOpen ? 'lg:grid-cols-3' : ''} gap-8`}>
 
-                        <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-inner">
-                            {joinUrl && <QRCode value={joinUrl} size={150} />}
-                        </div>
+                {/* Left Column: QR Code, Status, Settings */}
+                {isSidebarOpen && (
+                    <div className="space-y-6">
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center space-y-4">
+                            <div className="bg-blue-50 p-2 rounded-xl inline-block">
+                                <HiOutlineQrCode className="w-6 h-6 text-blue-600" />
+                            </div>
+                            <h3 className="font-bold text-slate-900">Direct Enrollment</h3>
+                            <p className="text-sm text-slate-500">Scan to join this batch directly.</p>
 
-                        <a
-                            href={`/enroll/${batchId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest mt-4"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            Live Link <HiOutlineArrowTopRightOnSquare size={10} />
-                        </a>
-                    </div>
+                            <div className="p-4 bg-white border border-slate-100 rounded-xl shadow-inner">
+                                {joinUrl && <QRCode value={joinUrl} size={150} />}
+                            </div>
 
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            <HiOutlineClipboardDocumentList className="w-5 h-5 text-indigo-600" />
-                            Batch Stats
-                        </h3>
-                        <div className="space-y-3">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Status</span>
-                                <span className="font-medium text-slate-900 bg-green-50 text-green-700 px-2 py-0.5 rounded">
-                                    {session.nominationBatch?.status}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Enrolled</span>
-                                <span className="font-medium text-slate-900">
-                                    {session.nominationBatch?.nominations.length || 0}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Waitlist (TNI)</span>
-                                <span className="font-medium text-slate-900">
-                                    {filteredPending.length !== pendingNominations.length
-                                        ? `${filteredPending.length} / ${pendingNominations.length}`
-                                        : pendingNominations.length}
-                                </span>
-                            </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500">Approved for Batching</span>
-                                <span className="font-medium text-green-600">
-                                    {filteredPending.filter(n => n.managerApprovalStatus === 'Approved').length !== pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length
-                                        ? `${filteredPending.filter(n => n.managerApprovalStatus === 'Approved').length} / ${pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length}`
-                                        : pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-                        <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
-                            Settings
-                        </h3>
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-bold text-slate-700">Require Manager Approval</p>
-                                <p className="text-[10px] text-slate-500 max-w-[150px]">Send email to manager for JIT enrollment approval.</p>
-                            </div>
-                            <button
-                                type="button"
-                                role="switch"
-                                aria-checked={requireApproval}
-                                onClick={handleToggleApproval}
-                                disabled={isToggling || isLocked}
-                                className={`${requireApproval ? 'bg-blue-600' : 'bg-slate-300'
-                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50`}
+                            <a
+                                href={`/enroll/${batchId}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-600 hover:text-blue-800 tracking-widest mt-4"
+                                onClick={(e) => e.stopPropagation()}
                             >
-                                <span
-                                    aria-hidden="true"
-                                    className={`${requireApproval ? 'translate-x-5' : 'translate-x-0'
-                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                />
-                            </button>
+                                Live Link <HiOutlineArrowTopRightOnSquare size={10} />
+                            </a>
                         </div>
 
-                        <hr className="my-4 border-slate-100" />
-
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-bold text-slate-700">Allow Feedback Walk-Ins</p>
-                                <p className="text-[10px] text-slate-500 max-w-[150px]">Allow participants not in the batch to submit feedback.</p>
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                <HiOutlineClipboardDocumentList className="w-5 h-5 text-indigo-600" />
+                                Batch Stats
+                            </h3>
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Status</span>
+                                    <span className="font-medium text-slate-900 bg-green-50 text-green-700 px-2 py-0.5 rounded">
+                                        {session.nominationBatch?.status}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Enrolled</span>
+                                    <span className="font-medium text-slate-900">
+                                        {session.nominationBatch?.nominations.length || 0}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Waitlist (TNI)</span>
+                                    <span className="font-medium text-slate-900">
+                                        {filteredPending.length !== pendingNominations.length
+                                            ? `${filteredPending.length} / ${pendingNominations.length}`
+                                            : pendingNominations.length}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between text-sm">
+                                    <span className="text-slate-500">Approved for Batching</span>
+                                    <span className="font-medium text-green-600">
+                                        {filteredPending.filter(n => n.managerApprovalStatus === 'Approved').length !== pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length
+                                            ? `${filteredPending.filter(n => n.managerApprovalStatus === 'Approved').length} / ${pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length}`
+                                            : pendingNominations.filter(n => n.managerApprovalStatus === 'Approved').length}
+                                    </span>
+                                </div>
                             </div>
-                            <button
-                                type="button"
-                                role="switch"
-                                aria-checked={allowWalkIns}
-                                onClick={handleToggleWalkIns}
-                                disabled={isTogglingWalkIns || isLocked}
-                                className={`${allowWalkIns ? 'bg-indigo-600' : 'bg-slate-300'
-                                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50`}
-                            >
-                                <span
-                                    aria-hidden="true"
-                                    className={`${allowWalkIns ? 'translate-x-5' : 'translate-x-0'
-                                        } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
-                                />
-                            </button>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+                            <h3 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+                                Settings
+                            </h3>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-bold text-slate-700">Require Manager Approval</p>
+                                    <p className="text-[10px] text-slate-500 max-w-[150px]">Send email to manager for JIT enrollment approval.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={requireApproval}
+                                    onClick={handleToggleApproval}
+                                    disabled={isToggling || isLocked}
+                                    className={`${requireApproval ? 'bg-blue-600' : 'bg-slate-300'
+                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2 disabled:opacity-50`}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className={`${requireApproval ? 'translate-x-5' : 'translate-x-0'
+                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                </button>
+                            </div>
+
+                            <hr className="my-4 border-slate-100" />
+
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-bold text-slate-700">Allow Feedback Walk-Ins</p>
+                                    <p className="text-[10px] text-slate-500 max-w-[150px]">Allow participants not in the batch to submit feedback.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    role="switch"
+                                    aria-checked={allowWalkIns}
+                                    onClick={handleToggleWalkIns}
+                                    disabled={isTogglingWalkIns || isLocked}
+                                    className={`${allowWalkIns ? 'bg-indigo-600' : 'bg-slate-300'
+                                        } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2 disabled:opacity-50`}
+                                >
+                                    <span
+                                        aria-hidden="true"
+                                        className={`${allowWalkIns ? 'translate-x-5' : 'translate-x-0'
+                                            } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                                    />
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
 
-            {/* Attendance Tab */}
-            {activeTab === 'attendance' && (
-                <AttendanceTab session={session} />
-            )}
+                {/* Middle & Right: Management Area */}
+                <div className={`${isSidebarOpen ? 'lg:col-span-2' : ''} space-y-8`}>
 
-            {/* Overview Tab */}
-            {activeTab === 'overview' && (
-                <div className="space-y-8">
                     {/* 2. Current Batch List */}
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                         <div className="p-6 border-b border-slate-100">
@@ -480,6 +471,17 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         </div>
                     </div>
 
+                    {/* Attendance Tab */}
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+                         <div className="p-6 border-b border-slate-100">
+                             <h3 className="font-bold text-slate-900 text-lg">Attendance</h3>
+                             <p className="text-sm text-slate-500">Manage participant attendance.</p>
+                         </div>
+                         <div className="p-6">
+                            <AttendanceTab session={session} />
+                         </div>
+                    </div>
+
                     {/* 3. Email Logs */}
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
                         <div className="p-6 border-b border-slate-100">
@@ -555,7 +557,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         )}
                     </div>
                 </div>
-            )}
+
+            </div>
         </div>
     );
 }

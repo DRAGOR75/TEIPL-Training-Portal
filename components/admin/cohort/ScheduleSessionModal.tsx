@@ -136,13 +136,23 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-700 uppercase">Trainer</label>
-                            <SearchableSelect
-                                options={trainers.map(t => ({ label: t.name, value: t.name }))}
-                                value={trainerName}
-                                onChange={setTrainerName}
-                                placeholder="Select Trainer"
-                                searchPlaceholder="Search trainers..."
-                            />
+                            {(() => {
+                                const trainerOptions = trainers.map(t => ({ label: t.name, value: t.name }));
+                                if (trainerName && !trainerOptions.find(o => o.value === trainerName)) {
+                                    trainerOptions.push({ label: trainerName, value: trainerName });
+                                }
+                                return (
+                                    <SearchableSelect
+                                        options={trainerOptions}
+                                        value={trainerName}
+                                        onChange={setTrainerName}
+                                        onAddNew={setTrainerName}
+                                        addNewLabel="Use custom trainer"
+                                        placeholder="Select Trainer"
+                                        searchPlaceholder="Search trainers..."
+                                    />
+                                );
+                            })()}
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-xs font-bold text-slate-700 uppercase">Location</label>

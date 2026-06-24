@@ -34,7 +34,8 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
         managerName: '',
         managerEmail: '',
         nominations: [],
-        trainingHistory: []
+        trainingHistory: [],
+        systemTrainingHistory: []
     };
 
     // Fetch Programs (Filtered by Grade & Section)
@@ -114,7 +115,7 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
                     nominations={nominations}
                     programs={programs as any}
                     empId={empId}
-                    trainingHistory={currentEmployee.trainingHistory || []}
+                    trainingHistory={[...(currentEmployee.trainingHistory || []), ...(currentEmployee.systemTrainingHistory || [])].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())}
                     managerEmail={currentEmployee.managerEmail || undefined}
                     managerName={currentEmployee.managerName || undefined}
                     isAddTNIDisabled={isAddTNIDisabled}

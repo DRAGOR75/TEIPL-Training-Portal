@@ -94,49 +94,8 @@ export async function selfEnroll(formData: FormData) {
             create: data
         });
 
-        // 4.5. Close TNI Loop & Create Training History (Moved from 30-day feedback)
-        if (empId !== 'WALKIN' && session.nominationBatchId) {
-            let empLocation = null;
-            const emp = await db.employee.findUnique({ where: { id: empId }, select: { location: true } });
-            empLocation = emp?.location;
-
-            const prog = await db.program.findUnique({ where: { name: session.programName }, select: { category: true } });
-            const progCategory = prog?.category ?? null;
-
-            const start = new Date(session.startDate);
-            const end = new Date(session.endDate);
-            const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
-
-            // Mark Nomination as Completed
-            await db.nomination.updateMany({
-                where: { empId: empId, batchId: session.nominationBatchId },
-                data: { status: 'Completed' }
-            });
-
-            // Create Training History if it doesn't exist
-            const existingHistory = await db.trainingHistory.findFirst({
-                where: { empId: empId, sessionId: sessionId }
-            });
-
-            if (!existingHistory) {
-                await db.trainingHistory.create({
-                    data: {
-                        empId: empId,
-                        employeeName: finalName,
-                        programName: session.programName,
-                        startDate: session.startDate,
-                        endDate: session.endDate,
-                        trainingDays: trainingDays > 0 ? trainingDays : null,
-                        location: session.location || empLocation,
-                        progCategory: progCategory,
-                        source: 'SYSTEM',
-                        sessionId: sessionId,
-                        trainerName: session.trainerName
-                    }
-                });
-            }
-        }
-
+        // Note: The TNI completion logic (step 4.5) has been moved to the Trainer Attendance flow.
+        
         // 5. Send Acknowledgment Email (Non-blocking)
         if (formData.get('isAdmin') !== 'true') {
             await sendFeedbackAcknowledgmentEmail(finalEmail, finalName, session.programName, {

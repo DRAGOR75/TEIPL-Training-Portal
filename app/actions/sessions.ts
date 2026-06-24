@@ -317,16 +317,9 @@ export async function createSession(formData: FormData) {
 
     const feedbackCreationDate = assessmentDate; // Keep them in sync for now
 
-    // Generate default class dates (all dates between start and end inclusive)
+    // Initialize class dates as an empty array.
+    // Trainers will dynamically add specific training dates from the Attendance Dashboard.
     const classDates: Date[] = [];
-    const currentDate = new Date(startDate);
-    currentDate.setHours(0, 0, 0, 0);
-    const endD = new Date(endDate);
-    endD.setHours(0, 0, 0, 0);
-    while (currentDate <= endD) {
-        classDates.push(new Date(currentDate));
-        currentDate.setDate(currentDate.getDate() + 1);
-    }
 
     try {
         const program = await db.program.findUnique({
@@ -582,6 +575,29 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
                 include: { employee: true }
             });
 
+            // Automatically create default 'Present' records for any existing class dates
+            const classDates = batch.trainingSession.classDates;
+            if (classDates && classDates.length > 0) {
+                const newEmpIds = nominations.map(n => n.employee.id);
+                const attendanceData = [];
+                for (const date of classDates) {
+                    for (const empId of newEmpIds) {
+                        attendanceData.push({
+                            sessionId: batch.trainingSession.id,
+                            empId: empId,
+                            date: date,
+                            status: 'Present'
+                        });
+                    }
+                }
+                if (attendanceData.length > 0) {
+                    await db.attendanceRecord.createMany({
+                        data: attendanceData,
+                        skipDuplicates: true
+                    });
+                }
+            }
+
             const { startDate, endDate } = batch.trainingSession;
             await Promise.all(nominations.map(async (nom) => {
                 if (nom.employee.managerEmail) {
@@ -668,6 +684,20 @@ export async function joinBatch(batchId: string, empId: string) {
             }
         });
 
+        // Automatically create default 'Present' records for any existing class dates
+        if (batch.trainingSession?.classDates && batch.trainingSession.classDates.length > 0) {
+            const attendanceData = batch.trainingSession.classDates.map(date => ({
+                sessionId: batch.trainingSession!.id,
+                empId: empId,
+                date: date,
+                status: 'Present'
+            }));
+            await db.attendanceRecord.createMany({
+                data: attendanceData,
+                skipDuplicates: true
+            });
+        }
+
         // 5. Send Email if Session exists
         if (batch.trainingSession && employee.managerEmail && batch.trainingSession.requireManagerApproval) {
             const { startDate, endDate } = batch.trainingSession;
@@ -713,7 +743,8 @@ export async function getBatchBasicDetails(batchId: string) {
             success: true,
             programName: batch.program?.name || batch.trainingSession?.programName,
             startDate: batch.trainingSession?.startDate,
-            endDate: batch.trainingSession?.endDate
+            endDate: batch.trainingSession?.endDate,
+            location: batch.trainingSession?.location || batch.proposedLocation
         };
     } catch (error) {
         console.error('Get Batch Basic Details Error:', error);
@@ -813,6 +844,20 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             }
         });
 
+        // Automatically create default 'Present' records for any existing class dates
+        if (batch.trainingSession?.classDates && batch.trainingSession.classDates.length > 0) {
+            const attendanceData = batch.trainingSession.classDates.map(date => ({
+                sessionId: batch.trainingSession!.id,
+                empId: employee.id,
+                date: date,
+                status: 'Present'
+            }));
+            await db.attendanceRecord.createMany({
+                data: attendanceData,
+                skipDuplicates: true
+            });
+        }
+
         // 4. Send Email if Session exists
         // Note: We use formData.managerEmail because employee object return from upsert might not have it if upsert return behavior varies, 
         // but robustly we should use employee.managerEmail or formData.managerEmail.
@@ -852,7 +897,7 @@ export async function removeNominationFromBatch(nominationId: string) {
         // 0. Check Batch Lock via Nomination -> Batch
         const nomination = await db.nomination.findUnique({
             where: { id: nominationId },
-            include: { batch: true }
+            include: { batch: { include: { trainingSession: true } } }
         });
 
         if (nomination?.batch?.status === 'Scheduled' || nomination?.batch?.status === 'Completed') {
@@ -868,6 +913,16 @@ export async function removeNominationFromBatch(nominationId: string) {
                 managerRejectionReason: null      // Clean up any old rejection reasons
             }
         });
+
+        const sessionId = nomination?.batch?.trainingSession?.id;
+        if (sessionId && nomination?.empId) {
+            await db.attendanceRecord.deleteMany({
+                where: {
+                    sessionId: sessionId,
+                    empId: nomination.empId
+                }
+            });
+        }
 
         revalidatePath('/admin/sessions');
         revalidateTag('sessions-list', 'max');
@@ -925,3 +980,26 @@ export async function toggleAllowWalkIns(sessionId: string, allowWalkIns: boolea
     }
 }
 
+export async function getEmployeeForConfirmation(empId: string) {
+    try {
+        const employee = await db.employee.findUnique({
+            where: { id: empId },
+            select: {
+                id: true,
+                name: true,
+                designation: true,
+                sectionName: true,
+                location: true
+            }
+        });
+
+        if (!employee) {
+            return { error: 'EMPLOYEE_NOT_FOUND' };
+        }
+
+        return { success: true, employee };
+    } catch (error) {
+        console.error('Get Employee For Confirmation Error:', error);
+        return { error: 'System error' };
+    }
+}
