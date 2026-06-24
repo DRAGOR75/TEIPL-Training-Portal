@@ -34,7 +34,8 @@ export default async function TNIDashboardPage({ params }: { params: Promise<{ e
         managerName: '',
         managerEmail: '',
         nominations: [],
-        trainingHistory: []
+        trainingHistory: [],
+        systemTrainingHistory: []
     };
 
     // Fetch Programs (Filtered by Grade & Section)

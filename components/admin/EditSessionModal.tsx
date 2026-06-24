@@ -122,7 +122,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
 
     const trainerOptions = trainers.map((t:any) => ({ label: t.name, value: t.name }));
     selectedTrainers.forEach(tName => {
-        if (tName && !trainerOptions.find(o => o.value === tName)) {
+        if (tName && !trainerOptions.find((o: { label: string; value: string }) => o.value === tName)) {
             trainerOptions.push({ label: tName, value: tName });
         }
     });
