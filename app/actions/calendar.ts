@@ -131,6 +131,15 @@ export async function cancelCalendarEvent(batchId: string) {
     if (!session?.user?.email) return { error: "Unauthorized" };
 
     try {
+        // Un-batch all nominations associated with this event so they revert to Pending
+        await db.nomination.updateMany({
+            where: { batchId },
+            data: {
+                status: 'Pending',
+                batchId: null
+            }
+        });
+
         await db.nominationBatch.delete({
             where: { id: batchId }
         });

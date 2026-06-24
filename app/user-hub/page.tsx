@@ -19,20 +19,18 @@ export default function UserHubPage() {
                         <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
                             Employee <span className="text-orange-600">Portal</span>
                         </h1>
-                        <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed">
-                            Manage your training nominations and access technical troubleshooting guides.
-                        </p>
+
                     </div>
                 </div>
             </div>
 
             <div className="container mx-auto px-6 py-12 max-w-7xl">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 
                     {/* Card 1: Training Management - Amber */}
                     <UserCard
                         href="/tni"
-                        title="Training Management"
+                        title="TNI & Training Records"
                         description="Identify your training needs, submit nominations, and track your learning journey."
                         icon={<HiOutlineClipboardDocumentList size={32} />}
                         tag="Personal Growth"
@@ -48,6 +46,15 @@ export default function UserHubPage() {
                         icon={<HiOutlineWrench size={32} />}
                         tag="Support"
                         color="red"
+                    />
+
+                    <UserCard
+                        href="/calendar"
+                        title="Training Calendar"
+                        description="View the trainer's master schedule and upcoming training sessions."
+                        icon={<HiOutlineCalendar size={32} />}
+                        tag="Schedule"
+                        color="emerald"
                     />
 
                 </div>

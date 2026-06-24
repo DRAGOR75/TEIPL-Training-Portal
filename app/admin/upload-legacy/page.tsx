@@ -44,6 +44,18 @@ export default function UploadLegacyDataPage() {
                         // Map mobile and email either from individual columns if they exist, or extracted from combined string
                         mobile: row['Mobile']?.trim() || (mobileMatch ? mobileMatch[0] : null),
                         email: row['Email']?.trim() || row['Mail']?.trim() || (emailMatch ? emailMatch[0] : null),
+                        organization: row['ORGANIZATION']?.trim(),
+                        onRollContract: row['On-Roll / Contract']?.trim(),
+                        department: row['Department']?.trim(),
+                        employeeGroup: row['Employee Group']?.trim(),
+                        employeeGrouupMNmw: row['Employee Group M/NM/W']?.trim(),
+                        aadharNumber: row['Aadhar Number']?.trim(),
+                        designation: row['Designation']?.trim(),
+                        section: row['Section (On Trg Date)']?.trim(),
+                        month: row['MTH']?.trim(),
+                        year: row['Year']?.trim() || row['YEAR']?.trim(),
+                        gender: row['Gender']?.trim(),
+                        attendancePercentage: parseFloat(row['Attd %']) || null,
                     };
                 }).filter(r => r.empId && r.programName); // Basic validation
 

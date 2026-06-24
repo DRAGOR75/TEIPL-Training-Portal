@@ -25,9 +25,7 @@ export default async function TrainerHubPage() {
                                 <h1 className="text-4xl md:text-5xl font-black tracking-tighter text-slate-900 uppercase">
                                     Trainer <span className="text-emerald-600">Workspace</span>
                                 </h1>
-                                <p className="max-w-xl text-lg text-slate-500 font-medium leading-relaxed pt-2">
-                                    Access your training sessions, monitor feedback, and track program performance.
-                                </p>
+
                             </div>
 
                             {session?.user?.name && (
@@ -47,7 +45,7 @@ export default async function TrainerHubPage() {
                     {/* Card 1: TNI Control Panel - Amber/Orange */}
                     <TrainerCard
                         href="/trainer/employee-tni"
-                        title="TNI Control Panel"
+                        title="TNI & Training Records"
                         description="Manage training needs and update employee profiles instantly."
                         icon={<HiOutlineUsers size={28} />}
                         tag="TNI"

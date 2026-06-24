@@ -2,7 +2,7 @@
 
 
 import { useState, useEffect } from 'react';
-import { joinBatch, registerAndJoinBatch, getBatchBasicDetails } from '@/app/actions/sessions';
+import { joinBatch, registerAndJoinBatch, getBatchBasicDetails, getEmployeeForConfirmation } from '@/app/actions/sessions';
 import { getSections, getDesignations, getLocations } from '@/app/actions/master-data';
 import {
     HiOutlineArrowPath,
@@ -27,6 +27,9 @@ export default function JoinPage() {
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
     const [result, setResult] = useState<{ employeeName?: string, programName?: string, error?: string } | null>(null);
     const [isRegistering, setIsRegistering] = useState(false); // New state for JIT mode
+    const [isConfirming, setIsConfirming] = useState(false); // Confirmation state
+    const [employeeDetails, setEmployeeDetails] = useState<{ name: string, designation: string, sectionName: string, location: string, empId: string } | null>(null);
+
 
     // Options State
     const [sectionOptions, setSectionOptions] = useState<{ label: string, value: string }[]>([]);
@@ -34,7 +37,7 @@ export default function JoinPage() {
     const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
 
     // Batch Details State
-    const [batchDetails, setBatchDetails] = useState<{ programName?: string, startDate?: Date, endDate?: Date } | null>(null);
+    const [batchDetails, setBatchDetails] = useState<{ programName?: string, startDate?: Date, endDate?: Date, location?: string } | null>(null);
 
     useEffect(() => {
         async function fetchBatchDetails() {
@@ -44,7 +47,8 @@ export default function JoinPage() {
                     setBatchDetails({
                         programName: res.programName,
                         startDate: res.startDate,
-                        endDate: res.endDate
+                        endDate: res.endDate,
+                        location: res.location ?? undefined
                     });
                 }
             }
@@ -101,14 +105,37 @@ export default function JoinPage() {
         setStatus('loading');
         setResult(null);
 
+        const res = await getEmployeeForConfirmation(empId);
+
+        if (res.success && res.employee) {
+            setEmployeeDetails({
+                name: res.employee.name,
+                designation: res.employee.designation || 'N/A',
+                sectionName: res.employee.sectionName || 'N/A',
+                location: res.employee.location || 'N/A',
+                empId: res.employee.id || 'N/A'
+            });
+            setStatus('idle');
+            setIsConfirming(true);
+        } else if (res.error === 'EMPLOYEE_NOT_FOUND') {
+            setStatus('idle');
+            setIsRegistering(true); // Switch to registration mode
+        } else {
+            setStatus('error');
+            setResult({ error: res.error });
+        }
+    }
+
+    async function handleConfirmJoin() {
+        setStatus('loading');
+        setResult(null);
+
         const res = await joinBatch(batchId, empId);
 
         if (res.success) {
             setStatus('success');
             setResult({ employeeName: res.employeeName, programName: res.programName });
-        } else if (res.error === 'EMPLOYEE_NOT_FOUND') {
-            setStatus('idle');
-            setIsRegistering(true); // Switch to registration mode
+            setIsConfirming(false);
         } else {
             setStatus('error');
             setResult({ error: res.error });
@@ -162,6 +189,76 @@ export default function JoinPage() {
                         {result?.programName}
                     </div>
                     <p className="text-xs text-slate-400 mt-8">You can close this window now.</p>
+                </div>
+            </div>
+        );
+    }
+
+    // --- CONFIRMATION VIEW ---
+    if (isConfirming && employeeDetails) {
+        return (
+            <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
+                <div className="bg-white p-10 rounded-3xl shadow-lg border border-slate-100 max-w-md w-full space-y-6 text-center">
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto text-blue-600 mb-2">
+                        <HiOutlineUser className="w-8 h-8" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-900">Registration Confirmation</h2>
+
+                    <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-left space-y-3">
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase">Name</p>
+                            <p className="font-semibold text-slate-800 text-lg">
+                                {employeeDetails.name} <span className="font-bold text-slate-600 text-base">({employeeDetails.empId})</span>
+                            </p>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-bold text-slate-400 uppercase">Designation</p>
+                            <p className="font-medium text-slate-700">{employeeDetails.designation}</p>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Department</p>
+                                <p className="font-medium text-slate-700">{employeeDetails.sectionName}</p>
+                            </div>
+                            <div>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Location</p>
+                                <p className="font-medium text-slate-700">{employeeDetails.location}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {status === 'error' && (
+                        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-start gap-2 text-left">
+                            <HiOutlineExclamationCircle className="w-5 h-5 shrink-0" />
+                            <span>{result?.error || 'Something went wrong.'}</span>
+                        </div>
+                    )}
+
+                    <div className="space-y-3 pt-4">
+                        <button
+                            onClick={handleConfirmJoin}
+                            disabled={status === 'loading'}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-200"
+                        >
+                            {status === 'loading' ? (
+                                <><HiOutlineArrowPath className="w-5 h-5 animate-spin" /> Enrolling...</>
+                            ) : (
+                                'Yes, Enroll Me'
+                            )}
+                        </button>
+                        <button
+                            onClick={() => {
+                                setIsConfirming(false);
+                                setEmpId('');
+                                setStatus('idle');
+                            }}
+                            disabled={status === 'loading'}
+                            className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all"
+                        >
+                            Cancel / Not Me
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -394,6 +491,12 @@ export default function JoinPage() {
                                     {new Date(batchDetails.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                                     {batchDetails.endDate && ` - ${new Date(batchDetails.endDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}`}
                                 </p>
+                            )}
+                            {batchDetails.location && (
+                                <div className="flex items-center justify-center gap-1 mt-1 opacity-90 text-xs">
+                                    <HiOutlineMapPin className="w-4 h-4" />
+                                    <span>{batchDetails.location}</span>
+                                </div>
                             )}
                         </div>
                     ) : (

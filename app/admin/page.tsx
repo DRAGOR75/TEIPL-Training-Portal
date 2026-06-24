@@ -39,37 +39,15 @@ export default async function AdminHubPage() {
             <div className="container mx-auto px-6 py-12 max-w-7xl">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
 
-                    {/* Card 1: Training Feedback */}
                     <AdminCard
-                        href="/admin/dashboard"
-                        title="Training Feedback"
-                        description="View training ratings, read employee feedback, and track program effectiveness."
-                        icon={<HiOutlineChatBubbleBottomCenterText size={24} />}
-                        tag="Analytics"
-                        color="blue"
-                    />
-
-                    {/* Card 2: Master Data Management */}
-                    <AdminCard
-                        href="/admin/tni-dashboard"
-                        title="Master Data Management"
+                        href="/admin/employee-tni"
+                        title="TNI & Training Records"
                         description="Manage training programs, sections, and employee database."
                         icon={<HiOutlineClipboardDocumentList size={24} />}
-                        tag="Master Data"
-                        color="amber"
+                        tag="TNI"
+                        color="pink"
                     />
 
-                    {/* Card 3: Troubleshooting Library */}
-                    <AdminCard
-                        href="/admin/troubleshooting"
-                        title="Troubleshooting Control Panel"
-                        description="Configure machines, fault codes, and create step-by-step diagnostic guides."
-                        icon={<HiOutlineWrench size={24} />}
-                        tag="Diagnostics"
-                        color="red"
-                    />
-
-                    {/* Card 4: Training Sessions */}
                     <AdminCard
                         href="/admin/sessions"
                         title="Training Sessions"
@@ -79,7 +57,48 @@ export default async function AdminHubPage() {
                         color="emerald"
                     />
 
-                    {/* Card 5: Training Cohorts - Indigo */}
+                    <AdminCard
+                        href="/admin/dashboard"
+                        title="Training Feedback"
+                        description="View training ratings, read employee feedback, and track program effectiveness."
+                        icon={<HiOutlineChatBubbleBottomCenterText size={24} />}
+                        tag="Analytics"
+                        color="blue"
+                    />
+
+
+
+
+                    <AdminCard
+                        href="/admin/tni-dashboard"
+                        title="Master Data Management"
+                        description="Manage training programs, sections, and employee database."
+                        icon={<HiOutlineClipboardDocumentList size={24} />}
+                        tag="Master Data"
+                        color="amber"
+                    />
+
+
+                    <AdminCard
+                        href="/admin/troubleshooting"
+                        title="Troubleshooting Control Panel"
+                        description="Configure machines, fault codes, and create step-by-step diagnostic guides."
+                        icon={<HiOutlineWrench size={24} />}
+                        tag="Diagnostics"
+                        color="red"
+                    />
+
+
+                    <AdminCard
+                        href="/admin/training-manuals"
+                        title="Training Manuals"
+                        description="Upload and manage training manuals."
+                        icon={<HiOutlineDocumentText size={24} />}
+                        tag="Manuals"
+                        color="indigo"
+                        isExternal
+                    />
+
                     <AdminCard
                         href="/wip"
                         title="Cohort Control Panel"
@@ -89,7 +108,7 @@ export default async function AdminHubPage() {
                         color="indigo"
                     />
 
-                    {/* Card 6: Bulk Email - Purple */}
+
                     <AdminCard
                         href="/admin/bulk-email"
                         title="Bulk Emails"
@@ -99,7 +118,7 @@ export default async function AdminHubPage() {
                         color="purple"
                     />
 
-                    {/* Card 7: Looker Reports */}
+
                     <AdminCard
                         href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd"
                         title="Looker Reports"
@@ -110,16 +129,7 @@ export default async function AdminHubPage() {
                         isExternal
                     />
 
-                    {/* Card 8: Training Manuals */}
-                    <AdminCard
-                        href="/wip"
-                        title="Training Manuals"
-                        description="Upload and manage training manuals."
-                        icon={<HiOutlineDocumentText size={24} />}
-                        tag="Manuals"
-                        color="indigo"
-                        isExternal
-                    />
+
 
                 </div>
 
@@ -139,7 +149,7 @@ function AdminCard({ href, title, description, icon, tag, color, isExternal }: {
     description: string;
     icon: React.ReactNode;
     tag: string;
-    color: 'blue' | 'indigo' | 'red' | 'emerald' | 'amber' | 'purple' | 'sky';
+    color: 'blue' | 'indigo' | 'red' | 'emerald' | 'amber' | 'purple' | 'sky' | 'pink';
     isExternal?: boolean;
 }) {
     const colorStyles = {
@@ -150,6 +160,7 @@ function AdminCard({ href, title, description, icon, tag, color, isExternal }: {
         amber: 'bg-amber-50 border-amber-100 text-amber-600 hover:border-amber-500 hover:shadow-amber-900/5',
         purple: 'bg-purple-50 border-purple-100 text-purple-600 hover:border-purple-500 hover:shadow-purple-900/5',
         sky: 'bg-sky-50 border-sky-100 text-sky-600 hover:border-sky-500 hover:shadow-sky-900/5',
+        pink: 'bg-pink-50 border-pink-100 text-pink-600 hover:border-pink-500 hover:shadow-pink-900/5',
     };
 
     const linkProps = isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {};

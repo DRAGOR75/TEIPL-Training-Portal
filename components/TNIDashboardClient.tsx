@@ -51,11 +51,13 @@ export default function TNIDashboardClient({
     // Split nominations
     const reviewedNominations = nominations
         .filter(nom =>
-            nom.managerApprovalStatus === 'Approved' ||
-            nom.managerApprovalStatus === 'Rejected' ||
-            nom.status === 'Completed' ||
-            nom.status === 'Batched' ||
-            nom.status === 'Rejected'
+            nom.status !== 'Completed' &&
+            (
+                nom.managerApprovalStatus === 'Approved' ||
+                nom.managerApprovalStatus === 'Rejected' ||
+                nom.status === 'Batched' ||
+                nom.status === 'Rejected'
+            )
         )
         .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 

@@ -1,5 +1,5 @@
 import { getSessionById, getPendingNominationsForProgram } from '@/app/actions/sessions';
-import ManagementClient from './management-client';
+import ManagementClient from '@/app/admin/sessions/[sessionId]/manage/management-client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineUser } from 'react-icons/hi2';

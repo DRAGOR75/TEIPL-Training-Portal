@@ -46,19 +46,20 @@ export default async function EmployeeCalendarPage() {
             program: { name: s.programName },
             proposedTrainer: s.trainerName,
             proposedLocation: s.location
-        }));
+        }))
+        .sort((a, b) => new Date(a.proposedStartDate).getTime() - new Date(b.proposedStartDate).getTime());
 
     return (
         <main className="min-h-screen bg-slate-50 py-12 px-6">
             <div className="max-w-[1600px] mx-auto">
                 <div className="mb-10">
-                    <h1 className="text-4xl font-black text-slate-900 tracking-tight">Training Calendar</h1>
-                    <p className="text-slate-500 font-medium mt-2">View the upcoming training schedule across all trainers.</p>
+                    <h1 className="text-4xl font-black text-slate-900 tracking-tight uppercase mb-3 italic">Training <span className="text-emerald-600">Calendar</span> </h1>
+
                 </div>
-                
+
                 <div className="mb-12">
-                    <GanttCalendar 
-                        programs={programs} 
+                    <GanttCalendar
+                        programs={programs}
                         sessions={normalizedSessions}
                         trainers={trainers}
                         locations={locations}
@@ -66,11 +67,6 @@ export default async function EmployeeCalendarPage() {
                     />
                 </div>
 
-                <div className="mb-6">
-                    <h2 className="text-2xl font-black text-slate-900 tracking-tight">Upcoming Sessions</h2>
-                    <p className="text-slate-500 font-medium mt-1">Browse scheduled training sessions and self-enroll with manager approval.</p>
-                </div>
-                
                 <EmployeeCalendarClient events={upcomingEvents} userEmail={session.user.email} />
             </div>
         </main>

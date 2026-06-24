@@ -30,6 +30,9 @@ export const getEmployeeProfile = async (empId: string) => {
                     },
                     trainingHistory: {
                         orderBy: { startDate: 'desc' }
+                    },
+                    systemTrainingHistory: {
+                        orderBy: { startDate: 'desc' }
                     }
                 }
             });

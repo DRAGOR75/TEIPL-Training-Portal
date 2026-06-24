@@ -16,6 +16,19 @@ export interface LegacyRecord {
     location?: string;
     mobile?: string;
     email?: string;
+    progCatogery?: string;
+    organization?: string;
+    onRollContract?: string;
+    department?: string;
+    employeeGroup?: string;
+    employeeGrouupMNmw?: string;
+    aadharNumber?: string;
+    designation?: string;
+    section?: string;
+    month?: string;
+    year?: string;
+    gender?: string;
+    attendancePercentage?: number | null;
 }
 
 function parseDate(dateStr?: string): Date | null {
@@ -222,6 +235,18 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 region: record.region || null,
                 location: record.location || null,
                 progCategory: record.progCategory || null,
+                organization: record.organization || null,
+                onRollContract: record.onRollContract || null,
+                department: record.department || null,
+                employeeGroup: record.employeeGroup || null,
+                employeeGrouupMNmw: record.employeeGrouupMNmw || null,
+                aadharNumber: record.aadharNumber || null,
+                designation: record.designation || null,
+                section: record.section || null,
+                month: record.month || null,
+                year: record.year || null,
+                gender: record.gender || null,
+                attendancePercentage: record.attendancePercentage || null,
                 source: 'LEGACY'
             };
         });

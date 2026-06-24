@@ -26,7 +26,8 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
         pathname?.startsWith('/join') ||
         pathname?.startsWith('/feedback') ||
         pathname?.startsWith('/tni') ||
-        pathname?.startsWith('/troubleshoot');
+        pathname?.startsWith('/troubleshoot') ||
+        pathname?.includes('/print');
 
     if (isTroubleshootPage) {
         return null;

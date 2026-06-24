@@ -99,7 +99,7 @@ export default function Home() {
             </div>
           </Link>
 
-          {/* Hub 3: Admin Center */}
+          {/* Hub 3: Admin Pannel */}
           <Link href="/admin" className="group relative flex flex-col md:flex-row items-start md:items-end gap-8 md:gap-16">
             <div className="absolute -top-12 md:-top-24 -left-6 md:-left-12 text-[10rem] md:text-[20rem] font-black text-indigo-500/5 select-none transition-all duration-700 group-hover:text-indigo-500/10 group-hover:-translate-y-4">
               03
@@ -108,7 +108,7 @@ export default function Home() {
               <span className="text-indigo-600 font-black text-sm uppercase tracking-[0.4em] mb-4 block">System Control</span>
               <h2 className="text-5xl md:text-8xl font-black text-slate-900 leading-[0.9] tracking-tighter uppercase transition-transform duration-500 group-hover:translate-x-4">
                 Admin <br />
-                <span className="text-indigo-600">Center</span>
+                <span className="text-indigo-600">Pannel</span>
               </h2>
             </div>
             <div className="relative z-10 max-w-sm">

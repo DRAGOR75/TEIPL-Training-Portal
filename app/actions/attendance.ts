@@ -47,6 +47,11 @@ export async function updateSessionClassDates(sessionId: string, classDates: Dat
     }
 
     try {
+        const existingSession = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            select: { classDates: true, nominationBatchId: true }
+        });
+
         // Strip time to keep dates consistent
         const cleanDates = classDates.map(d => {
             const newD = new Date(d);
@@ -59,11 +64,147 @@ export async function updateSessionClassDates(sessionId: string, classDates: Dat
             data: { classDates: cleanDates }
         });
 
+        if (existingSession && existingSession.nominationBatchId) {
+            const existingDatesStr = existingSession.classDates.map((d: any) => d.toISOString().split('T')[0]);
+            const addedDates = cleanDates.filter(d => !existingDatesStr.includes(d.toISOString().split('T')[0]));
+
+            if (addedDates.length > 0) {
+                // Fetch active participants
+                const nominations = await db.nomination.findMany({
+                    where: {
+                        batchId: existingSession.nominationBatchId,
+                        status: { not: 'Cancelled' }
+                    },
+                    select: { empId: true }
+                });
+
+                if (nominations.length > 0) {
+                    const attendanceRecordsData = [];
+                    for (const date of addedDates) {
+                        for (const nom of nominations) {
+                            attendanceRecordsData.push({
+                                sessionId: sessionId,
+                                empId: nom.empId,
+                                date: date,
+                                status: 'Present'
+                            });
+                        }
+                    }
+
+                    await db.attendanceRecord.createMany({
+                        data: attendanceRecordsData,
+                        skipDuplicates: true
+                    });
+                }
+            }
+        }
+
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
         revalidateTag('session-details', 'max');
         return { success: true };
-    } catch (error) {
+} catch (error) {
         console.error("Failed to update class dates", error);
+        return { success: false, error: "Database Error" };
+    }
+}
+
+export async function finalizeParticipantTraining(
+    sessionId: string,
+    batchId: string,
+    empId: string,
+    finalStatus: 'Completed' | 'Absent',
+    attendancePercentage: number
+) {
+    const sessionUser = await auth();
+    if (!sessionUser?.user?.email && process.env.NODE_ENV !== 'development') {
+        return { success: false, error: "Unauthorized" };
+    }
+
+    try {
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+            include: { nominationBatch: true }
+        });
+
+        if (!session) return { success: false, error: "Session not found" };
+
+        const emp = await db.employee.findUnique({ where: { id: empId } });
+        if (!emp) return { success: false, error: "Employee not found" };
+
+        const prog = await db.program.findUnique({ where: { name: session.programName }, select: { category: true } });
+        const progCategory = prog?.category ?? null;
+
+        const start = new Date(session.startDate);
+        const end = new Date(session.endDate);
+        const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+
+        if (finalStatus === 'Completed') {
+            // Mark Nomination as Completed
+            await db.nomination.updateMany({
+                where: { empId, batchId },
+                data: { status: 'Completed' }
+            });
+
+            // Create System Training History if it doesn't exist
+            const existingHistory = await db.systemTrainingHistory.findFirst({
+                where: { empId, sessionId }
+            });
+
+            const monthStr = start.toLocaleString('en-US', { month: 'short' });
+            const yearStr = start.getFullYear().toString();
+
+            if (!existingHistory) {
+                await db.systemTrainingHistory.create({
+                    data: {
+                        empId: empId,
+                        employeeName: emp.name,
+                        empStatus: emp.status,
+                        programName: session.programName,
+                        startDate: session.startDate,
+                        endDate: session.endDate,
+                        trainingDays: trainingDays > 0 ? trainingDays : null,
+                        region: emp.region,
+                        progCategory: progCategory,
+                        progCatogery: progCategory, // Populating both due to typo in schema
+                        organization: emp.organization,
+                        onRollContract: emp.onRollContract,
+                        department: emp.department,
+                        employeeGroup: emp.departmentGroup,
+                        employeeGrouupMNmw: emp.employeeGrouupMNmw,
+                        aadharNumber: emp.aadharNumber,
+                        designation: emp.designation,
+                        section: emp.sectionName,
+                        month: monthStr,
+                        year: yearStr,
+                        gender: emp.gender,
+                        location: session.location || emp.location,
+                        sessionId: sessionId,
+                        trainerName: session.trainerName,
+                        attendancePercentage: attendancePercentage
+                    }
+                });
+            } else {
+                await db.systemTrainingHistory.update({
+                    where: { id: existingHistory.id },
+                    data: { attendancePercentage: attendancePercentage }
+                });
+            }
+        } else if (finalStatus === 'Absent') {
+            // Mark Nomination as Cancelled (so they are removed from the batch but tracked)
+            await db.nomination.updateMany({
+                where: { empId, batchId },
+                data: { status: 'Cancelled' }
+            });
+            // Also delete System Training History if it accidentally existed
+            await db.systemTrainingHistory.deleteMany({
+                where: { empId, sessionId }
+            });
+        }
+
+        revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to finalize participant", error);
         return { success: false, error: "Database Error" };
     }
 }

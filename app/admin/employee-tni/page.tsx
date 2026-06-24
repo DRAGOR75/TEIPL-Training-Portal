@@ -9,10 +9,10 @@ import EmployeeSearch from '@/components/shared/EmployeeSearch';
 export const dynamic = 'force-dynamic';
 
 export const metadata = {
-    title: 'Trainer Employee TNI | Thriveni Training',
+    title: 'Admin Employee TNI | Thriveni Training',
 };
 
-export default async function TrainerEmployeeTNIPage({ searchParams }: { searchParams: Promise<{ empId?: string }> }) {
+export default async function AdminEmployeeTNIPage({ searchParams }: { searchParams: Promise<{ empId?: string }> }) {
     const session = await auth();
     if (!session || !['ADMIN', 'TRAINER'].includes(session.user?.role || '')) {
         redirect('/api/auth/signin');
@@ -73,7 +73,7 @@ export default async function TrainerEmployeeTNIPage({ searchParams }: { searchP
 
 
                 {/* Employee Search Form */}
-                <EmployeeSearch employees={allEmployees} basePath="/trainer/employee-tni" />
+                <EmployeeSearch employees={allEmployees} basePath="/admin/employee-tni" />
 
                 {/* Dashboard Area */}
                 {empId ? (

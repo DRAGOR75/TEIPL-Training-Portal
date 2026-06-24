@@ -30,7 +30,19 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
 
     return (
         <div className="space-y-6">
+
             <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="p-6 md:p-8 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
+                            <HiOutlineCalendarDays className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Upcoming Sessions</h3>
+
+                        </div>
+                    </div>
+                </div>
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
@@ -40,8 +52,7 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                                 <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">End Date</th>
                                 <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Trainer</th>
                                 <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Location</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Availability</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase text-right">Action</th>
+                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">No Of Persons Enrolled</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -84,26 +95,14 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                                                 {event.nominations.length} / {event.capacity || '∞'} Seats
                                             </span>
                                         </td>
-                                        <td className="p-4 align-middle text-right">
-                                            <button
-                                                onClick={() => setSelectedEventId(event.id)}
-                                                disabled={isFull}
-                                                className={`px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm ${
-                                                    isFull 
-                                                        ? 'bg-slate-100 text-slate-400 cursor-not-allowed' 
-                                                        : 'bg-emerald-600 hover:bg-emerald-700 text-white hover:shadow-md active:scale-95'
-                                                }`}
-                                            >
-                                                {isFull ? 'Waitlist Full' : 'Self Nominate'}
-                                            </button>
-                                        </td>
+
                                     </tr>
                                 );
                             })}
-                            
+
                             {events.length === 0 && (
                                 <tr>
-                                    <td colSpan={7} className="p-16 text-center">
+                                    <td colSpan={6} className="p-16 text-center">
                                         <HiOutlineCalendarDays className="mx-auto text-5xl text-slate-300 mb-4" />
                                         <h3 className="text-xl font-black text-slate-700">No Events Scheduled</h3>
                                         <p className="text-slate-500 font-medium mt-2">There are no upcoming pre-scheduled training programs at the moment.</p>
@@ -129,7 +128,7 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                         <div className="p-6 space-y-4">
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Employee ID <span className="text-rose-500">*</span></label>
-                                <input 
+                                <input
                                     type="text"
                                     placeholder="Enter your Emp ID"
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
@@ -139,7 +138,7 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Justification (Optional)</label>
-                                <textarea 
+                                <textarea
                                     rows={3}
                                     placeholder="Why do you want to attend this training?"
                                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
@@ -149,13 +148,13 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                             </div>
                         </div>
                         <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-                            <button 
+                            <button
                                 onClick={() => setSelectedEventId(null)}
                                 className="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors"
                             >
                                 Cancel
                             </button>
-                            <button 
+                            <button
                                 onClick={handleNominate}
                                 disabled={isPending || !empId}
                                 className="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"

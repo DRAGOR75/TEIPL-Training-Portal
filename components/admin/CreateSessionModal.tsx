@@ -70,6 +70,11 @@ export default function CreateSessionModal({
 
     // Prepare Options
     const trainerOptions = trainers.map(t => ({ label: t.name, value: t.name }));
+    selectedTrainers.forEach(tName => {
+        if (tName && !trainerOptions.find(o => o.value === tName)) {
+            trainerOptions.push({ label: tName, value: tName });
+        }
+    });
     const programOptions = programs.map(p => ({ label: p.name, value: p.name }));
 
     // Location Options + "Other"
@@ -161,6 +166,12 @@ export default function CreateSessionModal({
                                                             newT[idx] = typeof val === 'string' ? val : String(val);
                                                             setSelectedTrainers(newT);
                                                         }}
+                                                        onAddNew={(val) => {
+                                                            const newT = [...selectedTrainers];
+                                                            newT[idx] = val;
+                                                            setSelectedTrainers(newT);
+                                                        }}
+                                                        addNewLabel="Use custom trainer"
                                                         placeholder={idx === 0 ? "Select Primary Trainer" : "Select Co-Trainer"}
                                                         searchPlaceholder="Search trainers..."
                                                         className="flex-1"

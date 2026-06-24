@@ -171,7 +171,7 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
                         endDate: end,
                         location: record.location?.trim() || 'TBD',
                         nominationBatchId: batch.id,
-                        requireManagerApproval: true,
+                        requireManagerApproval: false,
                     }
                 });
             });

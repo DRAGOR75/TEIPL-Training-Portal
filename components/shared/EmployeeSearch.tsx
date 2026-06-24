@@ -1,8 +1,7 @@
 "use client"
 
-import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { HiOutlineMagnifyingGlass, HiOutlineUserPlus } from 'react-icons/hi2';
+import { HiOutlineMagnifyingGlass } from 'react-icons/hi2';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 
 type Employee = {
@@ -12,7 +11,7 @@ type Employee = {
     mobile: string | null;
 };
 
-export default function EmployeeSearch({ employees }: { employees: Employee[] }) {
+export default function EmployeeSearch({ employees, basePath }: { employees: Employee[], basePath: string }) {
     const router = useRouter();
     const searchParams = useSearchParams();
     const currentEmpId = searchParams.get('empId') || '';
@@ -24,15 +23,15 @@ export default function EmployeeSearch({ employees }: { employees: Employee[] })
 
     const handleSelect = (val: string) => {
         if (val) {
-            router.push(`/trainer/employee-tni?empId=${encodeURIComponent(val)}`);
+            router.push(`${basePath}?empId=${encodeURIComponent(val)}`);
         } else {
-            router.push(`/trainer/employee-tni`);
+            router.push(`${basePath}`);
         }
     };
 
     const handleAddNew = (query: string) => {
         if (query.trim()) {
-            router.push(`/trainer/employee-tni?empId=${encodeURIComponent(query.trim())}`);
+            router.push(`${basePath}?empId=${encodeURIComponent(query.trim())}`);
         }
     };
 

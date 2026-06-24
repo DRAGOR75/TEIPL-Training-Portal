@@ -121,11 +121,6 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     };
 
     const trainerOptions = trainers.map((t:any) => ({ label: t.name, value: t.name }));
-    selectedTrainers.forEach(tName => {
-        if (tName && !trainerOptions.find(o => o.value === tName)) {
-            trainerOptions.push({ label: tName, value: tName });
-        }
-    });
     const locationOptions = locations.map((l:any) => ({ label: l.name, value: l.name }));
     locationOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
 
@@ -188,12 +183,6 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                             newT[idx] = typeof val === 'string' ? val : String(val);
                                             setSelectedTrainers(newT);
                                         }}
-                                        onAddNew={(val) => {
-                                            const newT = [...selectedTrainers];
-                                            newT[idx] = val;
-                                            setSelectedTrainers(newT);
-                                        }}
-                                        addNewLabel="Use custom trainer"
                                         placeholder={idx === 0 ? "Select Primary Trainer" : "Select Co-Trainer"}
                                         searchPlaceholder="Search trainers..."
                                         className="flex-1"

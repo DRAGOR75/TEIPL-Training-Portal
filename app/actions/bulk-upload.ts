@@ -63,6 +63,14 @@ interface EmployeeImportRow {
     'ManagerEmail ID'?: string;
     'Mobile No '?: string;
     'Location'?: string;
+    // New Fields
+    'Region'?: string;
+    'Organization'?: string;
+    'Highest Qualification'?: string;
+    'Department Group'?: string;
+    'Aadhar Number'?: string;
+    'Employee Group M/NM/W'?: string;
+    'On-Roll / Contract'?: string;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -149,6 +157,15 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 managerName: managerName || null,
                 managerEmail: managerEmail || null,
                 managerMobile: managerMobile || null,
+                // New Fields
+                region: row['Region']?.toString().substring(0, 100) || null,
+                organization: row['Organization']?.toString().substring(0, 100) || null,
+                highestQualification: row['Highest Qualification']?.toString().substring(0, 100) || null,
+                department: row['Department']?.toString().substring(0, 100) || null,
+                departmentGroup: row['Department Group']?.toString().substring(0, 100) || null,
+                aadharNumber: row['Aadhar Number']?.toString().substring(0, 50) || null,
+                employeeGrouupMNmw: row['Employee Group M/NM/W']?.toString().substring(0, 50) || null,
+                onRollContract: row['On-Roll / Contract']?.toString().substring(0, 50) || null,
             };
 
             // 1. Upsert Employee

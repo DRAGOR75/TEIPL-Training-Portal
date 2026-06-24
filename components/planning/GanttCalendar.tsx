@@ -72,10 +72,23 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
     // Generate Array of days [1, 2, 3 ... 31]
     const daysList = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-    // Filter programs that actually have sessions in this month (or show all if you prefer)
-    // To keep it clean, let's show all programs, or maybe just ones with activity. 
-    // For a planning board, showing all active programs is best so you can schedule on empty ones.
-    const activeTrainers = [...trainers, { id: 'unassigned', name: 'Unassigned' }];
+    // Find all unique custom trainer names from sessions that are not in the master list
+    const existingTrainerNames = new Set(trainers.map(t => t.name));
+    const customTrainers: any[] = [];
+    
+    sessions.forEach(s => {
+        if (s.trainerName && s.trainerName !== 'Unassigned' && s.trainerName !== 'TBD') {
+            const splitNames = s.trainerName.split(/,|&|\band\b/i).map(t => t.trim()).filter(Boolean);
+            splitNames.forEach(name => {
+                if (!existingTrainerNames.has(name)) {
+                    existingTrainerNames.add(name);
+                    customTrainers.push({ id: `custom_${name}`, name });
+                }
+            });
+        }
+    });
+
+    const activeTrainers = [...trainers, ...customTrainers, { id: 'unassigned', name: 'Unassigned' }];
 
     const trainerColors = [
         'from-blue-500 to-blue-600',
@@ -124,7 +137,7 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
     };
 
     return (
-        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col">
+        <div className="bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden flex flex-col h-[calc(100vh-280px)] min-h-[500px]">
 
             {/* Toolbar */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-200 bg-slate-50 shrink-0">
@@ -164,9 +177,9 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
                 <div className="min-w-[800px] flex flex-col">
 
                     {/* Header Row (Days) */}
-                    <div className="flex sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm">
+                    <div className="flex sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
                         {/* Y-Axis Label Area */}
-                        <div className="w-[180px] shrink-0 border-r border-slate-200 p-4 flex items-center bg-slate-50">
+                        <div className="w-[180px] shrink-0 border-r border-slate-200 p-4 flex items-center bg-slate-50 sticky left-0 z-30">
                             <span className="text-xs font-black uppercase text-slate-400 tracking-widest">Trainer Name</span>
                         </div>
                         {/* X-Axis Days */}
