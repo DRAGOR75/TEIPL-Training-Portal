@@ -12,6 +12,7 @@ export default function AttendanceTab({ session }: { session: any }) {
 
     // State for local attendance records (optimistic UI)
     const [localAttendance, setLocalAttendance] = useState<Record<string, Record<string, 'Present' | 'Absent'>>>({});
+    const [localFinalized, setLocalFinalized] = useState<Record<string, 'Completed' | 'Absent'>>({});
 
     useEffect(() => {
         const initialMap: Record<string, Record<string, 'Present' | 'Absent'>> = {};
@@ -100,13 +101,21 @@ export default function AttendanceTab({ session }: { session: any }) {
 
     const handleFinalize = async (empId: string, finalStatus: 'Completed' | 'Absent') => {
         if (!confirm(`Are you sure you want to mark this participant as ${finalStatus}? This will update their TNI record.`)) return;
-        setIsSaving(true);
+        
+        // Optimistic UI update
+        setLocalFinalized(prev => ({ ...prev, [empId]: finalStatus }));
+        
         const perc = getAttendancePercentage(empId);
         const res = await finalizeParticipantTraining(session.id, session.nominationBatchId, empId, finalStatus, perc);
         if (!res.success) {
             alert(res.error || 'Failed to finalize participant');
+            // Revert on failure
+            setLocalFinalized(prev => {
+                const next = { ...prev };
+                delete next[empId];
+                return next;
+            });
         }
-        setIsSaving(false);
     };
 
     // Constrain the date picker to the session boundaries
@@ -217,8 +226,8 @@ export default function AttendanceTab({ session }: { session: any }) {
                             {enrolledNominations.map((nom: any) => {
                                 const empId = nom.employee.id;
                                 const perc = getAttendancePercentage(empId);
-                                const isCompleted = nom.status === 'Completed';
-                                const isAbsent = nom.status === 'Absent';
+                                const isCompleted = nom.status === 'Completed' || localFinalized[empId] === 'Completed';
+                                const isAbsent = nom.status === 'Absent' || localFinalized[empId] === 'Absent';
                                 const isFinalized = isCompleted || isAbsent;
 
                                 // Removed statusForSelectedDate logic
