@@ -25,6 +25,13 @@ export default async function CalendarPage() {
                 location: true, 
                 startDate: true, 
                 endDate: true, 
+                nominationBatch: {
+                    select: {
+                        _count: {
+                            select: { nominations: true }
+                        }
+                    }
+                },
                 enrollments: { select: { id: true } } 
             } 
         })

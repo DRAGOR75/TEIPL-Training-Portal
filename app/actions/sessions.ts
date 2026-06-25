@@ -459,7 +459,7 @@ export async function getPendingNominationsForProgram(programId: string) {
     const nominations = await db.nomination.findMany({
         where: {
             programId,
-            status: { in: ['Pending', 'Approved'] },
+            status: { in: ['Pending', 'Approved', 'Completed'] },
             // Extra safety: If manager explicitly rejected the topic, don't show here 
             // even if status was bugged to 'Pending' in old records.
             managerApprovalStatus: { not: 'Rejected' }
