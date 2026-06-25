@@ -20,6 +20,17 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
     const formRef = useRef<HTMLFormElement>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
+    const handleExport = () => {
+        const dataToExport = sections.map((sec, idx) => ({
+            'S.No': idx + 1,
+            'Section ID': sec.id,
+            'Section Name': sec.name,
+            'Programs Count': sec._count?.programs || 0
+        }));
+        exportToExcel(dataToExport, 'Sections_Export');
+    };
+
+
     async function handleAdd(formData: FormData) {
         setLoading(true);
         const result = await createSection(formData);
@@ -61,6 +72,14 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                                 <HiOutlinePlus size={16} className="stroke-[2.5]" /> Add
                             </FormSubmitButton>
                         </form>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-emerald-200 text-sm"
+                        >
+                            <HiOutlineArrowDownTray size={18} className="stroke-[2.5]" />
+                            <span className="hidden sm:inline">Export Excel</span>
+                            <span className="sm:hidden">Export</span>
+                        </button>
 
                         <button 
                             onClick={() => setIsFullscreen(!isFullscreen)}

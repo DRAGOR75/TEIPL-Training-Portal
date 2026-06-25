@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import {
     HiOutlineBookOpen,
     HiOutlinePlus,
@@ -51,6 +51,12 @@ const THEME_COLORS = [
 ];
 
 export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSubject, onPreviewSubject }: SubjectGridProps) {
+    const [localSubjects, setLocalSubjects] = useState<Subject[]>(subjects);
+
+    useEffect(() => {
+        setLocalSubjects(subjects);
+    }, [subjects]);
+
     const [isPending, startTransition] = useTransition();
     const [showAddForm, setShowAddForm] = useState(false);
     const [newName, setNewName] = useState('');
@@ -59,7 +65,7 @@ export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSu
     const [editName, setEditName] = useState('');
     const [deletingId, setDeletingId] = useState<number | null>(null);
 
-    const filtered = subjects.filter(s => {
+    const filtered = localSubjects.filter(s => {
         if (!searchQuery) return isAdmin ? true : s.userView === 1;
         const q = searchQuery.toLowerCase();
         const match = s.name.toLowerCase().includes(q) || (s.keywords || '').toLowerCase().includes(q);
@@ -91,9 +97,17 @@ export default function SubjectGrid({ subjects, isAdmin, searchQuery, onSelectSu
 
     function handleToggle(e: React.MouseEvent, id: number, currentStatus: number) {
         e.stopPropagation();
+        const nextStatus = currentStatus === 1 ? 0 : 1;
+        // Optimistic
+        setLocalSubjects(prev => prev.map(s => s.id === id ? { ...s, userView: nextStatus } : s));
+
         startTransition(async () => {
             const result = await toggleManualSubjectStatus(id, currentStatus);
-            if (result.error) alert(result.error);
+            if (result.error) {
+                alert(result.error);
+                // Revert
+                setLocalSubjects(prev => prev.map(s => s.id === id ? { ...s, userView: currentStatus } : s));
+            }
         });
     }
 

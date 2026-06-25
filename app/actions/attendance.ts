@@ -73,7 +73,7 @@ export async function updateSessionClassDates(sessionId: string, classDates: Dat
                 const nominations = await db.nomination.findMany({
                     where: {
                         batchId: existingSession.nominationBatchId,
-                        status: { not: 'Cancelled' }
+                        status: { not: 'Absent' }
                     },
                     select: { empId: true }
                 });
@@ -190,10 +190,10 @@ export async function finalizeParticipantTraining(
                 });
             }
         } else if (finalStatus === 'Absent') {
-            // Mark Nomination as Cancelled (so they are removed from the batch but tracked)
+            // Mark Nomination as Absent (so they are removed from the batch but tracked)
             await db.nomination.updateMany({
                 where: { empId, batchId },
-                data: { status: 'Cancelled' }
+                data: { status: 'Absent' }
             });
             // Also delete System Training History if it accidentally existed
             await db.systemTrainingHistory.deleteMany({
