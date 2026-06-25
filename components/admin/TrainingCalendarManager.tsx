@@ -51,7 +51,7 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
             endDate: session.endDate,
             trainer: session.trainerName,
             location: session.location,
-            enrolledCount: session.enrollments?.length || 0,
+            enrolledCount: session.nominationBatch?._count?.nominations || session.enrollments?.length || 0,
             capacity: '∞',
             originalSession: session
         }));
