@@ -137,7 +137,7 @@ export async function getSessionDetails(sessionId: string) {
                 nominationBatch: {
                     include: {
                         nominations: {
-                            where: { status: 'Batched' },
+                            where: { status: { in: ['Batched', 'Completed'] } },
                             include: { employee: true }
                         }
                     }
