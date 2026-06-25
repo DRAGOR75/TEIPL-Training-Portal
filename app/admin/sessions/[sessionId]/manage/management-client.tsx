@@ -79,27 +79,37 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     };
 
     const handleToggleApproval = async () => {
-        setIsToggling(true);
         const newValue = !requireApproval;
-        const result = await toggleManagerApprovalRequirement(session.id, newValue);
-        if (result.success) {
-            setRequireApproval(newValue);
-        } else {
-            alert(result.error || 'Failed to update setting.');
+        setRequireApproval(newValue);
+        
+        try {
+            const result = await toggleManagerApprovalRequirement(session.id, newValue);
+            if (!result.success) {
+                alert(result.error || 'Failed to update setting.');
+                setRequireApproval(!newValue);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update setting.');
+            setRequireApproval(!newValue);
         }
-        setIsToggling(false);
     };
 
     const handleToggleWalkIns = async () => {
-        setIsTogglingWalkIns(true);
         const newValue = !allowWalkIns;
-        const result = await toggleAllowWalkIns(session.id, newValue);
-        if (result.success) {
-            setAllowWalkIns(newValue);
-        } else {
-            alert(result.error || 'Failed to update walk-in setting.');
+        setAllowWalkIns(newValue);
+        
+        try {
+            const result = await toggleAllowWalkIns(session.id, newValue);
+            if (!result.success) {
+                alert(result.error || 'Failed to update walk-in setting.');
+                setAllowWalkIns(!newValue);
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to update walk-in setting.');
+            setAllowWalkIns(!newValue);
         }
-        setIsTogglingWalkIns(false);
     };
 
     // Construct Join URL (using window.location for origin if on client)

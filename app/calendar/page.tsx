@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/prisma';
 import { getSessions } from '@/app/actions/sessions';
@@ -9,9 +9,11 @@ import EmployeeCalendarClient from '@/components/user/EmployeeCalendarClient';
 export const dynamic = 'force-dynamic';
 
 export default async function EmployeeCalendarPage() {
-    const session = await auth();
-    if (!session?.user?.email) {
-        redirect('/api/auth/signin');
+    const cookieStore = await cookies();
+    const empId = cookieStore.get('employee_id')?.value;
+
+    if (!empId) {
+        redirect('/user-hub');
     }
 
     const [programs, rawSessions, trainers, locations] = await Promise.all([
@@ -67,7 +69,7 @@ export default async function EmployeeCalendarPage() {
                     />
                 </div>
 
-                <EmployeeCalendarClient events={upcomingEvents} userEmail={session.user.email} />
+                <EmployeeCalendarClient events={upcomingEvents} empId={empId} />
             </div>
         </main>
     );

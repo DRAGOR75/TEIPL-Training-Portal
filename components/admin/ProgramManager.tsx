@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { createProgram, deleteProgram, updateProgram, toggleProgramStatus } from '@/app/actions/master-data';
 import {
@@ -34,8 +34,38 @@ interface Program {
 }
 
 export default function ProgramManager({ programs, allSections }: { programs: Program[], allSections: { id: string, name: string }[] }) {
+    const [localPrograms, setLocalPrograms] = useState<Program[]>(programs);
+
+    useEffect(() => {
+        setLocalPrograms(programs);
+    }, [programs]);
+
     const [loading, setLoading] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
+
+    const handleExport = () => {
+        const dataToExport = localPrograms.map((p, idx) => ({
+            'S.No': idx + 1,
+            'Subject ID': p.id,
+            'Subject Name': p.name,
+            'Category': p.category,
+            'Target Grades': p.targetGrades.join(', '),
+            'Machine Model': p.machineModel || '',
+            'Status': p.status || 'Active',
+            'Material Priority': p.materialPriority || '',
+            'Content Responsibility': p.contentResp || '',
+            'Target Date': p.targetDate || '',
+            'Syllabus Link': p.syllabusLink || '',
+            'Trainer Material': p.trainerMaterial || '',
+            'Participant Material': p.participantMaterial || '',
+            'Objectives': p.objectives || '',
+            'Days': p.days || '',
+            'Level': p.level || '',
+            'Sections': p.sections.map(s => s.name).join(', ') || 'All'
+        }));
+        exportToExcel(dataToExport, 'Subjects_Export');
+    };
+
 
     // Pagination & Search
     const [searchQuery, setSearchQuery] = useState('');
@@ -50,13 +80,13 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
 
     // Filter and Paginate
     const filteredPrograms = useMemo(() => {
-        return programs.filter(p => {
+        return localPrograms.filter(p => {
             const query = searchQuery.toLowerCase();
             return p.name.toLowerCase().includes(query) ||
                 p.category.toLowerCase().includes(query) ||
                 p.id.toLowerCase().includes(query);
         });
-    }, [programs, searchQuery]);
+    }, [localPrograms, searchQuery]);
 
     const totalPages = Math.ceil(filteredPrograms.length / itemsPerPage) || 1;
     // Prevent out-of-bounds page
@@ -96,8 +126,24 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
 
     async function handleToggleStatus(id: string, currentStatus: string | null) {
         setTogglingId(id);
-        const result = await toggleProgramStatus(id, currentStatus);
-        if (result?.error) alert(result.error);
+        const nextStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+
+        // Optimistically update status in local state
+        setLocalPrograms(prev => prev.map(p => p.id === id ? { ...p, status: nextStatus } : p));
+
+        try {
+            const result = await toggleProgramStatus(id, currentStatus);
+            if (result?.error) {
+                alert(result.error);
+                // Revert status
+                setLocalPrograms(prev => prev.map(p => p.id === id ? { ...p, status: currentStatus } : p));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to toggle status');
+            // Revert status
+            setLocalPrograms(prev => prev.map(p => p.id === id ? { ...p, status: currentStatus } : p));
+        }
         setTogglingId(null);
     }
 
@@ -256,6 +302,14 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                             title={isFullscreen ? "Exit Zen Mode" : "Enter Zen Mode"}
                         >
                             {isFullscreen ? <HiOutlineArrowsPointingIn size={18} /> : <HiOutlineArrowsPointingOut size={18} />}
+                        </button>
+                        <button
+                            onClick={handleExport}
+                            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-emerald-200 text-sm"
+                        >
+                            <HiOutlineArrowDownTray size={18} className="stroke-[2.5]" />
+                            <span className="hidden sm:inline">Export Excel</span>
+                            <span className="sm:hidden">Export</span>
                         </button>
 
                         <Link

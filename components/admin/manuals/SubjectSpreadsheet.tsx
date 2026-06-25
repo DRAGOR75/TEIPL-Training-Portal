@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import {
     HiOutlinePlus,
     HiOutlineTrash,
@@ -23,6 +23,12 @@ interface Subject {
 }
 
 export default function SubjectSpreadsheet({ subjects }: { subjects: Subject[] }) {
+    const [localSubjects, setLocalSubjects] = useState<Subject[]>(subjects);
+
+    useEffect(() => {
+        setLocalSubjects(subjects);
+    }, [subjects]);
+
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [editSeq, setEditSeq] = useState(0);
@@ -85,9 +91,17 @@ export default function SubjectSpreadsheet({ subjects }: { subjects: Subject[] }
     }
     
     function handleToggleVisibility(id: number, currentStatus: number) {
+        const nextStatus = currentStatus === 1 ? 0 : 1;
+        // Optimistic update
+        setLocalSubjects(prev => prev.map(s => s.id === id ? { ...s, userView: nextStatus } : s));
+
         startTransition(async () => {
             const result = await toggleManualSubjectStatus(id, currentStatus);
-            if (result.error) alert(result.error);
+            if (result.error) {
+                alert(result.error);
+                // Revert update
+                setLocalSubjects(prev => prev.map(s => s.id === id ? { ...s, userView: currentStatus } : s));
+            }
         });
     }
 
@@ -147,7 +161,7 @@ export default function SubjectSpreadsheet({ subjects }: { subjects: Subject[] }
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                        {subjects.map((s) => (
+                        {localSubjects.map((s) => (
                             <tr key={s.id} className="group hover:bg-slate-50/50 transition-colors">
                                 {editingId === s.id ? (
                                     <>
@@ -214,7 +228,7 @@ export default function SubjectSpreadsheet({ subjects }: { subjects: Subject[] }
                                 )}
                             </tr>
                         ))}
-                        {subjects.length === 0 && (
+                        {localSubjects.length === 0 && (
                             <tr>
                                 <td colSpan={4} className="px-5 py-12 text-center text-slate-400 text-sm">
                                     No subjects yet. Click &quot;Add Subject&quot; to create one.

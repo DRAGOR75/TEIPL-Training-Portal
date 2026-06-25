@@ -4,15 +4,14 @@ import { useState, useTransition } from 'react';
 import { HiOutlineCalendarDays, HiOutlineCheckCircle } from 'react-icons/hi2';
 import { selfNominateCalendar } from '@/app/actions/calendar';
 
-export default function EmployeeCalendarClient({ events, userEmail }: { events: any[], userEmail: string }) {
+export default function EmployeeCalendarClient({ events, empId }: { events: any[], empId: string }) {
     const [isPending, startTransition] = useTransition();
     const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-    const [empId, setEmpId] = useState('');
     const [justification, setJustification] = useState('');
 
     const handleNominate = () => {
         if (!empId) {
-            alert('Please enter your Employee ID');
+            alert('Missing Employee ID session');
             return;
         }
 
@@ -62,7 +61,11 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                                 const endDate = new Date(event.proposedEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
                                 return (
-                                    <tr key={event.id} className="hover:bg-slate-50/80 transition-colors">
+                                    <tr 
+                                        key={event.id} 
+                                        onClick={() => !isFull && setSelectedEventId(event.id)}
+                                        className={`transition-colors ${!isFull ? 'hover:bg-emerald-50 cursor-pointer' : 'hover:bg-slate-50/80 cursor-not-allowed opacity-70'}`}
+                                    >
                                         <td className="p-4 align-middle">
                                             <div className="font-bold text-slate-800 text-base">{event.program.name}</div>
                                         </td>
@@ -127,14 +130,10 @@ export default function EmployeeCalendarClient({ events, userEmail }: { events: 
                         </div>
                         <div className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Employee ID <span className="text-rose-500">*</span></label>
-                                <input
-                                    type="text"
-                                    placeholder="Enter your Emp ID"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                                    value={empId}
-                                    onChange={e => setEmpId(e.target.value)}
-                                />
+                                <label className="block text-sm font-bold text-slate-700 mb-1">Employee ID</label>
+                                <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500">
+                                    {empId}
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-sm font-bold text-slate-700 mb-1">Justification (Optional)</label>

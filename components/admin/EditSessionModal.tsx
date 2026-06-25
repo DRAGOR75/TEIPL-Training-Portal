@@ -391,9 +391,20 @@ function AttendanceTab({ session }: { session: any }) {
     const handleMarkAttendance = async (empId: string, date: Date, status: 'Present' | 'Absent') => {
         const dateStr = date.toISOString().split('T')[0];
         const key = `${empId}_${dateStr}`;
+        const previousStatus = records[key];
         setRecords(prev => ({ ...prev, [key]: status }));
         
-        await saveDailyAttendance(session.id, empId, date, status);
+        try {
+            const res = await saveDailyAttendance(session.id, empId, date, status);
+            if (!res.success) {
+                alert('Failed to save attendance');
+                setRecords(prev => ({ ...prev, [key]: previousStatus }));
+            }
+        } catch (error) {
+            console.error(error);
+            alert('Failed to save attendance');
+            setRecords(prev => ({ ...prev, [key]: previousStatus }));
+        }
     };
 
     return (

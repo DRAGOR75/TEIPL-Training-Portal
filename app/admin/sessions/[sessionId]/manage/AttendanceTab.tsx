@@ -9,23 +9,20 @@ export default function AttendanceTab({ session }: { session: any }) {
     const [newDateStr, setNewDateStr] = useState('');
 
     const classDates = session.classDates || [];
-    
-    // Default selected date to the first class date if available
-    const [selectedDateStr, setSelectedDateStr] = useState<string>('');
+
+    // State for local attendance records (optimistic UI)
+    const [localAttendance, setLocalAttendance] = useState<Record<string, Record<string, 'Present' | 'Absent'>>>({});
+    const [localFinalized, setLocalFinalized] = useState<Record<string, 'Completed' | 'Absent'>>({});
 
     useEffect(() => {
-        if (classDates.length > 0 && !selectedDateStr) {
-            setSelectedDateStr(new Date(classDates[0]).toISOString().split('T')[0]);
-        }
-    }, [classDates, selectedDateStr]);
-
-    // Map: empId -> { dateStr: status }
-    const attendanceMap = new Map();
-    session.attendanceRecords?.forEach((record: any) => {
-        const dateStr = new Date(record.date).toISOString().split('T')[0];
-        if (!attendanceMap.has(record.empId)) attendanceMap.set(record.empId, {});
-        attendanceMap.get(record.empId)[dateStr] = record.status;
-    });
+        const initialMap: Record<string, Record<string, 'Present' | 'Absent'>> = {};
+        session.attendanceRecords?.forEach((record: any) => {
+            const dateStr = new Date(record.date).toISOString().split('T')[0];
+            if (!initialMap[record.empId]) initialMap[record.empId] = {};
+            initialMap[record.empId][dateStr] = record.status;
+        });
+        setLocalAttendance(initialMap);
+    }, [session.attendanceRecords]);
 
     const enrolledNominations = session.nominationBatch?.nominations || [];
 
@@ -35,7 +32,6 @@ export default function AttendanceTab({ session }: { session: any }) {
         // Check if it already exists
         const exists = classDates.some((d: any) => new Date(d).toISOString().split('T')[0] === newDateStr);
         if (exists) {
-            setSelectedDateStr(newDateStr);
             setNewDateStr('');
             setIsSaving(false);
             return;
@@ -44,7 +40,6 @@ export default function AttendanceTab({ session }: { session: any }) {
         const newDates = [...classDates, new Date(newDateStr)];
         const res = await updateSessionClassDates(session.id, newDates);
         if (res.success) {
-            setSelectedDateStr(newDateStr);
             setNewDateStr('');
         } else {
             alert(res.error || "Failed to add training date");
@@ -52,17 +47,45 @@ export default function AttendanceTab({ session }: { session: any }) {
         setIsSaving(false);
     };
 
-    const toggleAttendance = async (empId: string, dateObj: Date) => {
-        setIsSaving(true);
+    const toggleAttendance = (empId: string, dateObj: Date) => {
         const dateStr = new Date(dateObj).toISOString().split('T')[0];
-        const currentStatus = attendanceMap.get(empId)?.[dateStr] || 'Present';
+        const currentStatus = localAttendance[empId]?.[dateStr] || 'Present';
         const newStatus = currentStatus === 'Present' ? 'Absent' : 'Present';
 
-        const res = await saveDailyAttendance(session.id, empId, dateObj, newStatus);
-        if (!res.success) {
+        // 1. Optimistic update
+        setLocalAttendance(prev => ({
+            ...prev,
+            [empId]: {
+                ...(prev[empId] || {}),
+                [dateStr]: newStatus
+            }
+        }));
+
+        // 2. Call server action in the background
+        saveDailyAttendance(session.id, empId, dateObj, newStatus).then(res => {
+            if (!res.success) {
+                alert('Failed to save attendance');
+                // Revert status
+                setLocalAttendance(prev => ({
+                    ...prev,
+                    [empId]: {
+                        ...(prev[empId] || {}),
+                        [dateStr]: currentStatus
+                    }
+                }));
+            }
+        }).catch(err => {
+            console.error(err);
             alert('Failed to save attendance');
-        }
-        setIsSaving(false);
+            // Revert status
+            setLocalAttendance(prev => ({
+                ...prev,
+                [empId]: {
+                    ...(prev[empId] || {}),
+                    [dateStr]: currentStatus
+                }
+            }));
+        });
     };
 
     const getAttendancePercentage = (empId: string) => {
@@ -70,7 +93,7 @@ export default function AttendanceTab({ session }: { session: any }) {
         let presentCount = 0;
         classDates.forEach((dateObj: any) => {
             const dateStr = new Date(dateObj).toISOString().split('T')[0];
-            const status = attendanceMap.get(empId)?.[dateStr] || 'Present';
+            const status = localAttendance[empId]?.[dateStr] || 'Present';
             if (status === 'Present') presentCount++;
         });
         return Math.round((presentCount / classDates.length) * 100);
@@ -78,17 +101,23 @@ export default function AttendanceTab({ session }: { session: any }) {
 
     const handleFinalize = async (empId: string, finalStatus: 'Completed' | 'Absent') => {
         if (!confirm(`Are you sure you want to mark this participant as ${finalStatus}? This will update their TNI record.`)) return;
-        setIsSaving(true);
+        
+        // Optimistic UI update
+        setLocalFinalized(prev => ({ ...prev, [empId]: finalStatus }));
+        
         const perc = getAttendancePercentage(empId);
         const res = await finalizeParticipantTraining(session.id, session.nominationBatchId, empId, finalStatus, perc);
         if (!res.success) {
             alert(res.error || 'Failed to finalize participant');
+            // Revert on failure
+            setLocalFinalized(prev => {
+                const next = { ...prev };
+                delete next[empId];
+                return next;
+            });
         }
-        setIsSaving(false);
     };
 
-    const selectedDateObj = classDates.find((d: any) => new Date(d).toISOString().split('T')[0] === selectedDateStr);
-    
     // Constrain the date picker to the session boundaries
     const minDate = session.startDate ? new Date(session.startDate).toISOString().split('T')[0] : undefined;
     const maxDate = session.endDate ? new Date(session.endDate).toISOString().split('T')[0] : undefined;
@@ -137,28 +166,7 @@ export default function AttendanceTab({ session }: { session: any }) {
                     </div>
                 </div>
 
-                {/* View Date Selector (Only show if we have dates) */}
-                {classDates.length > 0 && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-50 mt-2">
-                        <HiOutlineCalendar className="text-slate-400 w-5 h-5" />
-                        <span className="text-sm text-slate-600 font-medium">Viewing Attendance for:</span>
-                        <select 
-                            value={selectedDateStr} 
-                            onChange={(e) => setSelectedDateStr(e.target.value)}
-                            className="text-sm border border-slate-200 rounded-xl px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none bg-blue-50/50 text-blue-900 font-bold"
-                        >
-                            {classDates.map((dateObj: any, idx: number) => {
-                                const d = new Date(dateObj);
-                                const dStr = d.toISOString().split('T')[0];
-                                return (
-                                    <option key={idx} value={dStr}>
-                                        {d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                    </option>
-                                );
-                            })}
-                        </select>
-                    </div>
-                )}
+                {/* Removed View Date Selector */}
             </div>
 
             {classDates.length === 0 ? (
@@ -198,21 +206,17 @@ export default function AttendanceTab({ session }: { session: any }) {
                             <tr>
                                 <th className="p-4 sticky left-0 bg-slate-50 z-20 w-64 border-r border-slate-200">Employee</th>
                                 
-                                {/* Selected Date Column */}
-                                {selectedDateObj ? (
-                                    <th className="p-4 text-center min-w-[120px] bg-blue-50 z-10 border-b border-blue-100">
+                                {/* Date Columns */}
+                                {classDates.map((dateObj: any, idx: number) => (
+                                    <th key={idx} className="p-4 text-center min-w-[120px] bg-blue-50 z-10 border-b border-blue-100 border-r border-blue-100/50">
                                         <div className="font-bold text-blue-800">
-                                            {new Date(selectedDateObj).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                            {new Date(dateObj).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                                         </div>
                                         <div className="text-[10px] text-blue-500 uppercase tracking-widest mt-1">
-                                            {new Date(selectedDateObj).toLocaleDateString('en-GB', { weekday: 'short' })}
+                                            {new Date(dateObj).toLocaleDateString('en-GB', { weekday: 'short' })}
                                         </div>
                                     </th>
-                                ) : (
-                                    <th className="p-4 text-center min-w-[120px] bg-slate-50 border-b border-slate-100">
-                                        <span className="text-slate-400 italic">Select a date</span>
-                                    </th>
-                                )}
+                                ))}
 
                                 <th className="p-4 text-center min-w-[100px] border-l border-slate-200">Attendance %</th>
                                 <th className="p-4 text-center min-w-[200px]">Finalize Training</th>
@@ -222,14 +226,11 @@ export default function AttendanceTab({ session }: { session: any }) {
                             {enrolledNominations.map((nom: any) => {
                                 const empId = nom.employee.id;
                                 const perc = getAttendancePercentage(empId);
-                                const isCompleted = nom.status === 'Completed';
-                                const isCancelled = nom.status === 'Cancelled';
-                                const isFinalized = isCompleted || isCancelled;
+                                const isCompleted = nom.status === 'Completed' || localFinalized[empId] === 'Completed';
+                                const isAbsent = nom.status === 'Absent' || localFinalized[empId] === 'Absent';
+                                const isFinalized = isCompleted || isAbsent;
 
-                                let statusForSelectedDate = 'Present';
-                                if (selectedDateStr) {
-                                    statusForSelectedDate = attendanceMap.get(empId)?.[selectedDateStr] || 'Present';
-                                }
+                                // Removed statusForSelectedDate logic
 
                                 return (
                                     <tr key={nom.id} className="hover:bg-slate-50 group">
@@ -238,35 +239,36 @@ export default function AttendanceTab({ session }: { session: any }) {
                                             <div className="text-[10px] text-slate-400 font-mono tracking-tighter">{empId}</div>
                                         </td>
                                         
-                                        {/* Selected Date Column */}
-                                        <td className="p-4 text-center">
-                                            {selectedDateObj ? (
-                                                <>
+                                        {/* Date Columns */}
+                                        {classDates.map((dateObj: any, idx: number) => {
+                                            const dateStr = new Date(dateObj).toISOString().split('T')[0];
+                                            const statusForDate = localAttendance[empId]?.[dateStr] || 'Present';
+                                            
+                                            return (
+                                                <td key={idx} className="p-4 text-center border-r border-slate-100">
                                                     <button 
-                                                        onClick={() => toggleAttendance(empId, selectedDateObj)}
+                                                        onClick={() => toggleAttendance(empId, dateObj)}
                                                         disabled={isSaving || isFinalized}
                                                         className={`transition-all rounded-full p-2 border-2 shadow-sm ${
                                                             isFinalized ? 'opacity-50 cursor-not-allowed grayscale' : ''
                                                         } ${
-                                                            statusForSelectedDate === 'Present' 
+                                                            statusForDate === 'Present' 
                                                             ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' 
                                                             : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
                                                         }`}
-                                                        title={isFinalized ? 'Training finalized' : `Currently ${statusForSelectedDate}. Click to change.`}
+                                                        title={isFinalized ? 'Training finalized' : `Currently ${statusForDate}. Click to change.`}
                                                     >
-                                                        {statusForSelectedDate === 'Present' 
+                                                        {statusForDate === 'Present' 
                                                             ? <HiOutlineCheckCircle className="w-5 h-5" /> 
                                                             : <HiOutlineXCircle className="w-5 h-5" />
                                                         }
                                                     </button>
-                                                    <div className={`text-[9px] mt-2 font-black tracking-widest uppercase ${statusForSelectedDate === 'Present' ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {statusForSelectedDate}
+                                                    <div className={`text-[9px] mt-2 font-black tracking-widest uppercase ${statusForDate === 'Present' ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {statusForDate}
                                                     </div>
-                                                </>
-                                            ) : (
-                                                <span className="text-slate-300">-</span>
-                                            )}
-                                        </td>
+                                                </td>
+                                            );
+                                        })}
 
                                         <td className="p-4 text-center border-l border-slate-200">
                                             <div className="font-bold text-lg text-slate-700">{perc}%</div>

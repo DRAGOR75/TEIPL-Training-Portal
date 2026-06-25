@@ -196,7 +196,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 tniStatus = 'Completed';
                 managerApprovalStatus = 'Approved';
             } else if (rawStatus === 'CANCELLED') {
-                tniStatus = 'Cancelled';
+                tniStatus = 'Absent';
                 managerApprovalStatus = 'Rejected';
             }
 
