@@ -33,7 +33,7 @@ export async function saveDailyAttendance(sessionId: string, empId: string, date
         });
 
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
-        revalidateTag('session-details');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error("Failed to save attendance", error);
@@ -203,7 +203,7 @@ export async function finalizeParticipantTraining(
         }
 
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
-        revalidateTag('session-details');
+        revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
         console.error("Failed to finalize participant", error);
