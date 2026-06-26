@@ -377,7 +377,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                 <div className="text-xs text-amber-700 bg-amber-50 border border-amber-200/60 rounded-xl px-4 py-2.5 font-bold">
                     Note:*This information is  only used  for  training purposes .
                     <br />
-                    *If you find any discrepancies in your profile please mail <span className="font-bold text-slate-900">cyn@thriveni.com</span>,from your oficial mail id to update your details
+                    *If you find any discrepancies in your profile please mail <span className="font-bold text-slate-900">cyn@thriveni.com,bvg@thriveni.com</span>,from your official mail id to update your details
                 </div>
             )}
 

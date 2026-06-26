@@ -32,6 +32,7 @@ interface EmployeeImportRow {
     'Grade'?: string;
     'Designation'?: string;
     'Department'?: string;
+    'Section'?: string;
     'Gender'?: string;
     'Sex'?: string;
     'Project Name'?: string; // Mapped to projectLocation
@@ -68,6 +69,8 @@ interface EmployeeImportRow {
     'Organization'?: string;
     'Highest Qualification'?: string;
     'Department Group'?: string;
+    'Employment Status'?: string;
+    'Status'?: string;
     'Aadhar Number'?: string;
     'Employee Group M/NM/W'?: string;
     'On-Roll / Contract'?: string;
@@ -148,7 +151,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 grade: gradeEnum,
                 gender: genderEnum,
                 designation: row['Designation'] ? row['Designation'].toString().substring(0, 100) : null,
-                sectionName: row['Department'] ? row['Department'].toString().substring(0, 100) : null,
+                sectionName: (row['Section'] || row['Department'])?.toString().substring(0, 100) || null,
                 projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
                 location: row['Site'] ? row['Site'].toString().substring(0, 100) : row['Location'] ? row['Location'].toString().substring(0, 100) : null,
                 dob: dob,
@@ -166,6 +169,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 aadharNumber: row['Aadhar Number']?.toString().substring(0, 50) || null,
                 employeeGrouupMNmw: row['Employee Group M/NM/W']?.toString().substring(0, 50) || null,
                 onRollContract: row['On-Roll / Contract']?.toString().substring(0, 50) || null,
+                status: (row['Employment Status'] || row['Status'])?.toString().substring(0, 50) || 'Active',
             };
 
             // 1. Upsert Employee
