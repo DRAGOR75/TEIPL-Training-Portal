@@ -96,7 +96,7 @@ export default function TrainerSessionsDashboard({
             const localDate = new Date(newDate.getTime() - (offset * 60 * 1000));
             const dateStr = localDate.toISOString().split('T')[0];
 
-            const result = await getTrainingSessionsForDate(dateStr);
+            const result = await getTrainingSessionsForDate(dateStr, currentTrainerName);
             setSessions(result as any);
         } catch (error) {
             console.error("Failed to fetch sessions", error);
