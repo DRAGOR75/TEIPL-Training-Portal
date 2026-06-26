@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { db } from '@/lib/db';
+import { db } from '@/lib/prisma';
 
 export async function loginEmployee(formData: FormData) {
     const empId = formData.get('empId') as string;

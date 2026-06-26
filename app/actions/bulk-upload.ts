@@ -71,6 +71,9 @@ interface EmployeeImportRow {
     'Department Group'?: string;
     'Employment Status'?: string;
     'Status'?: string;
+    'Aadhar Number'?: string;
+    'Employee Group M/NM/W'?: string;
+    'On-Roll / Contract'?: string;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
