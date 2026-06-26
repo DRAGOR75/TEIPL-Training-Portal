@@ -45,6 +45,7 @@ export default async function TrainerDashboardPage() {
             initialPendingReviews={todayData.pendingCount}
             currentPage={1}
             totalPages={1}
+            trainerName={trainerName}
         />
     );
 }
