@@ -46,6 +46,7 @@ type SessionsDashboardProps = {
     initialTrainers: Trainer[];
     programs: any[];
     locations: any[];
+    currentTrainerName?: string;
 };
 
 export default function SessionsDashboard({
@@ -53,7 +54,8 @@ export default function SessionsDashboard({
     initialMetadata,
     initialTrainers,
     programs,
-    locations
+    locations,
+    currentTrainerName
 }: SessionsDashboardProps) {
     const [date, setDate] = useState<any>(new Date());
     const [sessions, setSessions] = useState<SessionWithDetails[]>(initialSessions);
@@ -96,7 +98,7 @@ export default function SessionsDashboard({
             const localDate = new Date(newDate.getTime() - (offset * 60 * 1000));
             const dateStr = localDate.toISOString().split('T')[0];
 
-            const result = await getTrainingSessionsForDate(dateStr);
+            const result = await getTrainingSessionsForDate(dateStr, currentTrainerName);
             setSessions(result as any);
         } catch (error) {
             console.error("Failed to fetch sessions", error);

@@ -42,6 +42,7 @@ export default async function SessionsPage() {
             initialTrainers={trainersData}
             programs={programs}
             locations={locations}
+            currentTrainerName={trainerName}
         />
     );
 }
