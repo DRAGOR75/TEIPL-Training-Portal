@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import { HiOutlineArrowRight, HiOutlineUser } from 'react-icons/hi2';
 import { BiTargetLock } from 'react-icons/bi';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
@@ -5,6 +8,24 @@ import { loginEmployee } from '@/app/actions/employee-auth';
 import Link from 'next/link';
 
 export default function EmployeePortalLoginPage() {
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    async function handleSubmit(formData: FormData) {
+        setIsLoading(true);
+        setError(null);
+        
+        const res = await loginEmployee(formData);
+        
+        if (res?.error) {
+            setError(res.error);
+            setIsLoading(false);
+        } else {
+            // Success, redirect to dashboard
+            window.location.href = '/user-hub/dashboard';
+        }
+    }
+
     return (
         <div className="min-h-screen bg-slate-100 flex items-center justify-center p-4">
             <div className="max-w-md w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
@@ -23,7 +44,7 @@ export default function EmployeePortalLoginPage() {
                 </div>
 
                 <div className="p-8 pt-10">
-                    <form action={loginEmployee} className="space-y-6">
+                    <form action={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
                             <label htmlFor="empId" className="block text-sm font-bold text-slate-700 uppercase tracking-wide">
                                 Employee ID
@@ -42,7 +63,19 @@ export default function EmployeePortalLoginPage() {
                             </div>
                         </div>
 
-                        <FormSubmitButton className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-900/20">
+                        {error && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-xl">
+                                <p className="text-red-600 text-sm font-medium text-center">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
+
+                        <FormSubmitButton 
+                            isLoading={isLoading}
+                            loadingText="VERIFYING..."
+                            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-slate-900/20"
+                        >
                             <span>Access Portal</span>
                             <HiOutlineArrowRight size={20} />
                         </FormSubmitButton>

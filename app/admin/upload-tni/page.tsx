@@ -247,12 +247,20 @@ export default function UploadTNIPage() {
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-slate-50 text-slate-400 font-black uppercase tracking-wider text-[10px] border-b border-slate-200">
                                     <tr>
-                                        <th className="px-6 py-4">Emp.Id</th>
-                                        <th className="px-6 py-4">Name</th>
-                                        <th className="px-6 py-4">Section</th>
-                                        <th className="px-6 py-4">Grade</th>
-                                        <th className="px-6 py-4">DOB</th>
-                                        <th className="px-6 py-4">DOJ</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Emp.Id</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Name</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Designation</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Department</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Section</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Location</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Grade</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Emp. Status</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">TNI Status</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Gender</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">DOB</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">DOJ</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Email</th>
+                                        <th className="px-6 py-4 whitespace-nowrap">Mobile</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
@@ -265,16 +273,40 @@ export default function UploadTNIPage() {
                                                 <div className="text-slate-900 font-bold">{record['Emp.Name'] || record.name || record.Name || '-'}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-slate-600 font-medium">{record.Department || record.sectionName || '-'}</div>
+                                                <div className="text-slate-600 font-medium">{record.Designation || record.designation || '-'}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-slate-600 font-medium">{record.Department || record.department || '-'}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-slate-600 font-medium">{record.Section || record.sectionName || '-'}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="text-slate-600 font-medium">{record.Location || record.Site || record.location || '-'}</div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
                                                 {record.Grade || record.grade || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
-                                                {record.DOB || record.dob || '-'}
+                                                {record['Employment Status'] || record.Status || record.status || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
-                                                {record.DOJ || record.doj || '-'}
+                                                {record['Status-Completed/Cancelled/Open'] || record.tniStatus || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record.Gender || record.Sex || record.gender || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record.DOB || record.dob || record['Date of Birth'] || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record.DOJ || record.doj || record['Date of Joining'] || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record['Email ID'] || record['Email id'] || record.email || '-'}
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-600 font-medium">
+                                                {record['Mobile No'] || record.Mobile || record.mobile || '-'}
                                             </td>
                                         </tr>
                                     ))}

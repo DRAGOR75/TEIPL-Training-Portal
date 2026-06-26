@@ -31,7 +31,14 @@ export default function ExportSessionDataButton({ session, participants }: Expor
                 'Employee Name': p.employeeName,
                 'Employee Email': p.employeeEmail,
                 'Employee ID': p.empId || '',
-                'Feedback Rating': feedbackAverage,
+                'Content covered are useful for my work': p.contentRating || '',
+                'Training material': p.materialRating || '',
+                'I will recommend this training to others': p.recommendationRating === true ? 'Yes' : p.recommendationRating === false ? 'No' : '',
+                'How you like the Training (1 to 5)': p.trainingRating || '',
+                'Rate your Knowledge level before and after training [Before Training]': p.preTrainingRating || '',
+                'Rate your Knowledge level before and after training After Training]': p.postTrainingRating || '',
+                'Trainer Knowledge & Delivery': p.trainerRating || '',
+                'Feedback Average Rating': feedbackAverage,
                 'Feedback Status': p.status,
                 'Topics Learned': p.topicsLearned || '',
                 'Action Plan': p.actionPlan || '',
@@ -62,7 +69,14 @@ export default function ExportSessionDataButton({ session, participants }: Expor
             { wch: 25 }, // Employee Name
             { wch: 30 }, // Employee Email
             { wch: 15 }, // Employee ID
-            { wch: 15 }, // Feedback Rating
+            { wch: 35 }, // Content covered are useful for my work
+            { wch: 25 }, // Training material
+            { wch: 45 }, // I will recommend this training to others
+            { wch: 40 }, // How you like the Training (1 to 5)
+            { wch: 65 }, // Rate your Knowledge level before and after training [Before Training]
+            { wch: 65 }, // Rate your Knowledge level before and after training After Training]
+            { wch: 35 }, // Trainer Knowledge & Delivery
+            { wch: 25 }, // Feedback Average Rating
             { wch: 20 }, // Feedback Status
             { wch: 40 }, // Topics Learned
             { wch: 40 }, // Action Plan
