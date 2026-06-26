@@ -60,6 +60,7 @@ type DashboardClientProps = {
     totalPages: number;
     programs: any[];
     locations: any[];
+    trainerName?: string;
 };
 
 export default function TrainerDashboardClient({
@@ -67,7 +68,8 @@ export default function TrainerDashboardClient({
     initialSessions,
     initialPendingReviews,
     programs,
-    locations
+    locations,
+    trainerName
 }: DashboardClientProps) {
     const [date, setDate] = useState<any>(new Date());
     const [optimisticToggles, setOptimisticToggles] = useState<Record<string, boolean>>({});
@@ -98,7 +100,7 @@ export default function TrainerDashboardClient({
             const localDate = new Date(newDate.getTime() - (offset * 60 * 1000));
             const dateStr = localDate.toISOString().split('T')[0]; // "2024-01-08"
 
-            const result = await getSessionsForDate(dateStr);
+            const result = await getSessionsForDate(dateStr, trainerName);
             setSessions(result.sessions as Session[]);
         } catch (error) {
             console.error("Failed to fetch sessions", error);
