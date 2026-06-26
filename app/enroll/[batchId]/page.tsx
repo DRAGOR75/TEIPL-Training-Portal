@@ -118,8 +118,8 @@ export default function JoinPage() {
             setStatus('idle');
             setIsConfirming(true);
         } else if (res.error === 'EMPLOYEE_NOT_FOUND') {
-            setStatus('idle');
-            setIsRegistering(true); // Switch to registration mode
+            setStatus('error');
+            setResult({ error: 'You are not registered yet. Please contact the training department.' });
         } else {
             setStatus('error');
             setResult({ error: res.error });
@@ -244,7 +244,7 @@ export default function JoinPage() {
                             {status === 'loading' ? (
                                 <><HiOutlineArrowPath className="w-5 h-5 animate-spin" /> Enrolling...</>
                             ) : (
-                                'Yes, Enroll Me'
+                                'Yes, Enroll'
                             )}
                         </button>
                         <button
@@ -256,7 +256,7 @@ export default function JoinPage() {
                             disabled={status === 'loading'}
                             className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl transition-all"
                         >
-                            Cancel / Not Me
+                            Cancel
                         </button>
                     </div>
                 </div>
