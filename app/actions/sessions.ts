@@ -671,18 +671,39 @@ export async function joinBatch(batchId: string, empId: string) {
             return { error: 'This training session has already been completed. You cannot join now.' };
         }
 
-        // 4. Create Nomination
-        const nomination = await db.nomination.create({
-            data: {
+        // 4. Link existing TNI or create a new Nomination
+        const existingProgramTni = await db.nomination.findFirst({
+            where: {
                 empId,
                 programId: batch.programId,
-                batchId,
-                status: 'Batched',
-                source: 'QR',
-                justification: 'Self-Enrollment via QR Scan',
-                managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                batchId: null // Look for an unassigned TNI
             }
         });
+
+        let nomination;
+        if (existingProgramTni) {
+            nomination = await db.nomination.update({
+                where: { id: existingProgramTni.id },
+                data: {
+                    batchId,
+                    status: 'Batched',
+                    source: 'QR',
+                    managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                }
+            });
+        } else {
+            nomination = await db.nomination.create({
+                data: {
+                    empId,
+                    programId: batch.programId,
+                    batchId,
+                    status: 'Batched',
+                    source: 'QR',
+                    justification: 'Self-Enrollment via QR Scan',
+                    managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                }
+            });
+        }
 
         // Automatically create default 'Present' records for any existing class dates
         if (batch.trainingSession?.classDates && batch.trainingSession.classDates.length > 0) {
@@ -831,18 +852,39 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             }
         });
 
-        // 3. Create Nomination
-        const nomination = await db.nomination.create({
-            data: {
+        // 3. Link existing TNI or create a new Nomination
+        const existingProgramTni = await db.nomination.findFirst({
+            where: {
                 empId: employee.id,
                 programId: batch.programId,
-                batchId,
-                status: 'Batched',
-                source: 'QR',
-                justification: 'JIT Registration via QR Scan',
-                managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                batchId: null // Look for an unassigned TNI
             }
         });
+
+        let nomination;
+        if (existingProgramTni) {
+            nomination = await db.nomination.update({
+                where: { id: existingProgramTni.id },
+                data: {
+                    batchId,
+                    status: 'Batched',
+                    source: 'QR',
+                    managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                }
+            });
+        } else {
+            nomination = await db.nomination.create({
+                data: {
+                    empId: employee.id,
+                    programId: batch.programId,
+                    batchId,
+                    status: 'Batched',
+                    source: 'QR',
+                    justification: 'JIT Registration via QR Scan',
+                    managerApprovalStatus: batch.trainingSession?.requireManagerApproval ? 'Pending' : 'Approved'
+                }
+            });
+        }
 
         // Automatically create default 'Present' records for any existing class dates
         if (batch.trainingSession?.classDates && batch.trainingSession.classDates.length > 0) {

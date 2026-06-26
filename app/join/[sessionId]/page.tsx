@@ -129,7 +129,7 @@ export default async function JoinSessionPage({
                 <JoinFormClient
                     sessionId={sessionId}
                     participants={participants}
-                    allowWalkIns={session.allowWalkIns}
+                    allowWalkIns={false} // session.allowWalkIns
                     defaultEmpId={defaultEmpId}
                     isAdmin={isAdmin}
                 />
