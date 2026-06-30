@@ -5,7 +5,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     PieChart, Pie, Cell, Sector, Treemap, RadialBarChart, RadialBar
 } from 'recharts';
-import { HiOutlineArrowDownTray, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
+import { HiOutlineDocumentArrowDown, HiOutlineChartBar, HiOutlineFunnel, HiOutlineUsers, HiOutlineAcademicCap, HiOutlineMap, HiOutlineMagnifyingGlass, HiOutlineTrash, HiOutlineXMark, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
 import * as XLSX from 'xlsx';
 import { getFilteredParticipantDepth, getTniReportData, getAllNominationsForExport, getUntrainedPendingTrainees } from '@/app/actions/reports';
 import UntrainedPendingReport from '@/components/admin/UntrainedPendingReport';
@@ -233,9 +233,9 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <button
                         onClick={handleExport}
-                        className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-100 active:scale-95"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                     >
-                        <HiOutlineArrowDownTray size={18} /> Export to Excel
+                        <HiOutlineDocumentArrowDown size={18} /> Export to Excel
                     </button>
                 </div>
             </div>
@@ -634,9 +634,10 @@ export default function ReportsDashboard({ data }: ReportsDashboardProps) {
                                 <button
                                     onClick={handleExportFiltered}
                                     title="Export to Excel"
-                                    className="p-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition-all shadow-md shadow-emerald-200 active:scale-95"
+                                    className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                                 >
-                                    <HiOutlineArrowDownTray size={20} />
+                                    <HiOutlineDocumentArrowDown size={18} />
+                                    <span className="hidden sm:inline">Export to Excel</span>
                                 </button>
                             )}
                             {(selectedProgram || selectedSite) && (

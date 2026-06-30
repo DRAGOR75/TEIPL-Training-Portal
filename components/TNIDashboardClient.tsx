@@ -45,7 +45,8 @@ export default function TNIDashboardClient({
     const [formValues, setFormValues] = useState({
         selectedProgramId: '',
         justification: '',
-        selectedSectionId: ''
+        selectedSectionId: '',
+        selectedCategory: ''
     });
 
     // Split nominations
@@ -112,18 +113,29 @@ export default function TNIDashboardClient({
         setFormValues({
             selectedProgramId: '',
             justification: '',
-            selectedSectionId: ''
+            selectedSectionId: '',
+            selectedCategory: ''
         });
         setIsFormOpen(false);
     };
 
-    // Filter programs based on selected section
+    // Filter programs based on selected section and category
     const filteredPrograms = programs.filter(p => {
-        if (!formValues.selectedSectionId) return true;
-        // The program object includes 'sections' array if fetched with include: { sections: true }
-        const progSections = (p as any).sections || [];
-        return progSections.some((s: any) => s.id === formValues.selectedSectionId);
+        let matchesSection = true;
+        if (formValues.selectedSectionId) {
+            const progSections = (p as any).sections || [];
+            matchesSection = progSections.some((s: any) => s.id === formValues.selectedSectionId);
+        }
+        
+        let matchesCategory = true;
+        if (formValues.selectedCategory) {
+            matchesCategory = p.category === formValues.selectedCategory;
+        }
+
+        return matchesSection && matchesCategory;
     });
+
+    const uniqueCategories = Array.from(new Set(programs.map(p => p.category))).filter(Boolean).sort();
 
     return (
         <div className="space-y-10">
@@ -405,7 +417,7 @@ export default function TNIDashboardClient({
                                     <input type="hidden" name="empId" value={empId} />
                                     <input type="hidden" name="redirectUrl" value={isTrainerView ? `/trainer/employee-tni?empId=${empId}` : `/tni/${empId}`} />
 
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                         {/* Section Filter */}
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Filter by Section</label>
@@ -419,6 +431,23 @@ export default function TNIDashboardClient({
                                                     setFormValues(prev => ({ ...prev, selectedSectionId: val, selectedProgramId: '' }));
                                                 }}
                                                 placeholder="Select a section to filter programs..."
+                                                className="w-full text-xs"
+                                            />
+                                        </div>
+
+                                        {/* Category Filter */}
+                                        <div className="space-y-1">
+                                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Filter by Category</label>
+                                            <SearchableSelect
+                                                options={[
+                                                    { label: 'All Categories', value: '' },
+                                                    ...uniqueCategories.map(c => ({ label: c, value: c }))
+                                                ]}
+                                                value={formValues.selectedCategory}
+                                                onChange={(val) => {
+                                                    setFormValues(prev => ({ ...prev, selectedCategory: val, selectedProgramId: '' }));
+                                                }}
+                                                placeholder="Select a category..."
                                                 className="w-full text-xs"
                                             />
                                         </div>

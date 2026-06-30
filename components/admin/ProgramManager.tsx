@@ -7,7 +7,7 @@ import {
     HiOutlineTrash, HiOutlineBookOpen, HiOutlinePlus, HiOutlineChevronDown,
     HiOutlineChevronUp, HiOutlineArrowPath, HiOutlinePencilSquare,
     HiOutlineMagnifyingGlass, HiOutlineArrowUpTray, HiOutlineXMark,
-    HiOutlineArrowDownTray, HiOutlineEye, HiOutlineEyeSlash,
+    HiOutlineDocumentArrowDown, HiOutlineEye, HiOutlineEyeSlash,
     HiOutlineArrowsPointingOut, HiOutlineArrowsPointingIn
 } from 'react-icons/hi2';
 import { TrainingCategory, Grade } from '@prisma/client';
@@ -253,7 +253,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
             <div className={`flex flex-col ${isFullscreen ? 'flex-1 w-full min-h-0' : 'w-full'}`}>
 
                 {/* Consolidated Header & Controls Toolbar */}
-                <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 ${isFullscreen ? '' : 'p-4 sm:p-6 pb-0'}`}>
+                <div className={`flex flex-col gap-4 mb-6 ${isFullscreen ? '' : 'p-4 sm:p-6 pb-0'}`}>
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
                             <HiOutlineBookOpen size={24} />
@@ -305,11 +305,10 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         </button>
                         <button
                             onClick={handleExport}
-                            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-emerald-200 text-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                         >
-                            <HiOutlineArrowDownTray size={18} className="stroke-[2.5]" />
-                            <span className="hidden sm:inline">Export Excel</span>
-                            <span className="sm:hidden">Export</span>
+                            <HiOutlineDocumentArrowDown size={18} />
+                            <span className="hidden sm:inline">Export to Excel</span>
                         </button>
 
                         <Link

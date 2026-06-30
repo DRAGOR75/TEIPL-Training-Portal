@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useMemo, useTransition } from 'react';
-import { HiOutlineCalendar, HiOutlinePlus, HiOutlineCheckCircle, HiOutlineTableCells, HiOutlineCalendarDays, HiOutlineTrash, HiOutlinePencilSquare } from 'react-icons/hi2';
+import { HiOutlineCalendar, HiOutlinePlus, HiOutlineCheckCircle, HiOutlineTableCells, HiOutlineCalendarDays, HiOutlineTrash, HiOutlinePencilSquare, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
 import Link from 'next/link';
+import { exportToExcel } from '@/lib/export-utils';
 import GanttCalendar from '@/components/planning/GanttCalendar';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import EditSessionModal from '@/components/admin/EditSessionModal';
@@ -73,11 +74,11 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
             </div>
 
             <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-slate-200">
-                <div className="flex justify-between items-end mb-6 px-2">
+                <div className="flex flex-col gap-4 mb-6 px-2">
                     <h3 className="text-xl font-black text-slate-800">
                         Scheduled Programs {selectedTrainer ? `- ${selectedTrainer}` : `- ${viewDate.toLocaleDateString('default', { month: 'long', year: 'numeric' })}`}
                     </h3>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
                         <Link
                             href="/admin/upload-calendar"
                             className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 border border-slate-200"
@@ -98,6 +99,24 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                                 </button>
                             }
                         />
+                        <button
+                            onClick={() => {
+                                const exportData = unifiedEvents.map((event: any) => ({
+                                    'Program Name': event.programName,
+                                    'Nominated': event.enrolledCount,
+                                    'Start Date': new Date(event.startDate).toLocaleDateString(),
+                                    'End Date': new Date(event.endDate).toLocaleDateString(),
+                                    'Trainer': event.trainer || 'TBD',
+                                    'Location': event.location || 'TBD',
+                                    'Status': 'Scheduled'
+                                }));
+                                exportToExcel(exportData, 'Scheduled_Programs');
+                            }}
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                        >
+                            <HiOutlineDocumentArrowDown size={18} />
+                            <span className="hidden sm:inline">Export to Excel</span>
+                        </button>
                     </div>
                 </div>
 

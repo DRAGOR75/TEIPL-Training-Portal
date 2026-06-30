@@ -29,6 +29,7 @@ export default function MasterDataRibbon() {
         { id: 'EMPLOYEES', label: 'Employees', href: '/admin/tni-dashboard/employees', icon: HiOutlineUsers },
         { id: 'BULK_UPLOADS', label: 'Bulk Upload', href: '/admin/tni-dashboard/bulk-upload', icon: HiOutlineArrowUpTray },
         { id: 'CALENDAR', label: 'Calendar', href: '/admin/tni-dashboard/calendar', icon: HiOutlineCalendar },
+        { id: 'NOMINATIONS', label: 'All TNI', href: '/admin/tni-dashboard/nominations', icon: HiOutlineBookOpen },
         { id: 'SETTINGS', label: 'Settings', href: '/admin/tni-dashboard/settings', icon: HiOutlineCog },
     ] as const;
 
