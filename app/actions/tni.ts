@@ -25,7 +25,10 @@ export const getEmployeeProfile = async (empId: string) => {
                 where: { id },
                 include: {
                     nominations: {
-                        where: { createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) } },
+                        where: { 
+                            createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) },
+                            status: { not: 'Inactive' }
+                        },
                         include: { program: true, batch: true }
                     },
                     trainingHistory: {
@@ -314,3 +317,45 @@ export async function updateNominationStatus(nominationId: string, status: 'Appr
         return { success: false, error: 'Failed to update status' };
     }
 }
+
+export async function getAllNominations() {
+    try {
+        return await db.nomination.findMany({
+            include: {
+                employee: true,
+                program: true,
+                batch: true
+            },
+            orderBy: { createdAt: 'desc' }
+        });
+    } catch (error) {
+        console.error("Failed to fetch all nominations:", error);
+        return [];
+    }
+}
+
+export async function markNominationInactive(nominationId: string) {
+    const session = await auth();
+    if (session?.user?.role !== 'ADMIN') {
+        return { success: false, error: 'Unauthorized' };
+    }
+    
+    try {
+        await db.nomination.update({
+            where: { id: nominationId },
+            data: {
+                status: 'Inactive',
+                managerApprovalStatus: 'Inactive'
+            }
+        });
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('manager-approval', 'max');
+        revalidateTag('tni-reports', 'max');
+        revalidatePath('/admin/tni-dashboard/nominations');
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to mark inactive:", error);
+        return { success: false, error: 'Failed to mark as inactive' };
+    }
+}
+

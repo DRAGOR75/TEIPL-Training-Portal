@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createLocation, deleteLocation } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlineMapPin, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath, HiOutlineArrowDownTray } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineMapPin, HiOutlinePlus, HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineArrowPath, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
 import { exportToExcel } from '@/lib/export-utils';
 
 interface Location {
@@ -35,29 +35,30 @@ export default function LocationManager({ locations }: { locations: Location[] }
 
     return (
         <div className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mb-6">
-            <div className="p-5 flex justify-between items-center bg-slate-50 border-b border-slate-100">
+            <div className="p-5 flex flex-col gap-4 bg-slate-50 border-b border-slate-100">
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 bg-emerald-100 rounded-xl text-emerald-700">
-                        <HiOutlineMapPin size={24} />
+                    <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center shrink-0">
+                        <HiOutlineMapPin size={22} />
                     </div>
                     <div>
-                        <h3 className="text-sm font-black uppercase tracking-[0.1em] text-slate-800">Training Venues</h3>
-                        <p className="text-xs text-slate-500 font-medium">{locations.length} Active Sites</p>
+                        <h2 className="text-lg font-black text-slate-900 tracking-tight">TRAINING VENUES</h2>
+                        <p className="text-slate-500 font-medium text-xs mt-0.5">{locations.length} venues managed</p>
                     </div>
                 </div>
-                <button
-                    onClick={() => {
-                        const exportData = locations.map(l => ({
-                            ID: l.id,
-                            Name: l.name
-                        }));
-                        exportToExcel(exportData, 'Training_Venues');
-                    }}
-                    className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-emerald-200 active:scale-95"
-                >
-                    <HiOutlineArrowDownTray size={18} />
-                    <span className="hidden sm:inline">Export to Excel</span>
-                </button>
+                <div className="flex flex-wrap items-center gap-3">
+                    <button
+                        onClick={() => {
+                            const exportData = locations.map(l => ({
+                                'Venue Name': l.name
+                            }));
+                            exportToExcel(exportData, 'Training_Venues');
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
+                    >
+                        <HiOutlineDocumentArrowDown size={18} />
+                        <span className="hidden sm:inline">Export to Excel</span>
+                    </button>
+                </div>
             </div>
 
             <div className="p-6">

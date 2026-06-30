@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { createSection, deleteSection } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
-import { HiOutlineTrash, HiOutlineBuildingOffice2, HiOutlinePlus, HiOutlineArrowPath, HiOutlineArrowDownTray, HiOutlineArrowsPointingOut, HiOutlineArrowsPointingIn } from 'react-icons/hi2';
+import { HiOutlineTrash, HiOutlineBuildingOffice2, HiOutlinePlus, HiOutlineArrowPath, HiOutlineDocumentArrowDown, HiOutlineArrowsPointingOut, HiOutlineArrowsPointingIn } from 'react-icons/hi2';
 import { exportToExcel } from '@/lib/export-utils';
 
 interface Section {
@@ -54,7 +54,7 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
             <div className={`flex flex-col ${isFullscreen ? 'h-full max-w-[1600px] mx-auto w-full' : ''}`}>
                 
                 {/* Consolidated Header & Controls Toolbar */}
-                <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 ${isFullscreen ? '' : 'p-6 sm:p-8 pb-0'}`}>
+                <div className={`flex flex-col gap-4 mb-6 ${isFullscreen ? '' : 'p-6 sm:p-8 pb-0'}`}>
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
                             <HiOutlineBuildingOffice2 size={24} />
@@ -74,11 +74,10 @@ export default function SectionManager({ sections }: { sections: Section[] }) {
                         </form>
                         <button
                             onClick={handleExport}
-                            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-emerald-200 text-sm"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                         >
-                            <HiOutlineArrowDownTray size={18} className="stroke-[2.5]" />
-                            <span className="hidden sm:inline">Export Excel</span>
-                            <span className="sm:hidden">Export</span>
+                            <HiOutlineDocumentArrowDown size={18} />
+                            <span className="hidden sm:inline">Export to Excel</span>
                         </button>
 
                         <button 

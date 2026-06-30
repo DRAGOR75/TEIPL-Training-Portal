@@ -69,9 +69,9 @@ export default function ParticipantTableClient({ participants, sessionName }: Pa
                     <button
                         onClick={handleExport}
                         disabled={filteredParticipants.length === 0}
-                        className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-200 active:scale-95"
+                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <HiOutlineDocumentArrowDown className="w-5 h-5" />
+                        <HiOutlineDocumentArrowDown size={18} />
                         Export to Excel
                     </button>
                 </div>

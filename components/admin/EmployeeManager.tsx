@@ -12,7 +12,7 @@ import {
     HiOutlineArrowUpTray,
     HiOutlineTableCells,
     HiOutlineArrowPath,
-    HiOutlineArrowDownTray,
+    HiOutlineDocumentArrowDown,
     HiOutlineMagnifyingGlass,
     HiOutlineXMark,
     HiOutlineArrowsPointingIn,
@@ -243,7 +243,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
             <div className={`flex flex-col ${isFullscreen ? 'flex-1 w-full min-h-0' : 'w-full'}`}>
 
                 {/* Header & Controls Toolbar */}
-                <div className={`flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 ${isFullscreen ? '' : 'p-4 sm:p-6 pb-0'}`}>
+                <div className={`flex flex-col gap-4 mb-6 ${isFullscreen ? '' : 'p-4 sm:p-6 pb-0'}`}>
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center shrink-0">
                             <HiOutlineUsers size={24} />
@@ -328,10 +328,10 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 }));
                                 exportToExcel(exportData, 'Employee_Directory');
                             }}
-                            className="p-2.5 rounded-xl text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition-colors shadow-sm"
-                            title="Export to Excel"
+                            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                         >
-                            <HiOutlineArrowDownTray size={18} />
+                            <HiOutlineDocumentArrowDown size={18} />
+                            <span className="hidden sm:inline">Export to Excel</span>
                         </button>
 
                         <button
