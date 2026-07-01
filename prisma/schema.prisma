@@ -192,6 +192,7 @@ model TrainingSession {
   // NEW fields for Assessment tracking
   assessmentDate     DateTime? @map("assessment_date")
   feedbackEmailsSent Boolean   @default(false) @map("feedback_emails_sent")
+  sessionCategory    String?   @map("session_category")
 
   classDates        DateTime[]         @map("class_dates") // Track specific days of training
   attendanceRecords AttendanceRecord[]
@@ -701,7 +702,7 @@ model TrainingHistory {
   endDate      DateTime @map("end_date")
   trainingDays Int?     @map("training_days")
   region       String?
-  progCatogery String?  @map("prog_catogery")
+
   organization  String? 
   onRollContract String? @map("onroll_contract")
   department String?
@@ -723,6 +724,9 @@ model TrainingHistory {
   sessionId     String? @map("session_id")
   trainerName   String? @map("trainer_name")
   averageRating Float?  @map("average_rating")
+  status        String  @default("Completed")
+  sessionCategory String? @map("session_category")
+  altProgramName  String? @map("alt_program_name")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -744,7 +748,7 @@ model SystemTrainingHistory {
   endDate      DateTime @map("end_date")
   trainingDays Int?     @map("training_days")
   region       String?
-  progCatogery String?  @map("prog_catogery")
+
   organization  String? 
   onRollContract String? @map("onroll_contract")
   department String?
@@ -765,6 +769,9 @@ model SystemTrainingHistory {
   sessionId     String? @map("session_id")
   trainerName   String? @map("trainer_name")
   averageRating Float?  @map("average_rating")
+  status        String  @default("Completed")
+  sessionCategory String? @map("session_category")
+  altProgramName  String? @map("alt_program_name")
 
   createdAt DateTime @default(now()) @map("created_at")
 

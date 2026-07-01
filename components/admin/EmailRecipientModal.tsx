@@ -74,27 +74,18 @@ export default function EmailRecipientModal({ sessionId, isReminder = false, onC
         // Sync HTML content from the editable div
         const finalHtml = contentRef.current?.innerHTML || htmlContent;
 
-        const CHUNK_SIZE = 5;
-        const maxEmails = Math.max(toList.length, ccList.length);
-        const totalBatches = Math.max(1, Math.ceil(maxEmails / CHUNK_SIZE));
-
-        setProgress({ current: 0, total: totalBatches });
-
         try {
-            for (let i = 0; i < totalBatches; i++) {
-                const batchTo = toList.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-                const batchCc = ccList.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+            setProgress({ current: 0, total: 1 });
+            
+            const result = await sendBatchInvitation(sessionId, toList, ccList, finalHtml, subject, isReminder);
 
-                setProgress({ current: i + 1, total: totalBatches });
-
-                const result = await sendBatchInvitation(sessionId, batchTo, batchCc, finalHtml, subject, isReminder);
-
-                if (!result.success) {
-                    setError(`Failed to send to some recipients.`);
-                    setIsSending(false);
-                    return;
-                }
+            if (!result.success) {
+                setError(`Failed to send the email.`);
+                setIsSending(false);
+                return;
             }
+            
+            setProgress({ current: 1, total: 1 });
             onSuccess();
         } catch (err) {
             setError("An unexpected error occurred.");

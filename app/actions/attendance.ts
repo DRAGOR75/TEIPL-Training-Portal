@@ -139,66 +139,63 @@ export async function finalizeParticipantTraining(
         const end = new Date(session.endDate);
         const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
 
-        if (finalStatus === 'Completed') {
-            // Mark Nomination as Completed
-            await db.nomination.updateMany({
-                where: { empId, batchId },
-                data: { status: 'Completed' }
-            });
+        // Mark Nomination as finalStatus (Completed or Absent)
+        await db.nomination.updateMany({
+            where: { empId, batchId },
+            data: { status: finalStatus }
+        });
 
-            // Create System Training History if it doesn't exist
-            const existingHistory = await db.systemTrainingHistory.findFirst({
-                where: { empId, sessionId }
-            });
+        // Create or update System Training History
+        const existingHistory = await db.systemTrainingHistory.findFirst({
+            where: { empId, sessionId }
+        });
 
-            const monthStr = start.toLocaleString('en-US', { month: 'short' });
-            const yearStr = start.getFullYear().toString();
+        const monthStr = start.toLocaleString('en-US', { month: 'short' });
+        const yearStr = start.getFullYear().toString();
 
-            if (!existingHistory) {
-                await db.systemTrainingHistory.create({
-                    data: {
-                        empId: empId,
-                        employeeName: emp.name,
-                        empStatus: emp.status,
-                        programName: session.programName,
-                        startDate: session.startDate,
-                        endDate: session.endDate,
-                        trainingDays: trainingDays > 0 ? trainingDays : null,
-                        region: emp.region,
-                        progCategory: progCategory,
-                        progCatogery: progCategory, // Populating both due to typo in schema
-                        organization: emp.organization,
-                        onRollContract: emp.onRollContract,
-                        department: emp.department,
-                        employeeGroup: emp.departmentGroup,
-                        employeeGrouupMNmw: emp.employeeGrouupMNmw,
-                        aadharNumber: emp.aadharNumber,
-                        designation: emp.designation,
-                        section: emp.sectionName,
-                        month: monthStr,
-                        year: yearStr,
-                        gender: emp.gender,
-                        location: session.location || emp.location,
-                        sessionId: sessionId,
-                        trainerName: session.trainerName,
-                        attendancePercentage: attendancePercentage
-                    }
-                });
-            } else {
-                await db.systemTrainingHistory.update({
-                    where: { id: existingHistory.id },
-                    data: { attendancePercentage: attendancePercentage }
-                });
-            }
-        } else if (finalStatus === 'Absent') {
-            // Mark Nomination as Absent (so they are removed from the batch but tracked)
-            await db.nomination.updateMany({
-                where: { empId, batchId },
-                data: { status: 'Absent' }
+        if (!existingHistory) {
+            await db.systemTrainingHistory.create({
+                data: {
+                    empId: empId,
+                    employeeName: emp.name,
+                    empStatus: emp.status,
+                    programName: session.programName,
+                    startDate: session.startDate,
+                    endDate: session.endDate,
+                    trainingDays: trainingDays > 0 ? trainingDays : null,
+                    region: emp.region,
+                    progCategory: progCategory,
+
+                    organization: emp.organization,
+                    onRollContract: emp.onRollContract,
+                    department: emp.department,
+                    employeeGroup: emp.departmentGroup,
+                    employeeGrouupMNmw: emp.employeeGrouupMNmw,
+                    aadharNumber: emp.aadharNumber,
+                    designation: emp.designation,
+                    section: emp.sectionName,
+                    month: monthStr,
+                    year: yearStr,
+                    gender: emp.gender,
+                    location: session.location || emp.location,
+                    sessionId: sessionId,
+                    trainerName: session.trainerName,
+                    attendancePercentage: attendancePercentage,
+                    status: finalStatus,
+                    sessionCategory: session.sessionCategory,
+                    altProgramName: session.altProgramName
+                }
             });
-            // Also delete System Training History if it accidentally existed
-            await db.systemTrainingHistory.deleteMany({
-                where: { empId, sessionId }
+        } else {
+            await db.systemTrainingHistory.update({
+                where: { id: existingHistory.id },
+                data: { 
+                    attendancePercentage: attendancePercentage,
+                    status: finalStatus,
+                    programName: session.programName,
+                    sessionCategory: session.sessionCategory,
+                    altProgramName: session.altProgramName
+                }
             });
         }
 

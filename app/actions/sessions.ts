@@ -342,6 +342,7 @@ export async function createSession(formData: FormData) {
         const trainingSession = await db.trainingSession.create({
             data: {
                 programName,
+                altProgramName: formData.get('altProgramName') as string || null,
                 trainerName,
                 startDate,
                 endDate,
@@ -349,6 +350,7 @@ export async function createSession(formData: FormData) {
                 endTime: formData.get('endTime') as string || "6:00 pm",
                 location: formData.get('location') as string,
                 topics: formData.get('topics') as string,
+                sessionCategory: formData.get('sessionCategory') as string,
                 assessmentDate,
                 feedbackCreationDate,
                 classDates,
