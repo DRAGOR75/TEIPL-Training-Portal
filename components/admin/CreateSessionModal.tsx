@@ -145,6 +145,15 @@ export default function CreateSessionModal({
                                     />
                                 </div>
                                 <input type="hidden" name="programName" value={selectedProgram} />
+                                <div className="mt-2">
+                                    <input 
+                                        type="text" 
+                                        name="altProgramName" 
+                                        placeholder="Alternate Program Name (Optional)" 
+                                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                    />
+                                    <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
+                                </div>
                             </div>
 
                             <div>
@@ -244,6 +253,21 @@ export default function CreateSessionModal({
                                 onChange={(e) => setAssessmentDate(e.target.value)}
                                 className="w-full p-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-bold"
                             />
+                        </div>
+
+                        {/* ROW 3.75: Session Category */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Session Category (Optional)</label>
+                            <select name="sessionCategory" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">Select Category...</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Technical-VR">Technical-VR</option>
+                                <option value="Technical by OEM">Technical by OEM</option>
+                                <option value="Workshop">Workshop</option>
+                                <option value="Functional/Others">Functional/Others</option>
+                                <option value="Behavioural">Behavioural</option>
+                                <option value="Safety">Safety</option>
+                            </select>
                         </div>
 
                         {/* ROW 4: Location */}

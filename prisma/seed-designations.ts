@@ -56,6 +56,7 @@ const designationData = [
     { name: "Senior Trade Engineer", grade: "Executive" },
     { name: "GEA", grade: "Executive" },
     { name: "DEA", grade: "Executive" },
+    { name: "Asst Trade Engineer", grade: "Executive" }
 ];
 
 async function main() {

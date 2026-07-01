@@ -16,7 +16,7 @@ export interface LegacyRecord {
     location?: string;
     mobile?: string;
     email?: string;
-    progCatogery?: string;
+
     organization?: string;
     onRollContract?: string;
     department?: string;

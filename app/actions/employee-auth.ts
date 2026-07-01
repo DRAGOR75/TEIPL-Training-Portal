@@ -12,7 +12,7 @@ export async function loginEmployee(formData: FormData) {
         });
 
         if (!employee) {
-            return { error: 'You are not registered yet. Please contact the training department.' };
+            return { error: 'You are not registered yet. For registration please send send a mail to cyn@thriveni.com ,bvg@thriveni.com from your official email id.' };
         }
 
         const cookieStore = await cookies();
@@ -23,7 +23,7 @@ export async function loginEmployee(formData: FormData) {
             path: '/',
             maxAge: 60 * 60 * 24 * 30, // 30 days
         });
-        
+
         return { success: true };
     }
 }
