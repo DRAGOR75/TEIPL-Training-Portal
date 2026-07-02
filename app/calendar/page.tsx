@@ -3,16 +3,17 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/prisma';
 import { getSessions } from '@/app/actions/sessions';
 import { getTrainers } from '@/app/actions/trainers';
-import GanttCalendar from '@/components/planning/GanttCalendar';
-import EmployeeCalendarClient from '@/components/user/EmployeeCalendarClient';
+import CalendarSyncClient from '@/components/user/CalendarSyncClient';
+import { auth } from '@/auth';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EmployeeCalendarPage() {
     const cookieStore = await cookies();
     const empId = cookieStore.get('employee_id')?.value;
+    const sessionUser = await auth();
 
-    if (!empId) {
+    if (!empId && !sessionUser) {
         redirect('/user-hub');
     }
 
@@ -33,7 +34,7 @@ export default async function EmployeeCalendarPage() {
         trainerName: s.trainerName,
         startDate: s.startDate,
         endDate: s.endDate,
-        location: s.location ?? undefined,
+        location: s.location ?? undefined
     }));
 
     // Map upcoming actual sessions for the enrollment table
@@ -59,17 +60,14 @@ export default async function EmployeeCalendarPage() {
 
                 </div>
 
-                <div className="mb-12">
-                    <GanttCalendar
-                        programs={programs}
-                        sessions={normalizedSessions}
-                        trainers={trainers}
-                        locations={locations}
-                        readOnly={true}
-                    />
-                </div>
-
-                <EmployeeCalendarClient events={upcomingEvents} empId={empId} />
+                <CalendarSyncClient
+                    programs={programs}
+                    sessions={normalizedSessions}
+                    trainers={trainers}
+                    locations={locations}
+                    upcomingEvents={upcomingEvents}
+                    empId={empId ?? null}
+                />
             </div>
         </main>
     );

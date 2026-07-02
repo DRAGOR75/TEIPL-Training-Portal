@@ -36,6 +36,10 @@ export async function getBatchInvitationPreview(sessionId: string) {
 
         const toEmails = nominations.map(nom => nom.employee.email).filter(Boolean);
         const managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(Boolean))] as string[];
+        
+        if (!managerEmails.includes('training.trc@thriveni.com')) {
+            managerEmails.push('training.trc@thriveni.com');
+        }
 
         // Generate Preview HTML
         // Participants are needed for the table
@@ -152,6 +156,11 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
             // Fallback to default logic
             toEmails = nominations.map(nom => nom.employee.email);
             managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(email => email !== null))] as string[];
+        }
+
+        // Always include training.trc@thriveni.com in CC for invitation emails
+        if (!managerEmails.includes('training.trc@thriveni.com')) {
+            managerEmails.push('training.trc@thriveni.com');
         }
 
         // Update DB immediately so UI is responsive

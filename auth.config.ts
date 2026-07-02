@@ -11,9 +11,11 @@ export const authConfig = {
             const role = (auth?.user as any)?.role;
             const isAdminRoute = nextUrl.pathname.startsWith('/admin');
             const isTrainerRoute = nextUrl.pathname.startsWith('/trainer');
+            const isPrintRoute = nextUrl.pathname.match(/\/admin\/sessions\/.*\/print/);
 
             if (isAdminRoute) {
                 if (isLoggedIn && role === 'ADMIN') return true;
+                if (isLoggedIn && role === 'TRAINER' && isPrintRoute) return true;
                 return Response.redirect(new URL('/login', nextUrl));
             }
 

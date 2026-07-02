@@ -11,7 +11,7 @@ type CreateSessionModalProps = {
     programs: any[];
     locations: any[];
     fixedTrainerName?: string;
-    
+
     // Props for external controlled state (like Gantt Chart)
     triggerComponent?: React.ReactNode;
     fixedProgramName?: string;
@@ -20,7 +20,7 @@ type CreateSessionModalProps = {
     onClose?: () => void;
 };
 
-export default function CreateSessionModal({ 
+export default function CreateSessionModal({
     trainers, programs, locations, fixedTrainerName,
     triggerComponent, fixedProgramName, prefillStartDate, defaultOpen, onClose
 }: CreateSessionModalProps) {
@@ -28,8 +28,8 @@ export default function CreateSessionModal({
 
     // Form State
     const [selectedProgram, setSelectedProgram] = useState<string>(fixedProgramName || '');
-    
-    const initialTrainers = fixedTrainerName 
+
+    const initialTrainers = fixedTrainerName
         ? fixedTrainerName.split(/,|&|\band\b/i).map(t => t.trim()).filter(t => t.length > 0)
         : [''];
     const [selectedTrainers, setSelectedTrainers] = useState<string[]>(initialTrainers.length > 0 ? initialTrainers : ['']);
@@ -94,7 +94,7 @@ export default function CreateSessionModal({
                     <form action={async (formData) => {
                         // Validation
                         if (!selectedProgram) { alert("Please select a Program."); return; }
-                        
+
                         const activeTrainers = selectedTrainers.filter(t => t.trim() !== '');
                         if (activeTrainers.length === 0 && !fixedTrainerName) { alert("Please select at least one Trainer."); return; }
 
@@ -146,10 +146,10 @@ export default function CreateSessionModal({
                                 </div>
                                 <input type="hidden" name="programName" value={selectedProgram} />
                                 <div className="mt-2">
-                                    <input 
-                                        type="text" 
-                                        name="altProgramName" 
-                                        placeholder="Alternate Program Name (Optional)" 
+                                    <input
+                                        type="text"
+                                        name="altProgramName"
+                                        placeholder="Alternate Program Name (Optional)"
                                         className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     />
                                     <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
@@ -186,8 +186,8 @@ export default function CreateSessionModal({
                                                         className="flex-1"
                                                     />
                                                     {idx > 0 && (
-                                                        <button 
-                                                            type="button" 
+                                                        <button
+                                                            type="button"
                                                             onClick={() => setSelectedTrainers(selectedTrainers.filter((_, i) => i !== idx))}
                                                             className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200"
                                                             title="Remove Co-Trainer"
@@ -197,13 +197,15 @@ export default function CreateSessionModal({
                                                     )}
                                                 </div>
                                             ))}
-                                            <button 
+                                            {/* Temporarily disabled co-trainer feature
+                                            <button
                                                 type="button"
                                                 onClick={() => setSelectedTrainers([...selectedTrainers, ''])}
                                                 className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 mt-1 -ml-2"
                                             >
                                                 + Add Co-Trainer
                                             </button>
+                                            */}
                                         </>
                                     )}
                                 </div>
@@ -257,7 +259,7 @@ export default function CreateSessionModal({
 
                         {/* ROW 3.75: Session Category */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Session Category (Optional)</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category</label>
                             <select name="sessionCategory" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                                 <option value="">Select Category...</option>
                                 <option value="Technical">Technical</option>
