@@ -15,6 +15,7 @@ type CreateSessionModalProps = {
     // Props for external controlled state (like Gantt Chart)
     triggerComponent?: React.ReactNode;
     fixedProgramName?: string;
+    fixedLocationName?: string;
     prefillStartDate?: string;
     defaultOpen?: boolean;
     onClose?: () => void;
@@ -22,7 +23,7 @@ type CreateSessionModalProps = {
 
 export default function CreateSessionModal({
     trainers, programs, locations, fixedTrainerName,
-    triggerComponent, fixedProgramName, prefillStartDate, defaultOpen, onClose
+    triggerComponent, fixedProgramName, fixedLocationName, prefillStartDate, defaultOpen, onClose
 }: CreateSessionModalProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen || false);
 
@@ -34,7 +35,7 @@ export default function CreateSessionModal({
         : [''];
     const [selectedTrainers, setSelectedTrainers] = useState<string[]>(initialTrainers.length > 0 ? initialTrainers : ['']);
     const [locationMode, setLocationMode] = useState<'select' | 'custom'>('select');
-    const [selectedLocation, setSelectedLocation] = useState<string>('');
+    const [selectedLocation, setSelectedLocation] = useState<string>(fixedLocationName || '');
     const [customLocation, setCustomLocation] = useState<string>('');
     const [assessmentDate, setAssessmentDate] = useState<string>('');
 
