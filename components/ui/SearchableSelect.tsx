@@ -10,8 +10,8 @@ interface Option {
 
 interface SearchableSelectProps {
     options: Option[];
-    value: string | number | null;
-    onChange: (value: string) => void;
+    value: any; // string | number | null | (string | number)[]
+    onChange: (value: any) => void;
     placeholder?: string;
     disabled?: boolean;
     className?: string;
@@ -22,6 +22,7 @@ interface SearchableSelectProps {
     direction?: 'down' | 'up' | 'responsive-bottom';
     onAddNew?: (searchQuery: string) => void;
     addNewLabel?: string;
+    isMulti?: boolean;
 }
 
 export default function SearchableSelect({
@@ -37,7 +38,8 @@ export default function SearchableSelect({
     icon,
     direction = 'down',
     onAddNew,
-    addNewLabel = 'Add New'
+    addNewLabel = 'Add New',
+    isMulti = false
 }: SearchableSelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -72,28 +74,82 @@ export default function SearchableSelect({
     // Performance optimization: only render up to 100 items at a time
     const displayedOptions = filteredOptions.slice(0, 100);
 
-    const selectedOption = options.find(option => String(option.value) === String(value));
+    const isSelected = (optValue: string | number) => {
+        if (isMulti && Array.isArray(value)) {
+            return value.some(v => String(v) === String(optValue));
+        }
+        return String(value) === String(optValue);
+    };
 
     const handleSelect = (optionValue: string | number) => {
-        onChange(String(optionValue));
-        setIsOpen(false);
-        setSearchQuery('');
+        if (isMulti) {
+            const arr = Array.isArray(value) ? value : [];
+            if (isSelected(optionValue)) {
+                // remove
+                onChange(arr.filter((v: any) => String(v) !== String(optionValue)));
+            } else {
+                // add
+                onChange([...arr, String(optionValue)]);
+            }
+            setSearchQuery('');
+        } else {
+            onChange(String(optionValue));
+            setIsOpen(false);
+            setSearchQuery('');
+        }
     };
 
     const handleClear = (e: React.MouseEvent) => {
         e.stopPropagation();
-        onChange('');
+        onChange(isMulti ? [] : '');
         setSearchQuery('');
+    };
+
+    const renderSelected = () => {
+        if (isMulti && Array.isArray(value)) {
+            if (value.length === 0) return <span className="text-slate-500">{placeholder}</span>;
+            
+            return (
+                <div className="flex flex-wrap gap-1">
+                    {value.map((val) => {
+                        const opt = options.find(o => String(o.value) === String(val));
+                        return (
+                            <span key={String(val)} className="inline-flex items-center gap-1 bg-thriveni-blue/10 text-thriveni-blue px-2 py-0.5 rounded-md text-xs font-medium border border-thriveni-blue/20">
+                                {opt ? opt.label : val}
+                                <button 
+                                    type="button" 
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onChange(value.filter((v: any) => String(v) !== String(val)));
+                                    }}
+                                    className="hover:text-red-500 hover:bg-red-100 rounded-full p-0.5 transition-colors"
+                                >
+                                    <HiOutlineXMark size={12} />
+                                </button>
+                            </span>
+                        );
+                    })}
+                </div>
+            );
+        } else {
+            const selectedOption = options.find(option => String(option.value) === String(value));
+            return selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>;
+        }
     };
 
     return (
         <div className={`relative ${className}`} ref={containerRef}>
-            {name && <input type="hidden" name={name} value={String(value || '')} />}
+            {name && (
+                isMulti && Array.isArray(value) 
+                    ? value.map((val, idx) => <input key={idx} type="hidden" name={name} value={String(val)} />)
+                    : <input type="hidden" name={name} value={String(value || '')} />
+            )}
+            
             {/* Main Control (Trigger or Input) */}
             <div
                 className={`
                     w-full rounded-xl border shadow-sm bg-white font-medium text-slate-900 
-                    transition-all flex items-center justify-between cursor-pointer
+                    transition-all flex items-center justify-between cursor-pointer min-h-[46px]
                     ${disabled ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200' : 'hover:border-thriveni-blue/30 focus-within:ring-2 focus-within:ring-thriveni-blue/20 focus-within:border-thriveni-blue'}
                     ${isOpen ? 'border-thriveni-blue ring-2 ring-thriveni-blue/20 bg-white shadow-md' : 'border-slate-200'}
                 `}
@@ -110,27 +166,29 @@ export default function SearchableSelect({
                     </div>
                 )}
 
-                <div className={`flex-1 flex items-center min-w-0 ${icon ? 'pl-11' : 'pl-3'}`}>
-                    {isOpen ? (
+                <div className={`flex-1 flex flex-col min-w-0 ${icon ? 'pl-11' : 'pl-3'} py-1.5`}>
+                    {!isOpen || isMulti ? (
+                        <div className="w-full text-left text-sm min-w-0 leading-snug">
+                            {renderSelected()}
+                        </div>
+                    ) : null}
+                    
+                    {isOpen && (
                         <input
                             ref={searchInputRef}
                             type="text"
-                            className="w-full bg-transparent border-none p-3 text-sm focus:outline-none placeholder:text-slate-400 min-w-0"
+                            className={`w-full bg-transparent border-none text-sm focus:outline-none placeholder:text-slate-400 min-w-0 ${isMulti ? 'mt-2' : ''}`}
                             placeholder={searchPlaceholder}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onClick={(e) => e.stopPropagation()} // Prevent closing when clicking input
                             autoComplete="off"
                         />
-                    ) : (
-                        <div className="p-3 w-full text-left truncate text-sm min-w-0 leading-snug">
-                            {selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>}
-                        </div>
                     )}
                 </div>
 
-                <div className="pr-4 flex items-center gap-2 text-slate-400">
-                    {(selectedOption || searchQuery) && !disabled && (
+                <div className="pr-4 flex items-center gap-2 text-slate-400 self-start mt-3">
+                    {((isMulti ? Array.isArray(value) && value.length > 0 : value) || searchQuery) && !disabled && (
                         <div
                             onClick={handleClear}
                             className="p-1 hover:bg-slate-200 rounded-full cursor-pointer transition-colors"
@@ -157,11 +215,21 @@ export default function SearchableSelect({
                                             key={option.value}
                                             className={`
                                             px-4 py-3 rounded-lg text-sm cursor-pointer transition-colors break-words leading-relaxed border-b border-transparent hover:border-slate-100 last:border-0
-                                            ${String(option.value) === String(value) ? 'bg-thriveni-blue/5 text-thriveni-blue font-bold' : 'text-slate-700 hover:bg-slate-50'}
+                                            ${isSelected(option.value) ? 'bg-thriveni-blue/5 text-thriveni-blue font-bold' : 'text-slate-700 hover:bg-slate-50'}
                                         `}
                                             onClick={() => handleSelect(option.value)}
                                         >
-                                            {option.label}
+                                            <div className="flex items-center gap-2">
+                                                {isMulti && (
+                                                    <input 
+                                                        type="checkbox" 
+                                                        checked={isSelected(option.value)} 
+                                                        readOnly 
+                                                        className="rounded border-slate-300 text-thriveni-blue focus:ring-thriveni-blue/50 w-4 h-4"
+                                                    />
+                                                )}
+                                                <span>{option.label}</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -174,7 +242,7 @@ export default function SearchableSelect({
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 onAddNew(searchQuery);
-                                                setIsOpen(false);
+                                                if(!isMulti) setIsOpen(false);
                                             }}
                                             className="bg-thriveni-blue/10 text-thriveni-blue hover:bg-thriveni-blue/20 px-4 py-2 rounded-lg font-bold transition-colors w-full"
                                         >
@@ -190,3 +258,4 @@ export default function SearchableSelect({
         </div >
     );
 }
+

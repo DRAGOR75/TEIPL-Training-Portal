@@ -11,13 +11,14 @@ interface TNIProgramSelectProps {
 }
 
 export default function TNIProgramSelect({ programs, category, name, placeholder }: TNIProgramSelectProps) {
-    const [value, setValue] = useState<string>('');
+    const [value, setValue] = useState<string[]>([]);
     const options = programs
         .filter(p => p.category === category)
         .map(p => ({ label: p.name, value: p.id }));
 
     return (
         <SearchableSelect 
+            isMulti={true}
             name={name}
             options={options}
             value={value}

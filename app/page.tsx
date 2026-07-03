@@ -108,7 +108,7 @@ export default function Home() {
               <span className="text-indigo-600 font-black text-sm uppercase tracking-[0.4em] mb-4 block">System Control</span>
               <h2 className="text-5xl md:text-8xl font-black text-slate-900 leading-[0.9] tracking-tighter uppercase transition-transform duration-500 group-hover:translate-x-4">
                 Admin <br />
-                <span className="text-indigo-600">Pannel</span>
+                <span className="text-indigo-600">Panel</span>
               </h2>
             </div>
             <div className="relative z-10 max-w-sm">

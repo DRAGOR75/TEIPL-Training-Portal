@@ -73,6 +73,7 @@ export async function updateEmployeeProfile(empId: string, data: {
     managerEmail?: string;
     managerMobile?: string;
     status?: string;
+    departmentGroup?: string;
 }) {
     try {
         const updated = await db.employee.upsert({
@@ -97,6 +98,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 managerEmail: data.managerEmail?.substring(0, 100),
                 managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status,
+                departmentGroup: data.departmentGroup?.substring(0, 100),
             },
             create: {
                 id: empId.substring(0, 50),
@@ -115,6 +117,7 @@ export async function updateEmployeeProfile(empId: string, data: {
                 managerEmail: data.managerEmail?.substring(0, 100),
                 managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status || 'Active',
+                departmentGroup: data.departmentGroup?.substring(0, 100),
             }
         });
 

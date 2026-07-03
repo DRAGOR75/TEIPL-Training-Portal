@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react';
 import { HiOutlineCalendarDays, HiOutlineCheckCircle } from 'react-icons/hi2';
 import { selfNominateCalendar } from '@/app/actions/calendar';
 
-export default function EmployeeCalendarClient({ events, empId }: { events: any[], empId: string }) {
+export default function EmployeeCalendarClient({ events, empId }: { events: any[], empId: string | null }) {
     const [isPending, startTransition] = useTransition();
     const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
     const [justification, setJustification] = useState('');
@@ -46,12 +46,12 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                     <table className="w-full text-left border-collapse min-w-[800px]">
                         <thead>
                             <tr className="bg-slate-50 border-b border-slate-200">
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Program Name</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Start Date</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">End Date</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Trainer</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">Location</th>
-                                <th className="p-4 font-bold text-slate-500 text-sm tracking-wider uppercase">No Of Persons Enrolled</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Program Name</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Start Date</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">End Date</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Trainer</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Location</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Enrolled persons</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -61,40 +61,40 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                 const endDate = new Date(event.proposedEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
 
                                 return (
-                                    <tr 
-                                        key={event.id} 
-                                        onClick={() => !isFull && setSelectedEventId(event.id)}
-                                        className={`transition-colors ${!isFull ? 'hover:bg-emerald-50 cursor-pointer' : 'hover:bg-slate-50/80 cursor-not-allowed opacity-70'}`}
+                                    <tr
+                                        key={event.id}
+                                        onClick={() => empId && !isFull && setSelectedEventId(event.id)}
+                                        className={`transition-colors ${empId && !isFull ? 'hover:bg-emerald-50 cursor-pointer' : 'hover:bg-slate-50/80 cursor-not-allowed opacity-70'}`}
                                     >
-                                        <td className="p-4 align-middle">
-                                            <div className="font-bold text-slate-800 text-base">{event.program.name}</div>
+                                        <td className="px-3 py-2 align-middle">
+                                            <div className="font-bold text-slate-800 text-sm">{event.program.name}</div>
                                         </td>
-                                        <td className="p-4 align-middle">
-                                            <div className="font-medium text-slate-600">{startDate}</div>
+                                        <td className="px-3 py-2 align-middle">
+                                            <div className="font-medium text-slate-600 text-sm">{startDate}</div>
                                         </td>
-                                        <td className="p-4 align-middle">
-                                            <div className="font-medium text-slate-600">{endDate}</div>
+                                        <td className="px-3 py-2 align-middle">
+                                            <div className="font-medium text-slate-600 text-sm">{endDate}</div>
                                         </td>
-                                        <td className="p-4 align-middle">
+                                        <td className="px-3 py-2 align-middle">
                                             <div className="font-medium text-slate-600">
                                                 {event.proposedTrainer ? (
-                                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-sm">{event.proposedTrainer}</span>
+                                                    <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg text-xs">{event.proposedTrainer}</span>
                                                 ) : (
-                                                    <span className="text-slate-400 italic text-sm">TBD</span>
+                                                    <span className="text-slate-400 italic text-xs">TBD</span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4 align-middle">
+                                        <td className="px-3 py-2 align-middle">
                                             <div className="font-medium text-slate-600">
                                                 {event.proposedLocation ? (
-                                                    <span className="bg-slate-100 text-slate-700 px-2.5 py-1 rounded-lg text-sm">{event.proposedLocation}</span>
+                                                    <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-lg text-xs">{event.proposedLocation}</span>
                                                 ) : (
-                                                    <span className="text-slate-400 italic text-sm">TBD</span>
+                                                    <span className="text-slate-400 italic text-xs">TBD</span>
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="p-4 align-middle">
-                                            <span className={`text-xs font-bold px-3 py-1.5 rounded-full border shadow-sm inline-flex items-center whitespace-nowrap ${isFull ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
+                                        <td className="px-3 py-2 align-middle">
+                                            <span className={`text-[11px] font-bold px-2 py-1 rounded-full border shadow-sm inline-flex items-center whitespace-nowrap ${isFull ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>
                                                 {event.nominations.length} / {event.capacity || '∞'} Seats
                                             </span>
                                         </td>
@@ -108,7 +108,7 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                     <td colSpan={6} className="p-16 text-center">
                                         <HiOutlineCalendarDays className="mx-auto text-5xl text-slate-300 mb-4" />
                                         <h3 className="text-xl font-black text-slate-700">No Events Scheduled</h3>
-                                        <p className="text-slate-500 font-medium mt-2">There are no upcoming pre-scheduled training programs at the moment.</p>
+                                        <p className="text-slate-500 font-medium mt-2">There are no upcoming  training programs at the moment.</p>
                                     </td>
                                 </tr>
                             )}

@@ -40,6 +40,7 @@ type Employee = {
     managerEmail: string | null;
     managerMobile: string | null;
     status: string | null;
+    departmentGroup: string | null;
 };
 
 type Section = {
@@ -93,7 +94,8 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
         managerName: employee.managerName || '',
         managerEmail: employee.managerEmail || '',
         managerMobile: employee.managerMobile || '',
-        status: employee.status || 'Active'
+        status: employee.status || 'Active',
+        departmentGroup: employee.departmentGroup || ''
     });
 
     async function handleSave() {
@@ -268,6 +270,22 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'ESCC', value: 'ESCC' },
+                                { label: 'Operators', value: 'Operators' },
+
+                                { label: 'Others', value: 'Others' }
+                            ]}
+                            value={formData.departmentGroup}
+                            onChange={(val) => setFormData({ ...formData, departmentGroup: val })}
+                            placeholder="Select Dept Group"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employment Status</label>
                         <SearchableSelect
                             options={[
@@ -430,6 +448,17 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             <div className="min-w-0">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Section</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Department Group */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department Group</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.departmentGroup || 'Not Set'}>{employee.departmentGroup || 'Not Set'}</span>
                             </div>
                         </div>
 

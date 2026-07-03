@@ -210,6 +210,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                     )}
                                 </div>
                             ))}
+                            {/* Temporarily disabled co-trainer feature
                             <button 
                                 type="button"
                                 onClick={() => setSelectedTrainers([...selectedTrainers, ''])}
@@ -217,6 +218,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                             >
                                 + Add Co-Trainer
                             </button>
+                            */}
                         </div>
                     </div>
                 </div>
