@@ -42,8 +42,13 @@ export default function TNIDashboardClient({
     const [isPending, startTransition] = useTransition();
 
     // Form states
-    const [formValues, setFormValues] = useState({
-        selectedProgramId: '',
+    const [formValues, setFormValues] = useState<{
+        selectedProgramId: string[];
+        justification: string;
+        selectedSectionId: string;
+        selectedCategory: string;
+    }>({
+        selectedProgramId: [],
         justification: '',
         selectedSectionId: '',
         selectedCategory: ''
@@ -111,7 +116,7 @@ export default function TNIDashboardClient({
 
     const resetForm = () => {
         setFormValues({
-            selectedProgramId: '',
+            selectedProgramId: [],
             justification: '',
             selectedSectionId: '',
             selectedCategory: ''
@@ -428,7 +433,7 @@ export default function TNIDashboardClient({
                                                 ]}
                                                 value={formValues.selectedSectionId}
                                                 onChange={(val) => {
-                                                    setFormValues(prev => ({ ...prev, selectedSectionId: val, selectedProgramId: '' }));
+                                                    setFormValues(prev => ({ ...prev, selectedSectionId: val, selectedProgramId: [] }));
                                                 }}
                                                 placeholder="Select a section to filter programs..."
                                                 className="w-full text-xs"
@@ -445,7 +450,7 @@ export default function TNIDashboardClient({
                                                 ]}
                                                 value={formValues.selectedCategory}
                                                 onChange={(val) => {
-                                                    setFormValues(prev => ({ ...prev, selectedCategory: val, selectedProgramId: '' }));
+                                                    setFormValues(prev => ({ ...prev, selectedCategory: val, selectedProgramId: [] }));
                                                 }}
                                                 placeholder="Select a category..."
                                                 className="w-full text-xs"
@@ -456,6 +461,7 @@ export default function TNIDashboardClient({
                                         <div className="space-y-1">
                                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Select Program</label>
                                             <SearchableSelect
+                                                isMulti={true}
                                                 options={filteredPrograms.map(p => ({
                                                     label: `${p.name} - ${p.category} [ID: ${p.id.split('-')[0]}]`,
                                                     value: p.id
@@ -468,10 +474,12 @@ export default function TNIDashboardClient({
 
                                             {/* Hidden input to satisfy existing backend logic without modifying it */}
                                             {(() => {
-                                                const selectedProg = programs.find(p => p.id === formValues.selectedProgramId);
-                                                return selectedProg ? (
-                                                    <input type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
-                                                ) : null;
+                                                return formValues.selectedProgramId.map(id => {
+                                                    const selectedProg = programs.find(p => p.id === id);
+                                                    return selectedProg ? (
+                                                        <input key={id} type="hidden" name={`programId_${selectedProg.category}`} value={selectedProg.id} />
+                                                    ) : null;
+                                                });
                                             })()}
                                         </div>
                                     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { saveDailyAttendance, finalizeParticipantTraining, updateSessionClassDates } from '@/app/actions/attendance';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineCalendar, HiOutlinePlus } from 'react-icons/hi2';
 
@@ -9,6 +9,44 @@ export default function AttendanceTab({ session }: { session: any }) {
     const [newDateStr, setNewDateStr] = useState('');
 
     const classDates = session.classDates || [];
+
+    const availableDates = useMemo(() => {
+        if (!session.startDate || !session.endDate) return [];
+        const start = new Date(session.startDate);
+        const end = new Date(session.endDate);
+        const dates = [];
+        let current = new Date(start);
+        current.setHours(0,0,0,0);
+        end.setHours(0,0,0,0);
+        while (current <= end) {
+            const dateObj = new Date(current);
+            // Handle timezone offset to ensure correct string
+            const offset = dateObj.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(dateObj.getTime() - offset)).toISOString().slice(0, -1);
+            dates.push(localISOTime.split('T')[0]);
+            current.setDate(current.getDate() + 1);
+        }
+        return dates;
+    }, [session.startDate, session.endDate]);
+
+    const [selectedDates, setSelectedDates] = useState<string[]>([]);
+    
+    useEffect(() => {
+        if (availableDates.length > 0 && selectedDates.length === 0 && classDates.length === 0) {
+            setSelectedDates(availableDates);
+        }
+    }, [availableDates]);
+
+    const handleSaveBulkDates = async () => {
+        if (selectedDates.length === 0) return;
+        setIsSaving(true);
+        const newDates = selectedDates.map(d => new Date(d));
+        const res = await updateSessionClassDates(session.id, newDates);
+        if (!res.success) {
+            alert(res.error || "Failed to add training dates");
+        }
+        setIsSaving(false);
+    };
 
     // State for local attendance records (optimistic UI)
     const [localAttendance, setLocalAttendance] = useState<Record<string, Record<string, 'Present' | 'Absent'>>>({});
@@ -170,32 +208,99 @@ export default function AttendanceTab({ session }: { session: any }) {
             </div>
 
             {classDates.length === 0 ? (
-                <div className="p-12 flex flex-col items-center justify-center bg-slate-50 border-t border-slate-100 min-h-[400px]">
-                    <div className="bg-white p-8 rounded-3xl shadow-air border border-slate-200 text-center max-w-md w-full">
+                <div className="p-8 flex flex-col items-center justify-center bg-slate-50 border-t border-slate-100 min-h-[400px]">
+                    <div className="bg-white p-8 rounded-3xl shadow-air border border-slate-200 w-full max-w-lg">
                         <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
                             <HiOutlineCalendar className="w-8 h-8" />
                         </div>
-                        <h4 className="text-xl font-bold text-slate-900 mb-2">No Training Dates Added</h4>
-                        <p className="text-sm text-slate-500 mb-6">Before tracking attendance, please select the specific date you are holding this training session.</p>
-                        <div className="flex flex-col items-center gap-3">
-                            <label className="text-xs font-bold text-slate-700 uppercase tracking-widest">Select your first training date</label>
-                            <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 w-full">
-                                <input 
-                                    type="date"
-                                    min={minDate}
-                                    max={maxDate}
-                                    value={newDateStr}
-                                    onChange={(e) => setNewDateStr(e.target.value)}
-                                    className="text-sm bg-transparent border-none focus:ring-0 text-slate-700 w-full"
-                                />
-                                <button 
-                                    onClick={handleAddDate}
-                                    disabled={isSaving || !newDateStr}
-                                    className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white px-4 py-2 rounded-lg transition-colors font-bold text-sm shadow-sm"
-                                >
-                                    Start
-                                </button>
-                            </div>
+                        <h4 className="text-xl font-bold text-slate-900 mb-2 text-center">Select Training Dates</h4>
+                        <p className="text-sm text-slate-500 mb-6 text-center">
+                            Please select all the dates on which this training was held.
+                        </p>
+                        
+                        <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto p-2">
+                            {availableDates.length > 0 ? (
+                                <>
+                                    <div className="flex justify-between items-center mb-2 px-2">
+                                        <span className="text-xs font-bold text-slate-500 uppercase">Available Dates</span>
+                                        <div className="flex gap-2">
+                                            <button 
+                                                onClick={() => setSelectedDates(availableDates)}
+                                                className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                                            >
+                                                Select All
+                                            </button>
+                                            <span className="text-slate-300">|</span>
+                                            <button 
+                                                onClick={() => setSelectedDates([])}
+                                                className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {availableDates.map(dateStr => {
+                                            const isSelected = selectedDates.includes(dateStr);
+                                            const dateObj = new Date(dateStr);
+                                            const displayStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                                            const dayStr = dateObj.toLocaleDateString('en-GB', { weekday: 'short' });
+                                            
+                                            return (
+                                                <label 
+                                                    key={dateStr}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+                                                        isSelected 
+                                                            ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' 
+                                                            : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
+                                                    }`}
+                                                >
+                                                    <input 
+                                                        type="checkbox" 
+                                                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-600"
+                                                        checked={isSelected}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setSelectedDates([...selectedDates, dateStr]);
+                                                            } else {
+                                                                setSelectedDates(selectedDates.filter(d => d !== dateStr));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <div className="flex flex-col">
+                                                        <span className={`text-sm font-bold ${isSelected ? 'text-blue-900' : 'text-slate-700'}`}>{displayStr}</span>
+                                                        <span className={`text-xs ${isSelected ? 'text-blue-600' : 'text-slate-500'}`}>{dayStr}</span>
+                                                    </div>
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center p-4 bg-orange-50 text-orange-800 rounded-xl border border-orange-200 text-sm">
+                                    No start and end dates found for this session. Please set them in the session details first.
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="mt-8">
+                            <button 
+                                onClick={handleSaveBulkDates}
+                                disabled={isSaving || selectedDates.length === 0}
+                                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-3 rounded-xl transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2"
+                            >
+                                {isSaving ? (
+                                    <>
+                                        <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Saving Dates...
+                                    </>
+                                ) : (
+                                    `Save Selected Dates (${selectedDates.length})`
+                                )}
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -230,6 +335,10 @@ export default function AttendanceTab({ session }: { session: any }) {
                                 const isAbsent = nom.status === 'Absent' || localFinalized[empId] === 'Absent';
                                 const isFinalized = isCompleted || isAbsent;
 
+                                const todayStr = new Date().toISOString().split('T')[0];
+                                const endDateStr = session.endDate ? new Date(session.endDate).toISOString().split('T')[0] : '';
+                                const canFinalize = endDateStr ? todayStr >= endDateStr : true;
+
                                 // Removed statusForSelectedDate logic
 
                                 return (
@@ -242,30 +351,41 @@ export default function AttendanceTab({ session }: { session: any }) {
                                         {/* Date Columns */}
                                         {classDates.map((dateObj: any, idx: number) => {
                                             const dateStr = new Date(dateObj).toISOString().split('T')[0];
+                                            const isFutureDate = dateStr > todayStr;
                                             const statusForDate = localAttendance[empId]?.[dateStr] || 'Present';
+                                            
+                                            const isDisabled = isSaving || isFinalized || isFutureDate;
                                             
                                             return (
                                                 <td key={idx} className="p-4 text-center border-r border-slate-100">
-                                                    <button 
-                                                        onClick={() => toggleAttendance(empId, dateObj)}
-                                                        disabled={isSaving || isFinalized}
-                                                        className={`transition-all rounded-full p-2 border-2 shadow-sm ${
-                                                            isFinalized ? 'opacity-50 cursor-not-allowed grayscale' : ''
-                                                        } ${
-                                                            statusForDate === 'Present' 
-                                                            ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' 
-                                                            : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
-                                                        }`}
-                                                        title={isFinalized ? 'Training finalized' : `Currently ${statusForDate}. Click to change.`}
-                                                    >
-                                                        {statusForDate === 'Present' 
-                                                            ? <HiOutlineCheckCircle className="w-5 h-5" /> 
-                                                            : <HiOutlineXCircle className="w-5 h-5" />
-                                                        }
-                                                    </button>
-                                                    <div className={`text-[9px] mt-2 font-black tracking-widest uppercase ${statusForDate === 'Present' ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {statusForDate}
-                                                    </div>
+                                                    {isFutureDate ? (
+                                                        <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-1 rounded border border-slate-100 inline-block mt-2">
+                                                            Available {new Date(dateObj).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                                                        </div>
+                                                    ) : (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => toggleAttendance(empId, dateObj)}
+                                                                disabled={isDisabled}
+                                                                className={`transition-all rounded-full p-2 border-2 shadow-sm ${
+                                                                    isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''
+                                                                } ${
+                                                                    statusForDate === 'Present' 
+                                                                    ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' 
+                                                                    : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                                                                }`}
+                                                                title={isFinalized ? 'Training finalized' : `Currently ${statusForDate}. Click to change.`}
+                                                            >
+                                                                {statusForDate === 'Present' 
+                                                                    ? <HiOutlineCheckCircle className="w-5 h-5" /> 
+                                                                    : <HiOutlineXCircle className="w-5 h-5" />
+                                                                }
+                                                            </button>
+                                                            <div className={`text-[9px] mt-2 font-black tracking-widest uppercase ${statusForDate === 'Present' ? 'text-green-600' : 'text-red-600'}`}>
+                                                                {statusForDate}
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </td>
                                             );
                                         })}
@@ -281,19 +401,25 @@ export default function AttendanceTab({ session }: { session: any }) {
                                                 }`}>
                                                     {isCompleted ? 'Completed' : 'Absent'}
                                                 </div>
+                                            ) : !canFinalize ? (
+                                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-3 py-1.5 rounded-full inline-block border border-slate-100">
+                                                    Available {session.endDate ? new Date(session.endDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'later'}
+                                                </div>
                                             ) : (
                                                 <div className="flex gap-2 justify-center">
                                                     <button 
                                                         onClick={() => handleFinalize(empId, 'Completed')}
                                                         disabled={isSaving}
-                                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold tracking-wider transition-colors shadow-sm disabled:opacity-50 uppercase"
+                                                        className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold tracking-wider transition-colors shadow-sm uppercase"
+                                                        title="Mark as Completed"
                                                     >
                                                         Mark Completed
                                                     </button>
                                                     <button 
                                                         onClick={() => handleFinalize(empId, 'Absent')}
                                                         disabled={isSaving}
-                                                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-bold tracking-wider transition-colors disabled:opacity-50 uppercase"
+                                                        className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-bold tracking-wider transition-colors uppercase"
+                                                        title="Mark as Absent"
                                                     >
                                                         Mark Absent
                                                     </button>
