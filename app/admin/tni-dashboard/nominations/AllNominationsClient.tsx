@@ -218,7 +218,7 @@ export default function AllNominationsClient({ nominations }: Props) {
                                         <th className="px-4 py-3 w-[14%]">Status</th>
                                     </>
                                 )}
-                                <th className="px-4 py-3 w-[8%] text-right">Actions</th>
+                                <th className="px-4 py-3 w-[8%] text-right">Mark as Inactive</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">

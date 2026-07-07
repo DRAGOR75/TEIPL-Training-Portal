@@ -228,6 +228,13 @@ export async function lockSessionBatch(sessionId: string) {
             data: { status: 'Scheduled' }
         });
 
+        if (result.count > 0) {
+            await db.trainingSession.update({
+                where: { id: sessionId },
+                data: { status: 'Scheduled' }
+            });
+        }
+
         if (result.count === 0) {
             // Check why it failed (Already Scheduled is fine, Completed is bad to overwrite)
             const currentBatch = await db.nominationBatch.findUnique({
@@ -276,6 +283,13 @@ export async function unlockSessionBatch(sessionId: string) {
             },
             data: { status: 'Forming' }
         });
+
+        if (result.count > 0) {
+            await db.trainingSession.update({
+                where: { id: sessionId },
+                data: { status: 'Forming' }
+            });
+        }
 
         if (result.count === 0) {
             const currentBatch = await db.nominationBatch.findUnique({

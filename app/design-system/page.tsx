@@ -3,6 +3,7 @@
 // import { Badge } from "@/components/ui/badge";
 // import { Card } from "@/components/ui/card";
 import { HiOutlineCheckCircle, HiOutlineExclamationCircle, HiOutlineCalendar, HiOutlineSquares2X2, HiOutlineUser } from 'react-icons/hi2';
+import { FiArrowLeft } from 'react-icons/fi';
 
 export default function DesignSystemPage() {
     return (
@@ -195,6 +196,82 @@ export default function DesignSystemPage() {
                                 />
                                 <p className="text-xs text-slate-400 font-mono mt-2">px-4 py-3 rounded-xl bg-slate-50</p>
                             </div>
+                        </div>
+
+                        {/* Tables */}
+                        <div className="space-y-4 col-span-1 md:col-span-2 mt-4">
+                            <p className="font-bold text-slate-900">Tables & Data Grids (Master Data Style)</p>
+                            <p className="text-sm text-slate-500 max-w-3xl">
+                                Tables should feature a distinct, ultra-compact header with uppercase, black-weight typography. The container uses a rounded-2xl soft shadow shell.
+                            </p>
+                            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                                <div className="overflow-x-auto relative">
+                                    <table className="w-full table-fixed text-xs text-left min-w-[600px]">
+                                        <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 shadow-sm before:content-[''] before:absolute before:inset-0 before:border-b before:border-slate-200 before:pointer-events-none">
+                                            <tr>
+                                                <th className="px-4 py-3 w-[10%] text-center">No</th>
+                                                <th className="px-4 py-3 w-[30%]">Employee</th>
+                                                <th className="px-4 py-3 w-[20%]">Status</th>
+                                                <th className="px-4 py-3 w-[40%] text-right">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100 bg-white">
+                                            <tr className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="px-4 py-2 text-center text-[10px] font-bold text-slate-400">1</td>
+                                                <td className="px-4 py-2">
+                                                    <div className="font-bold text-slate-900 text-[11px] truncate">John Doe</div>
+                                                    <div className="text-[10px] text-slate-500 font-medium truncate">john@example.com</div>
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-green-50 text-green-700 border border-green-100">
+                                                        ACTIVE
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-2 text-right">
+                                                    <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100">
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            <tr className="hover:bg-slate-50/50 transition-colors group">
+                                                <td className="px-4 py-2 text-center text-[10px] font-bold text-slate-400">2</td>
+                                                <td className="px-4 py-2">
+                                                    <div className="font-bold text-slate-900 text-[11px] truncate">Jane Smith</div>
+                                                    <div className="text-[10px] text-slate-500 font-medium truncate">jane@example.com</div>
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                                                        PENDING
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-2 text-right">
+                                                    <button className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors border border-transparent hover:border-blue-100">
+                                                        Edit
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <p className="text-xs text-slate-400 font-mono mt-2">Header: text-[10px] font-black uppercase tracking-wider | Body: text-[11px] / text-[10px]</p>
+                        </div>
+
+                        {/* Page Headers (Two-Tone) */}
+                        <div className="space-y-4 col-span-1 md:col-span-2">
+                            <p className="font-bold text-slate-900">Page Headers (Two-Tone)</p>
+                            <p className="text-sm text-slate-500 max-w-3xl">
+                                Used for main section headers, featuring a small "back" link and a massive, tightly-tracked, two-tone typography style.
+                            </p>
+                            <div className="bg-white p-12 rounded-3xl border border-slate-200 shadow-sm flex flex-col items-start justify-center">
+                                <button className="flex items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-sm uppercase tracking-wider transition-colors mb-2">
+                                    <FiArrowLeft className="w-4 h-4" /> Back to Home
+                                </button>
+                                <h1 className="text-6xl font-black tracking-tighter uppercase">
+                                    <span className="text-slate-900">Admin</span> <span className="text-blue-600">Panel</span>
+                                </h1>
+                            </div>
+                            <p className="text-xs text-slate-400 font-mono mt-2">text-6xl font-black tracking-tighter uppercase (Split with text-slate-900 and text-blue-600)</p>
                         </div>
                     </div>
 

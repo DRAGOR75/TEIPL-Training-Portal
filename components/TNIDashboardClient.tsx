@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { submitTNINomination } from '@/app/actions/tni';
+import { submitTNINomination, markNominationInactive } from '@/app/actions/tni';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import SearchableSelect from './ui/SearchableSelect';
 import { HiOutlinePlus, HiOutlineXMark, HiOutlineClipboardDocumentList, HiOutlineAcademicCap, HiOutlineCheckCircle, HiOutlineClock, HiChevronDown, HiChevronUp } from 'react-icons/hi2';
@@ -42,6 +42,17 @@ export default function TNIDashboardClient({
     const [isPending, startTransition] = useTransition();
 
     // Form states
+    const handleMarkInactive = (nominationId: string) => {
+        if (!window.confirm("Are you sure you want to mark this TNI as inactive? It will be hidden from the dashboard.")) {
+            return;
+        }
+        startTransition(async () => {
+            const res = await markNominationInactive(nominationId);
+            if (!res.success) {
+                alert(res.error || "Failed to mark as inactive");
+            }
+        });
+    };
     const [formValues, setFormValues] = useState<{
         selectedProgramId: string[];
         justification: string;
@@ -131,7 +142,7 @@ export default function TNIDashboardClient({
             const progSections = (p as any).sections || [];
             matchesSection = progSections.some((s: any) => s.id === formValues.selectedSectionId);
         }
-        
+
         let matchesCategory = true;
         if (formValues.selectedCategory) {
             matchesCategory = p.category === formValues.selectedCategory;
@@ -253,6 +264,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Approval</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">TNI Status</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
+                                            {isTrainerView && <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap">Mark as Inactive</th>}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
@@ -300,6 +312,19 @@ export default function TNIDashboardClient({
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}
                                                 </td>
+                                                {isTrainerView && (
+                                                    <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-center whitespace-nowrap">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMarkInactive(nom.id)}
+                                                            disabled={isPending}
+                                                            className="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors disabled:opacity-50"
+                                                            title="Mark as Inactive"
+                                                        >
+                                                            <HiOutlineXMark size={16} />
+                                                        </button>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>
@@ -346,6 +371,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Justification</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Manager Approval</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap">Submitted</th>
+                                            {isTrainerView && <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap">Mark as Inactive</th>}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-200">
@@ -367,6 +393,19 @@ export default function TNIDashboardClient({
                                                         month: 'short', day: 'numeric', year: 'numeric'
                                                     })}
                                                 </td>
+                                                {isTrainerView && (
+                                                    <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-center whitespace-nowrap">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleMarkInactive(nom.id)}
+                                                            disabled={isPending}
+                                                            className="text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors disabled:opacity-50"
+                                                            title="Mark as Inactive"
+                                                        >
+                                                            <HiOutlineXMark size={16} />
+                                                        </button>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>

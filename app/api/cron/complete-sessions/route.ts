@@ -44,6 +44,16 @@ export async function GET(request: Request) {
             }
         });
 
+        // Sync the training sessions' status to 'Completed'
+        await db.trainingSession.updateMany({
+            where: {
+                nominationBatchId: { in: batchIds }
+            },
+            data: {
+                status: 'Completed'
+            }
+        });
+
         return NextResponse.json({ 
             success: true, 
             message: `Successfully completed ${result.count} session(s).`,
