@@ -339,7 +339,7 @@ export async function getAllNominations() {
 
 export async function markNominationInactive(nominationId: string) {
     const session = await auth();
-    if (session?.user?.role !== 'ADMIN') {
+    if (!session?.user?.role || !['ADMIN', 'TRAINER'].includes(session.user.role)) {
         return { success: false, error: 'Unauthorized' };
     }
     

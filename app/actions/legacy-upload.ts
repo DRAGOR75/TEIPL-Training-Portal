@@ -29,6 +29,7 @@ export interface LegacyRecord {
     year?: string;
     gender?: string;
     attendancePercentage?: number | null;
+    sessionId?: string;
 }
 
 function parseDate(dateStr?: string): Date | null {
@@ -247,6 +248,7 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 year: record.year || null,
                 gender: record.gender || null,
                 attendancePercentage: record.attendancePercentage || null,
+                sessionId: record.sessionId || null,
                 source: 'LEGACY'
             };
         });

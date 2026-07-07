@@ -79,7 +79,7 @@ async function main() {
                         endDate: session.endDate,
                         trainingDays: trainingDays > 0 ? trainingDays : null,
                         region: emp.region,
-                        progCategory: progCategory,
+                        progCategory: session.sessionCategory || progCategory,
 
                         organization: emp.organization,
                         onRollContract: emp.onRollContract,
@@ -110,6 +110,7 @@ async function main() {
                         status: finalStatus,
                         programName: session.programName,
                         sessionCategory: session.sessionCategory,
+                        progCategory: session.sessionCategory,
                         altProgramName: session.altProgramName
                     }
                 });

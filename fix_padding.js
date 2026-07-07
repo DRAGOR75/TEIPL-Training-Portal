@@ -1,0 +1,1 @@
+const fs=require('fs');let s=fs.readFileSync('app/admin/tests/QualificationsClient.tsx','utf8');s=s.replace(/td className="p-4/g,'td className="px-4 py-2');fs.writeFileSync('app/admin/tests/QualificationsClient.tsx',s);

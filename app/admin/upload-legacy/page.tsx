@@ -56,6 +56,7 @@ export default function UploadLegacyDataPage() {
                         year: row['Year']?.trim() || row['YEAR']?.trim(),
                         gender: row['Gender']?.trim(),
                         attendancePercentage: parseFloat(row['Attd %']) || null,
+                        sessionId: row['ProgID']?.trim() || row['sessionId']?.trim() || row['Session ID']?.trim() || row['session_id']?.trim(),
                     };
                 }).filter(r => r.empId && r.programName); // Basic validation
 

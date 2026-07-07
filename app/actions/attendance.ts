@@ -151,7 +151,19 @@ export async function finalizeParticipantTraining(
         });
 
         const monthStr = start.toLocaleString('en-US', { month: 'short' });
-        const yearStr = start.getFullYear().toString();
+        const fullYear = start.getFullYear();
+        const currentMonth = start.getMonth(); // 0-11
+        
+        let startYear, endYear;
+        if (currentMonth < 3) { // Jan, Feb, Mar belong to previous financial year
+            startYear = fullYear - 1;
+            endYear = fullYear;
+        } else { // Apr-Dec belong to current financial year
+            startYear = fullYear;
+            endYear = fullYear + 1;
+        }
+        
+        const yearStr = `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
 
         if (!existingHistory) {
             await db.systemTrainingHistory.create({
@@ -164,7 +176,7 @@ export async function finalizeParticipantTraining(
                     endDate: session.endDate,
                     trainingDays: trainingDays > 0 ? trainingDays : null,
                     region: emp.region,
-                    progCategory: progCategory,
+                    progCategory: session.sessionCategory || progCategory,
 
                     organization: emp.organization,
                     onRollContract: emp.onRollContract,
@@ -194,6 +206,7 @@ export async function finalizeParticipantTraining(
                     status: finalStatus,
                     programName: session.programName,
                     sessionCategory: session.sessionCategory,
+                    progCategory: session.sessionCategory,
                     altProgramName: session.altProgramName
                 }
             });

@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useMemo, useTransition } from 'react';
-import { HiOutlineCalendar, HiOutlinePlus, HiOutlineCheckCircle, HiOutlineTableCells, HiOutlineCalendarDays, HiOutlineTrash, HiOutlinePencilSquare, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
+import { HiOutlineCalendar, HiOutlinePlus, HiOutlineCheckCircle, HiOutlineTableCells, HiOutlineCalendarDays, HiOutlineTrash, HiOutlinePencilSquare, HiOutlineDocumentArrowDown, HiOutlineExclamationTriangle } from 'react-icons/hi2';
 import Link from 'next/link';
 import { exportToExcel } from '@/lib/export-utils';
 import GanttCalendar from '@/components/planning/GanttCalendar';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import EditSessionModal from '@/components/admin/EditSessionModal';
+import CancelSessionModal from '@/components/admin/CancelSessionModal';
 import { deleteTrainingSession } from '@/app/actions/delete-session';
 
 export default function TrainingCalendarManager({ programs, trainers, allSessions, locations }: any) {
@@ -167,9 +168,30 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                                             </div>
                                         </td>
                                         <td className="px-4 py-2 align-middle">
-                                            <span className="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1">
-                                                <HiOutlineCheckCircle size={12} /> Scheduled
-                                            </span>
+                                            {event.originalSession.status === 'Cancelled' ? (
+                                                <div className="flex flex-col gap-1">
+                                                    <span className="bg-rose-100 text-rose-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-rose-200 inline-flex items-center gap-1 w-max">
+                                                        <HiOutlineExclamationTriangle size={12} /> Cancelled
+                                                    </span>
+                                                    {event.originalSession.cancellationReason && (
+                                                        <span className="text-[9px] text-rose-500 italic truncate max-w-[150px]" title={event.originalSession.cancellationReason}>
+                                                            {event.originalSession.cancellationReason}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : event.originalSession.status === 'Completed' ? (
+                                                <span className="bg-blue-100 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-blue-200 inline-flex items-center gap-1 w-max">
+                                                    <HiOutlineCheckCircle size={12} /> Completed
+                                                </span>
+                                            ) : event.originalSession.status === 'Forming' ? (
+                                                <span className="bg-amber-100 text-amber-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-amber-200 inline-flex items-center gap-1 w-max">
+                                                    <HiOutlineCheckCircle size={12} /> Forming
+                                                </span>
+                                            ) : (
+                                                <span className="bg-emerald-100 text-emerald-700 text-[9px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 inline-flex items-center gap-1 w-max">
+                                                    <HiOutlineCheckCircle size={12} /> Scheduled
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-4 py-2 align-middle text-right">
                                             <div className="flex justify-end gap-1.5">
@@ -186,10 +208,24 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                                                         </button>
                                                     }
                                                 />
+                                                {event.originalSession.status !== 'Cancelled' && (
+                                                    <CancelSessionModal
+                                                        session={event.originalSession}
+                                                        triggerComponent={
+                                                            <button
+                                                                className="flex items-center justify-center gap-1.5 bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors"
+                                                                title="Cancel Session"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        }
+                                                    />
+                                                )}
                                                 <button
                                                     onClick={() => handleDelete(event.id)}
                                                     disabled={isPending}
                                                     className="flex items-center justify-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-2.5 py-1 rounded-lg font-bold text-[11px] transition-colors disabled:opacity-50"
+                                                    title="Delete Session"
                                                 >
                                                     <HiOutlineTrash size={14} />
                                                 </button>

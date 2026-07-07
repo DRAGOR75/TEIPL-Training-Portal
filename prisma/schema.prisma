@@ -194,6 +194,10 @@ model TrainingSession {
   feedbackEmailsSent Boolean   @default(false) @map("feedback_emails_sent")
   sessionCategory    String?   @map("session_category")
 
+  // Cancellation fields
+  status             String  @default("Forming") // Forming, Scheduled, Completed, Cancelled
+  cancellationReason String? @db.Text @map("cancellation_reason")
+
   classDates        DateTime[]         @map("class_dates") // Track specific days of training
   attendanceRecords AttendanceRecord[]
 
