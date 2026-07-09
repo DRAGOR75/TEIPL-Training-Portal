@@ -26,7 +26,7 @@ export default function LocationManager({ locations }: { locations: Location[] }
     }
 
     async function handleDelete(id: string) {
-        if (!confirm('Delete location?')) return;
+        if (!confirm('Delete region?')) return;
         setDeletingId(id);
         const result = await deleteLocation(id);
         setDeletingId(null);
@@ -41,17 +41,17 @@ export default function LocationManager({ locations }: { locations: Location[] }
                         <HiOutlineMapPin size={22} />
                     </div>
                     <div>
-                        <h2 className="text-lg font-black text-slate-900 tracking-tight">TRAINING VENUES</h2>
-                        <p className="text-slate-500 font-medium text-xs mt-0.5">{locations.length} venues managed</p>
+                        <h2 className="text-lg font-black text-slate-900 tracking-tight">REGIONS</h2>
+                        <p className="text-slate-500 font-medium text-xs mt-0.5">{locations.length} regions managed</p>
                     </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
                     <button
                         onClick={() => {
                             const exportData = locations.map(l => ({
-                                'Venue Name': l.name
+                                'Region Name': l.name
                             }));
-                            exportToExcel(exportData, 'Training_Venues');
+                            exportToExcel(exportData, 'Regions');
                         }}
                         className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                     >
@@ -64,8 +64,8 @@ export default function LocationManager({ locations }: { locations: Location[] }
             <div className="p-6">
                 <form ref={formRef} action={handleAdd} className="flex flex-col sm:flex-row gap-4 items-end bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <div className="flex-1 w-full">
-                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">New Location Name</label>
-                        <input name="name" required placeholder="e.g. Training classroom TRC, Conference Hall" className="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 placeholder-slate-500" />
+                        <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">New Region Name</label>
+                        <input name="name" required placeholder="e.g. North, South, Head Office" className="w-full p-3 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none text-slate-800 placeholder-slate-500" />
                     </div>
                     <FormSubmitButton className="px-6 py-3 w-full sm:w-auto bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition disabled:opacity-50 flex items-center justify-center gap-2">
                         <HiOutlinePlus size={16} className="stroke-[2.5]" /> Add

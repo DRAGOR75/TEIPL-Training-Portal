@@ -300,7 +300,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
                         <SearchableSelect
                             options={locationOptions}
                             value={formData.location}

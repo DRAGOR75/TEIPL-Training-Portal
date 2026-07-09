@@ -78,7 +78,7 @@ async function main() {
                         startDate: session.startDate,
                         endDate: session.endDate,
                         trainingDays: trainingDays > 0 ? trainingDays : null,
-                        region: emp.region,
+                        employeeRegion: emp.region,
                         progCategory: session.sessionCategory || progCategory,
 
                         organization: emp.organization,

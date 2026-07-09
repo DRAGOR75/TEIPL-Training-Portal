@@ -12,12 +12,16 @@ export async function updateSession(sessionId: string, formData: FormData) {
 
     const startDateRaw = formData.get('startDate') as string;
     const endDateRaw = formData.get('endDate') as string;
-    const startTime = formData.get('startTime') as string;
-    const endTime = formData.get('endTime') as string;
     const trainerName = formData.get('trainerName') as string;
+    const coordinatorName = formData.get('coordinatorName') as string;
     const location = formData.get('location') as string;
+    const region = formData.get('region') as string;
+    const trainingLocationAddress = formData.get('trainingLocationAddress') as string;
     const topics = formData.get('topics') as string;
     const assessmentDateRaw = formData.get('assessmentDate') as string;
+    
+    const trainingDaysRaw = formData.get('trainingDays');
+    const trainingHoursRaw = formData.get('trainingHours');
 
     if (!startDateRaw || !endDateRaw) {
         return { success: false, error: 'Start Date and End Date are required.' };
@@ -49,10 +53,13 @@ export async function updateSession(sessionId: string, formData: FormData) {
         const dataToUpdate: any = {
             startDate,
             endDate,
-            startTime,
-            endTime,
             trainerName: trainerName || null,
+            coordinatorName: coordinatorName || null,
             location: location || null,
+            region: region || null,
+            trainingLocationAddress: trainingLocationAddress || null,
+            trainingDays: trainingDaysRaw ? parseFloat(trainingDaysRaw as string) : null,
+            trainingHours: trainingHoursRaw ? parseFloat(trainingHoursRaw as string) : null,
             topics: topics || null
         };
 

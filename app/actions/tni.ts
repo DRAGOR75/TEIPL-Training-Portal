@@ -187,6 +187,21 @@ export async function submitTNINomination(formData: FormData) {
     const bypassEmail = formData.get('bypassEmail') === 'on';
     const redirectUrl = formData.get('redirectUrl') as string;
 
+    const session = await auth();
+    let sourceValue = 'MANUAL';
+    if (session?.user) {
+        if (session.user.role === 'ADMIN') {
+            sourceValue = 'MANUAL-ADMIN';
+        } else if (session.user.role === 'TRAINER') {
+            const trainerName = session.user.name ? session.user.name.replace(/\s+/g, '-') : 'Unknown';
+            sourceValue = `MANUAL-TRAINER-${trainerName}`.toUpperCase();
+        } else if (session.user.role === 'MANAGER') {
+            sourceValue = 'MANUAL-MANAGER';
+        } else if (session.user.role === 'USER') {
+            sourceValue = 'MANUAL-SELF';
+        }
+    }
+
     // Collect all selected program IDs
     const programIds: string[] = [];
     for (const [key, value] of formData.entries()) {
@@ -210,7 +225,8 @@ export async function submitTNINomination(formData: FormData) {
                 programId,
                 justification: safeJustification,
                 status: bypassEmail ? 'Approved' : 'Pending',
-                managerApprovalStatus: bypassEmail ? 'Approved' : 'Pending'
+                managerApprovalStatus: bypassEmail ? 'Approved' : 'Pending',
+                source: sourceValue
             }))
         });
 

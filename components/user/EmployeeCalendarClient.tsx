@@ -50,7 +50,7 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Start Date</th>
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">End Date</th>
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Trainer</th>
-                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Location</th>
+                                <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Region</th>
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Enrolled persons</th>
                             </tr>
                         </thead>

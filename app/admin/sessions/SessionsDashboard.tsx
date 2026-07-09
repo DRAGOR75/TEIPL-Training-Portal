@@ -368,13 +368,13 @@ export default function SessionsDashboard({
                                             {/* Action Buttons */}
                                             <div className="pt-2 flex flex-col md:flex-row gap-3">
                                                 <button onClick={(e) => { e.stopPropagation(); router.push(`/admin/sessions/${session.id}/manage`); }} className="flex-1 px-6 flex items-center justify-center gap-2 bg-white border border-slate-200 hover:border-blue-400 hover:text-blue-600 text-slate-700 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95 group/btn">
-                                                    Manage Session
+                                                    Manage Participants
                                                     <HiOutlineArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                                                 </button>
-                                                <EditSessionModal 
-                                                    session={session} 
-                                                    trainers={initialTrainers} 
-                                                    locations={locations} 
+                                                <EditSessionModal
+                                                    session={session}
+                                                    trainers={initialTrainers}
+                                                    locations={locations}
                                                     triggerComponent={
                                                         <button className="w-full md:w-auto px-6 flex items-center justify-center gap-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 py-2.5 rounded-xl font-bold text-sm transition-all shadow-sm active:scale-95">
                                                             <HiOutlinePencilSquare className="w-4 h-4" /> Edit

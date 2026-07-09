@@ -222,7 +222,7 @@ export default function JoinPage() {
                                 <p className="font-medium text-slate-700">{employeeDetails.sectionName}</p>
                             </div>
                             <div>
-                                <p className="text-xs font-bold text-slate-400 uppercase">Location</p>
+                                <p className="text-xs font-bold text-slate-400 uppercase">Region</p>
                                 <p className="font-medium text-slate-700">{employeeDetails.location}</p>
                             </div>
                         </div>

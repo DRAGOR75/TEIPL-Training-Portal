@@ -110,23 +110,21 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                         </div>
                     </div>
 
-                    {/* Time Fields */}
+                    {/* Duration Fields */}
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 uppercase">Start Time</label>
+                            <label className="text-xs font-bold text-slate-700 uppercase">Training Days</label>
                             <input
-                                type="time"
-                                value={startTime}
-                                onChange={e => setStartTime(e.target.value)}
+                                type="number" step="0.5" min="0" placeholder="e.g. 2"
+                                name="trainingDays"
                                 className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 uppercase">End Time</label>
+                            <label className="text-xs font-bold text-slate-700 uppercase">Training Hours</label>
                             <input
-                                type="time"
-                                value={endTime}
-                                onChange={e => setEndTime(e.target.value)}
+                                type="number" step="0.5" min="0" placeholder="e.g. 16"
+                                name="trainingHours"
                                 className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             />
                         </div>
@@ -155,7 +153,7 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                             })()}
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-xs font-bold text-slate-700 uppercase">Location</label>
+                            <label className="text-xs font-bold text-slate-700 uppercase">Region</label>
                             {locationMode === 'select' ? (
                                 <SearchableSelect
                                     options={[
@@ -193,6 +191,19 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                                     </button>
                                 </div>
                             )}
+                            {/* Hidden input to ensure it gets submitted with formData */}
+                            <input type="hidden" name="location" value={location} />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 uppercase">Training Location</label>
+                            <input name="region" type="text" placeholder="e.g. Head Office" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-xs font-bold text-slate-700 uppercase">Detailed Address</label>
+                            <input name="trainingLocationAddress" type="text" placeholder="e.g. Conf Room A" className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
                         </div>
                     </div>
 
