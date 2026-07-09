@@ -172,11 +172,15 @@ model TrainingSession {
   programName               String    @map("program_name")
   altProgramName            String?   @map("alt_program_name")
   trainerName               String?   @map("trainer_name")
+  coordinatorName           String?   @map("coordinator_name")
   startDate                 DateTime  @map("start_date")
   endDate                   DateTime  @map("end_date")
   startTime                 String?   @map("start_time") // e.g. "10:00 am"
   endTime                   String?   @map("end_time") // e.g. "5:00 pm"
+  trainingDays              Float?    @map("training_days")
+  trainingHours             Float?    @map("training_hours")
   location                 String?
+  region                   String?
   trainingLocationAddress   String?   @map("training_location_address")
 
   topics                    String?   @db.Text
@@ -751,7 +755,8 @@ model SystemTrainingHistory {
   startDate    DateTime @map("start_date")
   endDate      DateTime @map("end_date")
   trainingDays Int?     @map("training_days")
-  region       String?
+  employeeRegion String? @map("employee_region")
+  employeeLocation String? @map("employee_location")
 
   organization  String? 
   onRollContract String? @map("onroll_contract")
@@ -766,8 +771,10 @@ model SystemTrainingHistory {
   gender         String?
   attendancePercentage     Float?  @map("attendance_percentage")
 
-  location     String?
-  progCategory String?  @map("prog_category")
+  location       String? // Acts as programLocation
+  programRegion  String? @map("program_region")
+  programAddress String? @map("program_address")
+  progCategory   String?  @map("prog_category")
 
   // Fields for Modern System Sync
   sessionId     String? @map("session_id")

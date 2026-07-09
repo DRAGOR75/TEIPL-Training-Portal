@@ -117,7 +117,7 @@ export default async function PrintAttendancePage({ params }: { params: Promise<
                             <span className="font-bold">Trainer Name: </span>{session.trainerName}
                         </div>
                         <div className="flex-1 p-2">
-                            <span className="font-bold">Coordinator Name: </span> _____________________
+                            <span className="font-bold">Coordinator Name: </span> {session.coordinatorName || '_____________________'}
                         </div>
                     </div>
                 </div>

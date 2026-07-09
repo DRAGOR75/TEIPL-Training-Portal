@@ -128,7 +128,7 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                                 <th className="px-4 py-3">Program Name</th>
                                 <th className="px-4 py-3">Dates</th>
                                 <th className="px-4 py-3">Trainer</th>
-                                <th className="px-4 py-3">Location</th>
+                                <th className="px-4 py-3">Region</th>
                                 <th className="px-4 py-3">Status</th>
                                 <th className="px-4 py-3 text-right">Actions</th>
                             </tr>

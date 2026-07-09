@@ -137,7 +137,7 @@ export async function finalizeParticipantTraining(
 
         const start = new Date(session.startDate);
         const end = new Date(session.endDate);
-        const trainingDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
+        const trainingDays = session.trainingDays || Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24)) + 1;
 
         // Mark Nomination as finalStatus (Completed or Absent)
         await db.nomination.updateMany({
@@ -175,7 +175,8 @@ export async function finalizeParticipantTraining(
                     startDate: session.startDate,
                     endDate: session.endDate,
                     trainingDays: trainingDays > 0 ? trainingDays : null,
-                    region: emp.region,
+                    employeeRegion: emp.region,
+                    employeeLocation: emp.location,
                     progCategory: session.sessionCategory || progCategory,
 
                     organization: emp.organization,
@@ -190,6 +191,8 @@ export async function finalizeParticipantTraining(
                     year: yearStr,
                     gender: emp.gender,
                     location: session.location || emp.location,
+                    programRegion: session.region,
+                    programAddress: session.trainingLocationAddress,
                     sessionId: sessionId,
                     trainerName: session.trainerName,
                     attendancePercentage: attendancePercentage,

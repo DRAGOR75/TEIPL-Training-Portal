@@ -193,7 +193,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Schedule Details</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Duration</th>
-                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Location</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Region</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap">Status</th>
                                         </tr>
                                     </thead>
@@ -210,7 +210,7 @@ export default function TNIDashboardClient({
                                                     )}
                                                 </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-600 font-medium whitespace-nowrap">{record.trainingDays ? `${record.trainingDays} Days` : '-'}</td>
-                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-700 font-medium whitespace-nowrap">{record.location || record.region || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-700 font-medium whitespace-nowrap">{record.location || record.region || record.employeeRegion || '-'}</td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-center whitespace-nowrap">
                                                     <span className="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl text-[9px] sm:text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
                                                         Completed

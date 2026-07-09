@@ -198,7 +198,7 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                                                             href={`/admin/sessions/${cp.session.id}/manage`}
                                                             className="text-blue-600 hover:text-blue-800 font-bold flex items-center gap-1"
                                                         >
-                                                            Manage Session <HiOutlineArrowTopRightOnSquare className="w-3 h-3" />
+                                                            Manage Participants <HiOutlineArrowTopRightOnSquare className="w-3 h-3" />
                                                         </Link>
                                                     </div>
                                                 </div>

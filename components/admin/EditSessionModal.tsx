@@ -90,10 +90,9 @@ export default function EditSessionModal({
 
 function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     // Form State pre-filled with session data
-    const initialTrainers = session.trainerName 
-        ? session.trainerName.split(/,|&|\band\b/i).map((t: string) => t.trim()).filter((t: string) => t.length > 0)
-        : [''];
-    const [selectedTrainers, setSelectedTrainers] = useState<string[]>(initialTrainers.length > 0 ? initialTrainers : ['']);
+    const initialTrainer = session.trainerName ? session.trainerName.trim() : '';
+    const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
+    const [selectedCoordinator, setSelectedCoordinator] = useState<string>(session.coordinatorName || '');
     
     const isLocationInList = session.location ? locations.some((l:any) => l.name === session.location) : false;
     const initialLocationMode = (!session.location || isLocationInList) ? 'select' : 'custom';
@@ -121,19 +120,25 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     };
 
     const trainerOptions = trainers.map((t:any) => ({ label: t.name, value: t.name }));
-    selectedTrainers.forEach(tName => {
-        if (tName && !trainerOptions.find((o: { label: string; value: string }) => o.value === tName)) {
-            trainerOptions.push({ label: tName, value: tName });
-        }
-    });
+    if (selectedTrainer && !trainerOptions.find((o: { label: string; value: string }) => o.value === selectedTrainer)) {
+        trainerOptions.push({ label: selectedTrainer, value: selectedTrainer });
+    }
+    if (selectedCoordinator && !trainerOptions.find((o: { label: string; value: string }) => o.value === selectedCoordinator)) {
+        trainerOptions.push({ label: selectedCoordinator, value: selectedCoordinator });
+    }
     const locationOptions = locations.map((l:any) => ({ label: l.name, value: l.name }));
     locationOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
 
     return (
         <div className="overflow-y-auto p-6 h-full custom-scrollbar">
             <form action={async (formData) => {
-                const activeTrainers = selectedTrainers.filter(t => t.trim() !== '');
-                formData.set('trainerName', activeTrainers.join(' & '));
+                formData.set('trainerName', selectedTrainer);
+                if (selectedCoordinator) {
+                    formData.set('coordinatorName', selectedCoordinator);
+                } else {
+                    formData.delete('coordinatorName');
+                    formData.append('coordinatorName', '');
+                }
 
                 if (locationMode === 'select') {
                     if (selectedLocation === 'OTHER_CUSTOM') {
@@ -176,49 +181,30 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                     </div>
                     
                     <div>
-                        <label className="block text-sm font-semibold text-slate-700 mb-1">Trainer(s)</label>
-                        <div className="space-y-3">
-                            {selectedTrainers.map((tName, idx) => (
-                                <div key={idx} className="flex gap-2 relative">
-                                    <SearchableSelect
-                                        options={trainerOptions}
-                                        value={tName}
-                                        onChange={(val) => {
-                                            const newT = [...selectedTrainers];
-                                            newT[idx] = typeof val === 'string' ? val : String(val);
-                                            setSelectedTrainers(newT);
-                                        }}
-                                        onAddNew={(val) => {
-                                            const newT = [...selectedTrainers];
-                                            newT[idx] = val;
-                                            setSelectedTrainers(newT);
-                                        }}
-                                        addNewLabel="Use custom trainer"
-                                        placeholder={idx === 0 ? "Select Primary Trainer" : "Select Co-Trainer"}
-                                        searchPlaceholder="Search trainers..."
-                                        className="flex-1"
-                                    />
-                                    {idx > 0 && (
-                                        <button 
-                                            type="button" 
-                                            onClick={() => setSelectedTrainers(selectedTrainers.filter((_, i) => i !== idx))}
-                                            className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-colors border border-transparent hover:border-red-200"
-                                            title="Remove Co-Trainer"
-                                        >
-                                            <HiOutlineXMark size={20} />
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                            {/* Temporarily disabled co-trainer feature
-                            <button 
-                                type="button"
-                                onClick={() => setSelectedTrainers([...selectedTrainers, ''])}
-                                className="text-xs font-bold text-indigo-600 hover:text-indigo-800 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1 mt-1 -ml-2"
-                            >
-                                + Add Co-Trainer
-                            </button>
-                            */}
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer</label>
+                        <SearchableSelect
+                            options={trainerOptions}
+                            value={selectedTrainer}
+                            onChange={(val) => setSelectedTrainer(typeof val === 'string' ? val : String(val))}
+                            onAddNew={(val) => setSelectedTrainer(val)}
+                            addNewLabel="Use custom trainer"
+                            placeholder="Select Primary Trainer"
+                            searchPlaceholder="Search trainers..."
+                            className="w-full"
+                        />
+                        
+                        <div className="mt-4">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Coordinator / Co-Trainer (Optional)</label>
+                            <SearchableSelect
+                                options={trainerOptions}
+                                value={selectedCoordinator}
+                                onChange={(val) => setSelectedCoordinator(typeof val === 'string' ? val : String(val))}
+                                onAddNew={(val) => setSelectedCoordinator(val)}
+                                addNewLabel="Use custom coordinator"
+                                placeholder="Select Coordinator / Co-Trainer"
+                                searchPlaceholder="Search..."
+                                className="w-full"
+                            />
                         </div>
                     </div>
                 </div>
@@ -245,14 +231,15 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                 {mode === 'session' && (
                     <>
                         {/* ROW 3: Times */}
+                        {/* ROW 3: Duration */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Start Time</label>
-                                <input name="startTime" type="time" defaultValue={session.startTime || "08:30"} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days</label>
+                                <input name="trainingDays" type="number" step="0.5" min="0" defaultValue={session.trainingDays || ''} placeholder="e.g. 2" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">End Time</label>
-                                <input name="endTime" type="time" defaultValue={session.endTime || "18:00"} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours</label>
+                                <input name="trainingHours" type="number" step="0.5" min="0" defaultValue={session.trainingHours || ''} placeholder="e.g. 16" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                         </div>
 
@@ -273,7 +260,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
 
                 {/* ROW 4: Location */}
                 <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1">Location</label>
+                    <label className="block text-sm font-semibold text-slate-700 mb-1">Region</label>
                     {locationMode === 'select' ? (
                         <div className="space-y-2">
                             <div className="relative">
@@ -314,6 +301,18 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                             </button>
                         </div>
                     )}
+                </div>
+
+                {/* ROW 4.5: Training Location (Maps to region column) & Address */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location</label>
+                        <input name="region" type="text" defaultValue={session.region || ''} placeholder="e.g. Head Office" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Detailed Address / Venue Name</label>
+                        <input name="trainingLocationAddress" type="text" defaultValue={session.trainingLocationAddress || ''} placeholder="e.g. Conference Room A, 2nd Floor" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                    </div>
                 </div>
 
                 {/* ROW 5: Topics */}

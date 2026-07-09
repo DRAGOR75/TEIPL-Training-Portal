@@ -59,6 +59,10 @@ export default async function ManageSessionPage({ params }: PageProps) {
                                 <HiOutlineUser className="w-5 h-5 text-slate-400" />
                                 {session.trainerName || 'No Trainer Assigned'}
                             </div>
+                            <div className="flex items-center gap-2">
+                                <HiOutlineUser className="w-5 h-5 text-slate-400" />
+                                {session.coordinatorName ? `Coordinator: ${session.coordinatorName}` : 'No Coordinator'}
+                            </div>
                         </div>
                     </div>
                 </div>
