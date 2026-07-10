@@ -267,10 +267,10 @@ export default function UploadTNIPage() {
                                     {records.slice(0, 100).map((record, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="font-bold text-slate-700 font-mono bg-slate-100 px-2 py-1 rounded w-fit">{record['Emp.Id'] || record.EmpId || record.id || '-'}</div>
+                                                <div className="font-bold text-slate-700 font-mono bg-slate-100 px-2 py-1 rounded w-fit">{record['Emp.Id'] || record.EmpId || record.id || record['Emp ID'] || record['Emp.ID'] || '-'}</div>
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-slate-900 font-bold">{record['Emp.Name'] || record.name || record.Name || '-'}</div>
+                                                <div className="text-slate-900 font-bold">{record['Emp.Name'] || record.name || record.Name || record['Name'] || '-'}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-slate-600 font-medium">{record.Designation || record.designation || '-'}</div>
@@ -303,7 +303,7 @@ export default function UploadTNIPage() {
                                                 {record.DOJ || record.doj || record['Date of Joining'] || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
-                                                {record['Email ID'] || record['Email id'] || record.email || '-'}
+                                                {record.Email || record.email || record['Email id'] || record['Email ID'] || '-'}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
                                                 {record['Mobile No'] || record.Mobile || record.mobile || '-'}

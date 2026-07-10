@@ -44,7 +44,10 @@ interface EmployeeImportRow {
     'Separated  TNI (Technical)'?: string;
     // Fallbacks just in case headers vary slightly
     id?: string;
+    'Emp ID'?: string;
+    'Emp.ID'?: string;
     name?: string;
+    'Name'?: string;
     email?: string;
     'Subject Code'?: string;
     'DOB'?: string;
@@ -98,17 +101,17 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
     for (const row of rowData) {
         try {
             // Flexible ID checking
-            const empIdRaw = row['Emp.Id'] || row.id;
+            const empIdRaw = row['Emp.Id'] || row.id || row['Emp ID'] || row['Emp.ID'];
             if (!empIdRaw) {
                 errors.push(`Row missing Employee ID: Skipping`);
                 continue;
             }
 
             const empId = empIdRaw.toString().trim();
-            const empName = (row['Emp.Name'] || row.name || '').toString().trim();
+            const empName = (row['Emp.Name'] || row.name || row['Name'] || '').toString().trim();
 
             // Handle Email Placeholder
-            let emailRaw = (row.email || row['Email id'] || row['Email ID'])?.toString().trim();
+            let emailRaw = (row.email || row['Email'] || row['Email id'] || row['Email ID'])?.toString().trim();
             if (!emailRaw) {
                 emailRaw = `${empId}@thriveni.com`; // Unique placeholder email string
             }
@@ -142,10 +145,10 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             const doj = parseUSDate(dojRaw);
 
             const mobile = (row['Mobile No'] || row['Mobile'] || '')?.toString().trim();
-            const managerName = (row['Reporting Manager'] || '')?.toString().trim();
+            const managerName = (row['Reporting Manager'] || row['Manager Name'] || '')?.toString().trim();
             const managerId = (row['Manager ID'] || '')?.toString().trim();
-            const managerEmail = (row['Manager Email ID'] || row['ManagerEmail ID'] || '')?.toString().trim();
-            const managerMobile = (row['Manager Mobile No'] || row['ManagerMobile No'] || '')?.toString().trim();
+            const managerEmail = (row['Manager Email ID'] || row['ManagerEmail ID'] || row['Manager Email'] || '')?.toString().trim();
+            const managerMobile = (row['Manager Mobile No'] || row['ManagerMobile No'] || row['Manager Mobile'] || '')?.toString().trim();
 
             // Sanitized Employee Data Object (excluding email)
             const employeeData = {
@@ -154,7 +157,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 gender: genderEnum,
                 designation: row['Designation'] ? row['Designation'].toString().substring(0, 100) : null,
                 sectionName: (row['Section'] || row['Department'])?.toString().substring(0, 100) || null,
-                projectLocation: row['Project Name'] ? row['Project Name'].toString().substring(0, 100) : null,
+                projectLocation: (row['Project Name'] || row['Project Location']) ? (row['Project Name'] || row['Project Location']).toString().substring(0, 100) : null,
                 location: row['Site'] ? row['Site'].toString().substring(0, 100) : row['Location'] ? row['Location'].toString().substring(0, 100) : null,
                 dob: dob,
                 doj: doj,
@@ -169,37 +172,37 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 department: row['Department']?.toString().substring(0, 100) || null,
                 departmentGroup: row['Department Group']?.toString().substring(0, 100) || null,
                 aadharNumber: row['Aadhar Number']?.toString().substring(0, 50) || null,
-                employeeGrouupMNmw: row['Employee Group M/NM/W']?.toString().substring(0, 50) || null,
-                onRollContract: row['On-Roll / Contract']?.toString().substring(0, 50) || null,
+                employeeGrouupMNmw: (row['Employee Group M/NM/W'] || row['Employee Group (M/NM/W)'])?.toString().substring(0, 50) || null,
+                onRollContract: (row['On-Roll / Contract'] || row['On Roll/Contract'])?.toString().substring(0, 50) || null,
                 status: (row['Employment Status'] || row['Status'])?.toString().substring(0, 50) || 'Active',
             };
 
             // Dynamically build update data to allow partial bulk uploads without wiping existing fields
             const updateData: any = {};
-            if ('Emp.Name' in row || 'name' in row) updateData.name = employeeData.name;
+            if ('Emp.Name' in row || 'name' in row || 'Name' in row) updateData.name = employeeData.name;
             if ('Grade' in row) updateData.grade = employeeData.grade;
             if ('Gender' in row || 'Sex' in row) updateData.gender = employeeData.gender;
             if ('Designation' in row) updateData.designation = employeeData.designation;
             if ('Section' in row || 'Department' in row) updateData.sectionName = employeeData.sectionName;
-            if ('Project Name' in row) updateData.projectLocation = employeeData.projectLocation;
+            if ('Project Name' in row || 'Project Location' in row) updateData.projectLocation = employeeData.projectLocation;
             if ('Site' in row || 'Location' in row) updateData.location = employeeData.location;
             if ('DOB' in row || 'Date of Birth' in row) updateData.dob = employeeData.dob;
             if ('DOJ' in row || 'D.O' in row || 'D.O.J' in row || 'Date of Joining' in row) updateData.doj = employeeData.doj;
             if ('Mobile No' in row || 'Mobile' in row) updateData.mobile = employeeData.mobile;
-            if ('Reporting Manager' in row) updateData.managerName = employeeData.managerName;
+            if ('Reporting Manager' in row || 'Manager Name' in row) updateData.managerName = employeeData.managerName;
             if ('Manager ID' in row) updateData.managerId = employeeData.managerId;
-            if ('Manager Email ID' in row || 'ManagerEmail ID' in row) updateData.managerEmail = employeeData.managerEmail;
-            if ('Manager Mobile No' in row || 'ManagerMobile No' in row) updateData.managerMobile = employeeData.managerMobile;
+            if ('Manager Email ID' in row || 'ManagerEmail ID' in row || 'Manager Email' in row) updateData.managerEmail = employeeData.managerEmail;
+            if ('Manager Mobile No' in row || 'ManagerMobile No' in row || 'Manager Mobile' in row) updateData.managerMobile = employeeData.managerMobile;
             if ('Region' in row) updateData.region = employeeData.region;
             if ('Organization' in row) updateData.organization = employeeData.organization;
             if ('Highest Qualification' in row) updateData.highestQualification = employeeData.highestQualification;
             if ('Department' in row) updateData.department = employeeData.department;
             if ('Department Group' in row) updateData.departmentGroup = employeeData.departmentGroup;
             if ('Aadhar Number' in row) updateData.aadharNumber = employeeData.aadharNumber;
-            if ('Employee Group M/NM/W' in row) updateData.employeeGrouupMNmw = employeeData.employeeGrouupMNmw;
-            if ('On-Roll / Contract' in row) updateData.onRollContract = employeeData.onRollContract;
+            if ('Employee Group M/NM/W' in row || 'Employee Group (M/NM/W)' in row) updateData.employeeGrouupMNmw = employeeData.employeeGrouupMNmw;
+            if ('On-Roll / Contract' in row || 'On Roll/Contract' in row) updateData.onRollContract = employeeData.onRollContract;
             if ('Employment Status' in row || 'Status' in row) updateData.status = employeeData.status;
-            if ('email' in row || 'Email id' in row || 'Email ID' in row) updateData.email = emailRaw.substring(0, 100);
+            if ('email' in row || 'Email id' in row || 'Email ID' in row || 'Email' in row) updateData.email = emailRaw.substring(0, 100);
 
             // 1. Upsert Employee
             try {
