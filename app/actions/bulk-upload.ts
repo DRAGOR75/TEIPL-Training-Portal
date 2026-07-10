@@ -58,6 +58,7 @@ interface EmployeeImportRow {
     'Email id'?: string;
     'Email ID'?: string;
     'Reporting Manager'?: string;
+    'Manager ID'?: string;
     'Manager Mobile No'?: string;
     'ManagerMobile No'?: string;
     'Manager Email ID'?: string;
@@ -142,6 +143,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             const mobile = (row['Mobile No'] || row['Mobile'] || '')?.toString().trim();
             const managerName = (row['Reporting Manager'] || '')?.toString().trim();
+            const managerId = (row['Manager ID'] || '')?.toString().trim();
             const managerEmail = (row['Manager Email ID'] || row['ManagerEmail ID'] || '')?.toString().trim();
             const managerMobile = (row['Manager Mobile No'] || row['ManagerMobile No'] || '')?.toString().trim();
 
@@ -158,9 +160,9 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 doj: doj,
                 mobile: mobile || null,
                 managerName: managerName || null,
+                managerId: managerId || null,
                 managerEmail: managerEmail || null,
                 managerMobile: managerMobile || null,
-                // New Fields
                 region: row['Region']?.toString().substring(0, 100) || null,
                 organization: row['Organization']?.toString().substring(0, 100) || null,
                 highestQualification: row['Highest Qualification']?.toString().substring(0, 100) || null,
@@ -172,21 +174,50 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 status: (row['Employment Status'] || row['Status'])?.toString().substring(0, 50) || 'Active',
             };
 
+            // Dynamically build update data to allow partial bulk uploads without wiping existing fields
+            const updateData: any = {};
+            if ('Emp.Name' in row || 'name' in row) updateData.name = employeeData.name;
+            if ('Grade' in row) updateData.grade = employeeData.grade;
+            if ('Gender' in row || 'Sex' in row) updateData.gender = employeeData.gender;
+            if ('Designation' in row) updateData.designation = employeeData.designation;
+            if ('Section' in row || 'Department' in row) updateData.sectionName = employeeData.sectionName;
+            if ('Project Name' in row) updateData.projectLocation = employeeData.projectLocation;
+            if ('Site' in row || 'Location' in row) updateData.location = employeeData.location;
+            if ('DOB' in row || 'Date of Birth' in row) updateData.dob = employeeData.dob;
+            if ('DOJ' in row || 'D.O' in row || 'D.O.J' in row || 'Date of Joining' in row) updateData.doj = employeeData.doj;
+            if ('Mobile No' in row || 'Mobile' in row) updateData.mobile = employeeData.mobile;
+            if ('Reporting Manager' in row) updateData.managerName = employeeData.managerName;
+            if ('Manager ID' in row) updateData.managerId = employeeData.managerId;
+            if ('Manager Email ID' in row || 'ManagerEmail ID' in row) updateData.managerEmail = employeeData.managerEmail;
+            if ('Manager Mobile No' in row || 'ManagerMobile No' in row) updateData.managerMobile = employeeData.managerMobile;
+            if ('Region' in row) updateData.region = employeeData.region;
+            if ('Organization' in row) updateData.organization = employeeData.organization;
+            if ('Highest Qualification' in row) updateData.highestQualification = employeeData.highestQualification;
+            if ('Department' in row) updateData.department = employeeData.department;
+            if ('Department Group' in row) updateData.departmentGroup = employeeData.departmentGroup;
+            if ('Aadhar Number' in row) updateData.aadharNumber = employeeData.aadharNumber;
+            if ('Employee Group M/NM/W' in row) updateData.employeeGrouupMNmw = employeeData.employeeGrouupMNmw;
+            if ('On-Roll / Contract' in row) updateData.onRollContract = employeeData.onRollContract;
+            if ('Employment Status' in row || 'Status' in row) updateData.status = employeeData.status;
+            if ('email' in row || 'Email id' in row || 'Email ID' in row) updateData.email = emailRaw.substring(0, 100);
+
             // 1. Upsert Employee
-            await db.employee.upsert({
-                where: { id: empId },
-                update: {
-                    ...employeeData,
-                    // If the employee exists and has a real email, DON'T overwrite it with a placeholder.
-                    // So we conditionally include email in update only if it was provided in the upload row.
-                    ...((row.email || row['Email id'] || row['Email ID']) ? { email: emailRaw.substring(0, 100) } : {})
-                },
-                create: {
-                    id: empId,
-                    email: emailRaw.substring(0, 100),
-                    ...employeeData
+            try {
+                await db.employee.upsert({
+                    where: { id: empId },
+                    update: updateData,
+                    create: {
+                        id: empId,
+                        email: emailRaw.substring(0, 100),
+                        ...employeeData
+                    }
+                });
+            } catch (upsertError: any) {
+                if (upsertError.code === 'P2002') {
+                    throw new Error(`Duplicate email '${emailRaw}' for employee '${empName}'. This email is already in use.`);
                 }
-            });
+                throw upsertError;
+            }
 
             // 2. Process TNI Nominations
             const tniSource = row['TNI Source'] ? row['TNI Source'].toString().trim() : 'BULK';
