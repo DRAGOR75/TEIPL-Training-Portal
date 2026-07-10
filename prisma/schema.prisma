@@ -726,6 +726,9 @@ model TrainingHistory {
 
   location     String?
   progCategory String?  @map("prog_category")
+  employeeLocation String? @map("employee_location")
+  programRegion  String? @map("program_region")
+  programAddress String? @map("program_address")
 
   // Fields for Modern System Sync
   source        String  @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)

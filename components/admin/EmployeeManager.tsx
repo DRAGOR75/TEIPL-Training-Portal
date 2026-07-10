@@ -36,9 +36,18 @@ interface Employee {
     dob: Date | null;
     projectLocation: string | null;
     gender: string | null;
+    managerId: string | null;
     managerName: string | null;
     managerEmail: string | null;
     managerMobile: string | null;
+    region: string | null;
+    organization: string | null;
+    highestQualification: string | null;
+    department: string | null;
+    departmentGroup: string | null;
+    aadharNumber: string | null;
+    employeeGrouupMNmw: string | null;
+    onRollContract: string | null;
 }
 
 export default function EmployeeManager({ employees }: { employees: Employee[] }) {
@@ -323,8 +332,17 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                     'Project Location': e.projectLocation || '',
                                     'Gender': e.gender || '',
                                     'Manager Name': e.managerName || '',
+                                    'Manager ID': e.managerId || '',
                                     'Manager Email': e.managerEmail || '',
-                                    'Manager Mobile': e.managerMobile || ''
+                                    'Manager Mobile': e.managerMobile || '',
+                                    'Region': e.region || '',
+                                    'Organization': e.organization || '',
+                                    'Highest Qualification': e.highestQualification || '',
+                                    'Department': e.department || '',
+                                    'Department Group': e.departmentGroup || '',
+                                    'Aadhar Number': e.aadharNumber || '',
+                                    'Employee Group (M/NM/W)': e.employeeGrouupMNmw || '',
+                                    'On Roll/Contract': e.onRollContract || ''
                                 }));
                                 exportToExcel(exportData, 'Employee_Directory');
                             }}
