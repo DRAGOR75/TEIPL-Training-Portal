@@ -349,7 +349,7 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
         }
     }
 
-    revalidateTag('employee-profile');
+    revalidateTag('employee-profile', 'max' as any);
     revalidatePath('/', 'layout');
     return { success: true, count: successCount, errors };
 }
