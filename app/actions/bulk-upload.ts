@@ -195,31 +195,33 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
             };
 
             // Dynamically build update data to allow partial bulk uploads without wiping existing fields
+            const hasValue = (val: any) => val !== undefined && val !== null && String(val).trim() !== '';
+
             const updateData: any = {};
-            if ('Emp.Name' in row || 'name' in row || 'Name' in row) updateData.name = employeeData.name;
-            if ('Grade' in row) updateData.grade = employeeData.grade;
-            if ('Gender' in row || 'Sex' in row) updateData.gender = employeeData.gender;
-            if ('Designation' in row) updateData.designation = employeeData.designation;
-            if ('Section' in row || 'Department' in row) updateData.sectionName = employeeData.sectionName;
-            if ('Project Name' in row || 'Project Location' in row) updateData.projectLocation = employeeData.projectLocation;
-            if ('Site' in row || 'Location' in row) updateData.location = employeeData.location;
-            if ('DOB' in row || 'Date of Birth' in row) updateData.dob = employeeData.dob;
-            if ('DOJ' in row || 'D.O' in row || 'D.O.J' in row || 'Date of Joining' in row) updateData.doj = employeeData.doj;
-            if ('Mobile No' in row || 'Mobile' in row) updateData.mobile = employeeData.mobile;
-            if ('Reporting Manager' in row || 'Manager Name' in row) updateData.managerName = employeeData.managerName;
-            if ('Manager ID' in row) updateData.managerId = employeeData.managerId;
-            if ('Manager Email ID' in row || 'ManagerEmail ID' in row || 'Manager Email' in row) updateData.managerEmail = employeeData.managerEmail;
-            if ('Manager Mobile No' in row || 'ManagerMobile No' in row || 'Manager Mobile' in row) updateData.managerMobile = employeeData.managerMobile;
-            if ('Region' in row) updateData.region = employeeData.region;
-            if ('Organization' in row) updateData.organization = employeeData.organization;
-            if ('Highest Qualification' in row) updateData.highestQualification = employeeData.highestQualification;
-            if ('Department' in row) updateData.department = employeeData.department;
-            if ('Department Group' in row) updateData.departmentGroup = employeeData.departmentGroup;
-            if ('Aadhar Number' in row) updateData.aadharNumber = employeeData.aadharNumber;
-            if ('Employee Group M/NM/W' in row || 'Employee Group (M/NM/W)' in row) updateData.employeeGrouupMNmw = employeeData.employeeGrouupMNmw;
-            if ('On-Roll / Contract' in row || 'On Roll/Contract' in row) updateData.onRollContract = employeeData.onRollContract;
-            if ('Employment Status' in row || 'Status' in row) updateData.status = employeeData.status;
-            if ('email' in row || 'Email id' in row || 'Email ID' in row || 'Email' in row) updateData.email = emailRaw.substring(0, 100);
+            if (hasValue(row['Emp.Name']) || hasValue(row['name']) || hasValue(row['Name'])) updateData.name = employeeData.name;
+            if (hasValue(row['Grade'])) updateData.grade = employeeData.grade;
+            if (hasValue(row['Gender']) || hasValue(row['Sex'])) updateData.gender = employeeData.gender;
+            if (hasValue(row['Designation'])) updateData.designation = employeeData.designation;
+            if (hasValue(row['Section']) || hasValue(row['Department'])) updateData.sectionName = employeeData.sectionName;
+            if (hasValue(row['Project Name']) || hasValue(row['Project Location'])) updateData.projectLocation = employeeData.projectLocation;
+            if (hasValue(row['Site']) || hasValue(row['Location'])) updateData.location = employeeData.location;
+            if (hasValue(row['DOB']) || hasValue(row['Date of Birth'])) updateData.dob = employeeData.dob;
+            if (hasValue(row['DOJ']) || hasValue(row['D.O']) || hasValue(row['D.O.J']) || hasValue(row['Date of Joining'])) updateData.doj = employeeData.doj;
+            if (hasValue(row['Mobile No']) || hasValue(row['Mobile'])) updateData.mobile = employeeData.mobile;
+            if (hasValue(row['Reporting Manager']) || hasValue(row['Manager Name'])) updateData.managerName = employeeData.managerName;
+            if (hasValue(row['Manager ID'])) updateData.managerId = employeeData.managerId;
+            if (hasValue(row['Manager Email ID']) || hasValue(row['ManagerEmail ID']) || hasValue(row['Manager Email'])) updateData.managerEmail = employeeData.managerEmail;
+            if (hasValue(row['Manager Mobile No']) || hasValue(row['ManagerMobile No']) || hasValue(row['Manager Mobile'])) updateData.managerMobile = employeeData.managerMobile;
+            if (hasValue(row['Region'])) updateData.region = employeeData.region;
+            if (hasValue(row['Organization'])) updateData.organization = employeeData.organization;
+            if (hasValue(row['Highest Qualification'])) updateData.highestQualification = employeeData.highestQualification;
+            if (hasValue(row['Department'])) updateData.department = employeeData.department;
+            if (hasValue(row['Department Group'])) updateData.departmentGroup = employeeData.departmentGroup;
+            if (hasValue(row['Aadhar Number'])) updateData.aadharNumber = employeeData.aadharNumber;
+            if (hasValue(row['Employee Group M/NM/W']) || hasValue(row['Employee Group (M/NM/W)'])) updateData.employeeGrouupMNmw = employeeData.employeeGrouupMNmw;
+            if (hasValue(row['On-Roll / Contract']) || hasValue(row['On Roll/Contract'])) updateData.onRollContract = employeeData.onRollContract;
+            if (hasValue(row['Employment Status']) || hasValue(row['Status'])) updateData.status = employeeData.status;
+            if (hasValue(row['email']) || hasValue(row['Email id']) || hasValue(row['Email ID']) || hasValue(row['Email'])) updateData.email = emailRaw.substring(0, 100);
 
             // 1. Upsert Employee
             try {
