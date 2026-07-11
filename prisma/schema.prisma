@@ -54,6 +54,9 @@ model Employee {
 enum Grade {
   EXECUTIVE
   WORKMAN
+  APPRENTICE
+  TRAINEE
+  LOCAL
 }
 
 enum Gender {

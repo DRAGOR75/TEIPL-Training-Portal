@@ -153,7 +153,10 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                                 name="grade"
                                 options={[
                                     { label: 'Executive', value: 'EXECUTIVE' },
-                                    { label: 'Workman', value: 'WORKMAN' }
+                                    { label: 'Workman', value: 'WORKMAN' },
+                                    { label: 'Apprentice', value: 'APPRENTICE' },
+                                    { label: 'Trainee', value: 'TRAINEE' },
+                                    { label: 'Local', value: 'LOCAL' }
                                 ]}
                                 value={isEdit ? employee?.grade || 'EXECUTIVE' : selectedGrade}
                                 onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, grade: val } : null) : setSelectedGrade}

@@ -203,12 +203,21 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Target Grades</label>
-                            <div className="flex gap-3">
+                            <div className="flex flex-wrap gap-3">
                                 <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer text-slate-700 hover:border-blue-500 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700">
                                     <input type="checkbox" name="targetGrades" value="EXECUTIVE" defaultChecked={program?.targetGrades.includes('EXECUTIVE')} className="accent-blue-600 w-4 h-4" /> Executive
                                 </label>
                                 <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer text-slate-700 hover:border-blue-500 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700">
                                     <input type="checkbox" name="targetGrades" value="WORKMAN" defaultChecked={program?.targetGrades.includes('WORKMAN')} className="accent-blue-600 w-4 h-4" /> Workman
+                                </label>
+                                <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer text-slate-700 hover:border-blue-500 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700">
+                                    <input type="checkbox" name="targetGrades" value="APPRENTICE" defaultChecked={program?.targetGrades.includes('APPRENTICE')} className="accent-blue-600 w-4 h-4" /> Apprentice
+                                </label>
+                                <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer text-slate-700 hover:border-blue-500 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700">
+                                    <input type="checkbox" name="targetGrades" value="TRAINEE" defaultChecked={program?.targetGrades.includes('TRAINEE')} className="accent-blue-600 w-4 h-4" /> Trainee
+                                </label>
+                                <label className="flex-1 flex items-center justify-center gap-2 text-sm bg-slate-50 p-3 rounded-xl border border-slate-200 cursor-pointer text-slate-700 hover:border-blue-500 transition-colors has-[:checked]:bg-blue-50 has-[:checked]:border-blue-500 has-[:checked]:text-blue-700">
+                                    <input type="checkbox" name="targetGrades" value="LOCAL" defaultChecked={program?.targetGrades.includes('LOCAL')} className="accent-blue-600 w-4 h-4" /> Local
                                 </label>
                             </div>
                         </div>
