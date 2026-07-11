@@ -5,17 +5,26 @@ import { Grade, Gender, TrainingCategory } from '@prisma/client';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 
-// Helper to strictly parse US Date format (MM/DD/YYYY)
-function parseUSDate(dateStr: string): Date | null {
+// Helper to parse dates robustly (handles MM/DD/YYYY and DD/MM/YYYY)
+function parseFlexibleDate(dateStr: string): Date | null {
     if (!dateStr) return null;
     dateStr = dateStr.trim();
     const parts = dateStr.split(/[-/]/);
     if (parts.length === 3) {
-        const month = parseInt(parts[0], 10);
-        const day = parseInt(parts[1], 10);
+        let part1 = parseInt(parts[0], 10);
+        let part2 = parseInt(parts[1], 10);
         let year = parseInt(parts[2], 10);
 
         if (year < 100) year += year < 50 ? 2000 : 1900;
+
+        let month = part1;
+        let day = part2;
+        
+        // If first part is > 12, it must be the day (DD/MM/YYYY format)
+        if (part1 > 12 && part2 <= 12) {
+            month = part2;
+            day = part1;
+        }
 
         if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
             return new Date(Date.UTC(year, month - 1, day));
@@ -147,10 +156,10 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             // Parse Dates
             const dobRaw = row['DOB'] || row['Date of Birth'] || '';
-            const dob = parseUSDate(dobRaw);
+            const dob = parseFlexibleDate(dobRaw);
 
             const dojRaw = row['DOJ'] || row['D.O'] || row['D.O.J'] || row['Date of Joining'] || '';
-            const doj = parseUSDate(dojRaw);
+            const doj = parseFlexibleDate(dojRaw);
 
             const mobile = (row['Mobile No'] || row['Mobile'] || '')?.toString().trim();
             const managerName = (row['Reporting Manager'] || row['Manager Name'] || '')?.toString().trim();
@@ -340,9 +349,8 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
         }
     }
 
-    revalidatePath('/admin/master-data');
-    revalidatePath('/admin/tni-dashboard');
-    revalidateTag('tni-reports', 'max');
+    revalidateTag('employee-profile');
+    revalidatePath('/', 'layout');
     return { success: true, count: successCount, errors };
 }
 
