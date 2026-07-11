@@ -249,7 +249,10 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                         <SearchableSelect
                             options={[
                                 { label: 'EXECUTIVE', value: 'EXECUTIVE' },
-                                { label: 'WORKMAN', value: 'WORKMAN' }
+                                { label: 'WORKMAN', value: 'WORKMAN' },
+                                { label: 'APPRENTICE', value: 'APPRENTICE' },
+                                { label: 'TRAINEE', value: 'TRAINEE' },
+                                { label: 'LOCAL', value: 'LOCAL' }
                             ]}
                             value={formData.grade}
                             onChange={(val) => setFormData({ ...formData, grade: val })}
