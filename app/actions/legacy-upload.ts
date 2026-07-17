@@ -12,14 +12,18 @@ export interface LegacyRecord {
     startDate?: string;
     endDate?: string;
     trainingDays?: number | null;
+    trainingHours?: number | null;
     progCategory?: string;
     location?: string;
     mobile?: string;
     email?: string;
+    subjectCode?: string;
+    altProgramName?: string;
 
     organization?: string;
     onRollContract?: string;
     department?: string;
+    departmentGroup?: string;
     employeeGroup?: string;
     employeeGrouupMNmw?: string;
     aadharNumber?: string;
@@ -78,7 +82,7 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
             return { success: true, count: 0 };
         }
 
-        const validRecords = records.filter(r => r.empId && r.programName);
+        const validRecords = records.filter(r => r.empId && (r.subjectCode || r.altProgramName || r.programName));
 
         if (validRecords.length === 0) {
             return { success: false, error: 'No valid records found in batch.' };
@@ -224,24 +228,41 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
             }
         }
 
+        // 3b. Fetch programs for subjectCode mapping
+        const subjectCodes = Array.from(new Set(validRecords.map(r => r.subjectCode).filter(Boolean))) as string[];
+        const programs = await db.program.findMany({
+            where: { id: { in: subjectCodes } },
+            select: { id: true, name: true }
+        });
+        const programMap = new Map(programs.map(p => [p.id, p.name]));
+
         // 4. Prepare TrainingHistory inserts
         const historyInserts = validRecords.map(record => {
             const start = parseDate(record.startDate) || new Date();
             const end = parseDate(record.endDate) || start;
             
+            let finalProgramName = record.programName || 'Unknown Program';
+            if (record.subjectCode && programMap.has(record.subjectCode)) {
+                finalProgramName = programMap.get(record.subjectCode)!;
+            } else if (record.altProgramName) {
+                finalProgramName = record.altProgramName;
+            }
+
             return {
                 empId: record.empId,
                 employeeName: record.employeeName || 'Unknown',
-                programName: record.programName,
+                programName: finalProgramName,
                 startDate: start,
                 endDate: end,
                 trainingDays: record.trainingDays ? parseInt(record.trainingDays as any, 10) : null,
+                trainingHours: record.trainingHours ? parseFloat(record.trainingHours as any) : null,
                 region: record.region || null,
                 location: record.location || null,
                 progCategory: record.progCategory || null,
                 organization: record.organization || null,
                 onRollContract: record.onRollContract || null,
                 department: record.department || null,
+                departmentGroup: record.departmentGroup || null,
                 employeeGroup: record.employeeGroup || null,
                 employeeGrouupMNmw: record.employeeGrouupMNmw || null,
                 aadharNumber: record.aadharNumber || null,
@@ -255,7 +276,9 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 source: 'LEGACY',
                 employeeLocation: record.employeeLocation || null,
                 programRegion: record.programRegion || null,
-                programAddress: record.programAddress || null
+                programAddress: record.programAddress || null,
+                subjectCode: record.subjectCode || null,
+                altProgramName: record.altProgramName || null
             };
         });
 
@@ -288,8 +311,8 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 });
             }
         }, {
-            maxWait: 15000, // Wait up to 15 seconds to acquire connection
-            timeout: 30000  // Allow transaction to run for up to 30 seconds
+            maxWait: 30000, // Wait up to 30 seconds to acquire connection
+            timeout: 120000 // Allow transaction to run for up to 2 minutes
         });
 
         return { success: true, count: validRecords.length };

@@ -19,7 +19,7 @@ function parseFlexibleDate(dateStr: string): Date | null {
 
         let month = part1;
         let day = part2;
-        
+
         // If first part is > 12, it must be the day (DD/MM/YYYY format)
         if (part1 > 12 && part2 <= 12) {
             month = part2;
@@ -95,6 +95,7 @@ interface EmployeeImportRow {
     'Manager Mobile'?: string;
     'Employee Group (M/NM/W)'?: string;
     'On Roll/Contract'?: string;
+
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -236,7 +237,8 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 });
             } catch (upsertError: any) {
                 if (upsertError.code === 'P2002') {
-                    throw new Error(`Duplicate email '${emailRaw}' for employee '${empName}'. This email is already in use.`);
+                    const displayName = empName ? ` (${empName})` : '';
+                    throw new Error(`Duplicate email '${emailRaw}' for Employee ID '${empId}'${displayName}. This email is already assigned to another employee.`);
                 }
                 throw upsertError;
             }
@@ -347,7 +349,8 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
 
             successCount++;
         } catch (e: any) {
-            errors.push(`Row Error (${row['Emp.Id'] || 'Unknown ID'}): ${e.message}`);
+            const idForError = row['Emp.Id'] || row.id || row['Emp ID'] || row['Emp.ID'] || 'Unknown ID';
+            errors.push(`Row Error (Emp ID: ${idForError}): ${e.message}`);
         }
     }
 

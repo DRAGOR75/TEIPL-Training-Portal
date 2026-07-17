@@ -133,7 +133,13 @@ export default function SearchableSelect({
             );
         } else {
             const selectedOption = options.find(option => String(option.value) === String(value));
-            return selectedOption ? selectedOption.label : <span className="text-slate-500">{placeholder}</span>;
+            if (selectedOption) {
+                return selectedOption.label;
+            } else if (value) {
+                return value;
+            } else {
+                return <span className="text-slate-500">{placeholder}</span>;
+            }
         }
     };
 

@@ -76,9 +76,9 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                 e.id.toLowerCase().includes(query) ||
                 (e.email && e.email.toLowerCase().includes(query)) ||
                 (e.sectionName && e.sectionName.toLowerCase().includes(query));
-            
-            // Assume location or projectLocation serves as Region
-            const regionVal = e.location || e.projectLocation;
+
+            // Assume location serves as Region
+            const regionVal = e.location;
             const matchesRegion = selectedRegion ? regionVal === selectedRegion : true;
 
             return matchesSearch && matchesRegion;
@@ -86,7 +86,7 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
     }, [employees, searchQuery, selectedRegion]);
 
     const regions = useMemo(() => {
-        const uniqueRegions = Array.from(new Set(employees.map(e => e.location || e.projectLocation).filter(Boolean)));
+        const uniqueRegions = Array.from(new Set(employees.map(e => e.location).filter(Boolean)));
         return uniqueRegions.sort() as string[];
     }, [employees]);
 

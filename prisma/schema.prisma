@@ -707,16 +707,17 @@ model TrainingHistory {
   id           String   @id @default(uuid())
   empId        String   @map("emp_id")
   employeeName String   @map("employee_name")
-  empStatus    String?  @map("emp_status")
   programName  String   @map("program_name")
   startDate    DateTime @map("start_date")
   endDate      DateTime @map("end_date")
   trainingDays Int?     @map("training_days")
+  trainingHours Float?  @map("training_hours")
   region       String?
 
   organization  String? 
   onRollContract String? @map("onroll_contract")
   department String?
+  departmentGroup String? @map("department_group")
   employeeGroup String? @map("employee_group")
   employeeGrouupMNmw String? @map("employee_grouup_m_nm_w")
   aadharNumber     String? @map("aadhar_number")
@@ -741,6 +742,7 @@ model TrainingHistory {
   status        String  @default("Completed")
   sessionCategory String? @map("session_category")
   altProgramName  String? @map("alt_program_name")
+  subjectCode     String? @map("subject_code")
 
   createdAt DateTime @default(now()) @map("created_at")
 
@@ -756,17 +758,18 @@ model SystemTrainingHistory {
   id           String   @id @default(uuid())
   empId        String   @map("emp_id")
   employeeName String   @map("employee_name")
-  empStatus    String?  @map("emp_status")
   programName  String   @map("program_name")
   startDate    DateTime @map("start_date")
   endDate      DateTime @map("end_date")
   trainingDays Int?     @map("training_days")
+  trainingHours Float?  @map("training_hours")
   employeeRegion String? @map("employee_region")
   employeeLocation String? @map("employee_location")
 
   organization  String? 
   onRollContract String? @map("onroll_contract")
   department String?
+  departmentGroup String? @map("department_group")
   employeeGroup String? @map("employee_group")
   employeeGrouupMNmw String? @map("employee_grouup_m_nm_w")
   aadharNumber     String? @map("aadhar_number")
@@ -789,6 +792,7 @@ model SystemTrainingHistory {
   status        String  @default("Completed")
   sessionCategory String? @map("session_category")
   altProgramName  String? @map("alt_program_name")
+  subjectCode     String? @map("subject_code")
 
   createdAt DateTime @default(now()) @map("created_at")
 

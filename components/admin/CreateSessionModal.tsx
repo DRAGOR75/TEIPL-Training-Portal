@@ -32,7 +32,11 @@ export default function CreateSessionModal({
 
     const initialTrainer = fixedTrainerName ? fixedTrainerName.trim() : '';
     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
+    const [trainerMode, setTrainerMode] = useState<'select' | 'custom'>('select');
+    const [customTrainer, setCustomTrainer] = useState<string>('');
     const [selectedCoordinator, setSelectedCoordinator] = useState<string>('');
+    const [coordinatorMode, setCoordinatorMode] = useState<'select' | 'custom'>('select');
+    const [customCoordinator, setCustomCoordinator] = useState<string>('');
     const [locationMode, setLocationMode] = useState<'select' | 'custom'>('select');
     const [selectedLocation, setSelectedLocation] = useState<string>(fixedLocationName || '');
     const [customLocation, setCustomLocation] = useState<string>('');
@@ -76,6 +80,7 @@ export default function CreateSessionModal({
     if (selectedCoordinator && !trainerOptions.find(o => o.value === selectedCoordinator)) {
         trainerOptions.push({ label: selectedCoordinator, value: selectedCoordinator });
     }
+    trainerOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
     const programOptions = programs.map(p => ({ label: p.name, value: p.name }));
 
     // Location Options + "Other"
@@ -96,7 +101,8 @@ export default function CreateSessionModal({
                         // Validation
                         if (!selectedProgram) { alert("Please select a Program."); return; }
 
-                        if (!selectedTrainer && !fixedTrainerName) { alert("Please select a Primary Trainer."); return; }
+                        const finalTrainer = fixedTrainerName || (trainerMode === 'custom' ? customTrainer : selectedTrainer);
+                        if (!finalTrainer) { alert("Please select or enter a Primary Trainer."); return; }
 
                         // Set Program & Trainer
                         formData.set('programName', selectedProgram);
@@ -166,35 +172,87 @@ export default function CreateSessionModal({
                                         <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
                                             {fixedTrainerName}
                                         </div>
+                                    ) : trainerMode === 'select' ? (
+                                        <div className="space-y-2">
+                                            <SearchableSelect
+                                                options={trainerOptions}
+                                                value={selectedTrainer}
+                                                onChange={(val) => {
+                                                    const v = typeof val === 'string' ? val : String(val);
+                                                    if (v === 'OTHER_CUSTOM') {
+                                                        setTrainerMode('custom');
+                                                        setCustomTrainer('');
+                                                    } else {
+                                                        setSelectedTrainer(v);
+                                                    }
+                                                }}
+                                                placeholder="Select Primary Trainer"
+                                                searchPlaceholder="Search trainers..."
+                                                className="w-full"
+                                            />
+                                        </div>
                                     ) : (
-                                        <SearchableSelect
-                                            options={trainerOptions}
-                                            value={selectedTrainer}
-                                            onChange={(val) => setSelectedTrainer(typeof val === 'string' ? val : String(val))}
-                                            onAddNew={(val) => setSelectedTrainer(val)}
-                                            addNewLabel="Use custom trainer"
-                                            placeholder="Select Primary Trainer"
-                                            searchPlaceholder="Search trainers..."
-                                            className="w-full"
-                                        />
+                                        <div className="space-y-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Enter Custom Trainer Name"
+                                                value={customTrainer}
+                                                onChange={e => setCustomTrainer(e.target.value)}
+                                                className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setTrainerMode('select')}
+                                                className="text-xs text-blue-600 hover:underline font-bold"
+                                            >
+                                                Back to Select
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                                 {/* Fallback hidden input */}
-                                <input type="hidden" name="trainerName" value={fixedTrainerName || selectedTrainer} />
+                                <input type="hidden" name="trainerName" value={fixedTrainerName || (trainerMode === 'custom' ? customTrainer : selectedTrainer)} />
                                 
                                 <div className="mt-4">
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Coordinator / Co-Trainer (Optional)</label>
-                                    <SearchableSelect
-                                        options={trainerOptions}
-                                        value={selectedCoordinator}
-                                        onChange={(val) => setSelectedCoordinator(typeof val === 'string' ? val : String(val))}
-                                        onAddNew={(val) => setSelectedCoordinator(val)}
-                                        addNewLabel="Use custom coordinator"
-                                        placeholder="Select Coordinator / Co-Trainer"
-                                        searchPlaceholder="Search..."
-                                        className="w-full"
-                                    />
-                                    <input type="hidden" name="coordinatorName" value={selectedCoordinator} />
+                                    {coordinatorMode === 'select' ? (
+                                        <div className="space-y-2">
+                                            <SearchableSelect
+                                                options={trainerOptions}
+                                                value={selectedCoordinator}
+                                                onChange={(val) => {
+                                                    const v = typeof val === 'string' ? val : String(val);
+                                                    if (v === 'OTHER_CUSTOM') {
+                                                        setCoordinatorMode('custom');
+                                                        setCustomCoordinator('');
+                                                    } else {
+                                                        setSelectedCoordinator(v);
+                                                    }
+                                                }}
+                                                placeholder="Select Coordinator / Co-Trainer"
+                                                searchPlaceholder="Search..."
+                                                className="w-full"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <input
+                                                type="text"
+                                                placeholder="Enter Custom Coordinator Name"
+                                                value={customCoordinator}
+                                                onChange={e => setCustomCoordinator(e.target.value)}
+                                                className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => setCoordinatorMode('select')}
+                                                className="text-xs text-blue-600 hover:underline font-bold"
+                                            >
+                                                Back to Select
+                                            </button>
+                                        </div>
+                                    )}
+                                    <input type="hidden" name="coordinatorName" value={coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator} />
                                 </div>
                             </div>
                         </div>
