@@ -17,6 +17,19 @@ export async function checkEmployeeAccess(formData: FormData) {
     redirect(`/tni/${empId}`);
 }
 
+export async function getManagerDetails(managerId: string) {
+    if (!managerId) return null;
+    const employee = await db.employee.findUnique({
+        where: { id: managerId },
+        select: {
+            name: true,
+            email: true,
+            mobile: true
+        }
+    });
+    return employee;
+}
+
 // We need to wrap the cached function to pass the empId to the keyParts
 export const getEmployeeProfile = async (empId: string) => {
     return unstable_cache(
@@ -25,7 +38,7 @@ export const getEmployeeProfile = async (empId: string) => {
                 where: { id },
                 include: {
                     nominations: {
-                        where: { 
+                        where: {
                             createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) },
                             status: { not: 'Inactive' }
                         },
@@ -69,11 +82,19 @@ export async function updateEmployeeProfile(empId: string, data: {
     doj?: Date | null;
     dob?: Date | null;
     projectLocation?: string;
+    managerId?: string;
     managerName?: string;
     managerEmail?: string;
     managerMobile?: string;
     status?: string;
     departmentGroup?: string;
+    region?: string;
+    organization?: string;
+    highestQualification?: string;
+    department?: string;
+    aadharNumber?: string;
+    employeeGrouupMNmw?: string;
+    onRollContract?: string;
 }) {
     try {
         const updated = await db.employee.upsert({
@@ -94,11 +115,19 @@ export async function updateEmployeeProfile(empId: string, data: {
                 doj: data.doj,
                 dob: data.dob,
                 projectLocation: data.projectLocation?.substring(0, 100),
+                managerId: data.managerId?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
                 managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status,
                 departmentGroup: data.departmentGroup?.substring(0, 100),
+                region: data.region?.substring(0, 100),
+                organization: data.organization?.substring(0, 100),
+                highestQualification: data.highestQualification?.substring(0, 100),
+                department: data.department?.substring(0, 100),
+                aadharNumber: data.aadharNumber?.substring(0, 50),
+                employeeGrouupMNmw: data.employeeGrouupMNmw?.substring(0, 100),
+                onRollContract: data.onRollContract?.substring(0, 100),
             },
             create: {
                 id: empId.substring(0, 50),
@@ -113,16 +142,25 @@ export async function updateEmployeeProfile(empId: string, data: {
                 doj: data.doj,
                 dob: data.dob,
                 projectLocation: data.projectLocation?.substring(0, 100),
+                managerId: data.managerId?.substring(0, 100),
                 managerName: data.managerName?.substring(0, 100),
                 managerEmail: data.managerEmail?.substring(0, 100),
                 managerMobile: data.managerMobile?.substring(0, 15),
                 status: data.status || 'Active',
                 departmentGroup: data.departmentGroup?.substring(0, 100),
+                region: data.region?.substring(0, 100),
+                organization: data.organization?.substring(0, 100),
+                highestQualification: data.highestQualification?.substring(0, 100),
+                department: data.department?.substring(0, 100),
+                aadharNumber: data.aadharNumber?.substring(0, 50),
+                employeeGrouupMNmw: data.employeeGrouupMNmw?.substring(0, 100),
+                onRollContract: data.onRollContract?.substring(0, 100),
             }
         });
 
         revalidateTag('employee-profile', 'max');
         revalidatePath(`/tni/${empId}`);
+        revalidatePath(`/admin/employee-tni`);
         return { success: true, employee: updated };
     } catch (error: any) {
         console.error('Profile Update Error:', error);
@@ -358,7 +396,7 @@ export async function markNominationInactive(nominationId: string) {
     if (!session?.user?.role || !['ADMIN', 'TRAINER'].includes(session.user.role)) {
         return { success: false, error: 'Unauthorized' };
     }
-    
+
     try {
         await db.nomination.update({
             where: { id: nominationId },

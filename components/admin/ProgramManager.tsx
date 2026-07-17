@@ -376,7 +376,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                     {isFullscreen ? (
                                         <>
                                             <td className="px-3 py-2">
-                                                <div className="font-bold text-slate-900 text-[11px] truncate">{prog.name}</div>
+                                                <div className="font-bold text-slate-900 text-[11px] break-words">{prog.name}</div>
                                             </td>
                                             <td className="px-3 py-2">
                                                 <span className="text-[9px] font-mono font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded-md border border-slate-200" title={prog.id}>
@@ -386,7 +386,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                                         </>
                                     ) : (
                                         <td className="px-3 py-2">
-                                            <div className="font-bold text-slate-900 text-[11px] truncate">{prog.name}</div>
+                                            <div className="font-bold text-slate-900 text-[11px] break-words">{prog.name}</div>
                                             <div className="mt-0.5 text-[9px] font-mono font-bold text-slate-500 truncate" title={prog.id}>
                                                 {prog.id}
                                             </div>

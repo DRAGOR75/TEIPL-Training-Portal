@@ -73,7 +73,6 @@ async function main() {
                     data: {
                         empId: empId,
                         employeeName: emp.name,
-                        empStatus: emp.status,
                         programName: session.programName,
                         startDate: session.startDate,
                         endDate: session.endDate,

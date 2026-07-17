@@ -170,11 +170,11 @@ export async function finalizeParticipantTraining(
                 data: {
                     empId: empId,
                     employeeName: emp.name,
-                    empStatus: emp.status,
                     programName: session.programName,
                     startDate: session.startDate,
                     endDate: session.endDate,
                     trainingDays: trainingDays > 0 ? trainingDays : null,
+                    trainingHours: session.trainingHours || null,
                     employeeRegion: emp.region,
                     employeeLocation: emp.location,
                     progCategory: session.sessionCategory || progCategory,
@@ -182,7 +182,8 @@ export async function finalizeParticipantTraining(
                     organization: emp.organization,
                     onRollContract: emp.onRollContract,
                     department: emp.department,
-                    employeeGroup: emp.departmentGroup,
+                    departmentGroup: emp.departmentGroup,
+                    employeeGroup: emp.departmentGroup, // keeping for backwards compatibility if needed
                     employeeGrouupMNmw: emp.employeeGrouupMNmw,
                     aadharNumber: emp.aadharNumber,
                     designation: emp.designation,
@@ -207,6 +208,7 @@ export async function finalizeParticipantTraining(
                 data: { 
                     attendancePercentage: attendancePercentage,
                     status: finalStatus,
+                    trainingHours: session.trainingHours || null,
                     programName: session.programName,
                     sessionCategory: session.sessionCategory,
                     progCategory: session.sessionCategory,

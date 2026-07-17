@@ -38,7 +38,8 @@ export default function UploadLegacyDataPage() {
                         region: row['Region (On Trg Date)']?.trim() || row['employee_region']?.trim(),
                         startDate: row['Start Date']?.trim() || row['start_date']?.trim(),
                         endDate: row['End Date']?.trim() || row['end_date']?.trim(),
-                        trainingDays: parseInt(row['Trg Days'] || row['training_days'], 10) || null,
+                        trainingDays: parseInt(row['Trg Days'] || row['total_training_days'] || row['training_days'], 10) || null,
+                        trainingHours: parseFloat(row['Trg Hours'] || row['total_training_hours'] || row['training_hours']) || null,
                         progCategory: row['PROG CATEGORY']?.trim() || row['prog_category']?.trim(),
                         location: row['Training Location Detailed']?.trim() || row['Trg Loc Trim']?.trim() || row['location']?.trim(),
                         // Map mobile and email either from individual columns if they exist, or extracted from combined string
@@ -47,6 +48,7 @@ export default function UploadLegacyDataPage() {
                         organization: row['ORGANIZATION']?.trim() || row['organization']?.trim(),
                         onRollContract: row['On-Roll / Contract']?.trim() || row['onroll_contract']?.trim(),
                         department: row['Department']?.trim() || row['department']?.trim(),
+                        departmentGroup: row['Department Group']?.trim() || row['department_group']?.trim(),
                         employeeGroup: row['Employee Group']?.trim() || row['employee_group']?.trim(),
                         employeeGrouupMNmw: row['Employee Group M/NM/W']?.trim() || row['employee_grouup_m_nm_w']?.trim(),
                         aadharNumber: row['Aadhar Number']?.trim() || row['aadhar_number']?.trim(),
@@ -60,8 +62,10 @@ export default function UploadLegacyDataPage() {
                         employeeLocation: row['Employee Location']?.trim() || row['employee_location']?.trim(),
                         programRegion: row['Program Region']?.trim() || row['program_region']?.trim(),
                         programAddress: row['Program Address']?.trim() || row['program_address']?.trim(),
+                        subjectCode: row['Subject Code']?.trim() || row['subject_code']?.trim() || row['Program Code']?.trim() || row['program_code']?.trim(),
+                        altProgramName: row['Alt Program Name']?.trim() || row['alt_program_name']?.trim(),
                     };
-                }).filter(r => r.empId && r.programName); // Basic validation
+                }).filter(r => r.empId && (r.subjectCode || r.altProgramName || r.programName)); // Basic validation
 
                 setRecords(parsedRecords);
                 setStatus('idle');

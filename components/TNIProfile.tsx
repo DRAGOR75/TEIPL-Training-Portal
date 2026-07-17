@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react';
-import { updateEmployeeProfile } from '@/app/actions/tni';
+import { updateEmployeeProfile, getManagerDetails } from '@/app/actions/tni';
 import {
     HiOutlinePencil,
     HiOutlineCheck,
@@ -36,11 +36,19 @@ type Employee = {
     dob: Date | null;
     projectLocation: string | null;
     gender: string | null;
+    managerId: string | null;
     managerName: string | null;
     managerEmail: string | null;
     managerMobile: string | null;
     status: string | null;
     departmentGroup: string | null;
+    region: string | null;
+    organization: string | null;
+    highestQualification: string | null;
+    department: string | null;
+    aadharNumber: string | null;
+    employeeGrouupMNmw: string | null;
+    onRollContract: string | null;
 };
 
 type Section = {
@@ -91,12 +99,34 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
         doj: employee.doj ? new Date(employee.doj).toISOString().split('T')[0] : '',
         dob: employee.dob ? new Date(employee.dob).toISOString().split('T')[0] : '',
         projectLocation: employee.projectLocation || '',
+        managerId: employee.managerId || '',
         managerName: employee.managerName || '',
         managerEmail: employee.managerEmail || '',
         managerMobile: employee.managerMobile || '',
         status: employee.status || 'Active',
-        departmentGroup: employee.departmentGroup || ''
+        departmentGroup: employee.departmentGroup || '',
+        region: employee.region || '',
+        organization: employee.organization || '',
+        highestQualification: employee.highestQualification || '',
+        department: employee.department || '',
+        aadharNumber: employee.aadharNumber || '',
+        employeeGrouupMNmw: employee.employeeGrouupMNmw || '',
+        onRollContract: employee.onRollContract || ''
     });
+
+    async function handleManagerIdBlur() {
+        if (formData.managerId && formData.managerId.trim() !== '') {
+            const manager = await getManagerDetails(formData.managerId);
+            if (manager) {
+                setFormData(prev => ({
+                    ...prev,
+                    managerName: manager.name || prev.managerName,
+                    managerEmail: manager.email || prev.managerEmail,
+                    managerMobile: manager.mobile || prev.managerMobile
+                }));
+            }
+        }
+    }
 
     async function handleSave() {
         setLoading(true);
@@ -119,10 +149,19 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
             doj: formData.doj ? new Date(formData.doj) : null,
             dob: formData.dob ? new Date(formData.dob) : null,
             projectLocation: formData.projectLocation,
+            managerId: formData.managerId,
             managerName: formData.managerName,
             managerEmail: formData.managerEmail,
             managerMobile: formData.managerMobile,
-            status: formData.status
+            status: formData.status,
+            departmentGroup: formData.departmentGroup,
+            region: formData.region,
+            organization: formData.organization,
+            highestQualification: formData.highestQualification,
+            department: formData.department,
+            aadharNumber: formData.aadharNumber,
+            employeeGrouupMNmw: formData.employeeGrouupMNmw,
+            onRollContract: formData.onRollContract
         });
 
         if (res.error) {
@@ -311,6 +350,96 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             placeholder="Select Location"
                             searchPlaceholder="Search location..."
                             className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Location"
+                            value={formData.region}
+                            onChange={e => setFormData({ ...formData, region: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Organization"
+                            value={formData.organization}
+                            onChange={e => setFormData({ ...formData, organization: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Highest Qualification"
+                            value={formData.highestQualification}
+                            onChange={e => setFormData({ ...formData, highestQualification: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Department"
+                            value={formData.department}
+                            onChange={e => setFormData({ ...formData, department: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Aadhar Number"
+                            value={formData.aadharNumber}
+                            onChange={e => setFormData({ ...formData, aadharNumber: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'MANAGER', value: 'MANAGER' },
+                                { label: 'NON MANAGER', value: 'NON MANAGER' },
+                                { label: 'WORKMAN', value: 'WORKMAN' }
+                            ]}
+                            value={formData.employeeGrouupMNmw}
+                            onChange={(val) => setFormData({ ...formData, employeeGrouupMNmw: val })}
+                            placeholder="Select Group"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'On Roll', value: 'On Roll' },
+                                { label: 'Contract', value: 'Contract' }
+                            ]}
+                            value={formData.onRollContract}
+                            onChange={(val) => setFormData({ ...formData, onRollContract: val })}
+                            placeholder="Select Type"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerId}
+                            placeholder="Manager ID"
+                            onChange={e => setFormData({ ...formData, managerId: e.target.value })}
+                            onBlur={handleManagerIdBlur}
                         />
                     </div>
 
@@ -560,6 +689,83 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
+                        {/* Region */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineMap size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Region</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.region || 'Not Set'}>{employee.region || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Organization */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Organization</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.organization || 'Not Set'}>{employee.organization || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Highest Qualification */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineIdentification size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Highest Qualification</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.highestQualification || 'Not Set'}>{employee.highestQualification || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Department */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.department || 'Not Set'}>{employee.department || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Aadhar Number */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineIdentification size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Aadhar Number</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.aadharNumber || 'Not Set'}>{employee.aadharNumber || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Emp Group M/NM/W */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Emp Group M/NM/W</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.employeeGrouupMNmw || 'Not Set'}>{employee.employeeGrouupMNmw || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* On Roll / Contract */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBriefcase size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">On Roll / Contract</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.onRollContract || 'Not Set'}>{employee.onRollContract || 'Not Set'}</span>
+                            </div>
+                        </div>
+
                         {/* Reporting Manager */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
@@ -570,6 +776,11 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.managerName ? `${employee.managerName} ${employee.managerEmail ? `(${employee.managerEmail})` : ''}` : 'Not Set'}>
                                     {employee.managerName || 'Not Set'}
                                 </span>
+                                {employee.managerId && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerId}>
+                                        ID: {employee.managerId}
+                                    </span>
+                                )}
                                 {employee.managerEmail && (
                                     <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerEmail}>
                                         {employee.managerEmail}
