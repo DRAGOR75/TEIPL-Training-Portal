@@ -263,7 +263,7 @@ export default function UploadCalendarPage() {
                                     {records.slice(0, 100).map((record, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
                                             <td className="px-6 py-4">
-                                                <div className="text-slate-900 font-bold">{record.programName}</div>
+                                                <div className="text-slate-900 font-bold">{record.altProgramName || record.programName}</div>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="text-slate-600 font-medium font-mono">{record.startDate}</div>

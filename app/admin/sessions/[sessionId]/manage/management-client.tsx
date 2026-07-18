@@ -375,7 +375,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                         <div className="p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center bg-white sticky top-0 z-10">
                             <div>
                                 <h3 className="font-bold text-slate-900 text-lg">Waitlist (TNI)<br /> <span className='text-md text-emerald-600 font-normal'>Number of Employees: {filteredPending.length}</span></h3>
-                                <p className="text-sm text-slate-500">Employees whose managers approved the need for {session.programName}.</p>
+                                <p className="text-sm text-slate-500">Employees whose managers approved the need for {session.altProgramName || session.programName}.</p>
                             </div>
                             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto mt-4 md:mt-0">
                                 <input

@@ -85,7 +85,7 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                         <div className="flex-1">
                             <h1 className="text-xl font-bold text-slate-900 flex items-center gap-2">
                                 <HiOutlineBookOpen size={20} className="text-blue-600" />
-                                {session.programName}
+                                {session.altProgramName || session.programName}
                             </h1>
                             <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
                                 <span className="flex items-center gap-1"><HiOutlineUser size={12} /> {session.trainerName}</span>

@@ -94,7 +94,7 @@ export default async function ManagerFeedbackPage({
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div className="space-y-4">
-                                    <ContextItem icon={<HiOutlineAcademicCap className="text-indigo-500" />} label="Program Name" value={enrollment.session.programName} />
+                                    <ContextItem icon={<HiOutlineAcademicCap className="text-indigo-500" />} label="Program Name" value={enrollment.session.altProgramName || enrollment.session.programName} />
                                     <ContextItem icon={<HiOutlineUser className="text-indigo-500" />} label="Trainer" value={enrollment.session.trainerName || 'N/A'} />
                                     <ContextItem icon={<HiOutlineMapPin className="text-indigo-500" />} label="Location" value={enrollment.session.location || 'N/A'} />
                                 </div>

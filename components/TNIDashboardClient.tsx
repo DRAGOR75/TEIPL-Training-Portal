@@ -201,7 +201,7 @@ export default function TNIDashboardClient({
                                         {trainingHistory.map((record: any, idx: number) => (
                                             <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-2 sm:px-3 py-1.5 sm:py-3 border-r border-slate-200 text-center text-slate-400 font-bold whitespace-nowrap">{idx + 1}</td>
-                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{record.programName}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{record.altProgramName || record.programName}</td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-500 uppercase whitespace-nowrap">{record.progCategory || '-'}</td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-semibold text-slate-700 whitespace-nowrap">
                                                     {new Date(record.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}

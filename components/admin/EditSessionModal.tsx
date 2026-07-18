@@ -176,7 +176,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Training Program</label>
                         <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
-                            {session.programName}
+                            {session.altProgramName || session.programName}
                         </div>
                     </div>
                     

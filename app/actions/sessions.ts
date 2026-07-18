@@ -62,6 +62,7 @@ export async function getBatchInvitationPreview(sessionId: string) {
 
         const sessionData = {
             programName: trainingSession.programName,
+            altProgramName: trainingSession.altProgramName,
             startDate: trainingSession.startDate,
             endDate: trainingSession.endDate,
             startTime: trainingSession.startTime || "8:30 am",

@@ -141,7 +141,7 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                                 return (
                                     <tr key={event.id} className="hover:bg-slate-50/80 transition-colors">
                                         <td className="px-4 py-2 align-middle">
-                                            <div className="font-bold text-slate-900 text-[11px] truncate">{event.programName}</div>
+                                            <div className="font-bold text-slate-900 text-[11px] truncate">{event.altProgramName || event.programName}</div>
                                             <div className="text-[10px] font-bold text-slate-500 mt-0.5">
                                                 {event.enrolledCount} Nominated
                                             </div>
