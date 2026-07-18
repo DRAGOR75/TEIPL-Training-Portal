@@ -92,7 +92,12 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     // Form State pre-filled with session data
     const initialTrainer = session.trainerName ? session.trainerName.trim() : '';
     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
+    const [trainerMode, setTrainerMode] = useState<'select' | 'custom'>('select');
+    const [customTrainer, setCustomTrainer] = useState<string>('');
+    
     const [selectedCoordinator, setSelectedCoordinator] = useState<string>(session.coordinatorName || '');
+    const [coordinatorMode, setCoordinatorMode] = useState<'select' | 'custom'>('select');
+    const [customCoordinator, setCustomCoordinator] = useState<string>('');
     
     const isLocationInList = session.location ? locations.some((l:any) => l.name === session.location) : false;
     const initialLocationMode = (!session.location || isLocationInList) ? 'select' : 'custom';
@@ -126,15 +131,20 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     if (selectedCoordinator && !trainerOptions.find((o: { label: string; value: string }) => o.value === selectedCoordinator)) {
         trainerOptions.push({ label: selectedCoordinator, value: selectedCoordinator });
     }
+    trainerOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
     const locationOptions = locations.map((l:any) => ({ label: l.name, value: l.name }));
     locationOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
 
     return (
         <div className="overflow-y-auto p-6 h-full custom-scrollbar">
             <form action={async (formData) => {
-                formData.set('trainerName', selectedTrainer);
-                if (selectedCoordinator) {
-                    formData.set('coordinatorName', selectedCoordinator);
+                const finalTrainer = trainerMode === 'custom' ? customTrainer : selectedTrainer;
+                if (!finalTrainer) { alert("Please select or enter a Primary Trainer."); return; }
+                formData.set('trainerName', finalTrainer);
+                
+                const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
+                if (finalCoordinator) {
+                    formData.set('coordinatorName', finalCoordinator);
                 } else {
                     formData.delete('coordinatorName');
                     formData.append('coordinatorName', '');
@@ -178,33 +188,97 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                         <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
                             {session.programName}
                         </div>
+                        <div className="mt-2">
+                            <input
+                                type="text"
+                                name="altProgramName"
+                                defaultValue={session.altProgramName || ''}
+                                placeholder="Alternate Program Name (Optional)"
+                                className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                            />
+                            <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
+                        </div>
                     </div>
                     
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer</label>
-                        <SearchableSelect
-                            options={trainerOptions}
-                            value={selectedTrainer}
-                            onChange={(val) => setSelectedTrainer(typeof val === 'string' ? val : String(val))}
-                            onAddNew={(val) => setSelectedTrainer(val)}
-                            addNewLabel="Use custom trainer"
-                            placeholder="Select Primary Trainer"
-                            searchPlaceholder="Search trainers..."
-                            className="w-full"
-                        />
+                        {trainerMode === 'select' ? (
+                            <div className="space-y-2">
+                                <SearchableSelect
+                                    options={trainerOptions}
+                                    value={selectedTrainer}
+                                    onChange={(val) => {
+                                        const v = typeof val === 'string' ? val : String(val);
+                                        if (v === 'OTHER_CUSTOM') {
+                                            setTrainerMode('custom');
+                                            setCustomTrainer('');
+                                        } else {
+                                            setSelectedTrainer(v);
+                                        }
+                                    }}
+                                    placeholder="Select Primary Trainer"
+                                    searchPlaceholder="Search trainers..."
+                                    className="w-full"
+                                />
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    type="text"
+                                    placeholder="Enter Custom Trainer Name"
+                                    value={customTrainer}
+                                    onChange={e => setCustomTrainer(e.target.value)}
+                                    className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setTrainerMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
                         
                         <div className="mt-4">
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Coordinator / Co-Trainer (Optional)</label>
-                            <SearchableSelect
-                                options={trainerOptions}
-                                value={selectedCoordinator}
-                                onChange={(val) => setSelectedCoordinator(typeof val === 'string' ? val : String(val))}
-                                onAddNew={(val) => setSelectedCoordinator(val)}
-                                addNewLabel="Use custom coordinator"
-                                placeholder="Select Coordinator / Co-Trainer"
-                                searchPlaceholder="Search..."
-                                className="w-full"
-                            />
+                            {coordinatorMode === 'select' ? (
+                                <div className="space-y-2">
+                                    <SearchableSelect
+                                        options={trainerOptions}
+                                        value={selectedCoordinator}
+                                        onChange={(val) => {
+                                            const v = typeof val === 'string' ? val : String(val);
+                                            if (v === 'OTHER_CUSTOM') {
+                                                setCoordinatorMode('custom');
+                                                setCustomCoordinator('');
+                                            } else {
+                                                setSelectedCoordinator(v);
+                                            }
+                                        }}
+                                        placeholder="Select Coordinator / Co-Trainer"
+                                        searchPlaceholder="Search..."
+                                        className="w-full"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="space-y-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter Custom Coordinator Name"
+                                        value={customCoordinator}
+                                        onChange={e => setCustomCoordinator(e.target.value)}
+                                        className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setCoordinatorMode('select')}
+                                        className="text-xs text-blue-600 hover:underline font-bold"
+                                    >
+                                        Back to Select
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -254,6 +328,22 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                 onChange={(e) => setAssessmentDate(e.target.value)}
                                 className="w-full p-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-bold"
                             />
+                        </div>
+                        
+                        {/* ROW 3.75: Session Category */}
+                        <div>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category</label>
+                            <select name="sessionCategory" defaultValue={session.sessionCategory || ""} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                <option value="">Select Category...</option>
+                                <option value="Technical">Technical</option>
+                                <option value="Technical-VR">Technical-VR</option>
+                                <option value="Technical by OEM">Technical by OEM</option>
+                                <option value="All Nomination">Technical at OEM</option>
+                                <option value="Workshop">Workshop</option>
+                                <option value="Functional/Others">Functional/Others</option>
+                                <option value="Behavioural">Behavioural</option>
+                                <option value="Safety">Safety</option>
+                            </select>
                         </div>
                     </>
                 )}
@@ -315,7 +405,16 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                     </div>
                 </div>
 
-                {/* ROW 5: Topics */}
+                {/* ROW 5: Capacity */}
+                {mode === 'session' && (
+                    <div>
+                        <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants)</label>
+                        <input name="capacity" type="number" min="1" defaultValue={session.capacity || "20"} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <p className="text-xs text-slate-400 mt-1">Maximum number of self-enrollments allowed</p>
+                    </div>
+                )}
+
+                {/* ROW 6: Topics */}
                 {mode === 'session' && (
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned</label>

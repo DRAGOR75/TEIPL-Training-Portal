@@ -64,6 +64,7 @@ export default function QualificationsClient({
     });
     return Array.from(map.entries()).map(([programName, sessions]) => ({
       programName,
+      altProgramName: sessions[0]?.altProgramName || null,
       sessions,
       sessionCount: sessions.length
     }));
@@ -306,11 +307,11 @@ export default function QualificationsClient({
             <div className="max-h-[400px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
               {completedPrograms.map(prog => (
                 <button
-                  key={prog.programName}
+                  key={prog.altProgramName || prog.programName}
                   onClick={() => setSelectedProgramName(prog.programName)}
                   className={`w-full text-left p-3 text-sm rounded-xl border border-slate-200 transition-all duration-200 ${selectedProgramName === prog.programName ? 'bg-blue-50 border-blue-200 text-blue-800 shadow-sm' : 'bg-white hover:bg-slate-50 hover:border-slate-300 border-slate-100 text-slate-700'}`}
                 >
-                  <div className="font-semibold truncate">{prog.programName}</div>
+                  <div className="font-semibold truncate">{prog.altProgramName || prog.programName}</div>
                   <div className="text-xs opacity-70 mt-0.5">{prog.sessionCount} completed session{prog.sessionCount > 1 ? 's' : ''}</div>
                 </button>
               ))}
@@ -566,8 +567,8 @@ export default function QualificationsClient({
                 >
                     <option value="">-- Select Completed Program --</option>
                     {completedPrograms.map(prog => (
-                        <option key={prog.programName} value={prog.programName}>
-                            {prog.programName}
+                        <option key={prog.altProgramName || prog.programName} value={prog.altProgramName || prog.programName}>
+                            {prog.altProgramName || prog.programName}
                         </option>
                     ))}
                 </select>
@@ -622,7 +623,7 @@ export default function QualificationsClient({
                     <td className="px-4 py-2">
                       {item.programName === "Unknown Program" && !item.programId ? 
                         <span className="text-slate-400 italic">None (Independent)</span> : 
-                        <span className="font-medium text-slate-700">{item.programName}</span>}
+                        <span className="font-medium text-slate-700">{item.altProgramName || item.programName}</span>}
                     </td>
                     <td className="px-4 py-2 font-bold text-slate-700">{item.obtainedMarks || '-'} <span className="text-slate-400 font-normal">/ {item.maxMarks || '-'}</span></td>
                     <td className="px-4 py-2 text-slate-600">{item.testDate ? new Date(item.testDate).toLocaleDateString() : 'N/A'}</td>

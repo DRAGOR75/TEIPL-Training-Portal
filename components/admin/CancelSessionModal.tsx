@@ -57,7 +57,7 @@ export default function CancelSessionModal({
                     </div>
 
                     <div className="mb-4 text-sm text-slate-600 bg-rose-50 p-3 rounded-lg border border-rose-100 text-left">
-                        You are about to cancel the scheduled session for <strong>{session.programName}</strong>. 
+                        You are about to cancel the scheduled session for <strong>{session.altProgramName || session.programName}</strong>. 
                         Nominated employees will be reverted to 'Pending' status.
                     </div>
 

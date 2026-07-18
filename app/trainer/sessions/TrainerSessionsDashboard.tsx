@@ -319,7 +319,7 @@ export default function TrainerSessionsDashboard({
                                                 <div className="space-y-1">
                                                     <div className="flex items-center gap-3">
                                                         <h3 className="font-black text-lg text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
-                                                            {session.programName}
+                                                            {session.altProgramName || session.programName}
                                                         </h3>
                                                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 border ${session.nominationBatch?.status === 'Completed'
                                                             ? 'bg-emerald-100 text-emerald-700 border-emerald-200'

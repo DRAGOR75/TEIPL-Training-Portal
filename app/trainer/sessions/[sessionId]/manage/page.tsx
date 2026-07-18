@@ -77,7 +77,7 @@ export default async function ManageSessionPage({ params }: PageProps) {
                         </div>
 
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                            {session.programName}
+                            {session.altProgramName || session.programName}
                         </h1>
                         <div className="flex items-center gap-6 mt-4 text-slate-600 font-medium">
                             <div className="flex items-center gap-2">

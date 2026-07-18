@@ -7,6 +7,7 @@ export interface CalendarUploadRecord {
     slNo?: string;
     month?: string;
     programName: string;
+    altProgramName?: string | null;
     programId?: string;
     startDate: string;
     endDate: string;
@@ -47,13 +48,13 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
             const end = parseDate(record.endDate);
 
             if (!start || !end) {
-                errors.push(`Row ${index + 1}: Invalid date format for "${record.programName}".`);
+                errors.push(`Row ${index + 1}: Invalid date format for "${record.altProgramName || record.programName}".`);
                 continue;
             }
 
             // Ensure end date is not before start date
             if (end < start) {
-                errors.push(`Row ${index + 1}: End date is before start date for "${record.programName}".`);
+                errors.push(`Row ${index + 1}: End date is before start date for "${record.altProgramName || record.programName}".`);
                 continue;
             }
 
@@ -144,7 +145,7 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
             if (existingBatch) {
                 // If a session for this program already exists on these exact dates, skip it
                 // To avoid duplicate calendar blocks.
-                errors.push(`Row ${index + 1}: Skipped duplicate session for "${record.programName}" on ${start.toISOString().split('T')[0]}`);
+                errors.push(`Row ${index + 1}: Skipped duplicate session for "${record.altProgramName || record.programName}" on ${start.toISOString().split('T')[0]}`);
                 continue;
             }
 

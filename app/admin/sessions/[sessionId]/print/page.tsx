@@ -99,7 +99,7 @@ export default async function PrintAttendancePage({ params }: { params: Promise<
                 {/* Info Box */}
                 <div className="border border-black mb-4 text-xs">
                     <div className="border-b border-black p-2 font-bold">
-                        Program Name : {session.programName}
+                        Program Name : {session.altProgramName || session.programName}
                     </div>
                     <div className="flex border-b border-black">
                         <div className="flex-1 p-2 border-r border-black">

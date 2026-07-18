@@ -25,7 +25,7 @@ export default function JoinPage() {
 
     const [empId, setEmpId] = useState('');
     const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-    const [result, setResult] = useState<{ employeeName?: string, programName?: string, error?: string } | null>(null);
+    const [result, setResult] = useState<{ employeeName?: string, programName?: string, altProgramName?: string, error?: string } | null>(null);
     const [isRegistering, setIsRegistering] = useState(false); // New state for JIT mode
     const [isConfirming, setIsConfirming] = useState(false); // Confirmation state
     const [employeeDetails, setEmployeeDetails] = useState<{ name: string, designation: string, sectionName: string, location: string, empId: string } | null>(null);
@@ -37,7 +37,7 @@ export default function JoinPage() {
     const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
 
     // Batch Details State
-    const [batchDetails, setBatchDetails] = useState<{ programName?: string, startDate?: Date, endDate?: Date, location?: string } | null>(null);
+    const [batchDetails, setBatchDetails] = useState<{ programName?: string, altProgramName?: string, startDate?: Date, endDate?: Date, location?: string } | null>(null);
 
     useEffect(() => {
         async function fetchBatchDetails() {
@@ -186,7 +186,7 @@ export default function JoinPage() {
                         You have been added to:
                     </p>
                     <div className="bg-slate-50 p-4 rounded-xl font-medium text-blue-700 break-words">
-                        {result?.programName}
+                        {result?.altProgramName || result?.programName}
                     </div>
                     <p className="text-xs text-slate-400 mt-8">You can close this window now.</p>
                 </div>
@@ -485,7 +485,7 @@ export default function JoinPage() {
                     <h1 className="text-2xl font-black text-slate-900 tracking-tight">Quick Join</h1>
                     {batchDetails?.programName ? (
                         <div className="bg-blue-50 text-blue-800 p-3 rounded-xl border border-blue-100 my-4 inline-block max-w-full text-center mx-auto">
-                            <p className="font-bold text-sm">{batchDetails.programName}</p>
+                            <p className="font-bold text-sm">{batchDetails.altProgramName || batchDetails.programName}</p>
                             {batchDetails.startDate && (
                                 <p className="text-xs font-semibold mt-1 opacity-80">
                                     {new Date(batchDetails.startDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
