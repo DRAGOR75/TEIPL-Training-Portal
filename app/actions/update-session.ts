@@ -65,8 +65,7 @@ export async function updateSession(sessionId: string, formData: FormData) {
             trainingHours: trainingHoursRaw ? parseFloat(trainingHoursRaw as string) : null,
             topics: topics || null,
             altProgramName: altProgramName || null,
-            sessionCategory: sessionCategory || null,
-            capacity: capacityRaw ? parseInt(capacityRaw, 10) : null
+            sessionCategory: sessionCategory || null
         };
 
         if (assessmentDate) {
@@ -81,14 +80,18 @@ export async function updateSession(sessionId: string, formData: FormData) {
 
         // Also update the proposed dates on the batch just to keep them in sync
         if (existingSession.nominationBatchId) {
+            const batchUpdateData: any = {
+                proposedStartDate: startDate,
+                proposedEndDate: endDate,
+                proposedTrainer: trainerName || null,
+                proposedLocation: location || null
+            };
+            if (capacityRaw) {
+                batchUpdateData.capacity = parseInt(capacityRaw, 10);
+            }
             await db.nominationBatch.update({
                 where: { id: existingSession.nominationBatchId },
-                data: {
-                    proposedStartDate: startDate,
-                    proposedEndDate: endDate,
-                    proposedTrainer: trainerName || null,
-                    proposedLocation: location || null
-                }
+                data: batchUpdateData
             });
         }
 
