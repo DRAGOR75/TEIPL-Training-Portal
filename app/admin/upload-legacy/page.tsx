@@ -64,6 +64,7 @@ export default function UploadLegacyDataPage() {
                         programAddress: row['Program Address']?.trim() || row['program_address']?.trim(),
                         subjectCode: row['Subject Code']?.trim() || row['subject_code']?.trim() || row['Program Code']?.trim() || row['program_code']?.trim(),
                         altProgramName: row['Alt Program Name']?.trim() || row['alt_program_name']?.trim(),
+                        sessionCategory: row['session_category']?.trim() || row['Session Category']?.trim() || row['sessionCategory']?.trim(),
                     };
                 }).filter(r => r.empId && (r.subjectCode || r.altProgramName || r.programName)); // Basic validation
 
