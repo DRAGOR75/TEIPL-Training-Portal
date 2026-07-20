@@ -114,6 +114,7 @@ enum TrainingCategory {
   OTHER_PROGRAMS
   OPERATOR_PROGRAMS
   MINING_PROGRAMS
+  COMPLIANCE_TRAINING
 }
 
 // 4. Updated Nomination Table (TNI Table)

@@ -315,7 +315,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
                         <SearchableSelect
                             options={[
-                                { label: 'ESCC', value: 'ESCC' },
+                                { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
                                 { label: 'Operators', value: 'Operators' },
 
                                 { label: 'Others', value: 'Others' }

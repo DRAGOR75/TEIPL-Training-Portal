@@ -14,6 +14,7 @@ export interface LegacyRecord {
     trainingDays?: number | null;
     trainingHours?: number | null;
     progCategory?: string;
+    sessionCategory?: string;
     location?: string;
     mobile?: string;
     email?: string;
@@ -232,9 +233,9 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
         const subjectCodes = Array.from(new Set(validRecords.map(r => r.subjectCode).filter(Boolean))) as string[];
         const programs = await db.program.findMany({
             where: { id: { in: subjectCodes } },
-            select: { id: true, name: true }
+            select: { id: true, name: true, category: true }
         });
-        const programMap = new Map(programs.map(p => [p.id, p.name]));
+        const programMap = new Map(programs.map(p => [p.id, { name: p.name, category: p.category }]));
 
         // 4. Prepare TrainingHistory inserts
         const historyInserts = validRecords.map(record => {
@@ -242,8 +243,12 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
             const end = parseDate(record.endDate) || start;
             
             let finalProgramName = record.programName || 'Unknown Program';
+            let finalProgCategory: string | null = null; // Leave blank if not found via subjectCode
+
             if (record.subjectCode && programMap.has(record.subjectCode)) {
-                finalProgramName = programMap.get(record.subjectCode)!;
+                const progData = programMap.get(record.subjectCode)!;
+                finalProgramName = progData.name;
+                finalProgCategory = progData.category;
             } else if (record.altProgramName) {
                 finalProgramName = record.altProgramName;
             }
@@ -258,7 +263,7 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 trainingHours: record.trainingHours ? parseFloat(record.trainingHours as any) : null,
                 region: record.region || null,
                 location: record.location || null,
-                progCategory: record.progCategory || null,
+                progCategory: finalProgCategory,
                 organization: record.organization || null,
                 onRollContract: record.onRollContract || null,
                 department: record.department || null,
@@ -278,7 +283,8 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 programRegion: record.programRegion || null,
                 programAddress: record.programAddress || null,
                 subjectCode: record.subjectCode || null,
-                altProgramName: record.altProgramName || null
+                altProgramName: record.altProgramName || null,
+                sessionCategory: record.sessionCategory || null
             };
         });
 
