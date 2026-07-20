@@ -44,7 +44,7 @@ export default async function ParticipantsPage({ params }: PageProps) {
                             {session.nominationBatch.program.category}
                         </div>
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">
-                            Participants: {session.programName}
+                            Participants: {session.altProgramName || session.programName}
                         </h1>
                         <p className="text-slate-500 mt-2">
                             Comprehensive list of all enrolled participants and their details.
@@ -53,7 +53,7 @@ export default async function ParticipantsPage({ params }: PageProps) {
                 </div>
 
                 {/* Table Client Component */}
-                <ParticipantTableClient participants={participants} sessionName={session.programName} />
+                <ParticipantTableClient participants={participants} sessionName={session.altProgramName || session.programName} />
 
             </div>
         </div>

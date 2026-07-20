@@ -33,7 +33,7 @@ export default function EmailRecipientModal({ sessionId, isReminder = false, onC
                 setCcDisplay(result.cc.join(', '));
                 setHtmlContent(result.html || '');
 
-                const baseSubject = result.sessionData ? `Invitation: ${result.sessionData.programName} (${new Date(result.sessionData.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${new Date(result.sessionData.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })})` : '';
+                const baseSubject = result.sessionData ? `Invitation: ${result.sessionData.altProgramName || result.sessionData.programName} (${new Date(result.sessionData.startDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${new Date(result.sessionData.endDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })})` : '';
                 const defaultSub = isReminder ? `Reminder: ${baseSubject}` : baseSubject;
                 setSubject(defaultSub);
                 setDefaultContent({ html: result.html || '', subject: defaultSub });

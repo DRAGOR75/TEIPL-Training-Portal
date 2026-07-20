@@ -66,7 +66,7 @@ export default async function EmployeeFeedbackPage({
             <div className="max-w-2xl w-full bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden">
                 <div className="bg-slate-900 p-6 text-white">
                     <h1 className="text-2xl font-bold">Post training (30 days) performance feedback</h1>
-                    <p className="opacity-80 text-sm mt-1">Please rate the impact of: <span className="font-bold text-blue-300">{enrollment.session.programName}</span></p>
+                    <p className="opacity-80 text-sm mt-1">Please rate the impact of: <span className="font-bold text-blue-300">{enrollment.session.altProgramName || enrollment.session.programName}</span></p>
                 </div>
 
                 <form action={saveFeedback} className="p-8 space-y-6">

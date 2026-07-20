@@ -285,7 +285,7 @@ export default function UploadLegacyDataPage() {
                                             <div className="text-slate-500 text-xs font-mono">{record.empId}</div>
                                         </td>
                                         <td className="px-6 py-3">
-                                            <div className="text-slate-800 font-medium">{record.programName}</div>
+                                            <div className="text-slate-800 font-medium">{record.altProgramName || record.programName}</div>
                                             <div className="text-slate-400 text-xs">{record.progCategory}</div>
                                         </td>
                                         <td className="px-6 py-3">

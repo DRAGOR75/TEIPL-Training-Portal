@@ -12,6 +12,7 @@ interface Program {
 interface Session {
     id: string;
     programName: string;
+    altProgramName?: string | null;
     trainerName: string | null;
     startDate: Date;
     endDate: Date;
@@ -279,13 +280,13 @@ export default function GanttCalendar({ programs, sessions, trainers, locations,
                                                         {/* Bar Content */}
                                                         <div className="min-w-0 pr-2">
                                                             <p className="text-white font-black text-xs truncate">
-                                                                {session.programName}
+                                                                {session.altProgramName || session.programName}
                                                             </p>
                                                         </div>
 
                                                         {/* Detailed Tooltip on hover */}
                                                         <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white p-3 rounded-xl opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none w-max max-w-[250px] shadow-2xl z-[60] flex flex-col gap-1.5 border border-slate-700">
-                                                            <div className="font-black text-sm text-indigo-200 truncate">{session.programName}</div>
+                                                            <div className="font-black text-sm text-indigo-200 truncate">{session.altProgramName || session.programName}</div>
 
                                                             <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-1 text-xs">
                                                                 <span className="text-slate-400 font-medium">Dates:</span>

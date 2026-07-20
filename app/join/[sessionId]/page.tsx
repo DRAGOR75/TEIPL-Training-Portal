@@ -102,7 +102,7 @@ export default async function JoinSessionPage({
                                 <p className="text-[10px] uppercase text-blue-300 font-bold tracking-wider mb-0.5">Program</p>
                                 <div className="flex items-center justify-center md:justify-start gap-2 text-white font-semibold text-sm">
                                     <HiOutlineBookOpen size={14} className="text-blue-400" />
-                                    {session.programName}
+                                    {session.altProgramName || session.programName}
                                 </div>
                             </div>
 

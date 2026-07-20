@@ -106,9 +106,11 @@ export default function CreateSessionModal({
 
                         // Set Program & Trainer
                         formData.set('programName', selectedProgram);
-                        formData.set('trainerName', fixedTrainerName || selectedTrainer);
-                        if (selectedCoordinator) {
-                            formData.set('coordinatorName', selectedCoordinator);
+                        formData.set('trainerName', finalTrainer);
+                        
+                        const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
+                        if (finalCoordinator) {
+                            formData.set('coordinatorName', finalCoordinator);
                         }
 
                         // Handle Location

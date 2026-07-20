@@ -26,6 +26,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 type Session = {
     id: string;
     programName: string;
+    altProgramName?: string | null;
     trainerName: string | null;
     startDate: Date;
     endDate: Date;
@@ -361,7 +362,7 @@ export default function TrainerDashboardClient({
                                             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-slate-100">
                                                 <div className="flex items-center gap-3 flex-wrap">
                                                     <h3 className="font-black text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
-                                                        {t.programName}
+                                                        {t.altProgramName || t.programName}
                                                     </h3>
                                                     {t.emailsSent ? (
                                                         <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 uppercase tracking-wide flex items-center gap-1">
