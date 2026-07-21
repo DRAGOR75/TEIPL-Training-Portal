@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { selfEnroll } from '@/app/actions/enrollment';
 import { HiOutlineUser, HiOutlineEnvelope, HiOutlineBriefcase, HiOutlineInformationCircle, HiOutlineChatBubbleLeftRight, HiOutlineCheckCircle } from 'react-icons/hi2';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
+import { GoogleTranslateWidget } from '@/components/GoogleTranslateWidget';
 
 interface Participant {
     empId: string;
@@ -27,12 +28,17 @@ export default function JoinFormClient({ sessionId, participants, allowWalkIns, 
     const isWalkIn = selectedEmpId === 'WALKIN';
 
     return (
-        <form action={selfEnroll} className="p-5 md:p-10 space-y-8 md:space-y-10">
+        <form action={selfEnroll} className="p-5 md:p-10 space-y-8 md:space-y-10 relative">
             <input type="hidden" name="sessionId" value={sessionId} />
             {isAdmin && <input type="hidden" name="isAdmin" value="true" />}
 
+            {/* Language Toggle */}
+            <div className="absolute top-2 right-5 md:right-10 flex justify-end mb-4 z-10 gap-2">
+                <GoogleTranslateWidget />
+            </div>
+
             {/* SECTION 1: Identity Selection */}
-            <section className="space-y-6">
+            <section className="space-y-6 pt-6">
                 <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
                     <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
                         <HiOutlineUser size={20} />
@@ -98,12 +104,12 @@ export default function JoinFormClient({ sessionId, participants, allowWalkIns, 
                 </div>
 
                 <div className="grid grid-cols-1 gap-x-8 gap-y-6">
-                    <NumericRatingField label="Rate your knowledge level BEFORE training" name="preTrainingRating" />
-                    <NumericRatingField label="Rate your knowledge level AFTER training" name="postTrainingRating" />
-                    <NumericRatingField label="How would you rate the overall training?" name="trainingRating" />
-                    <NumericRatingField label="Contents covered were useful for my work" name="contentRating" />
-                    <NumericRatingField label="Trainer Knowledge and Delivery" name="trainerRating" />
-                    <NumericRatingField label="Quality of Training Materials" name="materialRating" />
+                    <NumericRatingField label="Rate your knowledge level BEFORE training" name="preTrainingRating" leftLabel="Poor" rightLabel="Excellent" />
+                    <NumericRatingField label="Rate your knowledge level AFTER training" name="postTrainingRating" leftLabel="Poor" rightLabel="Excellent" />
+                    <NumericRatingField label="How would you rate the overall training?" name="trainingRating" leftLabel="Poor" rightLabel="Excellent" />
+                    <NumericRatingField label="Contents covered were useful for my work" name="contentRating" leftLabel="Poor" rightLabel="Excellent" />
+                    <NumericRatingField label="Trainer Knowledge and Delivery" name="trainerRating" leftLabel="Poor" rightLabel="Excellent" />
+                    <NumericRatingField label="Quality of Training Materials" name="materialRating" leftLabel="Poor" rightLabel="Excellent" />
                     <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
                         <label className="block text-sm font-bold text-slate-700 mb-4">I would recommend this training to others <span className="text-red-500">*</span></label>
                         <div className="flex items-center gap-4">
@@ -175,7 +181,7 @@ function TextAreaField({ label, name, placeholder, required = false }: { label: 
     )
 }
 
-function NumericRatingField({ label, name }: { label: string, name: string }) {
+function NumericRatingField({ label, name, leftLabel, rightLabel }: { label: string, name: string, leftLabel: string, rightLabel: string }) {
     return (
         <div className="bg-slate-50/50 p-5 rounded-xl border border-slate-100/80 hover:border-blue-100 transition-all">
             <label className="block text-sm font-bold text-slate-700 mb-4">{label} <span className="text-red-500">*</span></label>
@@ -191,8 +197,8 @@ function NumericRatingField({ label, name }: { label: string, name: string }) {
                     ))}
                 </div>
                 <div className="flex justify-between w-full px-0.5">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">Poor</span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">Excellent</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">{leftLabel}</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center w-8 md:w-10">{rightLabel}</span>
                 </div>
             </div>
         </div>
