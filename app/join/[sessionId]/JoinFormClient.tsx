@@ -33,7 +33,7 @@ export default function JoinFormClient({ sessionId, participants, allowWalkIns, 
             {isAdmin && <input type="hidden" name="isAdmin" value="true" />}
 
             {/* Language Toggle */}
-            <div className="absolute top-2 right-5 md:right-10 flex justify-end mb-4 z-10 gap-2">
+            <div className="flex justify-end mb-2 md:-mt-4 z-10">
                 <GoogleTranslateWidget />
             </div>
 
