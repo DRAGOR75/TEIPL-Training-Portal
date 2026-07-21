@@ -177,7 +177,7 @@ export async function finalizeParticipantTraining(
                     trainingHours: session.trainingHours || null,
                     employeeRegion: emp.region,
                     employeeLocation: emp.location,
-                    progCategory: session.sessionCategory || progCategory,
+                    progCategory: progCategory,
 
                     organization: emp.organization,
                     onRollContract: emp.onRollContract,
@@ -211,7 +211,7 @@ export async function finalizeParticipantTraining(
                     trainingHours: session.trainingHours || null,
                     programName: session.programName,
                     sessionCategory: session.sessionCategory,
-                    progCategory: session.sessionCategory,
+                    progCategory: progCategory,
                     altProgramName: session.altProgramName
                 }
             });
