@@ -63,7 +63,7 @@ export function GoogleTranslateWidget() {
     };
 
     return (
-        <div className="flex items-center relative z-[60] min-w-[200px]">
+        <div className="flex items-center relative z-[60] w-[150px] md:w-[220px]">
             {/* The beautiful custom UI */}
             <div className="w-full">
                 <SearchableSelect
