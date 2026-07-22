@@ -206,6 +206,18 @@ export async function createEmployee(formData: FormData) {
                 designation: sanitizeInput(formData.get('designation') as string),
                 doj: formData.get('doj') ? new Date(formData.get('doj') as string) : undefined,
                 dob: formData.get('dob') ? new Date(formData.get('dob') as string) : undefined,
+                status: sanitizeInput(formData.get('status') as string) || 'Active',
+                mobile: sanitizeInput(formData.get('mobile') as string) || null,
+                projectLocation: sanitizeInput(formData.get('projectLocation') as string) || null,
+                managerId: sanitizeInput(formData.get('managerId') as string) || null,
+                region: sanitizeInput(formData.get('region') as string) || null,
+                organization: sanitizeInput(formData.get('organization') as string) || null,
+                highestQualification: sanitizeInput(formData.get('highestQualification') as string) || null,
+                department: sanitizeInput(formData.get('department') as string) || null,
+                departmentGroup: sanitizeInput(formData.get('departmentGroup') as string) || null,
+                aadharNumber: sanitizeInput(formData.get('aadharNumber') as string) || null,
+                employeeGrouupMNmw: sanitizeInput(formData.get('employeeGrouupMNmw') as string) || null,
+                onRollContract: sanitizeInput(formData.get('onRollContract') as string) || null,
             }
         });
         revalidatePath('/admin/tni-dashboard');
@@ -257,6 +269,18 @@ export async function updateEmployee(id: string, formData: FormData) {
                 designation: sanitizeInput(formData.get('designation') as string) || null,
                 doj: formData.get('doj') ? new Date(formData.get('doj') as string) : null,
                 dob: formData.get('dob') ? new Date(formData.get('dob') as string) : null,
+                status: sanitizeInput(formData.get('status') as string) || 'Active',
+                mobile: sanitizeInput(formData.get('mobile') as string) || null,
+                projectLocation: sanitizeInput(formData.get('projectLocation') as string) || null,
+                managerId: sanitizeInput(formData.get('managerId') as string) || null,
+                region: sanitizeInput(formData.get('region') as string) || null,
+                organization: sanitizeInput(formData.get('organization') as string) || null,
+                highestQualification: sanitizeInput(formData.get('highestQualification') as string) || null,
+                department: sanitizeInput(formData.get('department') as string) || null,
+                departmentGroup: sanitizeInput(formData.get('departmentGroup') as string) || null,
+                aadharNumber: sanitizeInput(formData.get('aadharNumber') as string) || null,
+                employeeGrouupMNmw: sanitizeInput(formData.get('employeeGrouupMNmw') as string) || null,
+                onRollContract: sanitizeInput(formData.get('onRollContract') as string) || null,
             }
         });
         revalidatePath('/admin/tni-dashboard');
