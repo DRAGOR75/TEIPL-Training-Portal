@@ -683,8 +683,8 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                 )}
             </div>
 
-            {isAddModalOpen && <EmployeeModal isEdit={false} />}
-            {editingEmployee && <EmployeeModal isEdit={true} employee={editingEmployee} />}
+            {isAddModalOpen && EmployeeModal({ isEdit: false })}
+            {editingEmployee && EmployeeModal({ isEdit: true, employee: editingEmployee })}
         </div>
     );
 }
