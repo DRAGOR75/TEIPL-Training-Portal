@@ -50,7 +50,7 @@ interface Employee {
     onRollContract: string | null;
 }
 
-export default function EmployeeManager({ employees }: { employees: Employee[] }) {
+export default function EmployeeManager({ employees, locations = [], sections = [] }: { employees: Employee[], locations?: { id: string, name: string }[], sections?: { id: string, name: string }[] }) {
     const [loading, setLoading] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -67,6 +67,22 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
 
     const [selectedGrade, setSelectedGrade] = useState('EXECUTIVE');
     const [selectedGender, setSelectedGender] = useState('');
+    const [selectedEmployeeGrouupMNmw, setSelectedEmployeeGrouupMNmw] = useState('');
+    const [selectedOnRollContract, setSelectedOnRollContract] = useState('');
+
+    const [selectedFormRegion, setSelectedFormRegion] = useState('');
+    const [selectedFormLocation, setSelectedFormLocation] = useState('');
+    const [selectedFormSection, setSelectedFormSection] = useState('');
+    const [selectedFormDeptGroup, setSelectedFormDeptGroup] = useState('');
+
+    const departmentGroups = useMemo(() => {
+        const groups = Array.from(new Set(employees.map(e => e.departmentGroup).filter(Boolean)));
+        return groups.sort() as string[];
+    }, [employees]);
+
+    const locationOptions = useMemo(() => locations.map(l => ({ label: l.name, value: l.name })), [locations]);
+    const sectionOptions = useMemo(() => sections.map(s => ({ label: s.name, value: s.name })), [sections]);
+    const deptGroupOptions = useMemo(() => departmentGroups.map(g => ({ label: g, value: g })), [departmentGroups]);
 
     // Filter and Paginate
     const filteredEmployees = useMemo(() => {
@@ -105,6 +121,12 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
             setIsAddModalOpen(false);
             setSelectedGrade('EXECUTIVE');
             setSelectedGender('');
+            setSelectedEmployeeGrouupMNmw('');
+            setSelectedOnRollContract('');
+            setSelectedFormRegion('');
+            setSelectedFormLocation('');
+            setSelectedFormSection('');
+            setSelectedFormDeptGroup('');
         }
     }
 
@@ -178,7 +200,14 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
-                            <input name="sectionName" defaultValue={employee?.sectionName || ''} placeholder="E.g. Engineering" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            <SearchableSelect
+                                name="sectionName"
+                                options={sectionOptions}
+                                value={isEdit ? employee?.sectionName || '' : selectedFormSection}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, sectionName: val } : null) : setSelectedFormSection}
+                                placeholder="Select Section"
+                                className="w-full"
+                            />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
@@ -186,7 +215,11 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
+                            <input name="managerId" defaultValue={employee?.managerId || ''} placeholder="Manager ID" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
                             <input name="managerName" defaultValue={employee?.managerName || ''} placeholder="Manager Name" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
@@ -229,6 +262,109 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                             <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                         </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                            <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                            <input name="status" defaultValue={employee?.status || 'Active'} placeholder="Status" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
+                            <input name="aadharNumber" defaultValue={employee?.aadharNumber || ''} placeholder="Aadhar Number" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
+                            <SearchableSelect
+                                name="location"
+                                options={locationOptions}
+                                value={isEdit ? employee?.location || '' : selectedFormRegion}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, location: val } : null) : setSelectedFormRegion}
+                                placeholder="Select Region"
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Project Location</label>
+                            <input name="projectLocation" defaultValue={employee?.projectLocation || ''} placeholder="Project Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                            <input name="location" defaultValue={employee?.location || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
+                            <input name="organization" defaultValue={employee?.organization || ''} placeholder="Organization" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                            <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
+                            <SearchableSelect
+                                name="departmentGroup"
+                                options={[
+                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+                                    { label: 'OPERATORS', value: 'OPERATORS' },
+                                    { label: 'OTHERS', value: 'OTHERS' }
+                                ]}
+                                value={isEdit ? employee?.departmentGroup || '' : selectedFormDeptGroup}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, departmentGroup: val } : null) : setSelectedFormDeptGroup}
+                                placeholder="Select Department Group"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
+                            <input name="highestQualification" defaultValue={employee?.highestQualification || ''} placeholder="Highest Qualification" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
+                            <SearchableSelect
+                                name="employeeGrouupMNmw"
+                                options={[
+                                    { label: 'Manager', value: 'Manager' },
+                                    { label: 'Non Manager', value: 'Non Manager' },
+                                    { label: 'Workman', value: 'Workman' }
+                                ]}
+                                value={isEdit ? employee?.employeeGrouupMNmw || '' : selectedEmployeeGrouupMNmw}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, employeeGrouupMNmw: val } : null) : setSelectedEmployeeGrouupMNmw}
+                                placeholder="Select Employee Group"
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                            <SearchableSelect
+                                name="onRollContract"
+                                options={[
+                                    { label: 'On Roll', value: 'On Roll' },
+                                    { label: 'Contract', value: 'Contract' }
+                                ]}
+                                value={isEdit ? employee?.onRollContract || '' : selectedOnRollContract}
+                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, onRollContract: val } : null) : setSelectedOnRollContract}
+                                placeholder="Select On Roll / Contract"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
 
                     <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
                         <button
@@ -547,8 +683,8 @@ export default function EmployeeManager({ employees }: { employees: Employee[] }
                 )}
             </div>
 
-            {isAddModalOpen && <EmployeeModal isEdit={false} />}
-            {editingEmployee && <EmployeeModal isEdit={true} employee={editingEmployee} />}
+            {isAddModalOpen && EmployeeModal({ isEdit: false })}
+            {editingEmployee && EmployeeModal({ isEdit: true, employee: editingEmployee })}
         </div>
     );
 }

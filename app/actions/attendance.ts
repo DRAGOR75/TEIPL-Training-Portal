@@ -145,6 +145,17 @@ export async function finalizeParticipantTraining(
             data: { status: finalStatus }
         });
 
+        // If the participant was absent, they shouldn't have a record in System Training History.
+        if (finalStatus === 'Absent') {
+            await db.systemTrainingHistory.deleteMany({
+                where: { empId, sessionId }
+            });
+
+            revalidatePath(`/admin/sessions/${sessionId}/manage`);
+            revalidateTag('session-details', 'max');
+            return { success: true };
+        }
+
         // Create or update System Training History
         const existingHistory = await db.systemTrainingHistory.findFirst({
             where: { empId, sessionId }

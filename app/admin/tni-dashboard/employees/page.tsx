@@ -1,5 +1,5 @@
 import EmployeeManager from '@/components/admin/EmployeeManager';
-import { getCachedAdminEmployees } from '@/lib/cache-master-data';
+import { getCachedAdminEmployees, getCachedAdminLocations, getCachedAdminSections } from '@/lib/cache-master-data';
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
@@ -11,7 +11,11 @@ export default async function EmployeesPage() {
         redirect("/api/auth/signin");
     }
 
-    const employees = await getCachedAdminEmployees();
+    const [employees, locations, sections] = await Promise.all([
+        getCachedAdminEmployees(),
+        getCachedAdminLocations(),
+        getCachedAdminSections()
+    ]);
 
-    return <EmployeeManager employees={employees as any} />;
+    return <EmployeeManager employees={employees as any} locations={locations} sections={sections} />;
 }
