@@ -151,25 +151,26 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
 
     // Modal Component
     const ProgramModal = ({ program, isEdit }: { program?: Program | null, isEdit: boolean }) => (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
-                    <h2 className="text-xl font-black text-slate-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200 max-h-[90vh] flex flex-col">
+                <div className="bg-slate-50 px-6 py-4 border-b flex justify-between items-center shrink-0">
+                    <h2 className="font-bold text-lg text-slate-800">
                         {isEdit ? 'Edit Subject' : 'Create New Subject'}
                     </h2>
                     <button
                         onClick={() => isEdit ? setEditingProgram(null) : setIsAddModalOpen(false)}
-                        className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                        className="text-slate-400 hover:text-slate-600 transition-colors"
                     >
                         <HiOutlineXMark size={24} />
                     </button>
                 </div>
-                <form action={isEdit ? handleEdit : handleAdd} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Subject ID (Optional)</label>
-                            <input name="id" disabled={isEdit} defaultValue={isEdit ? program?.id : ''} placeholder="Leave blank to auto-generate" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
-                        </div>
+                <form action={isEdit ? handleEdit : handleAdd} className="flex-1 overflow-y-auto flex flex-col">
+                    <div className="p-6 space-y-6 flex-1">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Subject ID *</label>
+                                <input name="id" required={!isEdit} disabled={isEdit} defaultValue={isEdit ? program?.id : ''} placeholder="e.g. ACE01" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed" />
+                            </div>
 
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Subject Name *</label>
@@ -179,14 +180,13 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Category *</label>
                             <select name="category" required defaultValue={program?.category} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all">
-                                <option value="FUNCTIONAL">Functional</option>
-                                <option value="BEHAVIOURAL">Behavioural</option>
-                                <option value="COMMON">Common</option>
-                                <option value="SAFETY_PROGRAMS">Safety</option>
-                                <option value="HEMM_PROGRAMS">HEMM</option>
-                                <option value="OTHER_PROGRAMS">Other</option>
-                                <option value="OPERATOR_PROGRAMS">Operator</option>
-                                <option value="MINING_PROGRAMS">Mining</option>
+                                <option value="SAFETY_PROGRAMS">Safety Programs</option>
+                                <option value="HEMM_PROGRAMS">HEMM Programs</option>
+                                <option value="BEHAVIOURAL_PROGRAMS">Behavioural Programs</option>
+                                <option value="OPERATOR_PROGRAMS">Operator Programs</option>
+                                <option value="MINING_PROGRAMS">Mining Programs</option>
+                                <option value="COMPLIANCE_TRAINING">Compliance Training</option>
+                                <option value="OTHER_PROGRAMS">Other Programs</option>
                             </select>
                         </div>
                     </div>
@@ -196,10 +196,60 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         <textarea
                             name="objectives"
                             defaultValue={program?.objectives || ''}
-                            rows={3}
+                            rows={2}
                             placeholder="Briefly describe the subject..."
                             className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all resize-none"
                         />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                            <select name="status" defaultValue={program?.status || 'Active'} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all">
+                                <option value="Active">Active</option>
+                                <option value="Inactive">Inactive</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Duration (Days)</label>
+                            <input type="number" step="0.5" name="days" defaultValue={program?.days || ''} placeholder="e.g. 2.5" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Level</label>
+                            <input name="level" defaultValue={program?.level || ''} placeholder="e.g. L2, L3, Advanced" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Machine Model</label>
+                            <input name="machineModel" defaultValue={program?.machineModel || ''} placeholder="e.g. Komatsu PC2000" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section Code Name</label>
+                            <input name="sectionCodeName" defaultValue={program?.sectionCodeName || ''} placeholder="e.g. SEC-001" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Material Priority</label>
+                            <input name="materialPriority" defaultValue={program?.materialPriority || ''} placeholder="e.g. High, Medium" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Content Responsibility</label>
+                            <input name="contentResp" defaultValue={program?.contentResp || ''} placeholder="e.g. John Doe, Technical Team" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Target Date</label>
+                            <input type="date" name="targetDate" defaultValue={program?.targetDate || ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Syllabus Link</label>
+                            <input name="syllabusLink" defaultValue={program?.syllabusLink || ''} placeholder="e.g. https://docs.google.com/..." className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Trainer Material</label>
+                            <input name="trainerMaterial" defaultValue={program?.trainerMaterial || ''} placeholder="e.g. Presentation slides, Manual" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Participant Material</label>
+                            <input name="participantMaterial" defaultValue={program?.participantMaterial || ''} placeholder="e.g. Workbook, Handouts" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 text-slate-800 transition-all" />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -239,15 +289,15 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         </div>
                     </div>
 
-                    <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                    <div className="bg-slate-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
                         <button
                             type="button"
                             onClick={() => isEdit ? setEditingProgram(null) : setIsAddModalOpen(false)}
-                            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                            className="px-6 py-2 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors"
                         >
                             Cancel
                         </button>
-                        <FormSubmitButton className="px-8 py-2.5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200 flex items-center gap-2">
+                        <FormSubmitButton className="px-6 py-2 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition shadow-sm flex items-center gap-2">
                             {isEdit ? 'Save Changes' : <><HiOutlinePlus size={18} /> Create Subject</>}
                         </FormSubmitButton>
                     </div>

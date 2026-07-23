@@ -52,6 +52,7 @@ export async function createProgram(formData: FormData) {
     const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
     const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
     const level = sanitizeInput(formData.get('level') as string);
+    const sectionCodeName = sanitizeInput(formData.get('sectionCodeName') as string);
 
     const daysStr = formData.get('days') as string;
     const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
@@ -65,6 +66,7 @@ export async function createProgram(formData: FormData) {
                 targetGrades: grades,
                 objectives: objectives || null,
                 machineModel: machineModel || null,
+                sectionCodeName: sectionCodeName || null,
                 status: status,
                 materialPriority: materialPriority || null,
                 contentResp: contentResp || null,
@@ -123,6 +125,7 @@ export async function updateProgram(programId: string, formData: FormData) {
     const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
     const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
     const level = sanitizeInput(formData.get('level') as string);
+    const sectionCodeName = sanitizeInput(formData.get('sectionCodeName') as string);
 
     const daysStr = formData.get('days') as string;
     const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
@@ -136,6 +139,7 @@ export async function updateProgram(programId: string, formData: FormData) {
                 targetGrades: grades,
                 objectives: objectives || null,
                 machineModel: machineModel || null,
+                sectionCodeName: sectionCodeName || null,
                 status: status,
                 materialPriority: materialPriority || null,
                 contentResp: contentResp || null,
