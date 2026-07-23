@@ -25,14 +25,40 @@ export default function UploadProgramsPage() {
             skipEmptyLines: true,
             complete: (results) => {
                 const parsedRecords: ProgramRecord[] = results.data.map((row: any) => {
-                    return {
-                        programGroup: row['Program Group']?.trim() || '',
-                        subjectCode: row['Subject Code']?.trim() || '',
-                        trainingName: row['Training Name']?.trim() || '',
-                        status: row['Status']?.trim() || '',
-                        forSection: row['For Section / Whom']?.trim() || '',
+                    // Helper to clean values (handles literal "null" strings from CSV)
+                    const clean = (val: any) => {
+                        if (!val) return '';
+                        const trimmed = String(val).trim();
+                        return trimmed.toLowerCase() === 'null' ? '' : trimmed;
                     };
-                }).filter(r => r.subjectCode && r.trainingName); // Basic validation
+
+                    // Helper to safely extract arrays from strings like "{EXECUTIVE,WORKMAN}"
+                    let parsedGrades: string[] = [];
+                    const rawGrades = clean(row['targetGrades'] || row['Target Grades']);
+                    if (rawGrades) {
+                        parsedGrades = rawGrades.replace(/[{}]/g, '').split(',').map((g: string) => g.trim()).filter(Boolean);
+                    }
+
+                    return {
+                        programGroup: clean(row['Program Group'] || row['category']),
+                        subjectCode: clean(row['Subject Code'] || row['id']),
+                        trainingName: clean(row['Training Name'] || row['name']),
+                        status: clean(row['Status'] || row['status']),
+                        forSection: clean(row['For Section / Whom']),
+                        sectionCodeName: clean(row['Section As Code Name / Section'] || row['code Name / Section']),
+                        days: (row['days'] || row['Days']) ? parseFloat(clean(row['days'] || row['Days'])) : null,
+                        targetGrades: parsedGrades,
+                        targetDate: clean(row['target_date'] || row['Target Date']),
+                        contentResp: clean(row['content_resp'] || row['Content Resp']),
+                        participantMaterial: clean(row['participant_material'] || row['Participant Material']),
+                        trainerMaterial: clean(row['trainer_material'] || row['Trainer Material']),
+                        syllabusLink: clean(row['syllabus_link'] || row['Syllabus Link']),
+                        objectives: clean(row['Objectives'] || row['objectives']),
+                        materialPriority: clean(row['material_priority'] || row['Material Priority']),
+                        machineModel: clean(row['machine_model'] || row['Machine Model']),
+                        level: clean(row['level'] || row['Level']),
+                    };
+                }).filter(r => r.subjectCode); // Basic validation: only Subject Code is strictly required for partial updates
 
                 setRecords(parsedRecords);
                 setStatus('idle');
@@ -119,7 +145,7 @@ export default function UploadProgramsPage() {
     };
 
     const downloadSample = () => {
-        const csvContent = "data:text/csv;charset=utf-8,Program Group,Subject Code,Training Name,Status,For Section / Whom\nHEMM Programs,ACE01,AC Electrical - Advance (L2),Active,AC Electricals HT/LT\nHEMM Programs,ACE02,AC Electrical - Failure Modes & Analysis (L3),Active,AC Electricals HT/LT";
+        const csvContent = "data:text/csv;charset=utf-8,Program Group,Subject Code,Training Name,Status,For Section / Whom,Section As Code Name / Section\nHEMM Programs,ACE01,AC Electrical - Advance (L2),Active,AC Electricals HT/LT,SEC-001\nHEMM Programs,ACE02,AC Electrical - Failure Modes & Analysis (L3),Active,AC Electricals HT/LT,SEC-002";
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);

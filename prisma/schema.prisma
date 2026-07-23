@@ -95,6 +95,7 @@ model Program {
   objectives          String? @db.Text
   days                Float?
   level               String?
+  sectionCodeName     String? @map("section_code_name")
 
   // Many-to-Many: A program can belong to many sections
   sections Section[] @relation("ProgramToSection")

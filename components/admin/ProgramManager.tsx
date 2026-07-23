@@ -61,6 +61,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
             'Objectives': p.objectives || '',
             'Days': p.days || '',
             'Level': p.level || '',
+            'Section Code Name': p.sectionCodeName || '',
             'Sections': p.sections.map(s => s.name).join(', ') || 'All'
         }));
         exportToExcel(dataToExport, 'Subjects_Export');

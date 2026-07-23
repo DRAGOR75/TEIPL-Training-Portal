@@ -21,6 +21,7 @@ import {
 } from 'react-icons/hi2';
 import SearchableSelect from '@/components/ui/SearchableSelect';
 import { exportToExcel } from '@/lib/export-utils';
+import MergeEmployeeModal from './MergeEmployeeModal';
 
 interface Employee {
     id: string; // emp_id
@@ -62,6 +63,7 @@ export default function EmployeeManager({ employees, locations = [], sections = 
 
     // Modals
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isMergeModalOpen, setIsMergeModalOpen] = useState(false);
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
@@ -499,6 +501,14 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                             <span className="hidden sm:inline">Add Employee</span>
                             <span className="sm:hidden">Add</span>
                         </button>
+                        <button
+                            onClick={() => setIsMergeModalOpen(true)}
+                            className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-amber-200 text-sm"
+                            title="Merge Duplicate Employee Records"
+                        >
+                            <HiOutlineArrowsPointingIn size={18} className="stroke-[2.5]" />
+                            <span className="hidden sm:inline">Merge Duplicate</span>
+                        </button>
                     </div>
                 </div>
 
@@ -683,8 +693,14 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                 )}
             </div>
 
-            {isAddModalOpen && EmployeeModal({ isEdit: false })}
-            {editingEmployee && EmployeeModal({ isEdit: true, employee: editingEmployee })}
+            {isAddModalOpen && <EmployeeModal isEdit={false} />}
+            {editingEmployee && <EmployeeModal employee={editingEmployee} isEdit={true} />}
+            
+            <MergeEmployeeModal 
+                isOpen={isMergeModalOpen} 
+                onClose={() => setIsMergeModalOpen(false)} 
+                employees={employees} 
+            />
         </div>
     );
 }

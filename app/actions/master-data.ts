@@ -39,7 +39,7 @@ export async function createProgram(formData: FormData) {
     const category = formData.get('category') as TrainingCategory;
     const grades = formData.getAll('targetGrades') as Grade[];
     const sectionIds = formData.getAll('sectionIds') as string[];
-    
+
     // Extended fields
     const id = sanitizeInput(formData.get('id') as string);
     const objectives = sanitizeInput(formData.get('objectives') as string);
@@ -52,7 +52,7 @@ export async function createProgram(formData: FormData) {
     const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
     const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
     const level = sanitizeInput(formData.get('level') as string);
-    
+
     const daysStr = formData.get('days') as string;
     const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
 
@@ -106,12 +106,12 @@ export async function deleteProgram(id: string) {
 
 export async function updateProgram(programId: string, formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };
-    
+
     const name = sanitizeInput(formData.get('name') as string);
     const category = formData.get('category') as TrainingCategory;
     const grades = formData.getAll('targetGrades') as Grade[];
     const sectionIds = formData.getAll('sectionIds') as string[];
-    
+
     // Extended fields
     const objectives = sanitizeInput(formData.get('objectives') as string);
     const machineModel = sanitizeInput(formData.get('machineModel') as string);
@@ -123,7 +123,7 @@ export async function updateProgram(programId: string, formData: FormData) {
     const trainerMaterial = sanitizeInput(formData.get('trainerMaterial') as string);
     const participantMaterial = sanitizeInput(formData.get('participantMaterial') as string);
     const level = sanitizeInput(formData.get('level') as string);
-    
+
     const daysStr = formData.get('days') as string;
     const days = daysStr && !isNaN(parseFloat(daysStr)) ? parseFloat(daysStr) : null;
 
@@ -404,4 +404,141 @@ const getCachedTrainerOptions = unstable_cache(
 
 export async function getTrainerOptions() {
     return await getCachedTrainerOptions();
+}
+
+export async function mergeEmployees(primaryId: string, duplicateId: string) {
+    if (!await auth()) return { error: 'Unauthorized' };
+
+    if (primaryId === duplicateId) {
+        return { error: 'Primary and Duplicate cannot be the same employee.' };
+    }
+
+    try {
+        const result = await db.$transaction(async (tx) => {
+            // Verify both exist
+            const primary = await tx.employee.findUnique({ where: { id: primaryId } });
+            const duplicate = await tx.employee.findUnique({ where: { id: duplicateId } });
+
+            if (!primary) throw new Error('Primary employee not found.');
+            if (!duplicate) throw new Error('Duplicate employee not found.');
+
+            // 1. Direct Updates (No complex unique constraints)
+            await tx.systemTrainingHistory.updateMany({
+                where: { empId: duplicateId },
+                data: { empId: primaryId }
+            });
+
+            await tx.trainingHistory.updateMany({
+                where: { empId: duplicateId },
+                data: { empId: primaryId }
+            });
+
+            await tx.qualifications.updateMany({
+                where: { empID: duplicateId },
+                data: { empID: primaryId }
+            });
+
+            await tx.enrollment.updateMany({
+                where: { empId: duplicateId },
+                data: { empId: primaryId }
+            });
+
+            await tx.employee.updateMany({
+                where: { managerId: duplicateId },
+                data: { managerId: primaryId }
+            });
+
+            // 2. Resolve Unique Constraints Manually
+
+            // A. AttendanceRecord (@@unique([sessionId, empId, date]))
+            const dupAttendances = await tx.attendanceRecord.findMany({ where: { empId: duplicateId } });
+            for (const att of dupAttendances) {
+                const existing = await tx.attendanceRecord.findUnique({
+                    where: { sessionId_empId_date: { sessionId: att.sessionId, empId: primaryId, date: att.date } }
+                });
+                if (existing) {
+                    await tx.attendanceRecord.delete({ where: { id: att.id } }); // Delete duplicate
+                } else {
+                    await tx.attendanceRecord.update({
+                        where: { id: att.id },
+                        data: { empId: primaryId }
+                    });
+                }
+            }
+
+            // B. Nomination (@@unique([empId, batchId]))
+            const dupNominations = await tx.nomination.findMany({ where: { empId: duplicateId } });
+            for (const nom of dupNominations) {
+                if (nom.batchId) {
+                    const existing = await tx.nomination.findUnique({
+                        where: { empId_batchId: { empId: primaryId, batchId: nom.batchId } }
+                    });
+                    if (existing) {
+                        await tx.nomination.delete({ where: { id: nom.id } });
+                    } else {
+                        await tx.nomination.update({
+                            where: { id: nom.id },
+                            data: { empId: primaryId }
+                        });
+                    }
+                } else {
+                    // No batchId, no unique constraint violation
+                    await tx.nomination.update({
+                        where: { id: nom.id },
+                        data: { empId: primaryId }
+                    });
+                }
+            }
+
+            // C. CohortMember (@@unique([cohortId, employeeId]))
+            const dupCohortMembers = await tx.cohortMember.findMany({ where: { employeeId: duplicateId } });
+            for (const mem of dupCohortMembers) {
+                const existing = await tx.cohortMember.findUnique({
+                    where: { cohortId_employeeId: { cohortId: mem.cohortId, employeeId: primaryId } }
+                });
+                if (existing) {
+                    await tx.cohortMember.delete({ where: { id: mem.id } });
+                } else {
+                    await tx.cohortMember.update({
+                        where: { id: mem.id },
+                        data: { employeeId: primaryId }
+                    });
+                }
+            }
+
+            // D. CohortFeedback (@@unique([cohortId, empId]))
+            const dupCohortFeedbacks = await tx.cohortFeedback.findMany({ where: { empId: duplicateId } });
+            for (const fb of dupCohortFeedbacks) {
+                const existing = await tx.cohortFeedback.findUnique({
+                    where: { cohortId_empId: { cohortId: fb.cohortId, empId: primaryId } }
+                });
+                if (existing) {
+                    await tx.cohortFeedback.delete({ where: { id: fb.id } });
+                } else {
+                    await tx.cohortFeedback.update({
+                        where: { id: fb.id },
+                        data: { empId: primaryId }
+                    });
+                }
+            }
+
+            // 3. Mark Duplicate as Inactive instead of deleting
+            await tx.employee.update({
+                where: { id: duplicateId },
+                data: {
+                    status: 'Inactive',
+                    name: `[MERGED] ${duplicate.name}`
+                }
+            });
+
+            return true;
+        });
+
+        revalidatePath('/admin/employees');
+        revalidateTag('employees', 'max');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Merge Employee Error", error);
+        return { error: error.message || 'Failed to merge employees' };
+    }
 }
