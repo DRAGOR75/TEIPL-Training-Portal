@@ -16,7 +16,7 @@ import {
     HiOutlineArrowTopRightOnSquare,
 } from 'react-icons/hi2';
 import AddMembersModal from '@/components/admin/cohort/AddMembersModal';
-import ScheduleSessionModal from '@/components/admin/cohort/ScheduleSessionModal';
+import CreateSessionModal from '@/components/admin/CreateSessionModal';
 import { removeMemberFromCohort, updateCohort, markCohortProgramComplete } from '@/app/actions/cohorts';
 import { useRouter } from 'next/navigation';
 
@@ -326,11 +326,14 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
             )}
 
             {scheduleFor && (
-                <ScheduleSessionModal
-                    cohortProgram={scheduleFor}
-                    cohortName={cohort.name}
+                <CreateSessionModal
+                    programs={cohort.programs.map((p: any) => p.program)}
                     trainers={trainers}
                     locations={locations}
+                    fixedProgramName={scheduleFor.program.name}
+                    fixedAltProgramName={`${scheduleFor.program.name} (${cohort.name})`}
+                    cohortProgramId={scheduleFor.id}
+                    defaultOpen={true}
                     onClose={() => setScheduleFor(null)}
                 />
             )}

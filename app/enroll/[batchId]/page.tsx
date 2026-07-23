@@ -158,7 +158,7 @@ export default function JoinPage() {
         const payload = {
             ...regData,
             empId,
-            grade: regData.grade as 'EXECUTIVE' | 'WORKMAN'
+            grade: regData.grade as any // Allow all valid Grade enum values
         };
 
         const res = await registerAndJoinBatch(batchId, payload);
@@ -361,6 +361,9 @@ export default function JoinPage() {
                                 >
                                     <option value="EXECUTIVE">Executive</option>
                                     <option value="WORKMAN">Workman</option>
+                                    <option value="APPRENTICE">Apprentice</option>
+                                    <option value="TRAINEE">Trainee</option>
+                                    <option value="LOCAL">Local</option>
                                 </select>
                             </div>
                             <div className="space-y-1.5">

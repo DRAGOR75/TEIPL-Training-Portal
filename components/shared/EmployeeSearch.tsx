@@ -18,7 +18,7 @@ export default function EmployeeSearch({ employees, basePath }: { employees: Emp
 
     const options = employees.map(emp => ({
         value: emp.id,
-        label: `${emp.name} (ID: ${emp.id}) ${emp.email ? `- ${emp.email}` : ''} ${emp.mobile ? `- ${emp.mobile}` : ''}`
+        label: `${emp.name || 'Unknown'} (ID: ${emp.id}) ${emp.email ? `- ${emp.email}` : ''} ${emp.mobile ? `- ${emp.mobile}` : ''}`
     }));
 
     const handleSelect = (val: string) => {

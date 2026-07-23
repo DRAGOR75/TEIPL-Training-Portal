@@ -9,6 +9,18 @@ export interface ProgramRecord {
     trainingName: string;
     status: string;
     forSection: string;
+    sectionCodeName: string;
+    days?: number | null;
+    targetGrades?: string[];
+    targetDate?: string;
+    contentResp?: string;
+    participantMaterial?: string;
+    trainerMaterial?: string;
+    syllabusLink?: string;
+    objectives?: string;
+    materialPriority?: string;
+    machineModel?: string;
+    level?: string;
 }
 
 const mapCategory = (group: string) => {
@@ -48,6 +60,19 @@ export async function processProgramBatch(records: ProgramRecord[]) {
                 id: record.subjectCode.trim(), // Use custom string ID
                 name: record.trainingName.trim(),
                 category: category as any, // Cast to any to satisfy Prisma enum type locally
+                sectionCodeName: record.sectionCodeName || null,
+                status: record.status || 'Active',
+                days: record.days ?? null,
+                targetGrades: record.targetGrades && record.targetGrades.length > 0 ? record.targetGrades : ['EXECUTIVE', 'WORKMAN'], // default to both if empty
+                targetDate: record.targetDate || null,
+                contentResp: record.contentResp || null,
+                participantMaterial: record.participantMaterial || null,
+                trainerMaterial: record.trainerMaterial || null,
+                syllabusLink: record.syllabusLink || null,
+                objectives: record.objectives || null,
+                materialPriority: record.materialPriority || null,
+                machineModel: record.machineModel || null,
+                level: record.level || null,
             };
 
             const existingProgram = await db.program.findUnique({
@@ -55,18 +80,38 @@ export async function processProgramBatch(records: ProgramRecord[]) {
             });
 
             if (existingProgram) {
-                await db.program.update({
-                    where: { id: programData.id },
-                    data: {
-                        name: programData.name,
-                        category: programData.category,
-                        ...(sectionId ? { sections: { connect: { id: sectionId } } } : {})
-                    }
-                });
+                // Partial Update: Only overwrite fields that are explicitly provided
+                const updateData: any = {};
+                if (record.trainingName) updateData.name = programData.name;
+                if (record.programGroup) updateData.category = programData.category;
+                if (record.sectionCodeName) updateData.sectionCodeName = programData.sectionCodeName;
+                if (record.status) updateData.status = programData.status;
+                if (record.days !== undefined) updateData.days = programData.days;
+                if (record.targetGrades && record.targetGrades.length > 0) updateData.targetGrades = programData.targetGrades;
+                if (record.targetDate) updateData.targetDate = programData.targetDate;
+                if (record.contentResp) updateData.contentResp = programData.contentResp;
+                if (record.participantMaterial) updateData.participantMaterial = programData.participantMaterial;
+                if (record.trainerMaterial) updateData.trainerMaterial = programData.trainerMaterial;
+                if (record.syllabusLink) updateData.syllabusLink = programData.syllabusLink;
+                if (record.objectives) updateData.objectives = programData.objectives;
+                if (record.materialPriority) updateData.materialPriority = programData.materialPriority;
+                if (record.machineModel) updateData.machineModel = programData.machineModel;
+                if (record.level) updateData.level = programData.level;
+                if (sectionId) updateData.sections = { connect: { id: sectionId } };
+
+                if (Object.keys(updateData).length > 0) {
+                    await db.program.update({
+                        where: { id: programData.id },
+                        data: updateData
+                    });
+                }
             } else {
+                // For new creations, it must have a name
+                if (!record.trainingName) continue;
                 await db.program.create({
                     data: {
                         ...programData,
+                        targetGrades: programData.targetGrades as any, // Cast for Prisma enum
                         ...(sectionId ? { sections: { connect: { id: sectionId } } } : {})
                     }
                 });

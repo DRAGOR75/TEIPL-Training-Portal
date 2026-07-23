@@ -23,6 +23,9 @@ export async function GET(request: Request) {
                     endDate: {
                         lt: today // Less than current date/time
                     }
+                },
+                nominations: {
+                    some: {} // Only complete if there is at least 1 participant
                 }
             },
             select: { id: true, name: true }

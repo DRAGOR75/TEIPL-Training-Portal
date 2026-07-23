@@ -16,14 +16,16 @@ type CreateSessionModalProps = {
     triggerComponent?: React.ReactNode;
     fixedProgramName?: string;
     fixedLocationName?: string;
+    fixedAltProgramName?: string;
     prefillStartDate?: string;
+    cohortProgramId?: string;
     defaultOpen?: boolean;
     onClose?: () => void;
 };
 
 export default function CreateSessionModal({
     trainers, programs, locations, fixedTrainerName,
-    triggerComponent, fixedProgramName, fixedLocationName, prefillStartDate, defaultOpen, onClose
+    triggerComponent, fixedProgramName, fixedLocationName, fixedAltProgramName, prefillStartDate, cohortProgramId, defaultOpen, onClose
 }: CreateSessionModalProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen || false);
 
@@ -160,6 +162,7 @@ export default function CreateSessionModal({
                                     <input
                                         type="text"
                                         name="altProgramName"
+                                        defaultValue={fixedAltProgramName}
                                         placeholder="Alternate Program Name (Optional)"
                                         className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     />
@@ -396,6 +399,7 @@ export default function CreateSessionModal({
 
                         {/* Hidden Inputs for Form Data Construction if needed */}
                         <input type="hidden" name="feedbackCreationDate" value="" />
+                        {cohortProgramId && <input type="hidden" name="cohortProgramId" value={cohortProgramId} />}
 
                         <div className="pt-4 flex justify-end gap-3 border-t border-slate-100 mt-4">
                             <button type="button" onClick={handleClose} className="px-5 py-2.5 text-slate-600 hover:bg-slate-100 rounded-xl text-sm font-bold transition-colors">Cancel</button>

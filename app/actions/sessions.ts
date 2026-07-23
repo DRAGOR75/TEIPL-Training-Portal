@@ -385,6 +385,62 @@ export async function createSession(formData: FormData) {
             }
         });
 
+        const cohortProgramId = formData.get('cohortProgramId') as string | null;
+        if (cohortProgramId) {
+            const cohortProgram = await db.cohortProgram.findUnique({
+                where: { id: cohortProgramId },
+                include: { cohort: { include: { members: { where: { status: 'Active' } } } } }
+            });
+
+            if (cohortProgram) {
+                await db.cohortProgram.update({
+                    where: { id: cohortProgramId },
+                    data: { sessionId: trainingSession.id, status: 'InProgress' }
+                });
+
+                const members = cohortProgram.cohort.members;
+                if (members.length > 0) {
+                    const memberEmpIds = members.map(m => m.employeeId);
+                    const existingNominations = await db.nomination.findMany({
+                        where: {
+                            empId: { in: memberEmpIds },
+                            programId: cohortProgram.programId,
+                            batchId: null
+                        }
+                    });
+
+                    const coveredEmpIds = new Set(existingNominations.map(n => n.empId));
+
+                    if (existingNominations.length > 0) {
+                        await db.nomination.updateMany({
+                            where: { id: { in: existingNominations.map(n => n.id) } },
+                            data: {
+                                batchId: batch.id,
+                                status: 'Batched',
+                                source: 'COHORT',
+                                managerApprovalStatus: 'Approved'
+                            }
+                        });
+                    }
+
+                    const newMembers = members.filter(m => !coveredEmpIds.has(m.employeeId));
+                    if (newMembers.length > 0) {
+                        await db.nomination.createMany({
+                            data: newMembers.map(member => ({
+                                empId: member.employeeId,
+                                programId: cohortProgram.programId,
+                                batchId: batch.id,
+                                status: 'Batched',
+                                source: 'COHORT',
+                                managerApprovalStatus: 'Approved',
+                            })),
+                            skipDuplicates: true,
+                        });
+                    }
+                }
+            }
+        }
+
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
         revalidatePath('/admin/sessions');
@@ -696,9 +752,9 @@ export async function joinBatch(batchId: string, empId: string) {
             return { error: 'Invalid Batch ID.' };
         }
 
-        // SECURITY FIX: Only allow joining IF the batch is not completed
-        if (batch.status === 'Completed') {
-            return { error: 'This training session has already been completed. You cannot join now.' };
+        // SECURITY FIX: Only allow joining IF the batch is still forming
+        if (batch.status !== 'Forming') {
+            return { error: 'This training session has been locked or completed. You cannot join now.' };
         }
 
         // 4. Link existing TNI or create a new Nomination
@@ -833,9 +889,9 @@ export async function registerAndJoinBatch(batchId: string, formData: {
             return { error: 'Invalid Batch ID.' };
         }
 
-        // SECURITY FIX: Only allow joining IF the batch is not completed
-        if (batch.status === 'Completed') {
-            return { error: 'This training session has already been completed. You cannot join now.' };
+        // SECURITY FIX: Only allow joining IF the batch is still forming
+        if (batch.status !== 'Forming') {
+            return { error: 'This training session has been locked or completed. You cannot join now.' };
         }
 
         // Validation for JIT registration

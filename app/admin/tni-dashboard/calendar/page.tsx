@@ -25,6 +25,7 @@ export default async function CalendarPage() {
                 location: true, 
                 startDate: true, 
                 endDate: true, 
+                status: true,
                 nominationBatch: {
                     select: {
                         _count: {
