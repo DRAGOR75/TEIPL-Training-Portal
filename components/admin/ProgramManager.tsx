@@ -288,6 +288,7 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                             </select>
                         </div>
                     </div>
+                    </div>
 
                     <div className="bg-slate-50 px-6 py-4 border-t flex justify-end gap-3 shrink-0">
                         <button
