@@ -30,6 +30,7 @@ interface Program {
     participantMaterial?: string | null;
     days?: number | null;
     level?: string | null;
+    sectionCodeName?: string | null;
     sections: { id: string, name: string }[];
 }
 
