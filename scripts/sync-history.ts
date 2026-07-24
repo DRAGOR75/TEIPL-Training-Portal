@@ -97,7 +97,8 @@ async function main() {
                         attendancePercentage: attendancePercentage,
                         status: finalStatus,
                         sessionCategory: session.sessionCategory,
-                        altProgramName: session.altProgramName
+                        altProgramName: session.altProgramName,
+                        subjectCode: nom.program.id
                     }
                 });
                 created++;
@@ -110,7 +111,8 @@ async function main() {
                         programName: session.programName,
                         sessionCategory: session.sessionCategory,
                         progCategory: session.sessionCategory,
-                        altProgramName: session.altProgramName
+                        altProgramName: session.altProgramName,
+                        subjectCode: nom.program.id
                     }
                 });
                 updated++;

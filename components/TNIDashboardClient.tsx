@@ -193,7 +193,7 @@ export default function TNIDashboardClient({
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Category</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Schedule Details</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Duration</th>
-                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Region</th>
+                                            <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider border-r border-slate-200 whitespace-nowrap">Training Region</th>
                                             <th className="px-3 sm:px-4 py-2 sm:py-3 font-bold text-slate-500 uppercase tracking-wider text-center whitespace-nowrap">Status</th>
                                         </tr>
                                     </thead>
@@ -201,7 +201,12 @@ export default function TNIDashboardClient({
                                         {trainingHistory.map((record: any, idx: number) => (
                                             <tr key={record.id} className="hover:bg-slate-50/50 transition-colors">
                                                 <td className="px-2 sm:px-3 py-1.5 sm:py-3 border-r border-slate-200 text-center text-slate-400 font-bold whitespace-nowrap">{idx + 1}</td>
-                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">{record.altProgramName || record.programName}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-900 min-w-[150px]">
+                                                    {record.altProgramName || record.programName}
+                                                    {record.subjectCode && (
+                                                        <span className="block text-[10px] sm:text-xs text-slate-500 font-medium mt-0.5">Code: {record.subjectCode}</span>
+                                                    )}
+                                                </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-bold text-slate-500 uppercase whitespace-nowrap">{record.progCategory || '-'}</td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 font-semibold text-slate-700 whitespace-nowrap">
                                                     {new Date(record.startDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
@@ -210,7 +215,7 @@ export default function TNIDashboardClient({
                                                     )}
                                                 </td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-600 font-medium whitespace-nowrap">{record.trainingDays ? `${record.trainingDays} Days` : '-'}</td>
-                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-700 font-medium whitespace-nowrap">{record.location || record.region || record.employeeRegion || '-'}</td>
+                                                <td className="px-3 sm:px-4 py-1.5 sm:py-3 border-r border-slate-200 text-slate-700 font-medium whitespace-nowrap">{record.location || record.region || '-'}</td>
                                                 <td className="px-3 sm:px-4 py-1.5 sm:py-3 text-center whitespace-nowrap">
                                                     <span className="inline-flex px-2 sm:px-3 py-0.5 sm:py-1 rounded-xl text-[9px] sm:text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
                                                         Completed
