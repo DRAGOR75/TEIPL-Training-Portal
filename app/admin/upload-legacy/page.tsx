@@ -38,7 +38,7 @@ export default function UploadLegacyDataPage() {
                         region: row['Region (On Trg Date)']?.trim() || row['employee_region']?.trim(),
                         startDate: row['Start Date']?.trim() || row['start_date']?.trim(),
                         endDate: row['End Date']?.trim() || row['end_date']?.trim(),
-                        trainingDays: parseInt(row['Trg Days'] || row['total_training_days'] || row['training_days'], 10) || null,
+                        trainingDays: parseFloat(row['Trg Days'] || row['total_training_days'] || row['training_days']) || null,
                         trainingHours: parseFloat(row['Trg Hours'] || row['total_training_hours'] || row['training_hours']) || null,
                         progCategory: row['PROG CATEGORY']?.trim() || row['prog_category']?.trim(),
                         location: row['Training Location Detailed']?.trim() || row['Trg Loc Trim']?.trim() || row['location']?.trim() || row['Location']?.trim(),

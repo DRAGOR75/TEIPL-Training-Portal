@@ -712,7 +712,7 @@ model TrainingHistory {
   programName  String   @map("program_name")
   startDate    DateTime @map("start_date")
   endDate      DateTime @map("end_date")
-  trainingDays Int?     @map("training_days")
+  trainingDays Float?     @map("training_days")
   trainingHours Float?  @map("training_hours")
   region       String?
 
@@ -764,7 +764,7 @@ model SystemTrainingHistory {
   programName  String   @map("program_name")
   startDate    DateTime @map("start_date")
   endDate      DateTime @map("end_date")
-  trainingDays Int?     @map("training_days")
+  trainingDays Float?     @map("training_days")
   trainingHours Float?  @map("training_hours")
   employeeRegion String? @map("employee_region")
   employeeLocation String? @map("employee_location")

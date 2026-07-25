@@ -1,31 +1,10 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { HiOutlineCalendarDays, HiOutlineCheckCircle } from 'react-icons/hi2';
-import { selfNominateCalendar } from '@/app/actions/calendar';
+import { useState } from 'react';
+import { HiOutlineCalendarDays, HiOutlineXMark, HiOutlineUserGroup, HiOutlineInformationCircle } from 'react-icons/hi2';
 
 export default function EmployeeCalendarClient({ events, empId }: { events: any[], empId: string | null }) {
-    const [isPending, startTransition] = useTransition();
-    const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-    const [justification, setJustification] = useState('');
-
-    const handleNominate = () => {
-        if (!empId) {
-            alert('Missing Employee ID session');
-            return;
-        }
-
-        startTransition(async () => {
-            const res = await selfNominateCalendar(selectedEventId!, empId, justification);
-            if (res.error) {
-                alert(res.error);
-            } else {
-                alert('Successfully nominated for event!');
-                setSelectedEventId(null);
-                setJustification('');
-            }
-        });
-    };
+    const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
 
     return (
         <div className="space-y-6">
@@ -63,8 +42,8 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                 return (
                                     <tr
                                         key={event.id}
-                                        onClick={() => empId && !isFull && setSelectedEventId(event.id)}
-                                        className={`transition-colors ${empId && !isFull ? 'hover:bg-emerald-50 cursor-pointer' : 'hover:bg-slate-50/80 cursor-not-allowed opacity-70'}`}
+                                        onClick={() => setSelectedEvent(event)}
+                                        className="transition-colors hover:bg-slate-50 cursor-pointer"
                                     >
                                         <td className="px-3 py-2 align-middle">
                                             <div className="font-bold text-slate-800 text-sm">{event.program.name}</div>
@@ -117,53 +96,111 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                 </div>
             </div>
 
-            {/* NOMINATION MODAL */}
-            {selectedEventId && (
+            {/* EVENT DETAILS MODAL */}
+            {selectedEvent && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b border-slate-100 bg-emerald-50/50">
-                            <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                                <HiOutlineCheckCircle className="text-emerald-500" />
-                                Confirm Nomination
-                            </h2>
-                            <p className="text-sm text-slate-500 mt-1 font-medium">Please verify your Employee ID to register for this event.</p>
-                        </div>
-                        <div className="p-6 space-y-4">
+                    <div className="bg-white rounded-3xl max-w-2xl w-full shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]">
+
+                        {/* Header */}
+                        <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between sticky top-0 z-10">
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Employee ID</label>
-                                <div className="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 font-bold text-slate-500">
-                                    {empId}
+                                <h2 className="text-xl font-black text-slate-800 flex items-center gap-2">
+                                    <HiOutlineInformationCircle className="text-emerald-600" size={24} />
+                                    Session Details
+                                </h2>
+                                <p className="text-sm text-slate-500 mt-1 font-medium">{selectedEvent.program.name}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedEvent(null)}
+                                className="p-2 bg-white rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors shadow-sm"
+                            >
+                                <HiOutlineXMark size={20} />
+                            </button>
+                        </div>
+
+                        {/* Scrollable Content */}
+                        <div className="p-6 overflow-y-auto">
+
+                            {/* Program Details Section */}
+                            <div className="mb-8">
+                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Program Information</h3>
+                                <div className="grid grid-cols-2 gap-4 bg-slate-50 rounded-2xl p-5 border border-slate-100">
+                                    <div>
+                                        <p className="text-xs text-slate-500 font-medium mb-1">Start Date</p>
+                                        <p className="font-bold text-slate-800">
+                                            {new Date(selectedEvent.proposedStartDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 font-medium mb-1">End Date</p>
+                                        <p className="font-bold text-slate-800">
+                                            {new Date(selectedEvent.proposedEndDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 font-medium mb-1">Trainer</p>
+                                        <p className="font-bold text-slate-800">{selectedEvent.proposedTrainer || 'TBD'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 font-medium mb-1">Location</p>
+                                        <p className="font-bold text-slate-800">{selectedEvent.proposedLocation || 'TBD'}</p>
+                                    </div>
+                                    <div>
+                                        <p className="text-xs text-slate-500 font-medium mb-1">Capacity</p>
+                                        <p className="font-bold text-slate-800">{selectedEvent.nominations.length} / {selectedEvent.capacity || 30} Enrolled</p>
+                                    </div>
                                 </div>
                             </div>
+
+                            {/* Participants Section */}
                             <div>
-                                <label className="block text-sm font-bold text-slate-700 mb-1">Justification (Optional)</label>
-                                <textarea
-                                    rows={3}
-                                    placeholder="Why do you want to attend this training?"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none"
-                                    value={justification}
-                                    onChange={e => setJustification(e.target.value)}
-                                />
+                                <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-2">
+                                    <HiOutlineUserGroup size={18} />
+                                    Enrolled Participants ({selectedEvent.nominations.length})
+                                </h3>
+
+                                {selectedEvent.nominations.length > 0 ? (
+                                    <div className="border border-slate-200 rounded-2xl overflow-hidden">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-slate-50 border-b border-slate-200">
+                                                    <th className="px-4 py-3 font-bold text-slate-500 text-xs uppercase">Employee ID</th>
+                                                    <th className="px-4 py-3 font-bold text-slate-500 text-xs uppercase">Name</th>
+                                                    <th className="px-4 py-3 font-bold text-slate-500 text-xs uppercase">Section</th>
+                                                    <th className="px-4 py-3 font-bold text-slate-500 text-xs uppercase">Designation</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-slate-100">
+                                                {selectedEvent.nominations.map((nom: any) => (
+                                                    <tr key={nom.id} className="hover:bg-slate-50 transition-colors">
+                                                        <td className="px-4 py-3 text-sm font-bold text-slate-700">
+                                                            {nom.employee?.id || nom.empId}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-medium text-slate-600">
+                                                            {nom.employee?.name || 'Unknown'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-medium text-slate-600">
+                                                            {nom.employee?.section || '-'}
+                                                        </td>
+                                                        <td className="px-4 py-3 text-sm font-medium text-slate-600">
+                                                            {nom.employee?.designation || '-'}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div className="bg-slate-50 rounded-2xl p-8 text-center border border-slate-100">
+                                        <p className="text-slate-500 font-medium">No participants enrolled yet.</p>
+                                    </div>
+                                )}
                             </div>
-                        </div>
-                        <div className="p-6 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
-                            <button
-                                onClick={() => setSelectedEventId(null)}
-                                className="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-200 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleNominate}
-                                disabled={isPending || !empId}
-                                className="px-6 py-2.5 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-md disabled:opacity-50 transition-all active:scale-95 flex items-center gap-2"
-                            >
-                                {isPending ? 'Submitting...' : 'Submit Nomination'}
-                            </button>
                         </div>
                     </div>
                 </div>
             )}
+
         </div>
     );
 }

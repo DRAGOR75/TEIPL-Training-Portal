@@ -261,7 +261,7 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 programName: finalProgramName,
                 startDate: start,
                 endDate: end,
-                trainingDays: record.trainingDays ? parseInt(record.trainingDays as any, 10) : null,
+                trainingDays: record.trainingDays ? parseFloat(record.trainingDays as any) : null,
                 trainingHours: record.trainingHours ? parseFloat(record.trainingHours as any) : null,
                 region: record.region || null,
                 location: record.location || null,
