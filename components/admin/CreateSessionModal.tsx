@@ -109,7 +109,7 @@ export default function CreateSessionModal({
                         // Set Program & Trainer
                         formData.set('programName', selectedProgram);
                         formData.set('trainerName', finalTrainer);
-                        
+
                         const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
                         if (finalCoordinator) {
                             formData.set('coordinatorName', finalCoordinator);
@@ -217,7 +217,7 @@ export default function CreateSessionModal({
                                 </div>
                                 {/* Fallback hidden input */}
                                 <input type="hidden" name="trainerName" value={fixedTrainerName || (trainerMode === 'custom' ? customTrainer : selectedTrainer)} />
-                                
+
                                 <div className="mt-4">
                                     <label className="block text-sm font-semibold text-slate-700 mb-1">Coordinator / Co-Trainer (Optional)</label>
                                     {coordinatorMode === 'select' ? (

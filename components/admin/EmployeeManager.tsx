@@ -67,15 +67,6 @@ export default function EmployeeManager({ employees, locations = [], sections = 
     const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
 
-    const [selectedGrade, setSelectedGrade] = useState('EXECUTIVE');
-    const [selectedGender, setSelectedGender] = useState('');
-    const [selectedEmployeeGrouupMNmw, setSelectedEmployeeGrouupMNmw] = useState('');
-    const [selectedOnRollContract, setSelectedOnRollContract] = useState('');
-
-    const [selectedFormRegion, setSelectedFormRegion] = useState('');
-    const [selectedFormLocation, setSelectedFormLocation] = useState('');
-    const [selectedFormSection, setSelectedFormSection] = useState('');
-    const [selectedFormDeptGroup, setSelectedFormDeptGroup] = useState('');
 
     const departmentGroups = useMemo(() => {
         const groups = Array.from(new Set(employees.map(e => e.departmentGroup).filter(Boolean)));
@@ -121,14 +112,6 @@ export default function EmployeeManager({ employees, locations = [], sections = 
         if (result?.error) alert(result.error);
         else {
             setIsAddModalOpen(false);
-            setSelectedGrade('EXECUTIVE');
-            setSelectedGender('');
-            setSelectedEmployeeGrouupMNmw('');
-            setSelectedOnRollContract('');
-            setSelectedFormRegion('');
-            setSelectedFormLocation('');
-            setSelectedFormSection('');
-            setSelectedFormDeptGroup('');
         }
     }
 
@@ -150,240 +133,6 @@ export default function EmployeeManager({ employees, locations = [], sections = 
         if (result?.error) alert(result.error);
         setDeletingId(null);
     }
-
-    const EmployeeModal = ({ employee, isEdit }: { employee?: Employee | null, isEdit: boolean }) => (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-                <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
-                    <h2 className="text-xl font-black text-slate-800">
-                        {isEdit ? 'Edit Employee' : 'Add New Employee'}
-                    </h2>
-                    <button
-                        onClick={() => isEdit ? setEditingEmployee(null) : setIsAddModalOpen(false)}
-                        className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
-                    >
-                        <HiOutlineXMark size={24} />
-                    </button>
-                </div>
-                <form action={isEdit ? handleEdit : handleAdd} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
-                            <input name="id" required defaultValue={employee?.id} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
-                            <SearchableSelect
-                                name="grade"
-                                options={[
-                                    { label: 'Executive', value: 'EXECUTIVE' },
-                                    { label: 'Workman', value: 'WORKMAN' },
-                                    { label: 'Apprentice', value: 'APPRENTICE' },
-                                    { label: 'Trainee', value: 'TRAINEE' },
-                                    { label: 'Local', value: 'LOCAL' }
-                                ]}
-                                value={isEdit ? employee?.grade || 'EXECUTIVE' : selectedGrade}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, grade: val } : null) : setSelectedGrade}
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
-                        <input name="name" required defaultValue={employee?.name} placeholder="John Doe" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
-                        <input name="email" type="email" required defaultValue={employee?.email} placeholder="john.doe@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
-                            <SearchableSelect
-                                name="sectionName"
-                                options={sectionOptions}
-                                value={isEdit ? employee?.sectionName || '' : selectedFormSection}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, sectionName: val } : null) : setSelectedFormSection}
-                                placeholder="Select Section"
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
-                            <input name="designation" defaultValue={employee?.designation || ''} placeholder="E.g. Senior Engineer" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
-                            <input name="managerId" defaultValue={employee?.managerId || ''} placeholder="Manager ID" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
-                            <input name="managerName" defaultValue={employee?.managerName || ''} placeholder="Manager Name" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
-                            <input name="managerEmail" type="email" defaultValue={employee?.managerEmail || ''} placeholder="manager@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
-                            <input name="managerMobile" defaultValue={employee?.managerMobile || ''} placeholder="+91..." className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
-                            <SearchableSelect
-                                name="gender"
-                                options={[
-                                    { label: 'Male', value: 'MALE' },
-                                    { label: 'Female', value: 'FEMALE' },
-                                    { label: 'Other', value: 'OTHER' }
-                                ]}
-                                value={isEdit ? employee?.gender || '' : selectedGender}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, gender: val } : null) : setSelectedGender}
-                                placeholder="Select Gender"
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
-                            <input type="date" name="doj" defaultValue={employee?.doj ? new Date(employee.doj).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
-                            <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
-                            <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
-                            <input name="status" defaultValue={employee?.status || 'Active'} placeholder="Status" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
-                            <input name="aadharNumber" defaultValue={employee?.aadharNumber || ''} placeholder="Aadhar Number" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
-                            <SearchableSelect
-                                name="location"
-                                options={locationOptions}
-                                value={isEdit ? employee?.location || '' : selectedFormRegion}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, location: val } : null) : setSelectedFormRegion}
-                                placeholder="Select Region"
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Project Location</label>
-                            <input name="projectLocation" defaultValue={employee?.projectLocation || ''} placeholder="Project Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
-                            <input name="location" defaultValue={employee?.location || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
-                            <input name="organization" defaultValue={employee?.organization || ''} placeholder="Organization" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
-                            <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
-                            <SearchableSelect
-                                name="departmentGroup"
-                                options={[
-                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
-                                    { label: 'OPERATORS', value: 'OPERATORS' },
-                                    { label: 'OTHERS', value: 'OTHERS' }
-                                ]}
-                                value={isEdit ? employee?.departmentGroup || '' : selectedFormDeptGroup}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, departmentGroup: val } : null) : setSelectedFormDeptGroup}
-                                placeholder="Select Department Group"
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
-                            <input name="highestQualification" defaultValue={employee?.highestQualification || ''} placeholder="Highest Qualification" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
-                            <SearchableSelect
-                                name="employeeGrouupMNmw"
-                                options={[
-                                    { label: 'Manager', value: 'Manager' },
-                                    { label: 'Non Manager', value: 'Non Manager' },
-                                    { label: 'Workman', value: 'Workman' }
-                                ]}
-                                value={isEdit ? employee?.employeeGrouupMNmw || '' : selectedEmployeeGrouupMNmw}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, employeeGrouupMNmw: val } : null) : setSelectedEmployeeGrouupMNmw}
-                                placeholder="Select Employee Group"
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
-                            <SearchableSelect
-                                name="onRollContract"
-                                options={[
-                                    { label: 'On Roll', value: 'On Roll' },
-                                    { label: 'Contract', value: 'Contract' }
-                                ]}
-                                value={isEdit ? employee?.onRollContract || '' : selectedOnRollContract}
-                                onChange={isEdit ? (val) => setEditingEmployee(prev => prev ? { ...prev, onRollContract: val } : null) : setSelectedOnRollContract}
-                                placeholder="Select On Roll / Contract"
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-
-                    <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
-                        <button
-                            type="button"
-                            onClick={() => isEdit ? setEditingEmployee(null) : setIsAddModalOpen(false)}
-                            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <FormSubmitButton className="px-8 py-2.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center gap-2">
-                            {isEdit ? 'Save Changes' : <><HiOutlinePlus size={18} /> Add Employee</>}
-                        </FormSubmitButton>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
 
     return (
         <div className={isFullscreen
@@ -693,8 +442,8 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                 )}
             </div>
 
-            {isAddModalOpen && <EmployeeModal isEdit={false} />}
-            {editingEmployee && <EmployeeModal employee={editingEmployee} isEdit={true} />}
+            {isAddModalOpen && <EmployeeModal isEdit={false} onClose={() => setIsAddModalOpen(false)} onSubmit={handleAdd} sectionOptions={sectionOptions} locationOptions={locationOptions} />}
+            {editingEmployee && <EmployeeModal employee={editingEmployee} isEdit={true} onClose={() => setEditingEmployee(null)} onSubmit={handleEdit} sectionOptions={sectionOptions} locationOptions={locationOptions} />}
             
             <MergeEmployeeModal 
                 isOpen={isMergeModalOpen} 
@@ -702,5 +451,251 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                 employees={employees} 
             />
         </div>
+    );
+}
+
+
+function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, locationOptions }: { employee?: Employee | null, isEdit: boolean, onClose: () => void, onSubmit: (formData: FormData) => void, sectionOptions: any[], locationOptions: any[] }) {
+    const [selectedGrade, setSelectedGrade] = useState(employee?.grade || 'EXECUTIVE');
+    const [selectedGender, setSelectedGender] = useState(employee?.gender || '');
+    const [selectedEmployeeGrouupMNmw, setSelectedEmployeeGrouupMNmw] = useState(employee?.employeeGrouupMNmw || '');
+    const [selectedOnRollContract, setSelectedOnRollContract] = useState(employee?.onRollContract || '');
+    const [selectedFormRegion, setSelectedFormRegion] = useState(employee?.location || '');
+    const [selectedFormSection, setSelectedFormSection] = useState(employee?.sectionName || '');
+    const [selectedFormDeptGroup, setSelectedFormDeptGroup] = useState(employee?.departmentGroup || '');
+
+    return (
+<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+                <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
+                    <h2 className="text-xl font-black text-slate-800">
+                        {isEdit ? 'Edit Employee' : 'Add New Employee'}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="p-2 hover:bg-slate-100 rounded-full text-slate-500 transition-colors"
+                    >
+                        <HiOutlineXMark size={24} />
+                    </button>
+                </div>
+                <form action={onSubmit} className="p-6 space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
+                            <input name="id" required defaultValue={employee?.id} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
+                            <SearchableSelect
+                                name="grade"
+                                options={[
+                                    { label: 'Executive', value: 'EXECUTIVE' },
+                                    { label: 'Workman', value: 'WORKMAN' },
+                                    { label: 'Apprentice', value: 'APPRENTICE' },
+                                    { label: 'Trainee', value: 'TRAINEE' },
+                                    { label: 'Local', value: 'LOCAL' }
+                                ]}
+                                value={selectedGrade}
+                                onChange={setSelectedGrade}
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
+                        <input name="name" required defaultValue={employee?.name} placeholder="John Doe" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
+                        <input name="email" type="email" required defaultValue={employee?.email} placeholder="john.doe@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
+                            <SearchableSelect
+                                name="sectionName"
+                                options={sectionOptions}
+                                value={selectedFormSection}
+                                onChange={setSelectedFormSection}
+                                placeholder="Select Section"
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                            <input name="designation" defaultValue={employee?.designation || ''} placeholder="E.g. Senior Engineer" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
+                            <input name="managerId" defaultValue={employee?.managerId || ''} placeholder="Manager ID" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
+                            <input name="managerName" defaultValue={employee?.managerName || ''} placeholder="Manager Name" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
+                            <input name="managerEmail" type="email" defaultValue={employee?.managerEmail || ''} placeholder="manager@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
+                            <input name="managerMobile" defaultValue={employee?.managerMobile || ''} placeholder="+91..." className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
+                            <SearchableSelect
+                                name="gender"
+                                options={[
+                                    { label: 'Male', value: 'MALE' },
+                                    { label: 'Female', value: 'FEMALE' },
+                                    { label: 'Other', value: 'OTHER' }
+                                ]}
+                                value={selectedGender}
+                                onChange={setSelectedGender}
+                                placeholder="Select Gender"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
+                            <input type="date" name="doj" defaultValue={employee?.doj ? new Date(employee.doj).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
+                            <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                            <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                            <input name="status" defaultValue={employee?.status || 'Active'} placeholder="Status" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
+                            <input name="aadharNumber" defaultValue={employee?.aadharNumber || ''} placeholder="Aadhar Number" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
+                            <SearchableSelect
+                                name="location"
+                                options={locationOptions}
+                                value={selectedFormRegion}
+                                onChange={setSelectedFormRegion}
+                                placeholder="Select Region"
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Project Location</label>
+                            <input name="projectLocation" defaultValue={employee?.projectLocation || ''} placeholder="Project Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                            <input name="location" defaultValue={employee?.location || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
+                            <input name="organization" defaultValue={employee?.organization || ''} placeholder="Organization" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                            <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
+                            <SearchableSelect
+                                name="departmentGroup"
+                                options={[
+                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+                                    { label: 'OPERATORS', value: 'OPERATORS' },
+                                    { label: 'OTHERS', value: 'OTHERS' }
+                                ]}
+                                value={selectedFormDeptGroup}
+                                onChange={setSelectedFormDeptGroup}
+                                placeholder="Select Department Group"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
+                            <input name="highestQualification" defaultValue={employee?.highestQualification || ''} placeholder="Highest Qualification" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
+                            <SearchableSelect
+                                name="employeeGrouupMNmw"
+                                options={[
+                                    { label: 'Manager', value: 'Manager' },
+                                    { label: 'Non Manager', value: 'Non Manager' },
+                                    { label: 'Workman', value: 'Workman' }
+                                ]}
+                                value={selectedEmployeeGrouupMNmw}
+                                onChange={setSelectedEmployeeGrouupMNmw}
+                                placeholder="Select Employee Group"
+                                className="w-full"
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                            <SearchableSelect
+                                name="onRollContract"
+                                options={[
+                                    { label: 'On Roll', value: 'On Roll' },
+                                    { label: 'Contract', value: 'Contract' }
+                                ]}
+                                value={selectedOnRollContract}
+                                onChange={setSelectedOnRollContract}
+                                placeholder="Select On Roll / Contract"
+                                className="w-full"
+                            />
+                        </div>
+                    </div>
+
+
+                    <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="px-6 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <FormSubmitButton className="px-8 py-2.5 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition shadow-lg shadow-purple-200 flex items-center gap-2">
+                            {isEdit ? 'Save Changes' : <><HiOutlinePlus size={18} /> Add Employee</>}
+                        </FormSubmitButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    
     );
 }
