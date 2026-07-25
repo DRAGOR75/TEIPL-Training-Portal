@@ -740,6 +740,7 @@ model TrainingHistory {
   source        String  @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)
   sessionId     String? @map("session_id")
   trainerName   String? @map("trainer_name")
+  coordinatorName String? @map("coordinator_name")
   averageRating Float?  @map("average_rating")
   status        String  @default("Completed")
   sessionCategory String? @map("session_category")
@@ -790,6 +791,7 @@ model SystemTrainingHistory {
   // Fields for Modern System Sync
   sessionId     String? @map("session_id")
   trainerName   String? @map("trainer_name")
+  coordinatorName String? @map("coordinator_name")
   averageRating Float?  @map("average_rating")
   status        String  @default("Completed")
   sessionCategory String? @map("session_category")

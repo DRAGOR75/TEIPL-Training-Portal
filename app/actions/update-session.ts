@@ -73,6 +73,34 @@ export async function updateSession(sessionId: string, formData: FormData) {
             dataToUpdate.feedbackCreationDate = assessmentDate;
         }
 
+        // Filter out any classDates that now fall outside the new start/end bounds
+        if (existingSession.classDates && existingSession.classDates.length > 0) {
+            // Compare times assuming all are normalized to midnight UTC or similar
+            // To be safe, we just check if the classDate is between startDate and endDate
+            const startMs = startDate.getTime();
+            const endMs = endDate.getTime();
+            
+            const validClassDates = existingSession.classDates.filter((d: Date) => {
+                const time = d.getTime();
+                return time >= startMs && time <= endMs;
+            });
+            
+            if (validClassDates.length !== existingSession.classDates.length) {
+                dataToUpdate.classDates = validClassDates;
+
+                // Also delete attendance records that fall outside the new bounds
+                await db.attendanceRecord.deleteMany({
+                    where: {
+                        sessionId: sessionId,
+                        OR: [
+                            { date: { lt: startDate } },
+                            { date: { gt: endDate } }
+                        ]
+                    }
+                });
+            }
+        }
+
         await db.trainingSession.update({
             where: { id: sessionId },
             data: dataToUpdate
