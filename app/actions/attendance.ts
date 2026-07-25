@@ -132,7 +132,7 @@ export async function finalizeParticipantTraining(
         const emp = await db.employee.findUnique({ where: { id: empId } });
         if (!emp) return { success: false, error: "Employee not found" };
 
-        const prog = await db.program.findUnique({ where: { name: session.programName }, select: { category: true } });
+        const prog = await db.program.findUnique({ where: { name: session.programName }, select: { category: true, id: true } });
         const progCategory = prog?.category ?? null;
 
         const start = new Date(session.startDate);
@@ -189,6 +189,7 @@ export async function finalizeParticipantTraining(
                     employeeRegion: emp.region,
                     employeeLocation: emp.location,
                     progCategory: progCategory,
+                    subjectCode: prog?.id || null,
 
                     organization: emp.organization,
                     onRollContract: emp.onRollContract,
@@ -223,7 +224,8 @@ export async function finalizeParticipantTraining(
                     programName: session.programName,
                     sessionCategory: session.sessionCategory,
                     progCategory: progCategory,
-                    altProgramName: session.altProgramName
+                    altProgramName: session.altProgramName,
+                    subjectCode: prog?.id || null
                 }
             });
         }

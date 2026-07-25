@@ -31,21 +31,20 @@ export default function BulkEmailPage() {
         Papa.parse(file, {
             complete: (results) => {
                 const parsedUsers: ParsedUser[] = results.data
-                    .filter((row: any) => row.length >= 4) // Ensure potential validity (min 4 cols)
                     .map((row: any) => ({
-                        empId: row[0]?.trim(),
-                        name: row[1]?.trim(),
-                        email: row[2]?.trim(),
-                        password: row[3]?.trim(),
+                        empId: (row.EmpID || row.empId || row.empid || row['Emp ID'] || '')?.trim(),
+                        name: (row.Name || row.name || '')?.trim(),
+                        email: (row.Email || row.email || '')?.trim(),
+                        password: (row.Password || row.password || '')?.trim(),
                         designation: '', // Not in new format
                         department: '', // Not in new format
                         status: 'pending' as const
                     }))
-                    .filter(user => user.email && user.email.includes('@')); // Basic validation
+                    .filter(user => user.email && user.email.includes('@') && user.empId); // Basic validation
 
                 setUsers(parsedUsers);
             },
-            header: false,
+            header: true,
             skipEmptyLines: true,
         });
     };
@@ -145,7 +144,8 @@ export default function BulkEmailPage() {
                     <HiCloudArrowUp className="w-12 h-12 text-slate-400 mb-4" />
                     <h3 className="text-lg font-medium text-slate-700 mb-2">Upload CSV File</h3>
                     <p className="text-slate-500 mb-6 max-w-md">
-                        Format: EmpID, Name, Email, Password
+                        Required Columns: EmpID, Name, Email, Password <br/>
+                        <span className="text-xs text-slate-400">(Order doesn't matter, headers are required)</span>
                     </p>
                     <input
                         type="file"

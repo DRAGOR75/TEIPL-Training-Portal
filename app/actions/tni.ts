@@ -42,7 +42,7 @@ export const getEmployeeProfile = async (empId: string) => {
                             createdAt: { gte: new Date(new Date().getFullYear(), 0, 1) },
                             status: { not: 'Inactive' }
                         },
-                        include: { program: true, batch: true }
+                        include: { program: true, batch: { include: { trainingSession: true } } }
                     },
                     trainingHistory: {
                         orderBy: { startDate: 'desc' }
