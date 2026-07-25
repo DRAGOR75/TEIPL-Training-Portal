@@ -42,7 +42,7 @@ export default async function EmployeeCalendarPage() {
         .filter(s => new Date(s.startDate) >= new Date() && s.nominationBatchId)
         .map(s => ({
             id: s.nominationBatchId, // Used by selfNominateCalendar which expects a batchId
-            capacity: s.nominationBatch?.capacity || null,
+            capacity: s.nominationBatch?.capacity || 30,
             nominations: s.nominationBatch?.nominations || [],
             proposedStartDate: s.startDate,
             proposedEndDate: s.endDate,

@@ -461,7 +461,11 @@ export const getSessions = unstable_cache(
             include: {
                 nominationBatch: {
                     include: {
-                        nominations: true
+                        nominations: {
+                            include: {
+                                employee: true
+                            }
+                        }
                     }
                 }
             }

@@ -286,7 +286,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                 </div>
                             </div>
                         </div>
-                        <div className="max-h-[400px] overflow-y-auto">
+                        <div className="max-h-[400px] overflow-auto">
                             {session.nominationBatch?.nominations.length === 0 ? (
                                 <div className="p-8 text-center text-slate-500 text-sm">
                                     Enrollment is empty. Add people from the waiting list or share the QR code.
@@ -413,7 +413,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             </div>
                         </div>
 
-                        <div className="max-h-[800px] overflow-y-auto">
+                        <div className="max-h-[800px] overflow-auto">
                             {filteredPending.length === 0 ? (
                                 <div className="p-8 text-center text-slate-500 text-sm">
                                     No pending nominations found for this program.
@@ -498,7 +498,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             <h3 className="font-bold text-slate-900 text-lg">Communication Logs</h3>
                             <p className="text-sm text-slate-500">History of invitations and reminders sent.</p>
                         </div>
-                        <div className="max-h-[300px] overflow-y-auto">
+                        <div className="max-h-[300px] overflow-auto">
                             {!session.emailLogs || session.emailLogs.length === 0 ? (
                                 <div className="p-8 text-center text-slate-500 text-sm">
                                     No emails have been logged for this session yet.
