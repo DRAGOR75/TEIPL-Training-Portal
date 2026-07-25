@@ -19,6 +19,8 @@ export interface LegacyRecord {
     mobile?: string;
     email?: string;
     subjectCode?: string;
+    coordinatorName?: string;
+    trainerName?: string;
     altProgramName?: string;
 
     organization?: string;
@@ -284,7 +286,9 @@ export async function processLegacyTrainingBatch(records: LegacyRecord[]) {
                 programAddress: record.programAddress || null,
                 subjectCode: record.subjectCode || null,
                 altProgramName: record.altProgramName || null,
-                sessionCategory: record.sessionCategory || null
+                sessionCategory: record.sessionCategory || null,
+                coordinatorName: record.coordinatorName || null,
+                trainerName: record.trainerName || null,
             };
         });
 
