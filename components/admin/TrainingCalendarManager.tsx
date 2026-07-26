@@ -49,6 +49,7 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
             id: session.id,
             isConfirmed: true,
             programName: session.programName,
+            altProgramName: session.altProgramName,
             startDate: session.startDate,
             endDate: session.endDate,
             trainer: session.trainerName,
@@ -103,7 +104,7 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                         <button
                             onClick={() => {
                                 const exportData = unifiedEvents.map((event: any) => ({
-                                    'Program Name': event.programName,
+                                    'Program Name': event.altProgramName || event.programName,
                                     'Nominated': event.enrolledCount,
                                     'Start Date': new Date(event.startDate).toLocaleDateString(),
                                     'End Date': new Date(event.endDate).toLocaleDateString(),

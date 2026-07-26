@@ -309,11 +309,11 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days</label>
-                                <input name="trainingDays" type="number" step="0.5" min="0" defaultValue={session.trainingDays || ''} placeholder="e.g. 2" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <input name="trainingDays" type="number" step="0.5" min="0" defaultValue={session.trainingDays || ''} placeholder="e.g. 2" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours</label>
-                                <input name="trainingHours" type="number" step="0.5" min="0" defaultValue={session.trainingHours || ''} placeholder="e.g. 16" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <input name="trainingHours" type="number" step="0.5" min="0" defaultValue={session.trainingHours || ''} placeholder="e.g. 16" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                         </div>
 
@@ -409,7 +409,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                 {mode === 'session' && (
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants)</label>
-                        <input name="capacity" type="number" min="1" defaultValue={session.capacity || "20"} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <input name="capacity" type="number" min="1" defaultValue={session.capacity || "20"} onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                         <p className="text-xs text-slate-400 mt-1">Maximum number of self-enrollments allowed</p>
                     </div>
                 )}
