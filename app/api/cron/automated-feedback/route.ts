@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
         const sessionsForFeedback = await db.trainingSession.findMany({
             where: {
                 sendFeedbackAutomatically: true,
-                emailsSent: false,
+                feedbackEmailsSent: false,
                 feedbackCreationDate: {
                     lte: new Date(),
                 }

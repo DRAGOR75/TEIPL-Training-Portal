@@ -1,0 +1,1 @@
+const { PrismaClient } = require('@prisma/client'); const db = new PrismaClient(); async function main() { console.log(await db.trainingSession.findMany({ where: { sendFeedbackAutomatically: true, feedbackEmailsSent: false, feedbackCreationDate: { lte: new Date() } } })); } main().finally(()=>db.$disconnect());
