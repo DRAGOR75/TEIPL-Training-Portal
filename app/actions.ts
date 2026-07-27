@@ -208,12 +208,12 @@ export async function submitEmployeeFeedback(formData: FormData) {
             },
             select: {
                 managerEmail: true,
-                managerName: true, // 🟢 Added managerName
+                managerName: true,
                 employeeName: true,
                 employeeEmail: true,
                 empId: true,
-                session: { 
-                    select: { 
+                session: {
+                    select: {
                         id: true,
                         programName: true,
                         nominationBatchId: true,
@@ -221,22 +221,22 @@ export async function submitEmployeeFeedback(formData: FormData) {
                         endDate: true,
                         trainerName: true,
                         location: true
-                    } 
+                    }
                 }
             }
         });
 
-        // 🟢 NEW: Update the Training History with the final L3 rating
-        if (updatedEnrollment.session?.id) {
-            let effectiveEmpId = updatedEnrollment.empId;
-            if (!effectiveEmpId) {
-                const emp = await db.employee.findUnique({
-                    where: { email: updatedEnrollment.employeeEmail },
-                    select: { id: true }
-                });
-                effectiveEmpId = emp?.id ?? null;
-            }
+        let effectiveEmpId = updatedEnrollment.empId;
+        if (!effectiveEmpId) {
+            const emp = await db.employee.findUnique({
+                where: { email: updatedEnrollment.employeeEmail },
+                select: { id: true }
+            });
+            effectiveEmpId = emp?.id ?? null;
+        }
 
+        //NEW: Update the Training History with the final L3 rating
+        if (updatedEnrollment.session?.id) {
             if (effectiveEmpId) {
                 // Update existing Training History with L3 rating
                 await db.trainingHistory.updateMany({
@@ -252,9 +252,28 @@ export async function submitEmployeeFeedback(formData: FormData) {
         }
 
         // 2. Send Email to Manager
+        let finalManagerEmail = updatedEnrollment.managerEmail;
+        let finalManagerName = updatedEnrollment.managerName;
+
+        if (effectiveEmpId) {
+            const empData = await db.employee.findUnique({ where: { id: effectiveEmpId } });
+            if (empData && empData.managerEmail) {
+                finalManagerEmail = empData.managerEmail;
+                finalManagerName = empData.managerName || finalManagerName;
+
+                // Update the snapshot so it stays in sync
+                if (finalManagerEmail !== updatedEnrollment.managerEmail) {
+                    await db.enrollment.update({
+                        where: { id: enrollmentId },
+                        data: { managerEmail: finalManagerEmail, managerName: finalManagerName }
+                    });
+                }
+            }
+        }
+
         await sendFeedbackReviewRequestEmail(
-            updatedEnrollment.managerEmail,
-            updatedEnrollment.managerName,
+            finalManagerEmail,
+            finalManagerName,
             updatedEnrollment.employeeName,
             updatedEnrollment.session.programName,
             enrollmentId
@@ -354,9 +373,35 @@ export async function sendFeedbackEmails(sessionId: string) {
 
         const results = await Promise.all(pendingEnrollments.map(async (enrollment) => {
             try {
+                let currentEmail = enrollment.employeeEmail;
+                let currentName = enrollment.employeeName;
+
+                // Fetch the absolute latest details from the employee table
+                let empIdToSearch = enrollment.empId;
+                let emp = null;
+
+                if (empIdToSearch) {
+                    emp = await db.employee.findUnique({ where: { id: empIdToSearch } });
+                } else if (currentEmail) {
+                    emp = await db.employee.findUnique({ where: { email: currentEmail } });
+                }
+
+                if (emp && emp.email) {
+                    currentEmail = emp.email;
+                    currentName = emp.name || currentName;
+
+                    // Update enrollment if the email changed
+                    if (currentEmail !== enrollment.employeeEmail) {
+                        await db.enrollment.update({
+                            where: { id: enrollment.id },
+                            data: { employeeEmail: currentEmail, employeeName: currentName, empId: emp.id }
+                        });
+                    }
+                }
+
                 await sendFeedbackRequestEmail(
-                    enrollment.employeeEmail,
-                    enrollment.employeeName,
+                    currentEmail,
+                    currentName,
                     session.programName,
                     enrollment.id
                 );

@@ -225,7 +225,22 @@ export async function finalizeParticipantTraining(
                     sessionCategory: session.sessionCategory,
                     progCategory: progCategory,
                     altProgramName: session.altProgramName,
-                    subjectCode: prog?.id || null
+                    subjectCode: prog?.id || null,
+                    
+                    // Sync the latest employee details
+                    employeeName: emp.name,
+                    employeeRegion: emp.region,
+                    employeeLocation: emp.location,
+                    organization: emp.organization,
+                    onRollContract: emp.onRollContract,
+                    department: emp.department,
+                    departmentGroup: emp.departmentGroup,
+                    employeeGroup: emp.departmentGroup,
+                    employeeGrouupMNmw: emp.employeeGrouupMNmw,
+                    aadharNumber: emp.aadharNumber,
+                    designation: emp.designation,
+                    section: emp.sectionName,
+                    gender: emp.gender
                 }
             });
         }

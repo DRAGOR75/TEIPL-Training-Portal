@@ -117,6 +117,7 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                             <input
                                 type="number" step="0.5" min="0" placeholder="e.g. 2"
                                 name="trainingDays"
+                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                 className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             />
                         </div>
@@ -125,6 +126,7 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                             <input
                                 type="number" step="0.5" min="0" placeholder="e.g. 16"
                                 name="trainingHours"
+                                onWheel={(e) => (e.target as HTMLInputElement).blur()}
                                 className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                             />
                         </div>

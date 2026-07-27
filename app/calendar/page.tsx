@@ -30,7 +30,7 @@ export default async function EmployeeCalendarPage() {
     // Map to the simple interface required by the Gantt component
     const normalizedSessions = rawSessions.map(s => ({
         id: s.id,
-        programName: s.programName,
+        programName: s.altProgramName || s.programName,
         trainerName: s.trainerName,
         startDate: s.startDate,
         endDate: s.endDate,
@@ -46,7 +46,7 @@ export default async function EmployeeCalendarPage() {
             nominations: s.nominationBatch?.nominations || [],
             proposedStartDate: s.startDate,
             proposedEndDate: s.endDate,
-            program: { name: s.programName },
+            program: { name: s.altProgramName || s.programName },
             proposedTrainer: s.trainerName,
             proposedLocation: s.location
         }))
