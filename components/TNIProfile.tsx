@@ -130,8 +130,8 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
 
     async function handleSave() {
         setLoading(true);
-        if (!formData.name || !formData.email || !formData.sectionName || !formData.grade) {
-            alert('Please fill all required fields (Name, Email, Grade, and Section)');
+        if (!formData.name || !formData.email || !formData.sectionName || !formData.managerId || !formData.managerName || !formData.managerEmail || !formData.organization || !formData.onRollContract || !formData.department || !formData.gender || !formData.mobile || !formData.designation || !formData.employeeGrouupMNmw || !formData.grade || !formData.region) {
+            alert('Please fill all required fields');
             setLoading(false);
             return;
         }
@@ -237,7 +237,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'Male', value: 'MALE' },
@@ -252,7 +252,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
                         <SearchableSelect
                             options={designationOptions}
                             value={formData.designation}
@@ -284,7 +284,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade / Level *</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade  *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'EXECUTIVE', value: 'EXECUTIVE' },
@@ -312,7 +312,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
@@ -342,7 +342,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region *</label>
                         <SearchableSelect
                             options={locationOptions}
                             value={formData.location}
@@ -354,7 +354,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Location"
@@ -364,7 +364,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Organization"
@@ -384,7 +384,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             placeholder="Department"
@@ -404,7 +404,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'MANAGER', value: 'MANAGER' },
@@ -419,7 +419,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract *</label>
                         <SearchableSelect
                             options={[
                                 { label: 'On Roll', value: 'On Roll' },
@@ -433,7 +433,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerId}
@@ -444,7 +444,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerName}
@@ -454,7 +454,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerEmail}
@@ -464,7 +464,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile *</label>
                         <input
                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
                             value={formData.managerMobile}

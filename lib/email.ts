@@ -422,7 +422,8 @@ export async function sendManagerSessionApprovalEmail(
   programName: string,
   startDate: Date,
   endDate: Date,
-  nominationId: string
+  nominationId: string,
+  objectives?: string | null
 ) {
   const baseUrl = getBaseUrl();
   const token = generateSecureToken(nominationId);
@@ -447,6 +448,10 @@ export async function sendManagerSessionApprovalEmail(
         <h3 style="margin-top: 0; color: #0056b3; margin-bottom: 10px;">${programName}</h3>
         <p style="margin: 5px 0;"><strong>Start Date:</strong> ${startDateStr}</p>
         <p style="margin: 5px 0;"><strong>End Date:</strong> ${endDateStr}</p>
+        ${objectives ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #cce5ff;">
+          <h4 style="margin: 0 0 5px 0; color: #0056b3; font-size: 14px;">Program Objectives:</h4>
+          <p style="margin: 0; font-size: 14px; color: #444; white-space: pre-wrap;">${objectives}</p>
+        </div>` : ''}
       </div>
 
       <p>As their manager, please review and approve or reject their participation. If rejecting, you will be required to provide a reason.</p>
@@ -482,7 +487,8 @@ export function generateBatchInvitationHtml(
   endTime: string = "1:00 pm",
   venue: string = "Training classroom, TRC",
   trainerName: string = "Internal/External",
-  participants: { empId: string; name: string; designation: string | null }[]
+  participants: { empId: string; name: string; designation: string | null }[],
+  objectives?: string | null
 ) {
   const dateFormatter = new Intl.DateTimeFormat('en-IN', {
     timeZone: 'Asia/Kolkata',
@@ -518,8 +524,10 @@ export function generateBatchInvitationHtml(
         <p><strong>Time:</strong> ${startTime} to ${endTime}</p>
         <p><strong>Location:</strong> ${venue}</p>
         <p><strong>Trainer Name:</strong> ${trainerName}</p>
-        
-      
+        ${objectives ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #cce5ff;">
+          <h4 style="margin: 0 0 5px 0; color: #0056b3; font-size: 14px;">Program Objectives:</h4>
+          <p style="margin: 0; font-size: 14px; color: #444; white-space: pre-wrap;">${objectives}</p>
+        </div>` : ''}
       </div>
 
       <h3 style="color: #444; margin-top: 30px;">Confirmed Participants</h3>
@@ -556,9 +564,10 @@ export async function sendBatchInvitationEmail(
   customHtml?: string,
   customSubject?: string,
   sessionId?: string,
-  isReminder: boolean = false
+  isReminder: boolean = false,
+  objectives?: string | null
 ) {
-  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants);
+  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants, objectives);
 
   // Filter out any invalid emails
   const validTo = toEmails.filter(e => e && e.includes('@'));

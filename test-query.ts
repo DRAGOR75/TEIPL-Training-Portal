@@ -1,0 +1,1 @@
+import { db } from './lib/prisma'; async function main() { try { const res = await db.$queryRawSELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'training_history'; console.log(res); } catch(e) { console.error('SQL ERROR:', e); } } main().finally(()=>db.$disconnect());

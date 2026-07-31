@@ -106,6 +106,7 @@ export async function toggleFeedbackAutomation(sessionId: string, isEnabled: boo
             data: { sendFeedbackAutomatically: isEnabled },
         });
         revalidatePath('/admin/dashboard');
+        revalidatePath('/trainer/dashboard');
         return { success: true };
     } catch (error) {
         console.error("Error toggling automation:", error);

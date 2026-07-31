@@ -50,8 +50,8 @@ export default async function UserHubDashboardPage() {
                     {/* Card 1: Training Management - Amber */}
                     <UserCard
                         href={`/tni/${empId}`}
-                        title="TNI & Training Records"
-                        description="Identify your training needs, submit nominations, and track your learning journey."
+                        title="Profile & TNI"
+                        description="Update your Training Need Identification, Nominations and Track your learning journey."
                         icon={<HiOutlineClipboardDocumentList size={32} />}
                         tag="Personal Growth"
                         color="amber"

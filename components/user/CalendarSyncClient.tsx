@@ -29,18 +29,18 @@ export default function CalendarSyncClient({ programs, sessions, trainers, locat
     return (
         <>
             <div className="mb-12">
-                <LocationGanttCalendar
-                    programs={programs}
-                    sessions={sessions}
-                    trainers={trainers}
-                    locations={locations}
-                    readOnly={true}
-                    viewDate={viewDate}
-                    onViewDateChange={setViewDate}
-                />
+                <EmployeeCalendarClient events={filteredEvents} empId={empId} />
             </div>
             
-            <EmployeeCalendarClient events={filteredEvents} empId={empId} />
+            <LocationGanttCalendar
+                programs={programs}
+                sessions={sessions}
+                trainers={trainers}
+                locations={locations}
+                readOnly={true}
+                viewDate={viewDate}
+                onViewDateChange={setViewDate}
+            />
         </>
     );
 }
