@@ -249,6 +249,17 @@ export async function submitEmployeeFeedback(formData: FormData) {
                         averageRating: average
                     }
                 });
+
+                // Also update System Training History
+                await db.systemTrainingHistory.updateMany({
+                    where: {
+                        empId: effectiveEmpId,
+                        sessionId: updatedEnrollment.session.id
+                    },
+                    data: {
+                        averageRating: average
+                    }
+                });
             }
         }
 
