@@ -18,48 +18,66 @@ export async function getTrainingHistory(params: {
     const page = params.page || 1;
     const pageSize = params.pageSize || 20;
 
-    const where: any = {};
+    const baseWhere: any = {};
     if (params.searchName) {
-        where.employeeName = { contains: params.searchName, mode: 'insensitive' };
+        baseWhere.OR = [
+            { employeeName: { contains: params.searchName, mode: 'insensitive' } },
+            { empId: { contains: params.searchName, mode: 'insensitive' } },
+            { aadharNumber: { contains: params.searchName, mode: 'insensitive' } },
+            { employee: { email: { contains: params.searchName, mode: 'insensitive' } } }
+        ];
     }
     if (params.year) {
-        where.year = params.year;
+        baseWhere.year = params.year;
     }
     if (params.month) {
-        where.month = params.month;
+        baseWhere.month = params.month;
     }
     if (params.sessionId) {
-        where.sessionId = { contains: params.sessionId, mode: 'insensitive' };
+        baseWhere.sessionId = { contains: params.sessionId, mode: 'insensitive' };
     }
     if (params.programName) {
-        where.programName = params.programName; // exact match for dropdown
+        baseWhere.programName = params.programName; // exact match for dropdown
     }
     if (params.startDate) {
         const start = new Date(params.startDate);
         start.setHours(0, 0, 0, 0);
         const end = new Date(params.startDate);
         end.setHours(23, 59, 59, 999);
-        where.startDate = { gte: start, lte: end };
-    }
-    if (params.region) {
-        where.region = params.region;
+        baseWhere.startDate = { gte: start, lte: end };
     }
     if (params.organization) {
-        where.organization = params.organization;
+        baseWhere.organization = params.organization;
     }
 
-    const [data, totalCount] = await Promise.all([
+    const where1 = { ...baseWhere };
+    const where2 = { ...baseWhere };
+
+    if (params.region) {
+        where1.region = params.region;
+        where2.employeeRegion = params.region;
+    }
+
+    // Fetch from both tables
+    const [legacyData, systemData] = await Promise.all([
         db.trainingHistory.findMany({
-            where,
-            orderBy: { startDate: 'desc' },
-            skip: (page - 1) * pageSize,
-            take: pageSize,
+            where: where1,
         }),
-        db.trainingHistory.count({ where }),
+        db.systemTrainingHistory.findMany({
+            where: where2,
+        }),
     ]);
 
+    // Combine and sort
+    const combinedData = [...legacyData, ...systemData].sort((a, b) => {
+        return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+    });
+
+    const totalCount = combinedData.length;
+    const paginatedData = combinedData.slice((page - 1) * pageSize, page * pageSize);
+
     return {
-        data,
+        data: paginatedData,
         totalCount,
         totalPages: Math.ceil(totalCount / pageSize),
     };
@@ -67,9 +85,22 @@ export async function getTrainingHistory(params: {
 
 export async function deleteTrainingHistory(id: string) {
     try {
-        await db.trainingHistory.delete({
-            where: { id },
-        });
+        let deleted = false;
+        try {
+            await db.trainingHistory.delete({
+                where: { id },
+            });
+            deleted = true;
+        } catch (e) {
+            // Ignore if not found in legacy table
+        }
+        
+        if (!deleted) {
+            await db.systemTrainingHistory.delete({
+                where: { id },
+            });
+        }
+        
         revalidatePath('/admin/tni-dashboard/training-history');
         return { success: true };
     } catch (error: any) {
@@ -79,57 +110,45 @@ export async function deleteTrainingHistory(id: string) {
 }
 
 export async function getTrainingHistoryFilters() {
-    const [years, months, programs, startDatesData, regionsData, orgsData] = await Promise.all([
-        db.trainingHistory.findMany({
-            where: { year: { not: null } },
-            distinct: ['year'],
-            select: { year: true },
-            orderBy: { year: 'desc' }
-        }),
-        db.trainingHistory.findMany({
-            where: { month: { not: null } },
-            distinct: ['month'],
-            select: { month: true },
-            orderBy: { month: 'asc' }
-        }),
-        db.trainingHistory.findMany({
-            distinct: ['programName'],
-            select: { programName: true },
-            orderBy: { programName: 'asc' }
-        }),
-        db.trainingHistory.findMany({
-            distinct: ['startDate'],
-            select: { startDate: true },
-            orderBy: { startDate: 'desc' }
-        }),
-        db.trainingHistory.findMany({
-            where: { region: { not: null } },
-            distinct: ['region'],
-            select: { region: true },
-            orderBy: { region: 'asc' }
-        }),
-        db.trainingHistory.findMany({
-            where: { organization: { not: null } },
-            distinct: ['organization'],
-            select: { organization: true },
-            orderBy: { organization: 'asc' }
-        })
+    const [
+        years1, months1, programs1, startDates1, regions1, orgs1,
+        years2, months2, programs2, startDates2, regions2, orgs2
+    ] = await Promise.all([
+        db.trainingHistory.findMany({ where: { year: { not: null } }, distinct: ['year'], select: { year: true } }),
+        db.trainingHistory.findMany({ where: { month: { not: null } }, distinct: ['month'], select: { month: true } }),
+        db.trainingHistory.findMany({ distinct: ['programName'], select: { programName: true } }),
+        db.trainingHistory.findMany({ distinct: ['startDate'], select: { startDate: true } }),
+        db.trainingHistory.findMany({ where: { region: { not: null } }, distinct: ['region'], select: { region: true } }),
+        db.trainingHistory.findMany({ where: { organization: { not: null } }, distinct: ['organization'], select: { organization: true } }),
+        
+        db.systemTrainingHistory.findMany({ where: { year: { not: null } }, distinct: ['year'], select: { year: true } }),
+        db.systemTrainingHistory.findMany({ where: { month: { not: null } }, distinct: ['month'], select: { month: true } }),
+        db.systemTrainingHistory.findMany({ distinct: ['programName'], select: { programName: true } }),
+        db.systemTrainingHistory.findMany({ distinct: ['startDate'], select: { startDate: true } }),
+        db.systemTrainingHistory.findMany({ where: { employeeRegion: { not: null } }, distinct: ['employeeRegion'], select: { employeeRegion: true } }),
+        db.systemTrainingHistory.findMany({ where: { organization: { not: null } }, distinct: ['organization'], select: { organization: true } })
     ]);
 
-    const startDates = startDatesData
-        .map(d => d.startDate ? new Date(d.startDate).toISOString().split('T')[0] : '')
-        .filter(Boolean);
+    const allYears = Array.from(new Set([...years1.map(y => y.year), ...years2.map(y => y.year)])).filter(Boolean).sort().reverse();
+    const allMonths = Array.from(new Set([...months1.map(m => m.month), ...months2.map(m => m.month)])).filter(Boolean);
+    const allPrograms = Array.from(new Set([...programs1.map(p => p.programName), ...programs2.map(p => p.programName)])).filter(Boolean).sort();
+    const allRegions = Array.from(new Set([...regions1.map(r => r.region), ...regions2.map(r => r.employeeRegion)])).filter(Boolean).sort();
+    const allOrgs = Array.from(new Set([...orgs1.map(o => o.organization), ...orgs2.map(o => o.organization)])).filter(Boolean).sort();
 
-    // Remove duplicates since different times on the same date will map to the same YYYY-MM-DD
+    const startDates = [...startDates1, ...startDates2]
+        .map(d => d.startDate ? new Date(d.startDate).toISOString().split('T')[0] : '')
+        .filter(Boolean)
+        .sort()
+        .reverse();
+        
     const uniqueStartDates = Array.from(new Set(startDates));
 
     return {
-        years: years.map(y => y.year as string).filter(Boolean),
-        months: months.map(m => m.month as string).filter(Boolean),
-        programNames: programs.map(p => p.programName as string).filter(Boolean),
+        years: allYears as string[],
+        months: allMonths as string[],
+        programNames: allPrograms as string[],
         startDates: uniqueStartDates,
-        regions: regionsData.map(r => r.region as string).filter(Boolean),
-        organizations: orgsData.map(o => o.organization as string).filter(Boolean)
+        regions: allRegions as string[],
+        organizations: allOrgs as string[]
     };
 }
-
