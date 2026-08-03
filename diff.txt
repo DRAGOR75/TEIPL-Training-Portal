@@ -1,0 +1,1279 @@
+﻿diff --git a/app/actions.ts b/app/actions.ts
+index e0353d6..44c34ab 100644
+--- a/app/actions.ts
++++ b/app/actions.ts
+@@ -106,6 +106,7 @@ export async function toggleFeedbackAutomation(sessionId: string, isEnabled: boo
+             data: { sendFeedbackAutomatically: isEnabled },
+         });
+         revalidatePath('/admin/dashboard');
++        revalidatePath('/trainer/dashboard');
+         return { success: true };
+     } catch (error) {
+         console.error("Error toggling automation:", error);
+diff --git a/app/actions/sessions.ts b/app/actions/sessions.ts
+index ead2816..174dac3 100644
+--- a/app/actions/sessions.ts
++++ b/app/actions/sessions.ts
+@@ -19,6 +19,7 @@ export async function getBatchInvitationPreview(sessionId: string) {
+             include: {
+                 nominationBatch: {
+                     include: {
++                        program: true,
+                         nominations: {
+                             where: { status: 'Batched' },
+                             include: { employee: true }
+@@ -49,15 +50,18 @@ export async function getBatchInvitationPreview(sessionId: string) {
+             designation: nom.employee.designation
+         }));
+ 
++        const topics = trainingSession.topics || trainingSession.nominationBatch.program?.objectives;
++
+         const html = generateBatchInvitationHtml(
+-            trainingSession.programName,
++            trainingSession.altProgramName || trainingSession.programName,
+             trainingSession.startDate,
+             trainingSession.endDate,
+             trainingSession.startTime || "8:30 am",
+             trainingSession.endTime || "6:00 pm",
+             trainingSession.location || "Training classroom, TRC",
+             trainingSession.trainerName || "Internal/External",
+-            participants
++            participants,
++            topics
+         );
+ 
+         const sessionData = {
+@@ -118,6 +122,7 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
+             include: {
+                 nominationBatch: {
+                     include: {
++                        program: true,
+                         nominations: {
+                             where: { status: 'Batched' }, // Only currently enrolled
+                             include: { employee: true }
+@@ -174,13 +179,15 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
+         revalidateTag('sessions-list', 'max');
+         revalidateTag('session-details', 'max');
+ 
++        const topics = trainingSession.topics || trainingSession.nominationBatch.program?.objectives;
++
+         // Send Email in the background to avoid Vercel timeouts
+         after(async () => {
+             try {
+                 await sendBatchInvitationEmail(
+                     toEmails,
+                     managerEmails,
+-                    trainingSession.programName,
++                    trainingSession.altProgramName || trainingSession.programName,
+                     trainingSession.startDate,
+                     trainingSession.endDate,
+                     trainingSession.startTime || "8:30 am",
+@@ -191,7 +198,8 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
+                     customHtml,
+                     customSubject,
+                     sessionId,
+-                    isReminder
++                    isReminder,
++                    topics
+                 );
+             } catch (err) {
+                 console.error("Background email send failed:", err);
+@@ -689,16 +697,20 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
+             }
+ 
+             const { startDate, endDate } = batch.trainingSession;
++            const programName = batch.trainingSession.altProgramName || batch.program?.name || 'Training Program';
++            const topics = batch.trainingSession.topics || batch.program?.objectives || 'Training Topics';
++
+             await Promise.all(nominations.map(async (nom) => {
+                 if (nom.employee.managerEmail) {
+                     await sendManagerSessionApprovalEmail(
+                         nom.employee.managerEmail,
+                         nom.employee.managerName,
+                         nom.employee.name,
+-                        batch.program.name,
++                        programName,
+                         startDate,
+                         endDate,
+-                        nom.id
++                        nom.id,
++                        topics
+                     ).catch(err => console.error("Γ¥î Email failed for", nom.employee.name, err));
+                 }
+             }));
+@@ -812,14 +824,16 @@ export async function joinBatch(batchId: string, empId: string) {
+         // 5. Send Email if Session exists
+         if (batch.trainingSession && employee.managerEmail && batch.trainingSession.requireManagerApproval) {
+             const { startDate, endDate } = batch.trainingSession;
++            const programName = batch.trainingSession.altProgramName || batch.program.name;
+             await sendManagerSessionApprovalEmail(
+                 employee.managerEmail,
+                 employee.managerName,
+                 employee.name,
+-                batch.program.name,
++                programName,
+                 startDate,
+                 endDate,
+-                nomination.id
++                nomination.id,
++                batch.trainingSession.topics || batch.program.objectives
+             ).catch(console.error);
+         }
+ 
+@@ -995,14 +1009,16 @@ export async function registerAndJoinBatch(batchId: string, formData: {
+         // but robustly we should use employee.managerEmail or formData.managerEmail.
+         if (batch.trainingSession && formData.managerEmail && batch.trainingSession.requireManagerApproval) {
+             const { startDate, endDate } = batch.trainingSession;
++            const programName = batch.trainingSession.altProgramName || batch.program.name;
+             await sendManagerSessionApprovalEmail(
+                 formData.managerEmail,
+                 formData.managerName,
+                 formData.name,
+-                batch.program.name,
++                programName,
+                 startDate,
+                 endDate,
+-                nomination.id
++                nomination.id,
++                batch.trainingSession.topics || batch.program.objectives
+             ).catch(console.error);
+         }
+ 
+diff --git a/app/admin/dashboard/DashboardClient.tsx b/app/admin/dashboard/DashboardClient.tsx
+index eeb0b30..83a69a1 100644
+--- a/app/admin/dashboard/DashboardClient.tsx
++++ b/app/admin/dashboard/DashboardClient.tsx
+@@ -118,7 +118,10 @@ export default function DashboardClient({
+         setOptimisticToggles(prev => ({ ...prev, [sessionId]: nextStatus }));
+ 
+         try {
+-            await toggleFeedbackAutomation(sessionId, nextStatus);
++            const result = await toggleFeedbackAutomation(sessionId, nextStatus);
++            if (!result?.success) {
++                throw new Error(result?.error || "Unknown error");
++            }
+             router.refresh();
+         } catch (error) {
+             alert("Failed to update settings");
+diff --git a/app/admin/sessions/[sessionId]/manage/AttendanceTab.tsx b/app/admin/sessions/[sessionId]/manage/AttendanceTab.tsx
+index 04dab16..c221861 100644
+--- a/app/admin/sessions/[sessionId]/manage/AttendanceTab.tsx
++++ b/app/admin/sessions/[sessionId]/manage/AttendanceTab.tsx
+@@ -16,8 +16,8 @@ export default function AttendanceTab({ session }: { session: any }) {
+         const end = new Date(session.endDate);
+         const dates = [];
+         let current = new Date(start);
+-        current.setHours(0,0,0,0);
+-        end.setHours(0,0,0,0);
++        current.setHours(0, 0, 0, 0);
++        end.setHours(0, 0, 0, 0);
+         while (current <= end) {
+             const dateObj = new Date(current);
+             // Handle timezone offset to ensure correct string
+@@ -30,7 +30,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+     }, [session.startDate, session.endDate]);
+ 
+     const [selectedDates, setSelectedDates] = useState<string[]>([]);
+-    
++
+     useEffect(() => {
+         if (availableDates.length > 0 && selectedDates.length === 0 && classDates.length === 0) {
+             setSelectedDates(availableDates);
+@@ -74,7 +74,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+             setIsSaving(false);
+             return;
+         }
+-        
++
+         const newDates = [...classDates, new Date(newDateStr)];
+         const res = await updateSessionClassDates(session.id, newDates);
+         if (res.success) {
+@@ -90,6 +90,33 @@ export default function AttendanceTab({ session }: { session: any }) {
+         const currentStatus = localAttendance[empId]?.[dateStr] || 'Present';
+         const newStatus = currentStatus === 'Present' ? 'Absent' : 'Present';
+ 
++        if (newStatus === 'Present') {
++            const nom = enrolledNominations.find((n: any) => n.employee?.id === empId || n.empId === empId);
++            const emp = nom?.employee;
++            if (emp) {
++                const missingFields = [];
++                if (!emp.name) missingFields.push('Name');
++                if (!emp.id) missingFields.push('Emp ID');
++                if (!emp.organization) missingFields.push('Organization');
++                if (!emp.grade) missingFields.push('Grade');
++                if (!emp.gender) missingFields.push('Gender');
++                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
++                if (!emp.departmentGroup) missingFields.push('Department Group');
++                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
++                if (!emp.sectionName) missingFields.push('Section');
++                if (!emp.onRollContract) missingFields.push('On Roll Contract');
++                if (!emp.designation) missingFields.push('Designation');
++                if (!emp.region) missingFields.push('Region');
++                if (!emp.location) missingFields.push('Location');
++
++
++                if (missingFields.length > 0) {
++                    alert(`Cannot mark attendance as present. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
++                    return;
++                }
++            }
++        }
++
+         // 1. Optimistic update
+         setLocalAttendance(prev => ({
+             ...prev,
+@@ -138,11 +165,38 @@ export default function AttendanceTab({ session }: { session: any }) {
+     };
+ 
+     const handleFinalize = async (empId: string, finalStatus: 'Completed' | 'Absent') => {
++        if (finalStatus === 'Completed') {
++            const nom = enrolledNominations.find((n: any) => n.employee?.id === empId || n.empId === empId);
++            const emp = nom?.employee;
++            if (emp) {
++                const missingFields = [];
++                if (!emp.name) missingFields.push('Name');
++                if (!emp.id) missingFields.push('Emp ID');
++                if (!emp.organization) missingFields.push('Organization');
++                if (!emp.grade) missingFields.push('Grade');
++                if (!emp.gender) missingFields.push('Gender');
++                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
++                if (!emp.departmentGroup) missingFields.push('Department Group');
++                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
++                if (!emp.sectionName) missingFields.push('Section');
++                if (!emp.onRollContract) missingFields.push('On Roll Contract');
++                if (!emp.designation) missingFields.push('Designation');
++                if (!emp.region) missingFields.push('Region');
++                if (!emp.location) missingFields.push('Location');
++
++
++                if (missingFields.length > 0) {
++                    alert(`Cannot mark as completed. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
++                    return;
++                }
++            }
++        }
++
+         if (!confirm(`Are you sure you want to mark this participant as ${finalStatus}? This will update their TNI record.`)) return;
+-        
++
+         // Optimistic UI update
+         setLocalFinalized(prev => ({ ...prev, [empId]: finalStatus }));
+-        
++
+         const perc = getAttendancePercentage(empId);
+         const res = await finalizeParticipantTraining(session.id, session.nominationBatchId, empId, finalStatus, perc);
+         if (!res.success) {
+@@ -168,11 +222,11 @@ export default function AttendanceTab({ session }: { session: any }) {
+                         <h3 className="font-bold text-slate-900 text-lg">Daily Attendance & Finalization</h3>
+                         <p className="text-sm text-slate-500">Add the specific dates you hold training, then mark attendance.</p>
+                     </div>
+-                    
++
+                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                         {/* Add Date Input */}
+                         <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 flex-1 md:flex-initial">
+-                            <input 
++                            <input
+                                 type="date"
+                                 min={minDate}
+                                 max={maxDate}
+@@ -180,7 +234,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                 onChange={(e) => setNewDateStr(e.target.value)}
+                                 className="text-sm bg-transparent border-none focus:ring-0 text-slate-700 w-full"
+                             />
+-                            <button 
++                            <button
+                                 onClick={handleAddDate}
+                                 disabled={isSaving || !newDateStr}
+                                 className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white p-1.5 rounded-lg transition-colors flex items-center justify-center"
+@@ -189,15 +243,15 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                 <HiOutlinePlus className="w-4 h-4" />
+                             </button>
+                         </div>
+-                        
+-                        <a 
++
++                        <a
+                             href={`/admin/sessions/${session.id}/print`}
+                             target="_blank"
+                             rel="noopener noreferrer"
+                             className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 hover:text-indigo-800 font-bold border border-indigo-200 px-4 py-2 rounded-xl text-sm transition-colors flex items-center gap-2"
+                         >
+                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+-                              <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
++                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0110.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0l.229 2.523a1.125 1.125 0 01-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0021 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 00-1.913-.247M6.34 18H5.25A2.25 2.25 0 013 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 011.913-.247m10.5 0a48.536 48.536 0 00-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18 10.5h.008v.008H18V10.5zm-3 0h.008v.008H15V10.5z" />
+                             </svg>
+                             Print Sheet
+                         </a>
+@@ -217,21 +271,21 @@ export default function AttendanceTab({ session }: { session: any }) {
+                         <p className="text-sm text-slate-500 mb-6 text-center">
+                             Please select all the dates on which this training was held.
+                         </p>
+-                        
++
+                         <div className="flex flex-col gap-3 max-h-[300px] overflow-y-auto p-2">
+                             {availableDates.length > 0 ? (
+                                 <>
+                                     <div className="flex justify-between items-center mb-2 px-2">
+                                         <span className="text-xs font-bold text-slate-500 uppercase">Available Dates</span>
+                                         <div className="flex gap-2">
+-                                            <button 
++                                            <button
+                                                 onClick={() => setSelectedDates(availableDates)}
+                                                 className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                                             >
+                                                 Select All
+                                             </button>
+                                             <span className="text-slate-300">|</span>
+-                                            <button 
++                                            <button
+                                                 onClick={() => setSelectedDates([])}
+                                                 className="text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors"
+                                             >
+@@ -245,18 +299,17 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                             const dateObj = new Date(dateStr);
+                                             const displayStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+                                             const dayStr = dateObj.toLocaleDateString('en-GB', { weekday: 'short' });
+-                                            
++
+                                             return (
+-                                                <label 
++                                                <label
+                                                     key={dateStr}
+-                                                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
+-                                                        isSelected 
+-                                                            ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600' 
++                                                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${isSelected
++                                                            ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                                                             : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
+-                                                    }`}
++                                                        }`}
+                                                 >
+-                                                    <input 
+-                                                        type="checkbox" 
++                                                    <input
++                                                        type="checkbox"
+                                                         className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-600"
+                                                         checked={isSelected}
+                                                         onChange={(e) => {
+@@ -284,7 +337,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+                         </div>
+ 
+                         <div className="mt-8">
+-                            <button 
++                            <button
+                                 onClick={handleSaveBulkDates}
+                                 disabled={isSaving || selectedDates.length === 0}
+                                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white py-3 rounded-xl transition-all font-bold text-sm shadow-sm flex items-center justify-center gap-2"
+@@ -310,7 +363,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+                         <thead className="bg-slate-50 text-slate-600 font-medium">
+                             <tr>
+                                 <th className="p-4 sticky left-0 bg-slate-50 z-20 w-64 border-r border-slate-200">Employee</th>
+-                                
++
+                                 {/* Date Columns */}
+                                 {classDates.map((dateObj: any, idx: number) => (
+                                     <th key={idx} className="p-4 text-center min-w-[120px] bg-blue-50 z-10 border-b border-blue-100 border-r border-blue-100/50">
+@@ -347,15 +400,15 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                             <div className="font-bold text-slate-900">{nom.employee.name}</div>
+                                             <div className="text-[10px] text-slate-400 font-mono tracking-tighter">{empId}</div>
+                                         </td>
+-                                        
++
+                                         {/* Date Columns */}
+                                         {classDates.map((dateObj: any, idx: number) => {
+                                             const dateStr = new Date(dateObj).toISOString().split('T')[0];
+                                             const isFutureDate = dateStr > todayStr;
+                                             const statusForDate = localAttendance[empId]?.[dateStr] || 'Present';
+-                                            
++
+                                             const isDisabled = isSaving || isFinalized || isFutureDate;
+-                                            
++
+                                             return (
+                                                 <td key={idx} className="p-4 text-center border-r border-slate-100">
+                                                     {isFutureDate ? (
+@@ -364,20 +417,18 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                                         </div>
+                                                     ) : (
+                                                         <>
+-                                                            <button 
++                                                            <button
+                                                                 onClick={() => toggleAttendance(empId, dateObj)}
+                                                                 disabled={isDisabled}
+-                                                                className={`transition-all rounded-full p-2 border-2 shadow-sm ${
+-                                                                    isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''
+-                                                                } ${
+-                                                                    statusForDate === 'Present' 
+-                                                                    ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100' 
+-                                                                    : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+-                                                                }`}
++                                                                className={`transition-all rounded-full p-2 border-2 shadow-sm ${isDisabled ? 'opacity-50 cursor-not-allowed grayscale' : ''
++                                                                    } ${statusForDate === 'Present'
++                                                                        ? 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'
++                                                                        : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
++                                                                    }`}
+                                                                 title={isFinalized ? 'Training finalized' : `Currently ${statusForDate}. Click to change.`}
+                                                             >
+-                                                                {statusForDate === 'Present' 
+-                                                                    ? <HiOutlineCheckCircle className="w-5 h-5" /> 
++                                                                {statusForDate === 'Present'
++                                                                    ? <HiOutlineCheckCircle className="w-5 h-5" />
+                                                                     : <HiOutlineXCircle className="w-5 h-5" />
+                                                                 }
+                                                             </button>
+@@ -396,9 +447,8 @@ export default function AttendanceTab({ session }: { session: any }) {
+ 
+                                         <td className="p-4 text-center">
+                                             {isFinalized ? (
+-                                                <div className={`inline-flex px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${
+-                                                    isCompleted ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
+-                                                }`}>
++                                                <div className={`inline-flex px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest border ${isCompleted ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'
++                                                    }`}>
+                                                     {isCompleted ? 'Completed' : 'Absent'}
+                                                 </div>
+                                             ) : !canFinalize ? (
+@@ -407,7 +457,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                                 </div>
+                                             ) : (
+                                                 <div className="flex gap-2 justify-center">
+-                                                    <button 
++                                                    <button
+                                                         onClick={() => handleFinalize(empId, 'Completed')}
+                                                         disabled={isSaving}
+                                                         className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold tracking-wider transition-colors shadow-sm uppercase"
+@@ -415,7 +465,7 @@ export default function AttendanceTab({ session }: { session: any }) {
+                                                     >
+                                                         Mark Completed
+                                                     </button>
+-                                                    <button 
++                                                    <button
+                                                         onClick={() => handleFinalize(empId, 'Absent')}
+                                                         disabled={isSaving}
+                                                         className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-bold tracking-wider transition-colors uppercase"
+diff --git a/app/trainer/dashboard/TrainerDashboardClient.tsx b/app/trainer/dashboard/TrainerDashboardClient.tsx
+index 7d02904..5f1e5e8 100644
+--- a/app/trainer/dashboard/TrainerDashboardClient.tsx
++++ b/app/trainer/dashboard/TrainerDashboardClient.tsx
+@@ -115,7 +115,10 @@ export default function TrainerDashboardClient({
+         setOptimisticToggles(prev => ({ ...prev, [sessionId]: nextStatus }));
+ 
+         try {
+-            await toggleFeedbackAutomation(sessionId, nextStatus);
++            const result = await toggleFeedbackAutomation(sessionId, nextStatus);
++            if (!result?.success) {
++                throw new Error(result?.error || "Unknown error");
++            }
+             router.refresh();
+         } catch (error) {
+             alert("Failed to update settings");
+diff --git a/app/user-hub/dashboard/page.tsx b/app/user-hub/dashboard/page.tsx
+index d7ac819..3d2da48 100644
+--- a/app/user-hub/dashboard/page.tsx
++++ b/app/user-hub/dashboard/page.tsx
+@@ -50,8 +50,8 @@ export default async function UserHubDashboardPage() {
+                     {/* Card 1: Training Management - Amber */}
+                     <UserCard
+                         href={`/tni/${empId}`}
+-                        title="TNI & Training Records"
+-                        description="Identify your training needs, submit nominations, and track your learning journey."
++                        title="Profile & TNI"
++                        description="Update your Training Need Identification, Nominations and Track your learning journey."
+                         icon={<HiOutlineClipboardDocumentList size={32} />}
+                         tag="Personal Growth"
+                         color="amber"
+diff --git a/components/TNIProfile.tsx b/components/TNIProfile.tsx
+index 1e3b558..8572660 100644
+--- a/components/TNIProfile.tsx
++++ b/components/TNIProfile.tsx
+@@ -130,8 +130,8 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+ 
+     async function handleSave() {
+         setLoading(true);
+-        if (!formData.name || !formData.email || !formData.sectionName || !formData.grade) {
+-            alert('Please fill all required fields (Name, Email, Grade, and Section)');
++        if (!formData.name || !formData.email || !formData.sectionName || !formData.managerId || !formData.managerName || !formData.managerEmail || !formData.organization || !formData.onRollContract || !formData.department || !formData.gender || !formData.mobile || !formData.designation || !formData.employeeGrouupMNmw || !formData.grade || !formData.region) {
++            alert('Please fill all required fields');
+             setLoading(false);
+             return;
+         }
+@@ -237,7 +237,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
+                         <SearchableSelect
+                             options={[
+                                 { label: 'Male', value: 'MALE' },
+@@ -252,7 +252,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
+                         <SearchableSelect
+                             options={designationOptions}
+                             value={formData.designation}
+@@ -284,7 +284,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade / Level *</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade  *</label>
+                         <SearchableSelect
+                             options={[
+                                 { label: 'EXECUTIVE', value: 'EXECUTIVE' },
+@@ -312,7 +312,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
+                         <SearchableSelect
+                             options={[
+                                 { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+@@ -342,7 +342,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region *</label>
+                         <SearchableSelect
+                             options={locationOptions}
+                             value={formData.location}
+@@ -354,7 +354,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             placeholder="Location"
+@@ -364,7 +364,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             placeholder="Organization"
+@@ -384,7 +384,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             placeholder="Department"
+@@ -404,7 +404,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W *</label>
+                         <SearchableSelect
+                             options={[
+                                 { label: 'MANAGER', value: 'MANAGER' },
+@@ -419,7 +419,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract *</label>
+                         <SearchableSelect
+                             options={[
+                                 { label: 'On Roll', value: 'On Roll' },
+@@ -433,7 +433,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             value={formData.managerId}
+@@ -444,7 +444,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             value={formData.managerName}
+@@ -454,7 +454,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             value={formData.managerEmail}
+@@ -464,7 +464,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
+                     </div>
+ 
+                     <div className="space-y-1">
+-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
++                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile *</label>
+                         <input
+                             className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                             value={formData.managerMobile}
+diff --git a/components/admin/CreateSessionModal.tsx b/components/admin/CreateSessionModal.tsx
+index 22f9627..dccc4ed 100644
+--- a/components/admin/CreateSessionModal.tsx
++++ b/components/admin/CreateSessionModal.tsx
+@@ -31,6 +31,8 @@ export default function CreateSessionModal({
+ 
+     // Form State
+     const [selectedProgram, setSelectedProgram] = useState<string>(fixedProgramName || '');
++    const initialProgram = programs.find(p => p.name === (fixedProgramName || ''));
++    const [topics, setTopics] = useState<string>(initialProgram?.objectives || '');
+ 
+     const initialTrainer = fixedTrainerName ? fixedTrainerName.trim() : '';
+     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
+@@ -106,29 +108,37 @@ export default function CreateSessionModal({
+                         const finalTrainer = fixedTrainerName || (trainerMode === 'custom' ? customTrainer : selectedTrainer);
+                         if (!finalTrainer) { alert("Please select or enter a Primary Trainer."); return; }
+ 
+-                        // Set Program & Trainer
++                        const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
++
++                        // Location validation
++                        if (locationMode === 'select' && selectedLocation === 'OTHER_CUSTOM' && !customLocation) {
++                            alert("Please type a location."); return;
++                        }
++                        if (locationMode === 'select' && selectedLocation !== 'OTHER_CUSTOM' && !selectedLocation) {
++                            alert("Please select a Location."); return;
++                        }
++                        if (locationMode === 'custom' && !customLocation) {
++                            alert("Please type a location."); return;
++                        }
++
++                        // Additional mandatory field validation
++                        if (!formData.get('startDate')) { alert("Please select a Start Date."); return; }
++                        if (!formData.get('endDate')) { alert("Please select an End Date."); return; }
++                        if (!formData.get('trainingDays')) { alert("Please enter Total Training Days."); return; }
++                        if (!formData.get('trainingHours')) { alert("Please enter Total Training Hours."); return; }
++                        if (!formData.get('assessmentDate')) { alert("Please select a Post Training Assessment Date."); return; }
++                        if (!formData.get('sessionCategory')) { alert("Please select a Session Category."); return; }
++                        if (!formData.get('region')) { alert("Please enter a Training Location (Region)."); return; }
++                        if (!formData.get('trainingLocationAddress')) { alert("Please enter a Training Location Address."); return; }
++                        if (!formData.get('capacity')) { alert("Please enter a Capacity."); return; }
++
++                        // Set custom state values to formData
+                         formData.set('programName', selectedProgram);
+                         formData.set('trainerName', finalTrainer);
+-
+-                        const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
+                         if (finalCoordinator) {
+                             formData.set('coordinatorName', finalCoordinator);
+                         }
+-
+-                        // Handle Location
+-                        if (locationMode === 'select') {
+-                            if (selectedLocation === 'OTHER_CUSTOM') {
+-                                // Should shouldn't happen if UI logic is right, but guard:
+-                                if (!customLocation) { alert("Please type a location."); return; }
+-                                formData.set('location', customLocation);
+-                            } else {
+-                                if (!selectedLocation) { alert("Please select a Location."); return; }
+-                                formData.set('location', selectedLocation);
+-                            }
+-                        } else {
+-                            if (!customLocation) { alert("Please type a location."); return; }
+-                            formData.set('location', customLocation);
+-                        }
++                        formData.set('location', locationMode === 'select' ? (selectedLocation === 'OTHER_CUSTOM' ? customLocation : selectedLocation) : customLocation);
+ 
+                         try {
+                             const result = await createSession(formData);
+@@ -146,12 +156,21 @@ export default function CreateSessionModal({
+                         {/* ROW 1: Program & Trainer */}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Program</label>
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Program *</label>
+                                 <div className="relative">
+                                     <SearchableSelect
+                                         options={programOptions}
+                                         value={selectedProgram}
+-                                        onChange={(val) => setSelectedProgram(typeof val === 'string' ? val : String(val))}
++                                        onChange={(val) => {
++                                            const progName = typeof val === 'string' ? val : String(val);
++                                            setSelectedProgram(progName);
++                                            const prog = programs.find(p => p.name === progName);
++                                            if (prog && prog.objectives) {
++                                                setTopics(prog.objectives);
++                                            } else {
++                                                setTopics('');
++                                            }
++                                        }}
+                                         placeholder="Select Program"
+                                         searchPlaceholder="Search programs..."
+                                         className="w-full"
+@@ -159,11 +178,12 @@ export default function CreateSessionModal({
+                                 </div>
+                                 <input type="hidden" name="programName" value={selectedProgram} />
+                                 <div className="mt-2">
++                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Alternate Program Name (Optional)</label>
+                                     <input
+                                         type="text"
+                                         name="altProgramName"
+                                         defaultValue={fixedAltProgramName}
+-                                        placeholder="Alternate Program Name (Optional)"
++                                        placeholder="Alternate Program Name"
+                                         className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                                     />
+                                     <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
+@@ -171,7 +191,7 @@ export default function CreateSessionModal({
+                             </div>
+ 
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer</label>
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer *</label>
+                                 <div className="space-y-3">
+                                     {fixedTrainerName ? (
+                                         <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
+@@ -265,11 +285,11 @@ export default function CreateSessionModal({
+                         {/* ROW 2: Dates */}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date *</label>
+                                 <input name="startDate" required type="date" defaultValue={prefillStartDate} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                             </div>
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">End Date *</label>
+                                 <input
+                                     name="endDate"
+                                     required
+@@ -283,21 +303,22 @@ export default function CreateSessionModal({
+                         {/* ROW 3: Duration */}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days</label>
+-                                <input name="trainingDays" type="number" step="0.5" min="0" placeholder="e.g. 2" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days *</label>
++                                <input name="trainingDays" required type="number" step="0.5" min="0" placeholder="e.g. 2" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                             </div>
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours</label>
+-                                <input name="trainingHours" type="number" step="0.5" min="0" placeholder="e.g. 16" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours *</label>
++                                <input name="trainingHours" required type="number" step="0.5" min="0" placeholder="e.g. 16" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                             </div>
+                         </div>
+ 
+                         {/* ROW 3.5: Post Training Assessment Date */}
+                         <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+-                            <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date</label>
++                            <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date *</label>
+                             <p className="text-[10px] text-blue-600 mb-2 font-medium">Auto-calculated (+30 days from end date) but can be changed.</p>
+                             <input
+                                 name="assessmentDate"
++                                required
+                                 type="date"
+                                 value={assessmentDate}
+                                 onChange={(e) => setAssessmentDate(e.target.value)}
+@@ -307,8 +328,8 @@ export default function CreateSessionModal({
+ 
+                         {/* ROW 3.75: Session Category */}
+                         <div>
+-                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category</label>
+-                            <select name="sessionCategory" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
++                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category *</label>
++                            <select name="sessionCategory" required className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                                 <option value="">Select Category...</option>
+                                 <option value="Technical">Technical</option>
+                                 <option value="Technical-VR">Technical-VR</option>
+@@ -323,7 +344,7 @@ export default function CreateSessionModal({
+ 
+                         {/* ROW 4: Location */}
+                         <div>
+-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Region</label>
++                            <label className="block text-sm font-semibold text-slate-700 mb-1">Region *</label>
+                             {locationMode === 'select' ? (
+                                 <div className="space-y-2">
+                                     <div className="relative">
+@@ -369,30 +390,32 @@ export default function CreateSessionModal({
+                         {/* ROW 4.5: Training Location (Maps to region column) & Address */}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location</label>
+-                                <input name="region" type="text" placeholder="eg. TRC" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location *</label>
++                                <input name="region" required type="text" placeholder="eg. TRC" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                             </div>
+                             <div>
+-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location Address</label>
+-                                <input name="trainingLocationAddress" type="text" placeholder="e.g. TRC Training center" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
++                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location Address *</label>
++                                <input name="trainingLocationAddress" required type="text" placeholder="e.g. TRC Training center" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                             </div>
+                         </div>
+ 
+                         {/* ROW 5: Capacity */}
+                         <div>
+-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants)</label>
+-                            <input name="capacity" type="number" min="1" defaultValue="20" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
++                            <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants) *</label>
++                            <input name="capacity" required type="number" min="1" defaultValue="20" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                             <p className="text-xs text-slate-400 mt-1">Maximum number of self-enrollments allowed</p>
+                         </div>
+ 
+                         {/* ROW 6: Topics */}
+                         <div>
+-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned</label>
++                            <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned </label>
+                             <textarea
+                                 name="topics"
+                                 rows={3}
+                                 className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-y"
+                                 placeholder="Enter the key topics or agenda for this session..."
++                                value={topics}
++                                onChange={(e) => setTopics(e.target.value)}
+                             ></textarea>
+                             <p className="text-xs text-slate-400 mt-1 text-right">Visible in invitation emails</p>
+                         </div>
+diff --git a/components/admin/EditSessionModal.tsx b/components/admin/EditSessionModal.tsx
+index f99ed08..ff28653 100644
+--- a/components/admin/EditSessionModal.tsx
++++ b/components/admin/EditSessionModal.tsx
+@@ -489,6 +489,28 @@ function AttendanceTab({ session }: { session: any }) {
+     };
+ 
+     const handleMarkAttendance = async (empId: string, date: Date, status: 'Present' | 'Absent') => {
++        if (status === 'Present') {
++            const nom = nominations.find((n: any) => n.empId === empId);
++            const emp = nom?.employee;
++            if (emp) {
++                const missingFields = [];
++                if (!emp.name) missingFields.push('Name');
++                if (!emp.id) missingFields.push('Emp ID');
++                if (!emp.organization) missingFields.push('Organization');
++                if (!emp.grade) missingFields.push('Grade');
++                if (!emp.gender) missingFields.push('Gender');
++                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
++                if (!emp.departmentGroup) missingFields.push('Department Group');
++                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
++                if (!emp.sectionName) missingFields.push('Section');
++                
++                if (missingFields.length > 0) {
++                    alert(`Cannot mark attendance as present. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
++                    return;
++                }
++            }
++        }
++
+         const dateStr = date.toISOString().split('T')[0];
+         const key = `${empId}_${dateStr}`;
+         const previousStatus = records[key];
+diff --git a/components/admin/MasterDataRibbon.tsx b/components/admin/MasterDataRibbon.tsx
+index 493f415..7620d7f 100644
+--- a/components/admin/MasterDataRibbon.tsx
++++ b/components/admin/MasterDataRibbon.tsx
+@@ -30,6 +30,7 @@ export default function MasterDataRibbon() {
+         { id: 'BULK_UPLOADS', label: 'Bulk Upload', href: '/admin/tni-dashboard/bulk-upload', icon: HiOutlineArrowUpTray },
+         { id: 'CALENDAR', label: 'Calendar', href: '/admin/tni-dashboard/calendar', icon: HiOutlineCalendar },
+         { id: 'NOMINATIONS', label: 'All TNI', href: '/admin/tni-dashboard/nominations', icon: HiOutlineBookOpen },
++        { id: 'TRAINING_HISTORY', label: 'Training History', href: '/admin/tni-dashboard/training-history', icon: HiOutlineBookOpen },
+         { id: 'SETTINGS', label: 'Settings', href: '/admin/tni-dashboard/settings', icon: HiOutlineCog },
+     ] as const;
+ 
+diff --git a/lib/email.ts b/lib/email.ts
+index 66892d4..c7f1356 100644
+--- a/lib/email.ts
++++ b/lib/email.ts
+@@ -422,7 +422,8 @@ export async function sendManagerSessionApprovalEmail(
+   programName: string,
+   startDate: Date,
+   endDate: Date,
+-  nominationId: string
++  nominationId: string,
++  objectives?: string | null
+ ) {
+   const baseUrl = getBaseUrl();
+   const token = generateSecureToken(nominationId);
+@@ -447,6 +448,10 @@ export async function sendManagerSessionApprovalEmail(
+         <h3 style="margin-top: 0; color: #0056b3; margin-bottom: 10px;">${programName}</h3>
+         <p style="margin: 5px 0;"><strong>Start Date:</strong> ${startDateStr}</p>
+         <p style="margin: 5px 0;"><strong>End Date:</strong> ${endDateStr}</p>
++        ${objectives ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #cce5ff;">
++          <h4 style="margin: 0 0 5px 0; color: #0056b3; font-size: 14px;">Program Objectives:</h4>
++          <p style="margin: 0; font-size: 14px; color: #444; white-space: pre-wrap;">${objectives}</p>
++        </div>` : ''}
+       </div>
+ 
+       <p>As their manager, please review and approve or reject their participation. If rejecting, you will be required to provide a reason.</p>
+@@ -482,7 +487,8 @@ export function generateBatchInvitationHtml(
+   endTime: string = "1:00 pm",
+   venue: string = "Training classroom, TRC",
+   trainerName: string = "Internal/External",
+-  participants: { empId: string; name: string; designation: string | null }[]
++  participants: { empId: string; name: string; designation: string | null }[],
++  objectives?: string | null
+ ) {
+   const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+     timeZone: 'Asia/Kolkata',
+@@ -518,8 +524,10 @@ export function generateBatchInvitationHtml(
+         <p><strong>Time:</strong> ${startTime} to ${endTime}</p>
+         <p><strong>Location:</strong> ${venue}</p>
+         <p><strong>Trainer Name:</strong> ${trainerName}</p>
+-        
+-      
++        ${objectives ? `<div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #cce5ff;">
++          <h4 style="margin: 0 0 5px 0; color: #0056b3; font-size: 14px;">Program Objectives:</h4>
++          <p style="margin: 0; font-size: 14px; color: #444; white-space: pre-wrap;">${objectives}</p>
++        </div>` : ''}
+       </div>
+ 
+       <h3 style="color: #444; margin-top: 30px;">Confirmed Participants</h3>
+@@ -556,9 +564,10 @@ export async function sendBatchInvitationEmail(
+   customHtml?: string,
+   customSubject?: string,
+   sessionId?: string,
+-  isReminder: boolean = false
++  isReminder: boolean = false,
++  objectives?: string | null
+ ) {
+-  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants);
++  const html = customHtml || generateBatchInvitationHtml(programName, startDate, endDate, startTime, endTime, venue, trainerName, participants, objectives);
+ 
+   // Filter out any invalid emails
+   const validTo = toEmails.filter(e => e && e.includes('@'));
+diff --git a/package-lock.json b/package-lock.json
+index d68e409..bde65d5 100644
+--- a/package-lock.json
++++ b/package-lock.json
+@@ -30,6 +30,7 @@
+         "react": "^19.2.1",
+         "react-calendar": "^6.0.0",
+         "react-dom": "^19.2.1",
++        "react-hot-toast": "^2.6.0",
+         "react-icons": "^5.5.0",
+         "react-qr-code": "^2.0.18",
+         "recharts": "^3.8.1",
+@@ -943,6 +944,7 @@
+       "integrity": "sha512-e7jT4DxYvIDLk1ZHmU/m/mB19rex9sv0c2ftBtjSBv+kVM/902eh0fINUzD7UwLLNR+jU585GxUJ8/EBfAM5fw==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@babel/code-frame": "^7.27.1",
+         "@babel/generator": "^7.28.5",
+@@ -1329,6 +1331,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=18"
+       },
+@@ -1369,6 +1372,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=18"
+       }
+@@ -1390,6 +1394,7 @@
+       "resolved": "https://registry.npmjs.org/@dnd-kit/core/-/core-6.3.1.tgz",
+       "integrity": "sha512-xkGBRQQab4RLwgXxoqETICr6S5JlogafbhNsidmrkVv2YRs5MLwpjoF2qpiGjQt8S9AoxtIV603s0GIUpY5eYQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@dnd-kit/accessibility": "^3.1.1",
+         "@dnd-kit/utilities": "^3.2.2",
+@@ -1431,7 +1436,8 @@
+       "resolved": "https://registry.npmjs.org/@electric-sql/pglite/-/pglite-0.3.15.tgz",
+       "integrity": "sha512-Cj++n1Mekf9ETfdc16TlDi+cDDQF0W7EcbyRHYOAeZdsAe8M/FJg18itDTSwyHfar2WIezawM9o0EKaRGVKygQ==",
+       "devOptional": true,
+-      "license": "Apache-2.0"
++      "license": "Apache-2.0",
++      "peer": true
+     },
+     "node_modules/@electric-sql/pglite-socket": {
+       "version": "0.0.20",
+@@ -2957,6 +2963,7 @@
+       "integrity": "sha512-fWza+Lpbj6SkQKCrU6si4iu+fD2dD3gxNHFhUPxsfXBPhnv3rRSQVd0NtBUT9Z/RhF/boCBcuUaMUSTRTopjZg==",
+       "devOptional": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "dependencies": {
+         "playwright": "1.58.0"
+       },
+@@ -4756,6 +4763,7 @@
+       "integrity": "sha512-MWtvHrGZLFttgeEj28VXHxpmwYbor/ATPYbBfSFZEIRK0ecCFLl2Qo55z52Hss+UV9CRN7trSeq1zbgx7YDWWg==",
+       "devOptional": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "csstype": "^3.2.2"
+       }
+@@ -4766,6 +4774,7 @@
+       "integrity": "sha512-jp2L/eY6fn+KgVVQAOqYItbF0VY/YApe5Mz2F0aykSO8gx31bYCZyvSeYxCHKvzHG5eZjc+zyaS5BrBWya2+kQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "peerDependencies": {
+         "@types/react": "^19.2.0"
+       }
+@@ -4831,6 +4840,7 @@
+       "integrity": "sha512-N9lBGA9o9aqb1hVMc9hzySbhKibHmB+N3IpoShyV6HyQYRGIhlrO5rQgttypi+yEeKsKI4idxC8Jw6gXKD4THA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@typescript-eslint/scope-manager": "8.49.0",
+         "@typescript-eslint/types": "8.49.0",
+@@ -5505,6 +5515,7 @@
+       "integrity": "sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "bin": {
+         "acorn": "bin/acorn"
+       },
+@@ -5951,6 +5962,7 @@
+         }
+       ],
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "baseline-browser-mapping": "^2.9.0",
+         "caniuse-lite": "^1.0.30001759",
+@@ -6309,8 +6321,8 @@
+       "version": "3.2.3",
+       "resolved": "https://registry.npmjs.org/csstype/-/csstype-3.2.3.tgz",
+       "integrity": "sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==",
+-      "devOptional": true,
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/d3-array": {
+       "version": "3.2.4",
+@@ -7049,6 +7061,7 @@
+       "integrity": "sha512-BhHmn2yNOFA9H9JmmIVKJmd288g9hrVRDkdoIgRCRuSySRUHH7r/DI6aAXW9T1WwUuY3DFgrcaqB+deURBLR5g==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@eslint-community/eslint-utils": "^4.8.0",
+         "@eslint-community/regexpp": "^4.12.1",
+@@ -7234,6 +7247,7 @@
+       "integrity": "sha512-whOE1HFo/qJDyX4SnXzP4N6zOWn79WhnCUY/iDR0mPfQZO8wcYE4JClzI2oZrhBnnMUCBCHZhO6VQyoBU95mZA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@rtsao/scc": "^1.1.0",
+         "array-includes": "^3.1.9",
+@@ -8058,6 +8072,15 @@
+         "url": "https://github.com/sponsors/ljharb"
+       }
+     },
++    "node_modules/goober": {
++      "version": "2.1.19",
++      "resolved": "https://registry.npmjs.org/goober/-/goober-2.1.19.tgz",
++      "integrity": "sha512-U7veizMqxyKlM58+Z5j2ngJBH/r9siDmxpvNxSw0PylF6WQvrASJEZrxh1hidRBJc2jqoBVSyOban5u8m+6Rxg==",
++      "license": "MIT",
++      "peerDependencies": {
++        "csstype": "^3.0.10"
++      }
++    },
+     "node_modules/google-auth-library": {
+       "version": "10.5.0",
+       "resolved": "https://registry.npmjs.org/google-auth-library/-/google-auth-library-10.5.0.tgz",
+@@ -8274,6 +8297,7 @@
+       "integrity": "sha512-U7tt8JsyrxSRKspfhtLET79pU8K+tInj5QZXs1jSugO1Vq5dFj3kmZsRldo29mTBfcjDRVRXrEZ6LS63Cog9ZA==",
+       "devOptional": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=16.9.0"
+       }
+@@ -8940,6 +8964,7 @@
+       "integrity": "sha512-mjzqwWRD9Y1J1KUi7W97Gja1bwOOM5Ug0EZ6UDK3xS7j7mndrkwozHtSblfomlzyB4NepioNt+B2sOSzczVgtQ==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@acemir/cssom": "^0.9.28",
+         "@asamuzakjp/dom-selector": "^6.7.6",
+@@ -9662,6 +9687,7 @@
+       "resolved": "https://registry.npmjs.org/next/-/next-16.2.4.tgz",
+       "integrity": "sha512-kPvz56wF5frc+FxlHI5qnklCzbq53HTwORaWBGdT0vNoKh1Aya9XC8aPauH4NJxqtzbWsS5mAbctm4cr+EkQ2Q==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@next/env": "16.2.4",
+         "@swc/helpers": "0.5.15",
+@@ -9821,6 +9847,7 @@
+       "resolved": "https://registry.npmjs.org/nodemailer/-/nodemailer-7.0.11.tgz",
+       "integrity": "sha512-gnXhNRE0FNhD7wPSCGhdNh46Hs6nm+uTyg+Kq0cZukNQiYdnCsoQjodNP9BQVG9XrcK/v6/MgpAPBUFyzh9pvw==",
+       "license": "MIT-0",
++      "peer": true,
+       "engines": {
+         "node": ">=6.0.0"
+       }
+@@ -10166,6 +10193,7 @@
+       "resolved": "https://registry.npmjs.org/pg/-/pg-8.18.0.tgz",
+       "integrity": "sha512-xqrUDL1b9MbkydY/s+VZ6v+xiMUmOUk7SS9d/1kpyQxoJ6U9AO1oIJyUWVZojbfe5Cc/oluutcgFG4L9RDP1iQ==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "pg-connection-string": "^2.11.0",
+         "pg-pool": "^3.11.0",
+@@ -10433,6 +10461,7 @@
+       "resolved": "https://registry.npmjs.org/preact/-/preact-10.24.3.tgz",
+       "integrity": "sha512-Z2dPnBnMUfyQfSQ+GBdsGa16hz35YmLmtTLhM169uW944hYL6xzTYkJjC07j+Wosz733pMWx0fgON3JNw1jJQA==",
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "type": "opencollective",
+         "url": "https://opencollective.com/preact"
+@@ -10509,6 +10538,7 @@
+       "devOptional": true,
+       "hasInstallScript": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "dependencies": {
+         "@prisma/config": "7.3.0",
+         "@prisma/dev": "0.20.0",
+@@ -10655,6 +10685,7 @@
+       "resolved": "https://registry.npmjs.org/react/-/react-19.2.1.tgz",
+       "integrity": "sha512-DGrYcCWK7tvYMnWh79yrPHt+vdx9tY+1gPZa7nJQtO/p8bLTDaHp4dzwEhQB7pZ4Xe3ok4XKuEPrVuc+wlpkmw==",
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=0.10.0"
+       }
+@@ -10689,6 +10720,7 @@
+       "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-19.2.1.tgz",
+       "integrity": "sha512-ibrK8llX2a4eOskq1mXKu/TGZj9qzomO+sNfO98M6d9zIPOEhlBkMkBUBLd1vgS0gQsLDBzA+8jJBVXDnfHmJg==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "scheduler": "^0.27.0"
+       },
+@@ -10696,6 +10728,23 @@
+         "react": "^19.2.1"
+       }
+     },
++    "node_modules/react-hot-toast": {
++      "version": "2.6.0",
++      "resolved": "https://registry.npmjs.org/react-hot-toast/-/react-hot-toast-2.6.0.tgz",
++      "integrity": "sha512-bH+2EBMZ4sdyou/DPrfgIouFpcRLCJ+HoCA32UoAYHn6T3Ur5yfcDCeSr5mwldl6pFOsiocmrXMuoCJ1vV8bWg==",
++      "license": "MIT",
++      "dependencies": {
++        "csstype": "^3.1.3",
++        "goober": "^2.1.16"
++      },
++      "engines": {
++        "node": ">=10"
++      },
++      "peerDependencies": {
++        "react": ">=16",
++        "react-dom": ">=16"
++      }
++    },
+     "node_modules/react-icons": {
+       "version": "5.5.0",
+       "resolved": "https://registry.npmjs.org/react-icons/-/react-icons-5.5.0.tgz",
+@@ -10709,7 +10758,8 @@
+       "version": "16.13.1",
+       "resolved": "https://registry.npmjs.org/react-is/-/react-is-16.13.1.tgz",
+       "integrity": "sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/react-qr-code": {
+       "version": "2.0.18",
+@@ -10729,6 +10779,7 @@
+       "resolved": "https://registry.npmjs.org/react-redux/-/react-redux-9.2.0.tgz",
+       "integrity": "sha512-ROY9fvHhwOD9ySfrF0wmvu//bKCQ6AeZZq1nJNtbDC+kk5DuSuNX/n6YWYF/SYy7bSba4D4FSz8DJeKY/S/r+g==",
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "@types/use-sync-external-store": "^0.0.6",
+         "use-sync-external-store": "^1.4.0"
+@@ -10804,7 +10855,8 @@
+       "version": "5.0.1",
+       "resolved": "https://registry.npmjs.org/redux/-/redux-5.0.1.tgz",
+       "integrity": "sha512-M9/ELqF6fy8FwmkpnF0S3YKOqMyoWJ4+CS5Efg2ct3oY9daQvd/Pc71FpGZsVsbl3Cpb+IIcjBDUnnyBdQbq4w==",
+-      "license": "MIT"
++      "license": "MIT",
++      "peer": true
+     },
+     "node_modules/redux-thunk": {
+       "version": "3.1.0",
+@@ -11883,6 +11935,7 @@
+       "integrity": "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -12025,6 +12078,7 @@
+       "integrity": "sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "esbuild": "~0.27.0",
+         "get-tsconfig": "^4.7.5"
+@@ -12136,6 +12190,7 @@
+       "integrity": "sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==",
+       "devOptional": true,
+       "license": "Apache-2.0",
++      "peer": true,
+       "bin": {
+         "tsc": "bin/tsc",
+         "tsserver": "bin/tsserver"
+@@ -12350,6 +12405,7 @@
+       "integrity": "sha512-w+N7Hifpc3gRjZ63vYBXA56dvvRlNWRczTdmCBBa+CotUzAPf5b7YMdMR/8CQoeYE5LX3W4wj6RYTgonm1b9DA==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "dependencies": {
+         "esbuild": "^0.27.0",
+         "fdir": "^6.5.0",
+@@ -12443,6 +12499,7 @@
+       "integrity": "sha512-5gTmgEY/sqK6gFXLIsQNH19lWb4ebPDLA4SdLP7dsWkIXHWlG66oPuVvXSGFPppYZz8ZDZq0dYYrbHfBCVUb1Q==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "engines": {
+         "node": ">=12"
+       },
+@@ -12962,6 +13019,7 @@
+       "integrity": "sha512-AvvthqfqrAhNH9dnfmrfKzX5upOdjUVJYFqNSlkmGf64gRaTzlPwz99IHYnVs28qYAybvAlBV+H7pn0saFY4Ig==",
+       "dev": true,
+       "license": "MIT",
++      "peer": true,
+       "funding": {
+         "url": "https://github.com/sponsors/colinhacks"
+       }
+diff --git a/package.json b/package.json
+index 885bc3c..9379116 100644
+--- a/package.json
++++ b/package.json
+@@ -36,6 +36,7 @@
+     "react": "^19.2.1",
+     "react-calendar": "^6.0.0",
+     "react-dom": "^19.2.1",
++    "react-hot-toast": "^2.6.0",
+     "react-icons": "^5.5.0",
+     "react-qr-code": "^2.0.18",
+     "recharts": "^3.8.1",

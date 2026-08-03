@@ -106,6 +106,7 @@ export async function toggleFeedbackAutomation(sessionId: string, isEnabled: boo
             data: { sendFeedbackAutomatically: isEnabled },
         });
         revalidatePath('/admin/dashboard');
+        revalidatePath('/trainer/dashboard');
         return { success: true };
     } catch (error) {
         console.error("Error toggling automation:", error);
@@ -240,6 +241,17 @@ export async function submitEmployeeFeedback(formData: FormData) {
             if (effectiveEmpId) {
                 // Update existing Training History with L3 rating
                 await db.trainingHistory.updateMany({
+                    where: {
+                        empId: effectiveEmpId,
+                        sessionId: updatedEnrollment.session.id
+                    },
+                    data: {
+                        averageRating: average
+                    }
+                });
+
+                // Also update System Training History
+                await db.systemTrainingHistory.updateMany({
                     where: {
                         empId: effectiveEmpId,
                         sessionId: updatedEnrollment.session.id

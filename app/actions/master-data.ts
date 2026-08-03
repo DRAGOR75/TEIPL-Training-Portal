@@ -429,12 +429,18 @@ export async function mergeEmployees(primaryId: string, duplicateId: string) {
             // 1. Direct Updates (No complex unique constraints)
             await tx.systemTrainingHistory.updateMany({
                 where: { empId: duplicateId },
-                data: { empId: primaryId }
+                data: { 
+                    empId: primaryId,
+                    employeeName: primary.name
+                }
             });
 
             await tx.trainingHistory.updateMany({
                 where: { empId: duplicateId },
-                data: { empId: primaryId }
+                data: { 
+                    empId: primaryId,
+                    employeeName: primary.name
+                }
             });
 
             await tx.qualifications.updateMany({
@@ -442,10 +448,25 @@ export async function mergeEmployees(primaryId: string, duplicateId: string) {
                 data: { empID: primaryId }
             });
 
-            await tx.enrollment.updateMany({
-                where: { empId: duplicateId },
-                data: { empId: primaryId }
-            });
+            // Resolve Enrollments manually to prevent sessionId + email unique constraint errors
+            const dupEnrollments = await tx.enrollment.findMany({ where: { empId: duplicateId } });
+            for (const enr of dupEnrollments) {
+                const existing = await tx.enrollment.findUnique({
+                    where: { sessionId_employeeEmail: { sessionId: enr.sessionId, employeeEmail: primary.email } }
+                });
+                if (existing) {
+                    await tx.enrollment.delete({ where: { id: enr.id } });
+                } else {
+                    await tx.enrollment.update({
+                        where: { id: enr.id },
+                        data: { 
+                            empId: primaryId,
+                            employeeName: primary.name,
+                            employeeEmail: primary.email
+                        }
+                    });
+                }
+            }
 
             await tx.employee.updateMany({
                 where: { managerId: duplicateId },

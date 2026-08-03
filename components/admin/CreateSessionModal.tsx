@@ -31,6 +31,8 @@ export default function CreateSessionModal({
 
     // Form State
     const [selectedProgram, setSelectedProgram] = useState<string>(fixedProgramName || '');
+    const initialProgram = programs.find(p => p.name === (fixedProgramName || ''));
+    const [topics, setTopics] = useState<string>(initialProgram?.objectives || '');
 
     const initialTrainer = fixedTrainerName ? fixedTrainerName.trim() : '';
     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
@@ -106,29 +108,37 @@ export default function CreateSessionModal({
                         const finalTrainer = fixedTrainerName || (trainerMode === 'custom' ? customTrainer : selectedTrainer);
                         if (!finalTrainer) { alert("Please select or enter a Primary Trainer."); return; }
 
-                        // Set Program & Trainer
+                        const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
+
+                        // Location validation
+                        if (locationMode === 'select' && selectedLocation === 'OTHER_CUSTOM' && !customLocation) {
+                            alert("Please type a location."); return;
+                        }
+                        if (locationMode === 'select' && selectedLocation !== 'OTHER_CUSTOM' && !selectedLocation) {
+                            alert("Please select a Location."); return;
+                        }
+                        if (locationMode === 'custom' && !customLocation) {
+                            alert("Please type a location."); return;
+                        }
+
+                        // Additional mandatory field validation
+                        if (!formData.get('startDate')) { alert("Please select a Start Date."); return; }
+                        if (!formData.get('endDate')) { alert("Please select an End Date."); return; }
+                        if (!formData.get('trainingDays')) { alert("Please enter Total Training Days."); return; }
+                        if (!formData.get('trainingHours')) { alert("Please enter Total Training Hours."); return; }
+                        if (!formData.get('assessmentDate')) { alert("Please select a Post Training Assessment Date."); return; }
+                        if (!formData.get('sessionCategory')) { alert("Please select a Session Category."); return; }
+                        if (!formData.get('region')) { alert("Please enter a Training Location (Region)."); return; }
+                        if (!formData.get('trainingLocationAddress')) { alert("Please enter a Training Location Address."); return; }
+                        if (!formData.get('capacity')) { alert("Please enter a Capacity."); return; }
+
+                        // Set custom state values to formData
                         formData.set('programName', selectedProgram);
                         formData.set('trainerName', finalTrainer);
-
-                        const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
                         if (finalCoordinator) {
                             formData.set('coordinatorName', finalCoordinator);
                         }
-
-                        // Handle Location
-                        if (locationMode === 'select') {
-                            if (selectedLocation === 'OTHER_CUSTOM') {
-                                // Should shouldn't happen if UI logic is right, but guard:
-                                if (!customLocation) { alert("Please type a location."); return; }
-                                formData.set('location', customLocation);
-                            } else {
-                                if (!selectedLocation) { alert("Please select a Location."); return; }
-                                formData.set('location', selectedLocation);
-                            }
-                        } else {
-                            if (!customLocation) { alert("Please type a location."); return; }
-                            formData.set('location', customLocation);
-                        }
+                        formData.set('location', locationMode === 'select' ? (selectedLocation === 'OTHER_CUSTOM' ? customLocation : selectedLocation) : customLocation);
 
                         try {
                             const result = await createSession(formData);
@@ -146,12 +156,21 @@ export default function CreateSessionModal({
                         {/* ROW 1: Program & Trainer */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Program</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Program *</label>
                                 <div className="relative">
                                     <SearchableSelect
                                         options={programOptions}
                                         value={selectedProgram}
-                                        onChange={(val) => setSelectedProgram(typeof val === 'string' ? val : String(val))}
+                                        onChange={(val) => {
+                                            const progName = typeof val === 'string' ? val : String(val);
+                                            setSelectedProgram(progName);
+                                            const prog = programs.find(p => p.name === progName);
+                                            if (prog && prog.objectives) {
+                                                setTopics(prog.objectives);
+                                            } else {
+                                                setTopics('');
+                                            }
+                                        }}
                                         placeholder="Select Program"
                                         searchPlaceholder="Search programs..."
                                         className="w-full"
@@ -159,11 +178,12 @@ export default function CreateSessionModal({
                                 </div>
                                 <input type="hidden" name="programName" value={selectedProgram} />
                                 <div className="mt-2">
+                                    <label className="block text-sm font-semibold text-slate-700 mb-1">Alternate Program Name (Optional)</label>
                                     <input
                                         type="text"
                                         name="altProgramName"
                                         defaultValue={fixedAltProgramName}
-                                        placeholder="Alternate Program Name (Optional)"
+                                        placeholder="Alternate Program Name"
                                         className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                     />
                                     <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
@@ -171,7 +191,7 @@ export default function CreateSessionModal({
                             </div>
 
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer *</label>
                                 <div className="space-y-3">
                                     {fixedTrainerName ? (
                                         <div className="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-xl text-slate-600 cursor-not-allowed">
@@ -265,11 +285,11 @@ export default function CreateSessionModal({
                         {/* ROW 2: Dates */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Start Date *</label>
                                 <input name="startDate" required type="date" defaultValue={prefillStartDate} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">End Date</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">End Date *</label>
                                 <input
                                     name="endDate"
                                     required
@@ -283,21 +303,22 @@ export default function CreateSessionModal({
                         {/* ROW 3: Duration */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days</label>
-                                <input name="trainingDays" type="number" step="0.5" min="0" placeholder="e.g. 2" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Days *</label>
+                                <input name="trainingDays" required type="number" step="0.5" min="0" placeholder="e.g. 2" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours</label>
-                                <input name="trainingHours" type="number" step="0.5" min="0" placeholder="e.g. 16" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Total Training Hours *</label>
+                                <input name="trainingHours" required type="number" step="0.5" min="0" placeholder="e.g. 16" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             </div>
                         </div>
 
                         {/* ROW 3.5: Post Training Assessment Date */}
                         <div className="bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
-                            <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date</label>
+                            <label className="block text-sm font-bold text-blue-900 mb-1">Post Training Assessment Date *</label>
                             <p className="text-[10px] text-blue-600 mb-2 font-medium">Auto-calculated (+30 days from end date) but can be changed.</p>
                             <input
                                 name="assessmentDate"
+                                required
                                 type="date"
                                 value={assessmentDate}
                                 onChange={(e) => setAssessmentDate(e.target.value)}
@@ -307,8 +328,8 @@ export default function CreateSessionModal({
 
                         {/* ROW 3.75: Session Category */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category</label>
-                            <select name="sessionCategory" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                            <label className="block text-sm font-semibold text-slate-700 mb-1"> Category *</label>
+                            <select name="sessionCategory" required className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white">
                                 <option value="">Select Category...</option>
                                 <option value="Technical">Technical</option>
                                 <option value="Technical-VR">Technical-VR</option>
@@ -323,7 +344,7 @@ export default function CreateSessionModal({
 
                         {/* ROW 4: Location */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Region</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Region *</label>
                             {locationMode === 'select' ? (
                                 <div className="space-y-2">
                                     <div className="relative">
@@ -369,30 +390,32 @@ export default function CreateSessionModal({
                         {/* ROW 4.5: Training Location (Maps to region column) & Address */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location</label>
-                                <input name="region" type="text" placeholder="eg. TRC" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location *</label>
+                                <input name="region" required type="text" placeholder="eg. TRC" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location Address</label>
-                                <input name="trainingLocationAddress" type="text" placeholder="e.g. TRC Training center" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                                <label className="block text-sm font-semibold text-slate-700 mb-1">Training Location Address *</label>
+                                <input name="trainingLocationAddress" required type="text" placeholder="e.g. TRC Training center" className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
                             </div>
                         </div>
 
                         {/* ROW 5: Capacity */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants)</label>
-                            <input name="capacity" type="number" min="1" defaultValue="20" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Capacity (Total Participants) *</label>
+                            <input name="capacity" required type="number" min="1" defaultValue="20" onWheel={(e) => (e.target as HTMLInputElement).blur()} className="w-full p-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                             <p className="text-xs text-slate-400 mt-1">Maximum number of self-enrollments allowed</p>
                         </div>
 
                         {/* ROW 6: Topics */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1">Topics to be learned </label>
                             <textarea
                                 name="topics"
                                 rows={3}
                                 className="w-full p-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none resize-y"
                                 placeholder="Enter the key topics or agenda for this session..."
+                                value={topics}
+                                onChange={(e) => setTopics(e.target.value)}
                             ></textarea>
                             <p className="text-xs text-slate-400 mt-1 text-right">Visible in invitation emails</p>
                         </div>

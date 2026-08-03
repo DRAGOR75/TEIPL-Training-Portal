@@ -208,6 +208,7 @@ export async function finalizeParticipantTraining(
                     programAddress: session.trainingLocationAddress,
                     sessionId: sessionId,
                     trainerName: session.trainerName,
+                    coordinatorName: session.coordinatorName,
                     attendancePercentage: attendancePercentage,
                     status: finalStatus,
                     sessionCategory: session.sessionCategory,
@@ -220,6 +221,7 @@ export async function finalizeParticipantTraining(
                 data: { 
                     attendancePercentage: attendancePercentage,
                     status: finalStatus,
+                    coordinatorName: session.coordinatorName,
                     trainingHours: session.trainingHours || null,
                     programName: session.programName,
                     sessionCategory: session.sessionCategory,

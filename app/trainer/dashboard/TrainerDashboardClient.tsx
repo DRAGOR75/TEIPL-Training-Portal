@@ -115,7 +115,10 @@ export default function TrainerDashboardClient({
         setOptimisticToggles(prev => ({ ...prev, [sessionId]: nextStatus }));
 
         try {
-            await toggleFeedbackAutomation(sessionId, nextStatus);
+            const result = await toggleFeedbackAutomation(sessionId, nextStatus);
+            if (!result?.success) {
+                throw new Error(result?.error || "Unknown error");
+            }
             router.refresh();
         } catch (error) {
             alert("Failed to update settings");

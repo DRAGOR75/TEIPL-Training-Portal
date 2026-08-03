@@ -19,6 +19,7 @@ export async function getBatchInvitationPreview(sessionId: string) {
             include: {
                 nominationBatch: {
                     include: {
+                        program: true,
                         nominations: {
                             where: { status: 'Batched' },
                             include: { employee: true }
@@ -49,15 +50,18 @@ export async function getBatchInvitationPreview(sessionId: string) {
             designation: nom.employee.designation
         }));
 
+        const topics = trainingSession.topics || trainingSession.nominationBatch.program?.objectives;
+
         const html = generateBatchInvitationHtml(
-            trainingSession.programName,
+            trainingSession.altProgramName || trainingSession.programName,
             trainingSession.startDate,
             trainingSession.endDate,
             trainingSession.startTime || "8:30 am",
             trainingSession.endTime || "6:00 pm",
             trainingSession.location || "Training classroom, TRC",
             trainingSession.trainerName || "Internal/External",
-            participants
+            participants,
+            topics
         );
 
         const sessionData = {
@@ -118,6 +122,7 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
             include: {
                 nominationBatch: {
                     include: {
+                        program: true,
                         nominations: {
                             where: { status: 'Batched' }, // Only currently enrolled
                             include: { employee: true }
@@ -174,13 +179,15 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
 
+        const topics = trainingSession.topics || trainingSession.nominationBatch.program?.objectives;
+
         // Send Email in the background to avoid Vercel timeouts
         after(async () => {
             try {
                 await sendBatchInvitationEmail(
                     toEmails,
                     managerEmails,
-                    trainingSession.programName,
+                    trainingSession.altProgramName || trainingSession.programName,
                     trainingSession.startDate,
                     trainingSession.endDate,
                     trainingSession.startTime || "8:30 am",
@@ -191,7 +198,8 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
                     customHtml,
                     customSubject,
                     sessionId,
-                    isReminder
+                    isReminder,
+                    topics
                 );
             } catch (err) {
                 console.error("Background email send failed:", err);
@@ -689,16 +697,20 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
             }
 
             const { startDate, endDate } = batch.trainingSession;
+            const programName = batch.trainingSession.altProgramName || batch.program?.name || 'Training Program';
+            const topics = batch.trainingSession.topics || batch.program?.objectives || 'Training Topics';
+
             await Promise.all(nominations.map(async (nom) => {
                 if (nom.employee.managerEmail) {
                     await sendManagerSessionApprovalEmail(
                         nom.employee.managerEmail,
                         nom.employee.managerName,
                         nom.employee.name,
-                        batch.program.name,
+                        programName,
                         startDate,
                         endDate,
-                        nom.id
+                        nom.id,
+                        topics
                     ).catch(err => console.error("❌ Email failed for", nom.employee.name, err));
                 }
             }));
@@ -812,14 +824,16 @@ export async function joinBatch(batchId: string, empId: string) {
         // 5. Send Email if Session exists
         if (batch.trainingSession && employee.managerEmail && batch.trainingSession.requireManagerApproval) {
             const { startDate, endDate } = batch.trainingSession;
+            const programName = batch.trainingSession.altProgramName || batch.program.name;
             await sendManagerSessionApprovalEmail(
                 employee.managerEmail,
                 employee.managerName,
                 employee.name,
-                batch.program.name,
+                programName,
                 startDate,
                 endDate,
-                nomination.id
+                nomination.id,
+                batch.trainingSession.topics || batch.program.objectives
             ).catch(console.error);
         }
 
@@ -995,14 +1009,16 @@ export async function registerAndJoinBatch(batchId: string, formData: {
         // but robustly we should use employee.managerEmail or formData.managerEmail.
         if (batch.trainingSession && formData.managerEmail && batch.trainingSession.requireManagerApproval) {
             const { startDate, endDate } = batch.trainingSession;
+            const programName = batch.trainingSession.altProgramName || batch.program.name;
             await sendManagerSessionApprovalEmail(
                 formData.managerEmail,
                 formData.managerName,
                 formData.name,
-                batch.program.name,
+                programName,
                 startDate,
                 endDate,
-                nomination.id
+                nomination.id,
+                batch.trainingSession.topics || batch.program.objectives
             ).catch(console.error);
         }
 
