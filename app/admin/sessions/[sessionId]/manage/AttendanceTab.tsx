@@ -3,10 +3,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { saveDailyAttendance, finalizeParticipantTraining, updateSessionClassDates } from '@/app/actions/attendance';
 import { HiOutlineCheckCircle, HiOutlineXCircle, HiOutlineCalendar, HiOutlinePlus } from 'react-icons/hi2';
+import FinalizeAttendanceModal from './FinalizeAttendanceModal';
 
 export default function AttendanceTab({ session }: { session: any }) {
     const [isSaving, setIsSaving] = useState(false);
     const [newDateStr, setNewDateStr] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+    const [selectedFinalStatus, setSelectedFinalStatus] = useState<'Completed' | 'Absent'>('Completed');
 
     const classDates = session.classDates || [];
 
@@ -93,28 +97,7 @@ export default function AttendanceTab({ session }: { session: any }) {
         if (newStatus === 'Present') {
             const nom = enrolledNominations.find((n: any) => n.employee?.id === empId || n.empId === empId);
             const emp = nom?.employee;
-            if (emp) {
-                const missingFields = [];
-                if (!emp.name) missingFields.push('Name');
-                if (!emp.id) missingFields.push('Emp ID');
-                if (!emp.organization) missingFields.push('Organization');
-                if (!emp.grade) missingFields.push('Grade');
-                if (!emp.gender) missingFields.push('Gender');
-                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
-                if (!emp.departmentGroup) missingFields.push('Department Group');
-                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
-                if (!emp.sectionName) missingFields.push('Section');
-                if (!emp.onRollContract) missingFields.push('On Roll Contract');
-                if (!emp.designation) missingFields.push('Designation');
-                if (!emp.region) missingFields.push('Region');
-                if (!emp.location) missingFields.push('Location');
-
-
-                if (missingFields.length > 0) {
-                    alert(`Cannot mark attendance as present. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
-                    return;
-                }
-            }
+            // Removed profile validation during daily attendance marking
         }
 
         // 1. Optimistic update
@@ -164,35 +147,20 @@ export default function AttendanceTab({ session }: { session: any }) {
         return Math.round((presentCount / classDates.length) * 100);
     };
 
-    const handleFinalize = async (empId: string, finalStatus: 'Completed' | 'Absent') => {
-        if (finalStatus === 'Completed') {
-            const nom = enrolledNominations.find((n: any) => n.employee?.id === empId || n.empId === empId);
-            const emp = nom?.employee;
-            if (emp) {
-                const missingFields = [];
-                if (!emp.name) missingFields.push('Name');
-                if (!emp.id) missingFields.push('Emp ID');
-                if (!emp.organization) missingFields.push('Organization');
-                if (!emp.grade) missingFields.push('Grade');
-                if (!emp.gender) missingFields.push('Gender');
-                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
-                if (!emp.departmentGroup) missingFields.push('Department Group');
-                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
-                if (!emp.sectionName) missingFields.push('Section');
-                if (!emp.onRollContract) missingFields.push('On Roll Contract');
-                if (!emp.designation) missingFields.push('Designation');
-                if (!emp.region) missingFields.push('Region');
-                if (!emp.location) missingFields.push('Location');
-
-
-                if (missingFields.length > 0) {
-                    alert(`Cannot mark as completed. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
-                    return;
-                }
-            }
+    const handleFinalizeClick = (empId: string, finalStatus: 'Completed' | 'Absent') => {
+        const nom = enrolledNominations.find((n: any) => n.employee?.id === empId || n.empId === empId);
+        const emp = nom?.employee;
+        if (emp) {
+            setSelectedEmployee(emp);
+            setSelectedFinalStatus(finalStatus);
+            setModalOpen(true);
         }
+    };
 
-        if (!confirm(`Are you sure you want to mark this participant as ${finalStatus}? This will update their TNI record.`)) return;
+    const executeFinalization = async () => {
+        if (!selectedEmployee) return;
+        const empId = selectedEmployee.id;
+        const finalStatus = selectedFinalStatus;
 
         // Optimistic UI update
         setLocalFinalized(prev => ({ ...prev, [empId]: finalStatus }));
@@ -208,6 +176,9 @@ export default function AttendanceTab({ session }: { session: any }) {
                 return next;
             });
         }
+        
+        // Also update local data if we modified employee properties
+        // We can just rely on the next fetch or let the user refresh if they need to see it immediately
     };
 
     // Constrain the date picker to the session boundaries
@@ -458,7 +429,7 @@ export default function AttendanceTab({ session }: { session: any }) {
                                             ) : (
                                                 <div className="flex gap-2 justify-center">
                                                     <button
-                                                        onClick={() => handleFinalize(empId, 'Completed')}
+                                                        onClick={() => handleFinalizeClick(empId, 'Completed')}
                                                         disabled={isSaving}
                                                         className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded text-[10px] font-bold tracking-wider transition-colors shadow-sm uppercase"
                                                         title="Mark as Completed"
@@ -466,7 +437,7 @@ export default function AttendanceTab({ session }: { session: any }) {
                                                         Mark Completed
                                                     </button>
                                                     <button
-                                                        onClick={() => handleFinalize(empId, 'Absent')}
+                                                        onClick={() => handleFinalizeClick(empId, 'Absent')}
                                                         disabled={isSaving}
                                                         className="px-3 py-1.5 bg-red-100 hover:bg-red-200 text-red-700 rounded text-[10px] font-bold tracking-wider transition-colors uppercase"
                                                         title="Mark as Absent"
@@ -491,6 +462,14 @@ export default function AttendanceTab({ session }: { session: any }) {
                     )}
                 </div>
             )}
+            
+            <FinalizeAttendanceModal
+                isOpen={modalOpen}
+                onClose={() => setModalOpen(false)}
+                employee={selectedEmployee}
+                finalStatus={selectedFinalStatus}
+                onFinalize={executeFinalization}
+            />
         </div>
     );
 }

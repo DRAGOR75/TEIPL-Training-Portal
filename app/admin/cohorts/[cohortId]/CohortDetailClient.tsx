@@ -14,11 +14,13 @@ import {
     HiOutlineDocumentText,
     HiOutlinePlayCircle,
     HiOutlineArrowTopRightOnSquare,
+    HiOutlineDocumentArrowDown,
 } from 'react-icons/hi2';
 import AddMembersModal from '@/components/admin/cohort/AddMembersModal';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
-import { removeMemberFromCohort, updateCohort, markCohortProgramComplete } from '@/app/actions/cohorts';
+import { removeMemberFromCohort, updateCohort, markCohortProgramComplete, exportCohortProgramFeedbacks } from '@/app/actions/cohorts';
 import { useRouter } from 'next/navigation';
+import { exportToExcel } from '@/lib/export-utils';
 
 interface CohortDetailClientProps {
     cohort: any;
@@ -33,6 +35,7 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
     const [removingId, setRemovingId] = useState<string | null>(null);
     const [markingComplete, setMarkingComplete] = useState<string | null>(null);
     const [activatingCohort, setActivatingCohort] = useState(false);
+    const [exportingFeedback, setExportingFeedback] = useState(false);
 
     const completedCount = cohort.programs.filter((p: any) => p.status === 'Completed').length;
     const totalPrograms = cohort.programs.length;
@@ -62,6 +65,23 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
         await updateCohort(cohort.id, { status: 'Active' });
         setActivatingCohort(false);
         router.refresh();
+    };
+
+    const handleExportFeedback = async () => {
+        setExportingFeedback(true);
+        try {
+            const res = await exportCohortProgramFeedbacks(cohort.id);
+            if (res.success && res.data && res.data.length > 0) {
+                exportToExcel(res.data, `${cohort.name.replace(/[^a-zA-Z0-9]/g, '_')}_Feedback`);
+            } else {
+                alert("No feedback found for programs in this cohort.");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Failed to export feedback.");
+        } finally {
+            setExportingFeedback(false);
+        }
     };
 
     const getStatusIcon = (status: string) => {
@@ -139,6 +159,15 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                             >
                                 <HiOutlineUserPlus className="w-4 h-4" />
                                 Add Members
+                            </button>
+                            <button
+                                onClick={handleExportFeedback}
+                                disabled={exportingFeedback}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50"
+                                title="Export all session feedback in this cohort to Excel"
+                            >
+                                {exportingFeedback ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineDocumentArrowDown className="w-4 h-4" />}
+                                Export Feedback
                             </button>
                         </div>
                     </div>

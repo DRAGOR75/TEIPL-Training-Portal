@@ -492,23 +492,7 @@ function AttendanceTab({ session }: { session: any }) {
         if (status === 'Present') {
             const nom = nominations.find((n: any) => n.empId === empId);
             const emp = nom?.employee;
-            if (emp) {
-                const missingFields = [];
-                if (!emp.name) missingFields.push('Name');
-                if (!emp.id) missingFields.push('Emp ID');
-                if (!emp.organization) missingFields.push('Organization');
-                if (!emp.grade) missingFields.push('Grade');
-                if (!emp.gender) missingFields.push('Gender');
-                if (!emp.employeeGrouupMNmw) missingFields.push('M/NM/W');
-                if (!emp.departmentGroup) missingFields.push('Department Group');
-                if (!emp.managerId || !emp.managerName) missingFields.push('Manager Details');
-                if (!emp.sectionName) missingFields.push('Section');
-                
-                if (missingFields.length > 0) {
-                    alert(`Cannot mark attendance as present. The following employee profile fields are missing: ${missingFields.join(', ')}.`);
-                    return;
-                }
-            }
+            // Removed profile validation during daily attendance marking
         }
 
         const dateStr = date.toISOString().split('T')[0];
