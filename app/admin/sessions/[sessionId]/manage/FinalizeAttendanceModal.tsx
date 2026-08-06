@@ -54,7 +54,7 @@ export default function FinalizeAttendanceModal({
     const [sectionMode, setSectionMode] = useState<'select' | 'custom'>('select');
     
     const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
-    const [sectionOptions, setSectionOptions] = useState<{ id: string, name: string }[]>([]);
+    const [sectionOptions, setSectionOptions] = useState<{ label: string, value: string }[]>([]);
 
     useEffect(() => {
         getDesignations().then(desigs => setDesignationOptions(desigs));
@@ -387,9 +387,9 @@ export default function FinalizeAttendanceModal({
                                 >
                                     <option value="">Select Section</option>
                                     {sectionOptions.map(sec => (
-                                        <option key={sec.id} value={sec.name}>{sec.name}</option>
+                                        <option key={sec.value} value={sec.value}>{sec.label}</option>
                                     ))}
-                                    {formData.sectionName && formData.sectionName !== 'OTHER_CUSTOM' && !sectionOptions.find(o => o.name === formData.sectionName) && (
+                                    {formData.sectionName && formData.sectionName !== 'OTHER_CUSTOM' && !sectionOptions.find(o => o.value === formData.sectionName) && (
                                         <option value={formData.sectionName}>{formData.sectionName}</option>
                                     )}
                                     <option value="OTHER_CUSTOM">Other (Type Custom)</option>
