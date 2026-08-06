@@ -122,8 +122,14 @@ export default function CreateSessionModal({
                         }
 
                         // Additional mandatory field validation
-                        if (!formData.get('startDate')) { alert("Please select a Start Date."); return; }
-                        if (!formData.get('endDate')) { alert("Please select an End Date."); return; }
+                        const startDateStr = formData.get('startDate') as string;
+                        const endDateStr = formData.get('endDate') as string;
+                        if (!startDateStr) { alert("Please select a Start Date."); return; }
+                        if (!endDateStr) { alert("Please select an End Date."); return; }
+                        if (new Date(endDateStr) < new Date(startDateStr)) {
+                            alert("End Date cannot be earlier than Start Date.");
+                            return;
+                        }
                         if (!formData.get('trainingDays')) { alert("Please enter Total Training Days."); return; }
                         if (!formData.get('trainingHours')) { alert("Please enter Total Training Hours."); return; }
                         if (!formData.get('assessmentDate')) { alert("Please select a Post Training Assessment Date."); return; }
