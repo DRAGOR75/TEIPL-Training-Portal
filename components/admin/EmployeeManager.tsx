@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useMemo, useRef } from 'react';
-import { createEmployee, deleteEmployee, updateEmployee } from '@/app/actions/master-data';
+import { useState, useMemo, useRef, useEffect } from 'react';
+import { createEmployee, deleteEmployee, updateEmployee, getDesignations } from '@/app/actions/master-data';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineTrash,
@@ -244,7 +244,7 @@ export default function EmployeeManager({ employees, locations = [], sections = 
 
                         <button
                             onClick={() => setIsAddModalOpen(true)}
-                            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-purple-200 text-sm"
+                            className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm text-sm"
                         >
                             <HiOutlinePlus size={18} className="stroke-[2.5]" />
                             <span className="hidden sm:inline">Add Employee</span>
@@ -252,7 +252,7 @@ export default function EmployeeManager({ employees, locations = [], sections = 
                         </button>
                         <button
                             onClick={() => setIsMergeModalOpen(true)}
-                            className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl font-bold transition shadow-lg shadow-amber-200 text-sm"
+                            className="flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-lg font-medium transition shadow-sm text-sm"
                             title="Merge Duplicate Employee Records"
                         >
                             <HiOutlineArrowsPointingIn size={18} className="stroke-[2.5]" />
@@ -444,11 +444,11 @@ export default function EmployeeManager({ employees, locations = [], sections = 
 
             {isAddModalOpen && <EmployeeModal isEdit={false} onClose={() => setIsAddModalOpen(false)} onSubmit={handleAdd} sectionOptions={sectionOptions} locationOptions={locationOptions} />}
             {editingEmployee && <EmployeeModal employee={editingEmployee} isEdit={true} onClose={() => setEditingEmployee(null)} onSubmit={handleEdit} sectionOptions={sectionOptions} locationOptions={locationOptions} />}
-            
-            <MergeEmployeeModal 
-                isOpen={isMergeModalOpen} 
-                onClose={() => setIsMergeModalOpen(false)} 
-                employees={employees} 
+
+            <MergeEmployeeModal
+                isOpen={isMergeModalOpen}
+                onClose={() => setIsMergeModalOpen(false)}
+                employees={employees}
             />
         </div>
     );
@@ -463,9 +463,26 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
     const [selectedFormRegion, setSelectedFormRegion] = useState(employee?.location || '');
     const [selectedFormSection, setSelectedFormSection] = useState(employee?.sectionName || '');
     const [selectedFormDeptGroup, setSelectedFormDeptGroup] = useState(employee?.departmentGroup || '');
+    const [customSection, setCustomSection] = useState('');
+    const [sectionMode, setSectionMode] = useState<'select' | 'custom'>('select');
+
+    const [selectedFormDesignation, setSelectedFormDesignation] = useState(employee?.designation || '');
+    const [customDesignation, setCustomDesignation] = useState('');
+    const [designationMode, setDesignationMode] = useState<'select' | 'custom'>('select');
+
+    const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
+    
+    useEffect(() => {
+        getDesignations().then(desigs => setDesignationOptions(desigs));
+    }, []);
+
+    const initialOrg = employee?.organization || '';
+    const [selectedOrganization, setSelectedOrganization] = useState(initialOrg);
+    const [customOrganization, setCustomOrganization] = useState('');
+    const [orgMode, setOrgMode] = useState<'select' | 'custom'>('select');
 
     return (
-<div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
                     <h2 className="text-xl font-black text-slate-800">
@@ -482,7 +499,14 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
-                            <input name="id" required defaultValue={employee?.id} placeholder="E.g. E00123" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all disabled:opacity-50" />
+                            <input 
+                                name="id" 
+                                required 
+                                defaultValue={employee?.id} 
+                                readOnly={isEdit}
+                                placeholder="E.g. E00123" 
+                                className={`w-full p-3 border border-slate-200 rounded-xl text-sm outline-none transition-all ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800'}`} 
+                            />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
@@ -515,22 +539,105 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
-                            <SearchableSelect
-                                name="sectionName"
-                                options={sectionOptions}
-                                value={selectedFormSection}
-                                onChange={setSelectedFormSection}
-                                placeholder="Select Section"
-                                className="w-full"
-                            />
+                            {sectionMode === 'select' ? (
+                                <SearchableSelect
+                                    name="sectionName"
+                                    options={[
+                                        ...sectionOptions,
+                                        ...(employee?.sectionName && employee?.sectionName !== 'OTHER_CUSTOM' && !sectionOptions.find(o => o.value === employee?.sectionName) ? [{ label: employee.sectionName, value: employee.sectionName }] : []),
+                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                    ]}
+                                    value={selectedFormSection}
+                                    onChange={(val) => {
+                                        const v = typeof val === 'string' ? val : String(val);
+                                        if (v === 'OTHER_CUSTOM') {
+                                            setSectionMode('custom');
+                                            setCustomSection('');
+                                        } else {
+                                            setSelectedFormSection(v);
+                                        }
+                                    }}
+                                    placeholder="Select Section"
+                                    className="w-full"
+                                />
+                            ) : (
+                                <div className="space-y-2">
+                                    <input
+                                        name="sectionName"
+                                        value={customSection}
+                                        onChange={e => setCustomSection(e.target.value)}
+                                        placeholder="Type custom section..."
+                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setSectionMode('select')}
+                                        className="text-xs text-blue-600 hover:underline font-bold"
+                                    >
+                                        Back to Select
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
-                            <input name="designation" defaultValue={employee?.designation || ''} placeholder="E.g. Senior Engineer" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            {designationMode === 'select' ? (
+                                <SearchableSelect
+                                    name="designation"
+                                    options={[
+                                        ...designationOptions,
+                                        ...(employee?.designation && employee?.designation !== 'OTHER_CUSTOM' && !designationOptions.find(o => o.value === employee?.designation) ? [{ label: employee.designation, value: employee.designation }] : []),
+                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                    ]}
+                                    value={selectedFormDesignation}
+                                    onChange={(val) => {
+                                        const v = typeof val === 'string' ? val : String(val);
+                                        if (v === 'OTHER_CUSTOM') {
+                                            setDesignationMode('custom');
+                                            setCustomDesignation('');
+                                        } else {
+                                            setSelectedFormDesignation(v);
+                                        }
+                                    }}
+                                    placeholder="Select Designation"
+                                    className="w-full"
+                                />
+                            ) : (
+                                <div className="space-y-2">
+                                    <input
+                                        name="designation"
+                                        value={customDesignation}
+                                        onChange={e => setCustomDesignation(e.target.value)}
+                                        placeholder="Type custom designation..."
+                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setDesignationMode('select')}
+                                        className="text-xs text-blue-600 hover:underline font-bold"
+                                    >
+                                        Back to Select
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
+                            <SearchableSelect
+                                name="departmentGroup"
+                                options={[
+                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+                                    { label: 'Operators', value: 'Operators' },
+                                    { label: 'Others', value: 'Others' }
+                                ]}
+                                value={selectedFormDeptGroup}
+                                onChange={setSelectedFormDeptGroup}
+                                className="w-full"
+                            />
+                        </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
                             <input name="managerId" defaultValue={employee?.managerId || ''} placeholder="Manager ID" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
@@ -614,11 +721,52 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
-                            <input name="location" defaultValue={employee?.location || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            <input name="region" defaultValue={employee?.region || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                         </div>
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
-                            <input name="organization" defaultValue={employee?.organization || ''} placeholder="Organization" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            {orgMode === 'select' ? (
+                                <SearchableSelect
+                                    name="organization"
+                                    value={selectedOrganization}
+                                    options={[
+                                        { label: 'LMEL', value: 'LMEL' },
+                                        { label: 'TSMPL', value: 'TSMPL' },
+                                        { label: 'MTLL', value: 'MTLL' },
+                                        { label: 'TEIPL', value: 'TEIPL' },
+                                        ...(employee?.organization && employee.organization !== 'OTHER_CUSTOM' && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(employee.organization) ? [{ label: employee.organization, value: employee.organization }] : []),
+                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                    ]}
+                                    onChange={(val) => {
+                                        const v = typeof val === 'string' ? val : String(val);
+                                        if (v === 'OTHER_CUSTOM') {
+                                            setOrgMode('custom');
+                                            setCustomOrganization('');
+                                        } else {
+                                            setSelectedOrganization(v);
+                                        }
+                                    }}
+                                    placeholder="Select Organization"
+                                    className="w-full"
+                                />
+                            ) : (
+                                <div className="space-y-2">
+                                    <input
+                                        name="organization"
+                                        value={customOrganization}
+                                        onChange={e => setCustomOrganization(e.target.value)}
+                                        placeholder="Type custom organization..."
+                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => setOrgMode('select')}
+                                        className="text-xs text-blue-600 hover:underline font-bold"
+                                    >
+                                        Back to Select
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -696,6 +844,6 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                 </form>
             </div>
         </div>
-    
+
     );
 }

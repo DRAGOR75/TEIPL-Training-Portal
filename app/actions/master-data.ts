@@ -567,3 +567,48 @@ export async function mergeEmployees(primaryId: string, duplicateId: string) {
         return { error: error.message || 'Failed to merge employees' };
     }
 }
+
+export async function patchEmployeeProfile(id: string, data: Partial<{
+    name: string;
+    organization: string;
+    grade: Grade;
+    gender: Gender;
+    employeeGrouupMNmw: string;
+    departmentGroup: string;
+    managerName: string;
+    sectionName: string;
+    onRollContract: string;
+    designation: string;
+    region: string;
+    location: string;
+    email: string;
+    mobile: string;
+    department: string;
+    managerId: string;
+    managerEmail: string;
+    managerMobile: string;
+    aadharNumber: string;
+    highestQualification: string;
+    projectLocation: string;
+    doj: string;
+    dob: string;
+}>) {
+    if (!await auth()) return { error: 'Unauthorized' };
+    try {
+        const updateData: any = { ...data };
+        if (data.doj) updateData.doj = new Date(data.doj);
+        if (data.dob) updateData.dob = new Date(data.dob);
+
+        await db.employee.update({
+            where: { id },
+            data: updateData
+        });
+        revalidatePath('/admin/tni-dashboard');
+        revalidateTag('employee-profile', 'max');
+        revalidateTag('tni-reports', 'max');
+        return { success: true };
+    } catch (error: any) {
+        console.error("Patch Employee Error", error);
+        return { error: 'Failed to update employee profile' };
+    }
+}

@@ -106,13 +106,21 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
         status: employee.status || 'Active',
         departmentGroup: employee.departmentGroup || '',
         region: employee.region || '',
-        organization: employee.organization || '',
+        organization: ['LMEL', 'TSMPL', 'MTLL', 'TEIPL', ''].includes(employee.organization || '') ? (employee.organization || '') : 'OTHER_CUSTOM',
         highestQualification: employee.highestQualification || '',
         department: employee.department || '',
         aadharNumber: employee.aadharNumber || '',
         employeeGrouupMNmw: employee.employeeGrouupMNmw || '',
         onRollContract: employee.onRollContract || ''
     });
+
+    const [customOrganization, setCustomOrganization] = useState('');
+    const [customDesignation, setCustomDesignation] = useState('');
+    const [customSection, setCustomSection] = useState('');
+
+    const [orgMode, setOrgMode] = useState<'select' | 'custom'>('select');
+    const [designationMode, setDesignationMode] = useState<'select' | 'custom'>('select');
+    const [sectionMode, setSectionMode] = useState<'select' | 'custom'>('select');
 
     async function handleManagerIdBlur() {
         if (formData.managerId && formData.managerId.trim() !== '') {
@@ -130,7 +138,10 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
 
     async function handleSave() {
         setLoading(true);
-        if (!formData.name || !formData.email || !formData.sectionName || !formData.managerId || !formData.managerName || !formData.managerEmail || !formData.organization || !formData.onRollContract || !formData.department || !formData.gender || !formData.mobile || !formData.designation || !formData.employeeGrouupMNmw || !formData.grade || !formData.region) {
+        const finalOrganization = orgMode === 'custom' ? customOrganization : formData.organization;
+        const finalDesignation = designationMode === 'custom' ? customDesignation : formData.designation;
+        const finalSection = sectionMode === 'custom' ? customSection : formData.sectionName;
+        if (!formData.name || !formData.email || !finalSection || !formData.managerId || !formData.managerName || !formData.managerEmail || !finalOrganization || !formData.onRollContract || !formData.department || !formData.gender || !formData.mobile || !finalDesignation || !formData.employeeGrouupMNmw || !formData.grade || !formData.region) {
             alert('Please fill all required fields');
             setLoading(false);
             return;
@@ -141,11 +152,11 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
             name: formData.name,
             email: formData.email,
             grade: formData.grade as any,
-            sectionName: formData.sectionName,
+            sectionName: finalSection,
             location: formData.location,
             gender: formData.gender,
             mobile: formData.mobile,
-            designation: formData.designation,
+            designation: finalDesignation,
             doj: formData.doj ? new Date(formData.doj) : null,
             dob: formData.dob ? new Date(formData.dob) : null,
             projectLocation: formData.projectLocation,
@@ -156,7 +167,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
             status: formData.status,
             departmentGroup: formData.departmentGroup,
             region: formData.region,
-            organization: formData.organization,
+            organization: finalOrganization,
             highestQualification: formData.highestQualification,
             department: formData.department,
             aadharNumber: formData.aadharNumber,
@@ -199,9 +210,10 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee ID *</label>
                         <input
-                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            className={`w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 rounded-xl outline-none transition font-medium ${isEditing ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-slate-800'}`}
                             placeholder="Employee ID"
                             value={formData.id}
+                            readOnly={true}
                             onChange={e => setFormData({ ...formData, id: e.target.value })}
                         />
                     </div>
@@ -253,14 +265,44 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
-                        <SearchableSelect
-                            options={designationOptions}
-                            value={formData.designation}
-                            onChange={(val) => setFormData({ ...formData, designation: typeof val === 'string' ? val : String(val) })}
-                            placeholder="Select Designation"
-                            searchPlaceholder="Search Designations..."
-                            className="w-full text-base sm:text-xs font-medium"
-                        />
+                        {designationMode === 'select' ? (
+                            <SearchableSelect
+                                options={[
+                                    ...designationOptions,
+                                    ...(formData.designation && formData.designation !== 'OTHER_CUSTOM' && !designationOptions.find(o => o.value === formData.designation) ? [{ label: formData.designation, value: formData.designation }] : []),
+                                    { label: "Other (Type Custom)", value: "OTHER_CUSTOM" }
+                                ]}
+                                value={formData.designation}
+                                onChange={(val) => {
+                                    const v = typeof val === 'string' ? val : String(val);
+                                    if (v === 'OTHER_CUSTOM') {
+                                        setDesignationMode('custom');
+                                        setCustomDesignation('');
+                                    } else {
+                                        setFormData({ ...formData, designation: v });
+                                    }
+                                }}
+                                placeholder="Select Designation"
+                                searchPlaceholder="Search Designations..."
+                                className="w-full text-base sm:text-xs font-medium"
+                            />
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom designation..."
+                                    value={customDesignation}
+                                    onChange={e => setCustomDesignation(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setDesignationMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-1">
@@ -302,13 +344,43 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section *</label>
-                        <SearchableSelect
-                            options={sections.map(sec => ({ label: sec.name, value: sec.name }))}
-                            value={formData.sectionName}
-                            onChange={(val) => setFormData({ ...formData, sectionName: val })}
-                            placeholder="Select Section"
-                            className="w-full text-base sm:text-xs"
-                        />
+                        {sectionMode === 'select' ? (
+                            <SearchableSelect
+                                options={[
+                                    ...sections.map(sec => ({ label: sec.name, value: sec.name })),
+                                    ...(formData.sectionName && formData.sectionName !== 'OTHER_CUSTOM' && !sections.find(o => o.name === formData.sectionName) ? [{ label: formData.sectionName, value: formData.sectionName }] : []),
+                                    { label: "Other (Type Custom)", value: "OTHER_CUSTOM" }
+                                ]}
+                                value={formData.sectionName}
+                                onChange={(val) => {
+                                    const v = typeof val === 'string' ? val : String(val);
+                                    if (v === 'OTHER_CUSTOM') {
+                                        setSectionMode('custom');
+                                        setCustomSection('');
+                                    } else {
+                                        setFormData({ ...formData, sectionName: v });
+                                    }
+                                }}
+                                placeholder="Select Section"
+                                className="w-full text-base sm:text-xs"
+                            />
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom section..."
+                                    value={customSection}
+                                    onChange={e => setCustomSection(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setSectionMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-1">
@@ -365,12 +437,46 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization *</label>
-                        <input
-                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
-                            placeholder="Organization"
-                            value={formData.organization}
-                            onChange={e => setFormData({ ...formData, organization: e.target.value })}
-                        />
+                        {orgMode === 'select' ? (
+                            <select
+                                className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                value={formData.organization}
+                                onChange={e => {
+                                    if (e.target.value === 'OTHER_CUSTOM') {
+                                        setOrgMode('custom');
+                                        setCustomOrganization('');
+                                    } else {
+                                        setFormData({ ...formData, organization: e.target.value });
+                                    }
+                                }}
+                            >
+                                <option value="">Select Organization</option>
+                                <option value="LMEL">LMEL</option>
+                                <option value="TSMPL">TSMPL</option>
+                                <option value="MTLL">MTLL</option>
+                                <option value="TEIPL">TEIPL</option>
+                                {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(formData.organization) && (
+                                    <option value={formData.organization}>{formData.organization}</option>
+                                )}
+                                <option value="OTHER_CUSTOM">Other (Type Custom)</option>
+                            </select>
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom organization..."
+                                    value={customOrganization}
+                                    onChange={e => setCustomOrganization(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setOrgMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-1">
@@ -695,7 +801,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 <HiOutlineMap size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Region</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Location</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.region || 'Not Set'}>{employee.region || 'Not Set'}</span>
                             </div>
                         </div>

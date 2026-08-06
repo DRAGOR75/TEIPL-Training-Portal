@@ -113,7 +113,7 @@ export default function TrainingHistoryClient() {
                     </div>
 
                     {/* Filters */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-2 relative z-20">
                         <div className="relative w-full">
                             <HiOutlineMagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                             <input
@@ -169,7 +169,7 @@ export default function TrainingHistoryClient() {
                             />
                         </div>
 
-                        <div className="relative z-10">
+                        <div className="relative z-40">
                             <SearchableSelect
                                 options={[{ label: "All Programs", value: "" }, ...filterProgramNames.map(p => ({ label: p, value: p }))]}
                                 value={programName}
@@ -180,7 +180,7 @@ export default function TrainingHistoryClient() {
                             />
                         </div>
 
-                        <div className="relative z-10">
+                        <div className="relative z-30">
                             <SearchableSelect
                                 options={[{ label: "All Regions", value: "" }, ...filterRegion.map(p => ({ label: p, value: p }))]}
                                 value={region}
@@ -191,7 +191,7 @@ export default function TrainingHistoryClient() {
                             />
                         </div>
 
-                        <div className="relative z-10">
+                        <div className="relative z-20">
                             <SearchableSelect
                                 options={[{ label: "All Organizations", value: "" }, ...filterOrganization.map(p => ({ label: p, value: p }))]}
                                 value={organization}

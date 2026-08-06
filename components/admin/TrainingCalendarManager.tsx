@@ -103,14 +103,15 @@ export default function TrainingCalendarManager({ programs, trainers, allSession
                         />
                         <button
                             onClick={() => {
-                                const exportData = unifiedEvents.map((event: any) => ({
+                                const exportData = unifiedEvents.map((event: any, index: number) => ({
+                                    'S.No.': index + 1,
                                     'Program Name': event.altProgramName || event.programName,
                                     'Nominated': event.enrolledCount,
                                     'Start Date': new Date(event.startDate).toLocaleDateString(),
                                     'End Date': new Date(event.endDate).toLocaleDateString(),
                                     'Trainer': event.trainer || 'TBD',
                                     'Location': event.location || 'TBD',
-                                    'Status': 'Scheduled'
+                                    'Status': event.originalSession.status || 'Scheduled'
                                 }));
                                 exportToExcel(exportData, 'Scheduled_Programs');
                             }}

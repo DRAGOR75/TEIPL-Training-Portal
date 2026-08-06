@@ -195,7 +195,7 @@ export async function finalizeParticipantTraining(
                     onRollContract: emp.onRollContract,
                     department: emp.department,
                     departmentGroup: emp.departmentGroup,
-                    employeeGroup: emp.departmentGroup, // keeping for backwards compatibility if needed
+                    employeeGroup: emp.grade,
                     employeeGrouupMNmw: emp.employeeGrouupMNmw,
                     aadharNumber: emp.aadharNumber,
                     designation: emp.designation,
@@ -237,7 +237,7 @@ export async function finalizeParticipantTraining(
                     onRollContract: emp.onRollContract,
                     department: emp.department,
                     departmentGroup: emp.departmentGroup,
-                    employeeGroup: emp.departmentGroup,
+                    employeeGroup: emp.grade,
                     employeeGrouupMNmw: emp.employeeGrouupMNmw,
                     aadharNumber: emp.aadharNumber,
                     designation: emp.designation,

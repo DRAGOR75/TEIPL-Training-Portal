@@ -509,3 +509,55 @@ export async function deleteCohort(cohortId: string) {
         return { success: false, error: 'Failed to delete cohort.' };
     }
 }
+
+/**
+ * Fetch all enrollments (which contain feedbacks) for all sessions in a cohort
+ */
+export async function exportCohortProgramFeedbacks(cohortId: string) {
+    try {
+        const cohortPrograms = await db.cohortProgram.findMany({
+            where: { cohortId },
+            include: {
+                program: { select: { name: true } },
+                session: {
+                    include: {
+                        enrollments: {
+                            where: { status: 'Completed' } // Only get completed enrollments
+                        }
+                    }
+                }
+            }
+        });
+
+        // Flatten all enrollments into a single array
+        const allFeedbacks = [];
+        
+        for (const cp of cohortPrograms) {
+            if (cp.session && cp.session.enrollments.length > 0) {
+                for (const enrollment of cp.session.enrollments) {
+                    allFeedbacks.push({
+                        'Program Name': cp.program.name,
+                        'Trainer': cp.session.trainerName || 'N/A',
+                        'Employee Name': enrollment.employeeName,
+                        'Employee ID': enrollment.empId || 'N/A',
+                        'Status': enrollment.status,
+                        'Pre-Training Rating': enrollment.preTrainingRating || 'N/A',
+                        'Post-Training Rating': enrollment.postTrainingRating || 'N/A',
+                        'Trainer Rating': enrollment.trainerRating || 'N/A',
+                        'Content Rating': enrollment.contentRating || 'N/A',
+                        'Material Rating': enrollment.materialRating || 'N/A',
+                        'Topics Learned': enrollment.topicsLearned || 'N/A',
+                        'Action Plan': enrollment.actionPlan || 'N/A',
+                        'Suggestions': enrollment.suggestions || 'N/A',
+                        'Average Rating': enrollment.averageRating || 'N/A'
+                    });
+                }
+            }
+        }
+
+        return { success: true, data: allFeedbacks };
+    } catch (error) {
+        console.error('Failed to export cohort feedbacks:', error);
+        return { success: false, error: 'Failed to export feedbacks.' };
+    }
+}
