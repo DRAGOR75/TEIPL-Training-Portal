@@ -95,7 +95,7 @@ export default function FinalizeAttendanceModal({
             setCustomDesignation('');
             setCustomSection('');
 
-            setFormData(prev => ({
+            setFormData((prev: any) => ({
                 ...prev,
                 organization: isStandardOrg ? org : 'OTHER_CUSTOM',
                 designation: employee.designation || '',
