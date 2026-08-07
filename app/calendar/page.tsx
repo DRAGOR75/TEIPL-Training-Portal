@@ -39,7 +39,7 @@ export default async function EmployeeCalendarPage() {
 
     // Map upcoming actual sessions for the enrollment table
     const upcomingEvents = rawSessions
-        .filter(s => new Date(s.startDate) >= new Date() && s.nominationBatchId)
+        .filter(s => s.nominationBatchId)
         .map(s => ({
             id: s.nominationBatchId, // Used by selfNominateCalendar which expects a batchId
             capacity: s.nominationBatch?.capacity || 30,

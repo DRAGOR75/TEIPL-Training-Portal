@@ -455,7 +455,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 <option value="TSMPL">TSMPL</option>
                                 <option value="MTLL">MTLL</option>
                                 <option value="TEIPL">TEIPL</option>
-                                {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(formData.organization) && (
+                                {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL', 'OTHER_CUSTOM'].includes(formData.organization) && (
                                     <option value={formData.organization}>{formData.organization}</option>
                                 )}
                                 <option value="OTHER_CUSTOM">Other (Type Custom)</option>

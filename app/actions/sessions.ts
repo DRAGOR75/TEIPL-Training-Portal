@@ -467,6 +467,7 @@ export const getSessions = unstable_cache(
         return await db.trainingSession.findMany({
             orderBy: { startDate: 'desc' },
             include: {
+                enrollments: true,
                 nominationBatch: {
                     include: {
                         nominations: {
