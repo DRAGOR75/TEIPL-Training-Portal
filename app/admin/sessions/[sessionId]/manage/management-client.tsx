@@ -81,7 +81,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const handleToggleApproval = async () => {
         const newValue = !requireApproval;
         setRequireApproval(newValue);
-        
+
         try {
             const result = await toggleManagerApprovalRequirement(session.id, newValue);
             if (!result.success) {
@@ -98,7 +98,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
     const handleToggleWalkIns = async () => {
         const newValue = !allowWalkIns;
         setAllowWalkIns(newValue);
-        
+
         try {
             const result = await toggleAllowWalkIns(session.id, newValue);
             if (!result.success) {
@@ -482,15 +482,8 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                     </div>
 
                     {/* Attendance Tab */}
-                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                         <div className="p-6 border-b border-slate-100">
-                             <h3 className="font-bold text-slate-900 text-lg">Attendance</h3>
-                             <p className="text-sm text-slate-500">Manage participant attendance.</p>
-                         </div>
-                         <div className="p-6">
-                            <AttendanceTab session={session} />
-                         </div>
-                    </div>
+                    <AttendanceTab session={session} />
+
 
                     {/* 3. Email Logs */}
                     <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">

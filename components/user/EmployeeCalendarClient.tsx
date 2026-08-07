@@ -16,15 +16,18 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                             <HiOutlineCalendarDays className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Upcoming Sessions</h3>
-
+                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">All Programs</h3>
+                            <div className="mt-2 text-sm text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 inline-block shadow-sm">
+                                <span className="font-bold uppercase tracking-wider text-xs mr-1">Note:</span>
+                                Training dates may be subject to change. Contact the training department for enrollment with approval from your manager.
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="overflow-x-auto">
+                <div className="overflow-auto max-h-[500px]">
                     <table className="w-full text-left border-collapse min-w-[800px]">
-                        <thead>
-                            <tr className="bg-slate-50 border-b border-slate-200">
+                        <thead className="sticky top-0 z-10 bg-slate-50 shadow-sm">
+                            <tr className="border-b border-slate-200">
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Program Name</th>
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">Start Date</th>
                                 <th className="px-3 py-2 font-bold text-slate-500 text-xs tracking-wider uppercase">End Date</th>
@@ -86,8 +89,8 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                 <tr>
                                     <td colSpan={6} className="p-16 text-center">
                                         <HiOutlineCalendarDays className="mx-auto text-5xl text-slate-300 mb-4" />
-                                        <h3 className="text-xl font-black text-slate-700">No Events Scheduled</h3>
-                                        <p className="text-slate-500 font-medium mt-2">There are no upcoming  training programs at the moment.</p>
+                                        <h3 className="text-xl font-black text-slate-700">No Programs Found</h3>
+                                        <p className="text-slate-500 font-medium mt-2">There are no training programs for the selected month.</p>
                                     </td>
                                 </tr>
                             )}
@@ -179,10 +182,10 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                                                         <td className="px-4 py-3 text-sm font-medium text-slate-600">
                                                             {nom.employee?.name || 'Unknown'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-medium text-slate-600">
-                                                            {nom.employee?.section || '-'}
+                                                        <td className="px-4 py-3 text-sm text-slate-500">
+                                                            {nom.employee?.sectionName || '-'}
                                                         </td>
-                                                        <td className="px-4 py-3 text-sm font-medium text-slate-600">
+                                                        <td className="px-4 py-3 text-sm text-slate-500">
                                                             {nom.employee?.designation || '-'}
                                                         </td>
                                                     </tr>

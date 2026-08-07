@@ -186,16 +186,18 @@ export default function LocationGanttCalendar({ programs, sessions, trainers, lo
                         {/* X-Axis Days */}
                         <div className="flex-1 flex relative">
                             {daysList.map(day => {
+                                const dateObj = new Date(year, month, day);
                                 const isToday = day === new Date().getDate() && month === new Date().getMonth() && year === new Date().getFullYear();
+                                const isSunday = dateObj.getDay() === 0;
                                 return (
                                     <div
                                         key={day}
-                                        className={`flex-1 border-r border-slate-100 py-2 flex flex-col items-center justify-center min-w-[28px] ${isToday ? 'bg-indigo-50/50' : ''}`}
+                                        className={`flex-1 border-r ${isSunday ? 'border-red-200 bg-red-50/30' : 'border-slate-100'} py-2 flex flex-col items-center justify-center min-w-[28px] ${isToday ? 'bg-indigo-50/50' : ''}`}
                                     >
-                                        <span className={`text-[10px] font-bold ${isToday ? 'text-indigo-600' : 'text-slate-400'}`}>
-                                            {new Date(year, month, day).toLocaleDateString('default', { weekday: 'narrow' })}
+                                        <span className={`text-[10px] font-bold ${isToday ? 'text-indigo-600' : isSunday ? 'text-red-400' : 'text-slate-400'}`}>
+                                            {dateObj.toLocaleDateString('default', { weekday: 'narrow' })}
                                         </span>
-                                        <span className={`text-xs font-black ${isToday ? 'text-indigo-700 bg-indigo-100 rounded-full w-5 h-5 flex items-center justify-center mt-0.5' : 'text-slate-700 mt-0.5'}`}>
+                                        <span className={`text-xs font-black ${isToday ? 'text-indigo-700 bg-indigo-100 rounded-full w-5 h-5 flex items-center justify-center mt-0.5' : isSunday ? 'text-red-600 mt-0.5' : 'text-slate-700 mt-0.5'}`}>
                                             {day}
                                         </span>
                                     </div>
@@ -262,11 +264,13 @@ export default function LocationGanttCalendar({ programs, sessions, trainers, lo
 
                                         {/* Background Grid Cells (Clickable to Create) */}
                                         <div className="absolute inset-0 flex w-full h-full">
-                                            {daysList.map(day => (
+                                            {daysList.map(day => {
+                                                const isSunday = new Date(year, month, day).getDay() === 0;
+                                                return (
                                                 <div
                                                     key={day}
                                                     onClick={() => !readOnly && handleGridClick(location.name, day)}
-                                                    className={`flex-1 border-r border-slate-100 h-full transition-colors group/cell ${!readOnly ? 'hover:bg-indigo-50/30 cursor-crosshair' : ''}`}
+                                                    className={`flex-1 border-r ${isSunday ? 'border-red-200 bg-red-50/20' : 'border-slate-100'} h-full transition-colors group/cell ${!readOnly ? 'hover:bg-indigo-50/30 cursor-crosshair' : ''}`}
                                                 >
                                                     {!readOnly && (
                                                         <div className="w-full h-full flex items-center justify-center opacity-0 group-hover/cell:opacity-100">
@@ -274,7 +278,8 @@ export default function LocationGanttCalendar({ programs, sessions, trainers, lo
                                                         </div>
                                                     )}
                                                 </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
 
                                         {/* Overlay Rendered Session Bars */}

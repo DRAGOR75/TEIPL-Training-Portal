@@ -21,7 +21,8 @@ import {
     HiOutlineLink,
     HiOutlineClipboard,
     HiOutlinePhoto,
-    HiOutlineCheck
+    HiOutlineCheck,
+    HiOutlineMapPin
 } from 'react-icons/hi2';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
 import { SessionWithDetails } from '@/types/sessions';
@@ -358,6 +359,15 @@ export default function TrainerSessionsDashboard({
                                                     </div>
                                                     <span className="text-slate-600">
                                                         Participants: <span className="font-bold text-slate-900">{session.nominationBatch?.nominations.length || 0}</span>
+                                                    </span>
+                                                </div>
+                                                <div className="hidden md:block w-px h-5 bg-slate-200"></div>
+                                                <div className="flex items-center gap-2">
+                                                    <div className="p-1 bg-purple-50 text-purple-600 rounded-md">
+                                                        <HiOutlineMapPin size={14} />
+                                                    </div>
+                                                    <span className="text-slate-600">
+                                                        Location: <span className="font-bold text-slate-900">{session.location || 'TBD'}</span>
                                                     </span>
                                                 </div>
                                             </div>

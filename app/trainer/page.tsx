@@ -45,7 +45,7 @@ export default async function TrainerHubPage() {
                     {/* Card 1: TNI Control Panel - Amber/Orange */}
                     <TrainerCard
                         href="/trainer/employee-tni"
-                        title="TNI & Training Records"
+                        title="Profile & TNI"
                         description="Manage training needs and update employee profiles instantly."
                         icon={<HiOutlineUsers size={28} />}
                         tag="TNI"

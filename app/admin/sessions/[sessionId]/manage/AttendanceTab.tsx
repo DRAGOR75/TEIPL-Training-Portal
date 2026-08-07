@@ -176,7 +176,7 @@ export default function AttendanceTab({ session }: { session: any }) {
                 return next;
             });
         }
-        
+
         // Also update local data if we modified employee properties
         // We can just rely on the next fetch or let the user refresh if they need to see it immediately
     };
@@ -192,6 +192,10 @@ export default function AttendanceTab({ session }: { session: any }) {
                     <div>
                         <h3 className="font-bold text-slate-900 text-lg">Daily Attendance & Finalization</h3>
                         <p className="text-sm text-slate-500">Add the specific dates you hold training, then mark attendance.</p>
+                        <div className="mt-2 text-sm text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 inline-block shadow-sm">
+                            <span className="font-bold uppercase tracking-wider text-xs mr-1">Note:</span>
+                            Trainer has to ensure they mark the absent candidates (default is present) in the mark attendance tab.
+                        </div>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -275,8 +279,8 @@ export default function AttendanceTab({ session }: { session: any }) {
                                                 <label
                                                     key={dateStr}
                                                     className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${isSelected
-                                                            ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
-                                                            : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
+                                                        ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
+                                                        : 'border-slate-200 bg-white hover:border-blue-300 hover:bg-slate-50'
                                                         }`}
                                                 >
                                                     <input
@@ -462,7 +466,7 @@ export default function AttendanceTab({ session }: { session: any }) {
                     )}
                 </div>
             )}
-            
+
             <FinalizeAttendanceModal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
