@@ -1,4 +1,4 @@
-// import 'dotenv/config'
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 import { Pool as PgPool } from 'pg'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -28,7 +28,8 @@ function createPrismaClient() {
 
     if (isNeon) {
         console.log('[Prisma] Using Neon Serverless Adapter');
-        const adapter = new PrismaNeon({ connectionString })
+        const pool = new NeonPool({ connectionString })
+        const adapter = new PrismaNeon(pool)
         return new PrismaClient({ adapter, log: ['query', 'error', 'warn'] })
     } else {
         console.log('[Prisma] Using standard pg pool with keepAlive for GCP');

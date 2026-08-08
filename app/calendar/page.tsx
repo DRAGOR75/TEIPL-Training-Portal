@@ -27,8 +27,13 @@ export default async function EmployeeCalendarPage() {
         db.location.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
     ]);
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const activeSessions = rawSessions.filter(s => new Date(s.endDate) >= today);
+
     // Map to the simple interface required by the Gantt component
-    const normalizedSessions = rawSessions.map(s => ({
+    const normalizedSessions = activeSessions.map(s => ({
         id: s.id,
         programName: s.altProgramName || s.programName,
         trainerName: s.trainerName,
@@ -38,7 +43,7 @@ export default async function EmployeeCalendarPage() {
     }));
 
     // Map upcoming actual sessions for the enrollment table
-    const upcomingEvents = rawSessions
+    const upcomingEvents = activeSessions
         .filter(s => s.nominationBatchId)
         .map(s => ({
             id: s.nominationBatchId, // Used by selfNominateCalendar which expects a batchId
