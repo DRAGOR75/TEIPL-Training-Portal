@@ -1,0 +1,234 @@
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {/* Designation */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBriefcase className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Designation</span>
+                                <span className="text-xs font-bold text-slate-900 block truncate" title={employee.designation || 'Not Set'}>{employee.designation || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Section / Department */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 className="text-emerald-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Section</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Department Group */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department Group</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.departmentGroup || 'Not Set'}>{employee.departmentGroup || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Mobile Number */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-emerald-600 rounded-xl shrink-0">
+                                <HiOutlinePhone className="text-amber-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mobile Number</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.mobile || 'Not Set'}>{employee.mobile || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Date of Joining */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineCalendar className="text-red-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date of Joining / Exp</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.doj ? new Date(employee.doj).toLocaleDateString() : 'Not Set'}>
+                                    {(() => {
+                                        if (!employee.doj) return 'Not Set';
+                                        const doj = new Date(employee.doj);
+                                        const now = new Date();
+                                        let years = now.getFullYear() - doj.getFullYear();
+                                        let months = now.getMonth() - doj.getMonth();
+                                        if (months < 0) {
+                                            years--;
+                                            months += 12;
+                                        }
+                                        return `${doj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} (${years} Years, ${months} Months)`;
+                                    })()}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Date of Birth */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineCalendar className="text-purple-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Date of Birth</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.dob ? new Date(employee.dob).toLocaleDateString() : 'Not Set'}>
+                                    {employee.dob ? new Date(employee.dob).toLocaleDateString() : 'Not Set'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Grade / Level */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineShieldCheck className="text-yellow-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Grade / Level</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.grade || 'Not Set'}>{employee.grade || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Base Office Location */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineMapPin className="text-blue-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employee Region</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.location || 'Not Set'}>{employee.location || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className={`p-2 rounded-xl shrink-0 ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                <HiOutlineCheck size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employment Status</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.status || 'Active'}>
+                                    {employee.status || 'Active'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Gender */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers className="text-cyan-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}>
+                                    {employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Region */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineMap size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Location</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.region || 'Not Set'}>{employee.region || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Organization */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Organization</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.organization || 'Not Set'}>{employee.organization || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Highest Qualification */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineIdentification size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Highest Qualification</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.highestQualification || 'Not Set'}>{employee.highestQualification || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Department */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.department || 'Not Set'}>{employee.department || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Aadhar Number */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineIdentification size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Aadhar Number</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.aadharNumber || 'Not Set'}>{employee.aadharNumber || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Emp Group M/NM/W */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Emp Group M/NM/W</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.employeeGrouupMNmw || 'Not Set'}>{employee.employeeGrouupMNmw || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* On Roll / Contract */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBriefcase size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">On Roll / Contract</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.onRollContract || 'Not Set'}>{employee.onRollContract || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Reporting Manager */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUserCircle className="text-green-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Reporting Manager</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.managerName ? `${employee.managerName} ${employee.managerEmail ? `(${employee.managerEmail})` : ''}` : 'Not Set'}>
+                                    {employee.managerName || 'Not Set'}
+                                </span>
+                                {employee.managerId && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerId}>
+                                        ID: {employee.managerId}
+                                    </span>
+                                )}
+                                {employee.managerEmail && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerEmail}>
+                                        {employee.managerEmail}
+                                    </span>
+                                )}
+                                {employee.managerMobile && (
+                                    <span className="text-[10px] text-slate-500 font-medium block truncate mt-0.5" title={employee.managerMobile}>
+                                        {employee.managerMobile}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    </div>

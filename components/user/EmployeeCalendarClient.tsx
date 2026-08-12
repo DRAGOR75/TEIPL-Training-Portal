@@ -1,10 +1,24 @@
 'use client';
 
 import { useState } from 'react';
-import { HiOutlineCalendarDays, HiOutlineXMark, HiOutlineUserGroup, HiOutlineInformationCircle } from 'react-icons/hi2';
+import { HiOutlineCalendarDays, HiOutlineXMark, HiOutlineUserGroup, HiOutlineInformationCircle, HiOutlineChevronLeft, HiOutlineChevronRight } from 'react-icons/hi2';
 
-export default function EmployeeCalendarClient({ events, empId }: { events: any[], empId: string | null }) {
+export default function EmployeeCalendarClient({ events, empId, viewDate, onViewDateChange }: { events: any[], empId: string | null, viewDate?: Date, onViewDateChange?: (d: Date) => void }) {
     const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+
+    const currentDate = viewDate || new Date();
+
+    const nextMonth = () => {
+        if (onViewDateChange) onViewDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    };
+
+    const prevMonth = () => {
+        if (onViewDateChange) onViewDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    };
+
+    const goToday = () => {
+        if (onViewDateChange) onViewDateChange(new Date());
+    };
 
     return (
         <div className="space-y-6">
@@ -16,13 +30,31 @@ export default function EmployeeCalendarClient({ events, empId }: { events: any[
                             <HiOutlineCalendarDays className="w-6 h-6" />
                         </div>
                         <div>
-                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">All Programs</h3>
+                            <h3 className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">Upcoming Sessions</h3>
                             <div className="mt-2 text-sm text-amber-700 bg-amber-50 p-2.5 rounded-lg border border-amber-200 inline-block shadow-sm">
                                 <span className="font-bold uppercase tracking-wider text-xs mr-1">Note:</span>
                                 Training dates may be subject to change. Contact the training department for enrollment with approval from your manager.
                             </div>
                         </div>
                     </div>
+                    {onViewDateChange && (
+                        <div className="flex items-center gap-3 shrink-0">
+                            <button onClick={goToday} className="px-4 py-2 bg-white border border-slate-300 text-slate-700 font-bold text-sm rounded-xl hover:bg-slate-50 transition-colors shadow-sm">
+                                Today
+                            </button>
+                            <div className="flex items-center bg-white border border-slate-300 rounded-xl shadow-sm p-1">
+                                <button onClick={prevMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                                    <HiOutlineChevronLeft size={18} />
+                                </button>
+                                <span className="min-w-[140px] text-center font-black text-slate-800 tracking-wide">
+                                    {currentDate.toLocaleDateString('default', { month: 'long', year: 'numeric' })}
+                                </span>
+                                <button onClick={nextMonth} className="p-2 hover:bg-slate-100 rounded-lg text-slate-600 transition-colors">
+                                    <HiOutlineChevronRight size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
                 <div className="overflow-auto max-h-[500px]">
                     <table className="w-full text-left border-collapse min-w-[800px]">

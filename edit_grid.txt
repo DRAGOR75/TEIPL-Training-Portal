@@ -1,0 +1,373 @@
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[75vh] md:max-h-[60vh] overflow-y-auto pr-1 pb-4" style={{ scrollbarWidth: 'thin' }}>
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee ID *</label>
+                        <input
+                            className={`w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 rounded-xl outline-none transition font-medium ${isEditing ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:ring-2 focus:ring-blue-500 text-slate-800'}`}
+                            placeholder="Employee ID"
+                            value={formData.id}
+                            readOnly={true}
+                            onChange={e => setFormData({ ...formData, id: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Full Name"
+                            value={formData.name}
+                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Email Address"
+                            value={formData.email}
+                            onChange={e => setFormData({ ...formData, email: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Mobile"
+                            value={formData.mobile}
+                            onChange={e => setFormData({ ...formData, mobile: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'Male', value: 'MALE' },
+                                { label: 'Female', value: 'FEMALE' },
+                                { label: 'Other', value: 'OTHER' }
+                            ]}
+                            value={formData.gender}
+                            onChange={(val) => setFormData({ ...formData, gender: val })}
+                            placeholder="Select Gender"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
+                        {designationMode === 'select' ? (
+                            <SearchableSelect
+                                options={[
+                                    ...designationOptions,
+                                    ...(formData.designation && formData.designation !== 'OTHER_CUSTOM' && !designationOptions.find(o => o.value === formData.designation) ? [{ label: formData.designation, value: formData.designation }] : []),
+                                    { label: "Other (Type Custom)", value: "OTHER_CUSTOM" }
+                                ]}
+                                value={formData.designation}
+                                onChange={(val) => {
+                                    const v = typeof val === 'string' ? val : String(val);
+                                    if (v === 'OTHER_CUSTOM') {
+                                        setDesignationMode('custom');
+                                        setCustomDesignation('');
+                                    } else {
+                                        setFormData({ ...formData, designation: v });
+                                    }
+                                }}
+                                placeholder="Select Designation"
+                                searchPlaceholder="Search Designations..."
+                                className="w-full text-base sm:text-xs font-medium"
+                            />
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom designation..."
+                                    value={customDesignation}
+                                    onChange={e => setCustomDesignation(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setDesignationMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
+                        <input
+                            type="date"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.doj}
+                            onChange={e => setFormData({ ...formData, doj: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
+                        <input
+                            type="date"
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.dob}
+                            onChange={e => setFormData({ ...formData, dob: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade  *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'EXECUTIVE', value: 'EXECUTIVE' },
+                                { label: 'WORKMAN', value: 'WORKMAN' },
+                                { label: 'APPRENTICE', value: 'APPRENTICE' },
+                                { label: 'TRAINEE', value: 'TRAINEE' },
+                                { label: 'LOCAL', value: 'LOCAL' }
+                            ]}
+                            value={formData.grade}
+                            onChange={(val) => setFormData({ ...formData, grade: val })}
+                            placeholder="Select Grade"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section *</label>
+                        {sectionMode === 'select' ? (
+                            <SearchableSelect
+                                options={[
+                                    ...sections.map(sec => ({ label: sec.name, value: sec.name })),
+                                    ...(formData.sectionName && formData.sectionName !== 'OTHER_CUSTOM' && !sections.find(o => o.name === formData.sectionName) ? [{ label: formData.sectionName, value: formData.sectionName }] : []),
+                                    { label: "Other (Type Custom)", value: "OTHER_CUSTOM" }
+                                ]}
+                                value={formData.sectionName}
+                                onChange={(val) => {
+                                    const v = typeof val === 'string' ? val : String(val);
+                                    if (v === 'OTHER_CUSTOM') {
+                                        setSectionMode('custom');
+                                        setCustomSection('');
+                                    } else {
+                                        setFormData({ ...formData, sectionName: v });
+                                    }
+                                }}
+                                placeholder="Select Section"
+                                className="w-full text-base sm:text-xs"
+                            />
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom section..."
+                                    value={customSection}
+                                    onChange={e => setCustomSection(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setSectionMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+                                { label: 'Operators', value: 'Operators' },
+
+                                { label: 'Others', value: 'Others' }
+                            ]}
+                            value={formData.departmentGroup}
+                            onChange={(val) => setFormData({ ...formData, departmentGroup: val })}
+                            placeholder="Select Dept Group"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employment Status</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'Active', value: 'Active' },
+                                { label: 'Inactive', value: 'Inactive' }
+                            ]}
+                            value={formData.status}
+                            onChange={(val) => setFormData({ ...formData, status: val })}
+                            placeholder="Select Status"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region *</label>
+                        <SearchableSelect
+                            options={locationOptions}
+                            value={formData.location}
+                            onChange={(val) => setFormData({ ...formData, location: typeof val === 'string' ? val : String(val) })}
+                            placeholder="Select Location"
+                            searchPlaceholder="Search location..."
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Location"
+                            value={formData.region}
+                            onChange={e => setFormData({ ...formData, region: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization *</label>
+                        {orgMode === 'select' ? (
+                            <select
+                                className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                value={formData.organization}
+                                onChange={e => {
+                                    if (e.target.value === 'OTHER_CUSTOM') {
+                                        setOrgMode('custom');
+                                        setCustomOrganization('');
+                                    } else {
+                                        setFormData({ ...formData, organization: e.target.value });
+                                    }
+                                }}
+                            >
+                                <option value="">Select Organization</option>
+                                <option value="LMEL">LMEL</option>
+                                <option value="TSMPL">TSMPL</option>
+                                <option value="MTLL">MTLL</option>
+                                <option value="TEIPL">TEIPL</option>
+                                {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL', 'OTHER_CUSTOM'].includes(formData.organization) && (
+                                    <option value={formData.organization}>{formData.organization}</option>
+                                )}
+                                <option value="OTHER_CUSTOM">Other (Type Custom)</option>
+                            </select>
+                        ) : (
+                            <div className="space-y-2">
+                                <input
+                                    className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                                    placeholder="Type custom organization..."
+                                    value={customOrganization}
+                                    onChange={e => setCustomOrganization(e.target.value)}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setOrgMode('select')}
+                                    className="text-xs text-blue-600 hover:underline font-bold"
+                                >
+                                    Back to Select
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Highest Qualification"
+                            value={formData.highestQualification}
+                            onChange={e => setFormData({ ...formData, highestQualification: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Department"
+                            value={formData.department}
+                            onChange={e => setFormData({ ...formData, department: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Aadhar Number"
+                            value={formData.aadharNumber}
+                            onChange={e => setFormData({ ...formData, aadharNumber: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp Group M/NM/W *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'MANAGER', value: 'MANAGER' },
+                                { label: 'NON MANAGER', value: 'NON MANAGER' },
+                                { label: 'WORKMAN', value: 'WORKMAN' }
+                            ]}
+                            value={formData.employeeGrouupMNmw}
+                            onChange={(val) => setFormData({ ...formData, employeeGrouupMNmw: val })}
+                            placeholder="Select Group"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'On Roll', value: 'On Roll' },
+                                { label: 'Contract', value: 'Contract' }
+                            ]}
+                            value={formData.onRollContract}
+                            onChange={(val) => setFormData({ ...formData, onRollContract: val })}
+                            placeholder="Select Type"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerId}
+                            placeholder="Manager ID"
+                            onChange={e => setFormData({ ...formData, managerId: e.target.value })}
+                            onBlur={handleManagerIdBlur}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerName}
+                            placeholder="Manager Name"
+                            onChange={e => setFormData({ ...formData, managerName: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerEmail}
+                            placeholder="Manager Email"
+                            onChange={e => setFormData({ ...formData, managerEmail: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile *</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            value={formData.managerMobile}
+                            placeholder="Manager Mobile"
+                            onChange={e => setFormData({ ...formData, managerMobile: e.target.value })}
+                        />
+                    </div>
+                </div>

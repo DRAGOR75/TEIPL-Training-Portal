@@ -37,7 +37,7 @@ export async function getBatchInvitationPreview(sessionId: string) {
 
         const toEmails = nominations.map(nom => nom.employee.email).filter(Boolean);
         const managerEmails = [...new Set(nominations.map(nom => nom.employee.managerEmail).filter(Boolean))] as string[];
-        
+
         if (!managerEmails.includes('training.trc@thriveni.com')) {
             managerEmails.push('training.trc@thriveni.com');
         }
@@ -174,7 +174,7 @@ export async function sendBatchInvitation(sessionId: string, customTo?: string[]
             where: { id: sessionId },
             data: { emailsSent: true } // Mark as sent
         });
-        
+
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
         revalidateTag('sessions-list', 'max');
         revalidateTag('session-details', 'max');
@@ -343,8 +343,8 @@ export async function createSession(formData: FormData) {
 
     // Auto-calculate Assessment Dates (+20 days)
     const assessmentDateRaw = formData.get('assessmentDate') as string;
-    const assessmentDate = assessmentDateRaw 
-        ? new Date(assessmentDateRaw) 
+    const assessmentDate = assessmentDateRaw
+        ? new Date(assessmentDateRaw)
         : new Date(endDate.getTime() + 20 * 24 * 60 * 60 * 1000);
 
     const feedbackCreationDate = assessmentDate; // Keep them in sync for now
@@ -733,15 +733,25 @@ export async function addNominationsToBatch(batchId: string, nominationIds: stri
     }
 }
 
-export async function joinBatch(batchId: string, empId: string) {
+export async function joinBatch(batchId: string, empId: string, managerDetails?: { managerName: string, managerEmail: string }) {
     try {
         // 1. Check if Employee exists
-        const employee = await db.employee.findUnique({
+        let employee = await db.employee.findUnique({
             where: { id: empId }
         });
 
         if (!employee) {
             return { error: 'EMPLOYEE_NOT_FOUND' }; // Signal to UI to show registration form
+        }
+
+        if (managerDetails) {
+            employee = await db.employee.update({
+                where: { id: empId },
+                data: {
+                    managerName: managerDetails.managerName,
+                    managerEmail: managerDetails.managerEmail
+                }
+            });
         }
 
         // 2. Check if already nominated/enrolled
@@ -870,7 +880,8 @@ export async function getBatchBasicDetails(batchId: string) {
             programName: batch.program?.name || batch.trainingSession?.programName,
             startDate: batch.trainingSession?.startDate,
             endDate: batch.trainingSession?.endDate,
-            location: batch.trainingSession?.location || batch.proposedLocation
+            location: batch.trainingSession?.location || batch.proposedLocation,
+            requireManagerApproval: batch.trainingSession?.requireManagerApproval || false
         };
     } catch (error) {
         console.error('Get Batch Basic Details Error:', error);
@@ -1138,7 +1149,11 @@ export async function getEmployeeForConfirmation(empId: string) {
                 name: true,
                 designation: true,
                 sectionName: true,
-                location: true
+                location: true,
+                managerName: true,
+                managerEmail: true,
+                managerId: true,
+                managerMobile: true,
             }
         });
 

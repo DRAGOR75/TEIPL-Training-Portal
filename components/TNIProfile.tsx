@@ -239,31 +239,6 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
-                        <input
-                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
-                            placeholder="Mobile"
-                            value={formData.mobile}
-                            onChange={e => setFormData({ ...formData, mobile: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
-                        <SearchableSelect
-                            options={[
-                                { label: 'Male', value: 'MALE' },
-                                { label: 'Female', value: 'FEMALE' },
-                                { label: 'Other', value: 'OTHER' }
-                            ]}
-                            value={formData.gender}
-                            onChange={(val) => setFormData({ ...formData, gender: val })}
-                            placeholder="Select Gender"
-                            className="w-full text-base sm:text-xs"
-                        />
-                    </div>
-
-                    <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
                         {designationMode === 'select' ? (
                             <SearchableSelect
@@ -304,6 +279,32 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         )}
                     </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                        <input
+                            className="w-full text-base sm:text-xs px-4 py-3.5 sm:py-3 border border-slate-200 bg-slate-50 rounded-xl focus:bg-white focus:ring-2 focus:ring-blue-500 outline-none transition font-medium text-slate-800"
+                            placeholder="Mobile"
+                            value={formData.mobile}
+                            onChange={e => setFormData({ ...formData, mobile: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
+                        <SearchableSelect
+                            options={[
+                                { label: 'Male', value: 'MALE' },
+                                { label: 'Female', value: 'FEMALE' },
+                                { label: 'Other', value: 'OTHER' }
+                            ]}
+                            value={formData.gender}
+                            onChange={(val) => setFormData({ ...formData, gender: val })}
+                            placeholder="Select Gender"
+                            className="w-full text-base sm:text-xs"
+                        />
+                    </div>
+
 
                     <div className="space-y-1">
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
@@ -678,14 +679,38 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
-                        {/* Section / Department */}
+                        {/* Mobile Number */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineBuildingOffice2 className="text-emerald-600" size={18} />
+                            <div className="p-2 bg-blue-50 text-emerald-600 rounded-xl shrink-0">
+                                <HiOutlinePhone className="text-amber-600" size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Section</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mobile Number</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.mobile || 'Not Set'}>{employee.mobile || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Gender */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers className="text-cyan-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}>
+                                    {employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Organization */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Organization</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.organization || 'Not Set'}>{employee.organization || 'Not Set'}</span>
                             </div>
                         </div>
 
@@ -700,16 +725,28 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
-                        {/* Mobile Number */}
+                        {/* Department */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-emerald-600 rounded-xl shrink-0">
-                                <HiOutlinePhone className="text-amber-600" size={18} />
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 size={18} />
                             </div>
                             <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Mobile Number</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.mobile || 'Not Set'}>{employee.mobile || 'Not Set'}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.department || 'Not Set'}>{employee.department || 'Not Set'}</span>
                             </div>
                         </div>
+
+                        {/* Section / Department */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineBuildingOffice2 className="text-emerald-600" size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Section</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.sectionName || 'Not Set'}>{employee.sectionName || 'Not Set'}</span>
+                            </div>
+                        </div>
+
 
                         {/* Date of Joining */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
@@ -748,6 +785,18 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className={`p-2 rounded-xl shrink-0 ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
+                                <HiOutlineCheck size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employment Status</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.status || 'Active'}>
+                                    {employee.status || 'Active'}
+                                </span>
+                            </div>
+                        </div>
+
                         {/* Grade / Level */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
@@ -756,6 +805,17 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             <div className="min-w-0">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Grade / Level</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.grade || 'Not Set'}>{employee.grade || 'Not Set'}</span>
+                            </div>
+                        </div>
+
+                        {/* Emp Group M/NM/W */}
+                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
+                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
+                                <HiOutlineUsers size={18} />
+                            </div>
+                            <div className="min-w-0">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Emp Group M/NM/W</span>
+                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.employeeGrouupMNmw || 'Not Set'}>{employee.employeeGrouupMNmw || 'Not Set'}</span>
                             </div>
                         </div>
 
@@ -770,30 +830,6 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className={`p-2 rounded-xl shrink-0 ${employee.status?.toLowerCase() === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}>
-                                <HiOutlineCheck size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Employment Status</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.status || 'Active'}>
-                                    {employee.status || 'Active'}
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* Gender */}
-                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineUsers className="text-cyan-600" size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Gender</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}>
-                                    {employee.gender ? employee.gender.charAt(0) + employee.gender.slice(1).toLowerCase() : 'Not Set'}
-                                </span>
-                            </div>
-                        </div>
 
                         {/* Region */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
@@ -803,17 +839,6 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             <div className="min-w-0">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Location</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.region || 'Not Set'}>{employee.region || 'Not Set'}</span>
-                            </div>
-                        </div>
-
-                        {/* Organization */}
-                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineBuildingOffice2 size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Organization</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.organization || 'Not Set'}>{employee.organization || 'Not Set'}</span>
                             </div>
                         </div>
 
@@ -828,17 +853,6 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             </div>
                         </div>
 
-                        {/* Department */}
-                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineBuildingOffice2 size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Department</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.department || 'Not Set'}>{employee.department || 'Not Set'}</span>
-                            </div>
-                        </div>
-
                         {/* Aadhar Number */}
                         <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
                             <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
@@ -847,17 +861,6 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                             <div className="min-w-0">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Aadhar Number</span>
                                 <span className="text-xs font-bold text-slate-800 block truncate" title={employee.aadharNumber || 'Not Set'}>{employee.aadharNumber || 'Not Set'}</span>
-                            </div>
-                        </div>
-
-                        {/* Emp Group M/NM/W */}
-                        <div className="flex items-center gap-3.5 bg-slate-50/30 p-3.5 rounded-2xl border border-slate-100/80 hover:bg-slate-50 hover:border-slate-200 transition duration-200">
-                            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl shrink-0">
-                                <HiOutlineUsers size={18} />
-                            </div>
-                            <div className="min-w-0">
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Emp Group M/NM/W</span>
-                                <span className="text-xs font-bold text-slate-800 block truncate" title={employee.employeeGrouupMNmw || 'Not Set'}>{employee.employeeGrouupMNmw || 'Not Set'}</span>
                             </div>
                         </div>
 

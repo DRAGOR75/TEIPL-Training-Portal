@@ -28,7 +28,7 @@ export default function JoinPage() {
     const [result, setResult] = useState<{ employeeName?: string, programName?: string, altProgramName?: string, error?: string } | null>(null);
     const [isRegistering, setIsRegistering] = useState(false); // New state for JIT mode
     const [isConfirming, setIsConfirming] = useState(false); // Confirmation state
-    const [employeeDetails, setEmployeeDetails] = useState<{ name: string, designation: string, sectionName: string, location: string, empId: string } | null>(null);
+    const [employeeDetails, setEmployeeDetails] = useState<{ name: string, designation: string, sectionName: string, location: string, empId: string, managerName: string, managerEmail: string, managerId: string, managerMobile: string } | null>(null);
 
 
     // Options State
@@ -37,7 +37,7 @@ export default function JoinPage() {
     const [locationOptions, setLocationOptions] = useState<{ label: string, value: string }[]>([]);
 
     // Batch Details State
-    const [batchDetails, setBatchDetails] = useState<{ programName?: string, altProgramName?: string, startDate?: Date, endDate?: Date, location?: string } | null>(null);
+    const [batchDetails, setBatchDetails] = useState<{ programName?: string, altProgramName?: string, startDate?: Date, endDate?: Date, location?: string, requireManagerApproval?: boolean } | null>(null);
 
     useEffect(() => {
         async function fetchBatchDetails() {
@@ -48,7 +48,8 @@ export default function JoinPage() {
                         programName: res.programName,
                         startDate: res.startDate,
                         endDate: res.endDate,
-                        location: res.location ?? undefined
+                        location: res.location ?? undefined,
+                        requireManagerApproval: res.requireManagerApproval
                     });
                 }
             }
@@ -113,7 +114,11 @@ export default function JoinPage() {
                 designation: res.employee.designation || 'N/A',
                 sectionName: res.employee.sectionName || 'N/A',
                 location: res.employee.location || 'N/A',
-                empId: res.employee.id || 'N/A'
+                empId: res.employee.id || 'N/A',
+                managerName: res.employee.managerName || '',
+                managerEmail: res.employee.managerEmail || '',
+                managerId: res.employee.managerId || '',
+                managerMobile: res.employee.managerMobile || '',
             });
             setStatus('idle');
             setIsConfirming(true);
@@ -127,10 +132,25 @@ export default function JoinPage() {
     }
 
     async function handleConfirmJoin() {
+        if (batchDetails?.requireManagerApproval && !employeeDetails?.managerEmail) {
+            setStatus('error');
+            setResult({ error: 'Reporting Manager email is required. Please fill it in.' });
+            return;
+        }
+
         setStatus('loading');
         setResult(null);
 
-        const res = await joinBatch(batchId, empId);
+        const joinArgs = batchDetails?.requireManagerApproval
+            ? { 
+                managerName: employeeDetails?.managerName || '', 
+                managerEmail: employeeDetails?.managerEmail || '',
+                managerId: employeeDetails?.managerId || '',
+                managerMobile: employeeDetails?.managerMobile || ''
+              }
+            : undefined;
+
+        const res = await joinBatch(batchId, empId, joinArgs);
 
         if (res.success) {
             setStatus('success');
@@ -226,6 +246,60 @@ export default function JoinPage() {
                                 <p className="font-medium text-slate-700">{employeeDetails.location}</p>
                             </div>
                         </div>
+
+                        {batchDetails?.requireManagerApproval && (
+                            <>
+                                <hr className="border-slate-200 my-2" />
+
+                                <div className="space-y-3">
+                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest text-center">Reporting Manager</p>
+
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-600 uppercase">Manager Name</label>
+                                        <input
+                                            required
+                                            placeholder="Manager's Full Name"
+                                            value={employeeDetails.managerName}
+                                            onChange={e => setEmployeeDetails({ ...employeeDetails, managerName: e.target.value })}
+                                            className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-600 uppercase">Manager Email <span className='text-red-500'>*</span></label>
+                                        <input
+                                            required
+                                            type="email"
+                                            placeholder="manager@thriveni.com"
+                                            value={employeeDetails.managerEmail}
+                                            onChange={e => setEmployeeDetails({ ...employeeDetails, managerEmail: e.target.value })}
+                                            className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-600 uppercase">Manager ID <span className='text-red-500'>*</span></label>
+                                        <input
+                                            required
+                                            type="text"
+                                            placeholder="Manager's ID"
+                                            value={employeeDetails.managerId}
+                                            onChange={e => setEmployeeDetails({ ...employeeDetails, managerId: e.target.value })}
+                                            className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium text-sm"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-slate-600 uppercase">Manager Mobile <span className='text-red-500'>*</span></label>
+                                        <input
+                                            required
+                                            type="text"
+                                            placeholder="Manager's Mobile Number"
+                                            value={employeeDetails.managerMobile}
+                                            onChange={e => setEmployeeDetails({ ...employeeDetails, managerMobile: e.target.value })}
+                                            className="w-full p-3 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:font-normal font-medium text-sm"
+                                        />
+                                    </div>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {status === 'error' && (
