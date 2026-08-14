@@ -91,7 +91,7 @@ export default async function AdminEmployeeTNIPage({ searchParams }: { searchPar
                                 trainingHistory={[...(currentEmployee?.trainingHistory || []), ...(currentEmployee?.systemTrainingHistory || [])].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime())}
                                 managerEmail={currentEmployee?.managerEmail || undefined}
                                 managerName={currentEmployee?.managerName || undefined}
-                                isTrainerView={true}
+                                isAdminView={true}
                                 sections={sections}
                             />
                         ) : (

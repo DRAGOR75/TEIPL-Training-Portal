@@ -629,9 +629,16 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                             <SearchableSelect
                                 name="departmentGroup"
                                 options={[
-                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
+                                    { label: 'AC Electrical', value: 'AC Electrical' },
+                                    { label: 'HEMM', value: 'HEMM' },
+                                    { label: 'HEMM LS', value: 'HEMM LS' },
+                                    { label: 'HEMM Auto Elect', value: 'HEMM Auto Elect' },
+                                    { label: 'Stores and Procurement', value: 'Stores and Procurement' },
                                     { label: 'Operators', value: 'Operators' },
-                                    { label: 'Others', value: 'Others' }
+                                    { label: 'HR/Admin/Finance', value: 'HR/Admin/Finance' },
+                                    { label: 'Others and undefined', value: 'Others and undefined' },
+                                    { label: 'C&S', value: 'C&S' },
+                                    { label: 'Mining', value: 'Mining' }
                                 ]}
                                 value={selectedFormDeptGroup}
                                 onChange={setSelectedFormDeptGroup}

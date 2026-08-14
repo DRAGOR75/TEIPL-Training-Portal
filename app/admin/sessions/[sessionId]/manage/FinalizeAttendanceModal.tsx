@@ -342,12 +342,16 @@ export default function FinalizeAttendanceModal({
 
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500">M/NM/W</label>
-                            <input
-                                type="text"
+                            <select
                                 value={formData.employeeGrouupMNmw}
                                 onChange={(e) => setFormData({...formData, employeeGrouupMNmw: e.target.value})}
                                 className={`w-full text-sm p-2.5 bg-slate-50 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none ${errors.employeeGrouupMNmw ? 'border-red-400 bg-red-50' : 'border-slate-200'}`}
-                            />
+                            >
+                                <option value="">Select M/NM/W...</option>
+                                <option value="Manager">Manager</option>
+                                <option value="Non Manager">Non Manager</option>
+                                <option value="Workman">Workman</option>
+                            </select>
                         </div>
 
                         <div className="space-y-1">

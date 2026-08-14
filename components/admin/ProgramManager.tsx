@@ -252,18 +252,35 @@ export default function ProgramManager({ programs, allSections }: { programs: Pr
                         </div>
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Applicable Sections (Ctrl+Click)</label>
-                        <select
-                            name="sectionIds"
-                            multiple
-                            defaultValue={program?.sections.map(s => s.id) || []}
-                            className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 text-slate-700 h-[88px]"
-                        >
-                            {allSections.map(sec => (
-                                <option key={sec.id} value={sec.id} className="py-1">{sec.name}</option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Applicable Sections (Ctrl+Click)</label>
+                            <select
+                                name="sectionIds"
+                                multiple
+                                defaultValue={program?.sections.map(s => s.id) || []}
+                                className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 text-slate-700 h-[88px]"
+                            >
+                                {allSections.map(sec => (
+                                    <option key={sec.id} value={sec.id} className="py-1">{sec.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Target Grades (Ctrl+Click)</label>
+                            <select
+                                name="targetGrades"
+                                multiple
+                                defaultValue={program?.targetGrades || []}
+                                className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-blue-500 text-slate-700 h-[88px]"
+                            >
+                                <option value="EXECUTIVE" className="py-1">Executive</option>
+                                <option value="WORKMAN" className="py-1">Workman</option>
+                                <option value="APPRENTICE" className="py-1">Apprentice</option>
+                                <option value="TRAINEE" className="py-1">Trainee</option>
+                                <option value="LOCAL" className="py-1">Local</option>
+                            </select>
+                        </div>
                     </div>
                     </div>
 

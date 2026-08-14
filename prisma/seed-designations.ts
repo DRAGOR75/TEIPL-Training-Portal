@@ -46,6 +46,7 @@ const designationData = [
     { name: "Apprentice Electrician", grade: "Workman" },
     { name: "Specialist Electrician", grade: "Executive" },
     { name: "Expert Electrician", grade: "Executive" },
+    { name: "Senior Management Trainee", grade: "Executive" },
 
     { name: "Specialist Technician", grade: "Executive" },
     { name: "Expert Technician", grade: "Executive" },

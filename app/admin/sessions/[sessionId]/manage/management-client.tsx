@@ -298,7 +298,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                             <th className="px-4">SN</th>
                                             <th className="p-4">Employee</th>
                                             <th className="p-4">Manager Approval</th>
-                                            <th className="p-4">Location</th>
+                                            <th className="p-4">Employee Location</th>
                                             <th className="p-4">Designation</th>
                                             <th className="p-4">Section</th>
                                             <th className="p-4">Status</th>
@@ -426,7 +426,7 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                                             <th className="p-4 w-10">Select</th>
                                             <th className="p-4">Employee</th>
                                             <th className="p-4">TNI Status</th>
-                                            <th className="p-4">Location</th>
+                                            <th className="p-4">Employee Location</th>
                                             <th className="p-4">Designation</th>
                                             <th className="p-4">Section</th>
                                             <th className="p-4 text-right">Justification</th>
