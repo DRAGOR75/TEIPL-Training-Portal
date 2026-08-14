@@ -21,6 +21,7 @@ type TNIDashboardClientProps = {
     managerName?: string;
     isAddTNIDisabled?: boolean;
     isTrainerView?: boolean;
+    isAdminView?: boolean;
     sections?: { id: string; name: string }[];
 };
 
@@ -33,6 +34,7 @@ export default function TNIDashboardClient({
     managerName,
     isAddTNIDisabled = false,
     isTrainerView = false,
+    isAdminView = false,
     sections = []
 }: TNIDashboardClientProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
@@ -363,7 +365,7 @@ export default function TNIDashboardClient({
                                     });
                                 }} className="space-y-4">
                                     <input type="hidden" name="empId" value={empId} />
-                                    <input type="hidden" name="redirectUrl" value={isTrainerView ? `/trainer/employee-tni?empId=${empId}` : `/tni/${empId}`} />
+                                    <input type="hidden" name="redirectUrl" value={isAdminView ? `/admin/employee-tni?empId=${empId}` : isTrainerView ? `/trainer/employee-tni?empId=${empId}` : `/tni/${empId}`} />
 
                                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                         {/* Section Filter */}
