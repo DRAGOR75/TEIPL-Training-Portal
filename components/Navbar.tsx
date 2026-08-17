@@ -9,7 +9,7 @@ import {
     HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList,
     HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers,
     HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown,
-    HiOutlineCalendarDays
+    HiOutlineCalendarDays, HiOutlineQuestionMarkCircle
 } from 'react-icons/hi2';
 import SignOutButton from './auth/SignOutButton';
 import { Session } from 'next-auth';
@@ -77,6 +77,15 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                                 <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
                                 <NavLink href="/calendar" icon={<HiOutlineCalendarDays size={18} />} text="Calendar" />
                                 <NavLink href="/trainer/reports" icon={<HiOutlineChartBar size={18} />} text="Reports" />
+                                <a 
+                                    href="https://drive.google.com/file/d/1zki4mlepeFs7j_KILirR64kNcWkwuMeO/view?usp=drive_link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-2 text-slate-600 hover:text-blue-700 font-medium text-sm transition-colors py-2 px-3 rounded-lg hover:bg-white/50"
+                                >
+                                    <HiOutlineQuestionMarkCircle size={18} />
+                                    <span>Help</span>
+                                </a>
                             </>
                         )}
 
@@ -113,6 +122,15 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                                 <MobileNavLink href="/trainer" onClick={() => setIsOpen(false)} text="Trainer Hub" />
                                 <MobileNavLink href="/calendar" onClick={() => setIsOpen(false)} text="Calendar" />
                                 <MobileNavLink href="/trainer/reports" onClick={() => setIsOpen(false)} text="Reports" />
+                                <a
+                                    href="https://drive.google.com/file/d/1zki4mlepeFs7j_KILirR64kNcWkwuMeO/view?usp=drive_link"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => setIsOpen(false)}
+                                    className="block text-lg font-semibold text-slate-800 py-3 px-2 border-b border-slate-50 hover:bg-slate-50 hover:pl-4 transition-all"
+                                >
+                                    Help Book
+                                </a>
                             </>
                         )}
 
