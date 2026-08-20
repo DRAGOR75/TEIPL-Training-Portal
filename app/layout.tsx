@@ -7,7 +7,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 const inter = Inter({
     variable: "--font-inter",
     subsets: ["latin"],
-    weight: ["400", "500", "600", "700", "900"],
+    display: "swap",
 });
 
 const geistMono = Geist_Mono({

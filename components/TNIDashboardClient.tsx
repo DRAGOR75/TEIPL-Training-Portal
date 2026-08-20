@@ -69,7 +69,16 @@ export default function TNIDashboardClient({
     // Active nominations (not completed)
     const activeNominations = nominations
         .filter(nom => nom.status !== 'Completed')
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        .sort((a, b) => {
+            const isScheduled = (nom: any) => nom.status === 'Batched' && nom.managerApprovalStatus === 'Approved';
+            const aScheduled = isScheduled(a);
+            const bScheduled = isScheduled(b);
+            
+            if (aScheduled && !bScheduled) return -1;
+            if (!aScheduled && bScheduled) return 1;
+            
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        });
 
     // Helper status styling (clean borders, no emojis)
     const getStatusText = (nom: any) => {
