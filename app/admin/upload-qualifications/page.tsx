@@ -26,6 +26,7 @@ export default function UploadQualificationsPage() {
         Papa.parse(file, {
             header: true,
             skipEmptyLines: true,
+            transformHeader: (header) => header.trim(),
             complete: (results) => {
                 const parsedRecords = results.data as any[];
                 setRecords(parsedRecords);

@@ -1,12 +1,15 @@
 const Papa = require('papaparse');
-const fs = require('fs');
-const text = `Machine Model	Fault Name	Check Description	Justification	Action 	Symptoms	Reference	Sequence
-Alternator	Voltage oscillations	Incorrect AVR setting	Unstable AVR regulation	Set AVR stability potentiometer		A-6	1
-Alternator	Voltage oscillations	Thyristor load above limit	Non-linear load causes fluctuation	Reduce thyristor load		A-6	2`;
 
-const res = Papa.parse(text, {
+const csvData = `Emp ID	Emp Name	Subject name	Test Date	Max Marks	Marks Attained	Reference / Remarks	Key Word	Facilitator	Qualification Type
+10009413	Vinothkumar S	Review Test App Elec  8 Mar 21	21-12-2020	50	23.50	Review Test App	Electrical	Gaurav	Online Test`;
+
+Papa.parse(csvData, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (h) => h.trim().replace(/^"|"$/g, '')
+    complete: function(results) {
+        console.log("Headers:");
+        console.log(results.meta.fields);
+        console.log("First Row:");
+        console.log(results.data[0]);
+    }
 });
-console.log(JSON.stringify(res, null, 2));
