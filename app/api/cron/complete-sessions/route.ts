@@ -25,7 +25,9 @@ export async function GET(request: Request) {
                     }
                 },
                 nominations: {
-                    some: {} // Only complete if there is at least 1 participant
+                    some: {
+                        status: 'Completed'
+                    } // Only complete if at least 1 participant has attendance marked as Completed
                 }
             },
             select: { id: true, name: true }

@@ -81,6 +81,30 @@ export async function bulkUploadQualifications(data: any[]) {
                 matchedEmployee = employeeMap.get(`name:${String(rawName).toLowerCase()}`);
             }
 
+            const enrollmentDate = parseFlexibleDate(item['Date Of Enrollment'] || item['enrollment Date'] || item.enrollmentDate);
+            const testDate = parseFlexibleDate(item['Date of Completion'] || item['Test Date'] || item.testDate);
+
+            let derivedMonth = null;
+            let derivedYear = null;
+            
+            const dateToUse = testDate || enrollmentDate;
+            if (dateToUse) {
+                const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                derivedMonth = monthNames[dateToUse.getMonth()];
+                
+                const fullYear = dateToUse.getFullYear();
+                const currentMonth = dateToUse.getMonth(); // 0-11
+                let startYear, endYear;
+                if (currentMonth < 3) {
+                    startYear = fullYear - 1;
+                    endYear = fullYear;
+                } else {
+                    startYear = fullYear;
+                    endYear = fullYear + 1;
+                }
+                derivedYear = `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
+            }
+
             return {
                 // To avoid foreign key constraint errors, we ONLY set empID if the employee exists in the database.
                 empID: matchedEmployee ? matchedEmployee.id : null,
@@ -88,8 +112,8 @@ export async function bulkUploadQualifications(data: any[]) {
                 altSubjectName: parseSafeString(item['Alt Subject Name'] || item.altSubjectName),
                 qualificationType: parseSafeString(item['Qualification Type'] || item.qualificationType),
                 facilitator: parseSafeString(item['Facilitator'] || item.facilitator || item['Examiner Name']),
-                enrollmentDate: parseFlexibleDate(item['Date Of Enrollment'] || item['enrollment Date'] || item.enrollmentDate),
-                testDate: parseFlexibleDate(item['Date of Completion'] || item['Test Date'] || item.testDate),
+                enrollmentDate,
+                testDate,
                 duration: parseSafeString(item['Duration'] || item['LMS Program Hours Spent'] || item.duration),
                 maxMarks: parseSafeFloat(item['Max Marks'] ?? item.maxMarks),
                 obtainedMarks: parseSafeFloat(item['Marks Attained'] || item['Marks attaind/ Grade'] || item.obtainedMarks),
@@ -102,8 +126,8 @@ export async function bulkUploadQualifications(data: any[]) {
                 empGroup: parseSafeString(item['Emp Group'] || item.empGroup || (matchedEmployee ? matchedEmployee.employeeGrouupMNmw : null)),
                 gender: parseSafeString(item['Gender'] || item.gender || (matchedEmployee ? matchedEmployee.gender : null)),
                 shortProgReference: parseSafeString(item['Short Prog Reference'] || item['Key Word'] || item.shortProgReference),
-                month: parseSafeString(item['MTH'] || item.month),
-                year: parseSafeString(item['Year'] || item.year),
+                month: parseSafeString(item['MTH'] || item.month) || derivedMonth,
+                year: parseSafeString(item['Year'] || item.year) || derivedYear,
             };
         });
 
@@ -129,5 +153,16 @@ export async function deleteQualification(id: number) {
     } catch (error: any) {
         console.error('Error deleting qualification:', error);
         return { success: false, error: error.message || 'Failed to delete' };
+    }
+}
+
+export async function clearQualifications() {
+    try {
+        const result = await db.qualifications.deleteMany({});
+        revalidatePath('/admin/tests-qualifications');
+        return { success: true, count: result.count };
+    } catch (error: any) {
+        console.error('Error clearing qualifications:', error);
+        return { success: false, error: error.message || 'Failed to clear database' };
     }
 }
