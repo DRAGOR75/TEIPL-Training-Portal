@@ -29,10 +29,11 @@ export default async function TestsPage() {
   // Basic fallback to fetch program names if we need it in the client
   // Since qualifications only stores programId, not a relation
   const qualificationsWithProgramName = qualifications.map(q => {
-    const program = programs.find(p => p.id === q.programId);
+    const program = programs.find(p => p.id === q.subjectId);
     return {
       ...q,
-      programName: program?.name || "Unknown Program"
+      programId: q.subjectId,
+      programName: program?.name || q.subjectName || "Unknown Program"
     };
   });
 

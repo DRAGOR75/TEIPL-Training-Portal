@@ -84,7 +84,7 @@ export async function bulkUploadQualifications(data: any[]) {
             return {
                 // To avoid foreign key constraint errors, we ONLY set empID if the employee exists in the database.
                 empID: matchedEmployee ? matchedEmployee.id : null,
-                subjectId: parseSafeString(item['Subject ID'] || item.subjectId || item.subject_id),
+                subjectId: parseSafeString(item['Subject ID'] || item.subjectId || item.subject_id || item.programId),
                 altSubjectName: parseSafeString(item['Alt Subject Name'] || item.altSubjectName),
                 qualificationType: parseSafeString(item['Qualification Type'] || item.qualificationType),
                 facilitator: parseSafeString(item['Facilitator'] || item.facilitator || item['Examiner Name']),
