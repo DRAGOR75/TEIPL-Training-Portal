@@ -45,7 +45,7 @@ const parseSafeBoolean = (val: any) => {
     return false;
 };
 
-export async function processQualificationsUpload(data: any[]) {
+export async function bulkUploadQualifications(data: any[]) {
     try {
         // Extract unique IDs and Names to fetch from master Employee table
         const providedIds = Array.from(new Set(data.map(item => item['Emp ID'] || item.empID || item.EmpId || item.empId).filter(Boolean)));
@@ -116,5 +116,18 @@ export async function processQualificationsUpload(data: any[]) {
     } catch (error: any) {
         console.error('Error in bulk upload:', error);
         return { success: false, error: error.message || 'Failed to bulk upload' };
+    }
+}
+
+export async function deleteQualification(id: number) {
+    try {
+        await db.qualifications.delete({
+            where: { id }
+        });
+        revalidatePath('/admin/tests-qualifications');
+        return { success: true };
+    } catch (error: any) {
+        console.error('Error deleting qualification:', error);
+        return { success: false, error: error.message || 'Failed to delete' };
     }
 }
