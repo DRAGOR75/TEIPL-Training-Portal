@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
 import { HiCloudArrowUp, HiOutlinePlay, HiCheckCircle, HiExclamationCircle, HiOutlineTrash, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
-import { bulkUploadQualifications } from '@/app/actions/qualifications';
+import { bulkUploadQualifications, clearQualifications } from '@/app/actions/qualifications';
 import Link from 'next/link';
 
 export default function UploadQualificationsPage() {
@@ -13,6 +13,7 @@ export default function UploadQualificationsPage() {
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
     const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
+    const [isClearingDb, setIsClearingDb] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -96,6 +97,28 @@ export default function UploadQualificationsPage() {
         }
     };
 
+    const handleClearDatabase = async () => {
+        if (!confirm('CRITICAL WARNING: This will permanently delete ALL stored records in the Qualifications table. Existing employee profiles will remain intact, but their test and qualification records will be completely wiped clean.\n\nAre you absolutely sure you want to do this?')) {
+            return;
+        }
+
+        setIsClearingDb(true);
+        try {
+            const result = await clearQualifications();
+            if (result.success) {
+                alert(`Successfully cleared database ledger. wiped ${result.count || 0} records!`);
+                setRecords([]);
+                setStatus('idle');
+            } else {
+                alert(`Error clearing database: ${result.error}`);
+            }
+        } catch (err: any) {
+            alert(`Error: ${err.message}`);
+        } finally {
+            setIsClearingDb(false);
+        }
+    };
+
     const downloadSample = () => {
         const headers = [
             "Emp ID", "Emp Name", "Emp Location", "Subject name", 
@@ -136,6 +159,13 @@ export default function UploadQualificationsPage() {
                         <p className="text-slate-500 mt-2 font-medium">Upload a unified CSV to batch import LMS records and Test marks.</p>
                     </div>
                     <div className="flex gap-3">
+                        <button
+                            onClick={handleClearDatabase}
+                            disabled={isClearingDb || isProcessing}
+                            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 px-4 py-2 rounded-lg transition-colors text-sm font-semibold disabled:opacity-50"
+                        >
+                            <HiOutlineTrash className="w-5 h-5" /> {isClearingDb ? 'Clearing DB...' : 'Wipe DB Ledger'}
+                        </button>
                         <button
                             onClick={downloadSample}
                             className="flex items-center gap-2 text-purple-600 hover:text-purple-700 bg-purple-50 border border-purple-200 hover:bg-purple-100 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
