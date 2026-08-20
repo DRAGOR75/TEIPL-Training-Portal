@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Papa from 'papaparse';
 import { HiCloudArrowUp, HiOutlinePlay, HiCheckCircle, HiExclamationCircle, HiOutlineTrash, HiOutlineDocumentArrowDown } from 'react-icons/hi2';
-import { processQualificationsUpload } from '@/app/actions/qualifications';
+import { bulkUploadQualifications } from '@/app/actions/qualifications';
 import Link from 'next/link';
 
 export default function UploadQualificationsPage() {
@@ -56,7 +56,7 @@ export default function UploadQualificationsPage() {
                 const chunk = records.slice(i, i + CHUNK_SIZE);
                 const currentBatchNum = Math.floor(i / CHUNK_SIZE) + 1;
 
-                const result = await processQualificationsUpload(chunk);
+                const result = await bulkUploadQualifications(chunk);
 
                 if (result.success) {
                     successTotal += result.count || 0;
