@@ -36,17 +36,15 @@ model Employee {
   aadharNumber         String? @map("aadhar_number")
   employeeGrouupMNmw   String? @map("employee_grouup_m_nm_w")
   onRollContract       String? @map("on_roll_contract")
- 
-  
 
   // Relations
-  nominations       Nomination[] // Links to their training requests
-  cohortMemberships CohortMember[] // Cohort journeys
-  cohortFeedbacks   CohortFeedback[] // Cohort-level feedback
-  trainingHistory   TrainingHistory[] // Unified ledger for all completed training (legacy + modern)
+  nominations           Nomination[] // Links to their training requests
+  cohortMemberships     CohortMember[] // Cohort journeys
+  cohortFeedbacks       CohortFeedback[] // Cohort-level feedback
+  trainingHistory       TrainingHistory[] // Unified ledger for all completed training (legacy + modern)
   systemTrainingHistory SystemTrainingHistory[]
-  attendanceRecords AttendanceRecord[]
-  qualifications    Qualifications[] //Qualifications for the employee
+  attendanceRecords     AttendanceRecord[]
+  qualifications        Qualifications[] //Qualifications for the employee
 
   @@map("employees")
 }
@@ -173,20 +171,20 @@ model NominationBatch {
 }
 
 model TrainingSession {
-  id                        String    @id @default(uuid())
-  programName               String    @map("program_name")
-  altProgramName            String?   @map("alt_program_name")
-  trainerName               String?   @map("trainer_name")
-  coordinatorName           String?   @map("coordinator_name")
-  startDate                 DateTime  @map("start_date")
-  endDate                   DateTime  @map("end_date")
-  startTime                 String?   @map("start_time") // e.g. "10:00 am"
-  endTime                   String?   @map("end_time") // e.g. "5:00 pm"
-  trainingDays              Float?    @map("training_days")
-  trainingHours             Float?    @map("training_hours")
-  location                 String?
-  region                   String?
-  trainingLocationAddress   String?   @map("training_location_address")
+  id                      String   @id @default(uuid())
+  programName             String   @map("program_name")
+  altProgramName          String?  @map("alt_program_name")
+  trainerName             String?  @map("trainer_name")
+  coordinatorName         String?  @map("coordinator_name")
+  startDate               DateTime @map("start_date")
+  endDate                 DateTime @map("end_date")
+  startTime               String?  @map("start_time") // e.g. "10:00 am"
+  endTime                 String?  @map("end_time") // e.g. "5:00 pm"
+  trainingDays            Float?   @map("training_days")
+  trainingHours           Float?   @map("training_hours")
+  location                String?
+  region                  String?
+  trainingLocationAddress String?  @map("training_location_address")
 
   topics                    String?   @db.Text
   feedbackCreationDate      DateTime? @map("feedback_creation_date")
@@ -197,7 +195,6 @@ model TrainingSession {
   requireManagerApproval    Boolean   @default(false) @map("require_manager_approval")
   allowWalkIns              Boolean   @default(false) @map("allow_walk_ins")
 
-
   // NEW fields for Assessment tracking
   assessmentDate     DateTime? @map("assessment_date")
   feedbackEmailsSent Boolean   @default(false) @map("feedback_emails_sent")
@@ -205,7 +202,7 @@ model TrainingSession {
 
   // Cancellation fields
   status             String  @default("Forming") // Forming, Scheduled, Completed, Cancelled
-  cancellationReason String? @db.Text @map("cancellation_reason")
+  cancellationReason String? @map("cancellation_reason") @db.Text
 
   classDates        DateTime[]         @map("class_dates") // Track specific days of training
   attendanceRecords AttendanceRecord[]
@@ -706,43 +703,43 @@ model EmailLog {
 
 // --- TRAINING HISTORY LEDGER (Legacy + Completed Modern Sessions) ---
 model TrainingHistory {
-  id           String   @id @default(uuid())
-  empId        String   @map("emp_id")
-  employeeName String   @map("employee_name")
-  programName  String   @map("program_name")
-  startDate    DateTime @map("start_date")
-  endDate      DateTime @map("end_date")
-  trainingDays Float?     @map("training_days")
-  trainingHours Float?  @map("training_hours")
-  region       String?
+  id            String   @id @default(uuid())
+  empId         String   @map("emp_id")
+  employeeName  String   @map("employee_name")
+  programName   String   @map("program_name")
+  startDate     DateTime @map("start_date")
+  endDate       DateTime @map("end_date")
+  trainingDays  Float?   @map("training_days")
+  trainingHours Float?   @map("training_hours")
+  region        String?
 
-  organization  String? 
-  onRollContract String? @map("onroll_contract")
-  department String?
-  departmentGroup String? @map("department_group")
-  employeeGroup String? @map("employee_group")
-  employeeGrouupMNmw String? @map("employee_grouup_m_nm_w")
-  aadharNumber     String? @map("aadhar_number")
-  designation    String? 
-  section        String? 
-  month          String?
-  year           String?
-  gender         String?
-  attendancePercentage     Float?  @map("attendance_percentage")
+  organization         String?
+  onRollContract       String? @map("onroll_contract")
+  department           String?
+  departmentGroup      String? @map("department_group")
+  employeeGroup        String? @map("employee_group")
+  employeeGrouupMNmw   String? @map("employee_grouup_m_nm_w")
+  aadharNumber         String? @map("aadhar_number")
+  designation          String?
+  section              String?
+  month                String?
+  year                 String?
+  gender               String?
+  attendancePercentage Float?  @map("attendance_percentage")
 
-  location     String?
-  progCategory String?  @map("prog_category")
+  location         String?
+  progCategory     String? @map("prog_category")
   employeeLocation String? @map("employee_location")
-  programRegion  String? @map("program_region")
-  programAddress String? @map("program_address")
+  programRegion    String? @map("program_region")
+  programAddress   String? @map("program_address")
 
   // Fields for Modern System Sync
-  source        String  @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)
-  sessionId     String? @map("session_id")
-  trainerName   String? @map("trainer_name")
+  source          String  @default("LEGACY") // "LEGACY" (CSV) or "SYSTEM" (Completed Sessions)
+  sessionId       String? @map("session_id")
+  trainerName     String? @map("trainer_name")
   coordinatorName String? @map("coordinator_name")
-  averageRating Float?  @map("average_rating")
-  status        String  @default("Completed")
+  averageRating   Float?  @map("average_rating")
+  status          String  @default("Completed")
   sessionCategory String? @map("session_category")
   altProgramName  String? @map("alt_program_name")
   subjectCode     String? @map("subject_code")
@@ -758,42 +755,42 @@ model TrainingHistory {
 
 // --- SYSTEM TRAINING HISTORY (Modern Sessions) ---
 model SystemTrainingHistory {
-  id           String   @id @default(uuid())
-  empId        String   @map("emp_id")
-  employeeName String   @map("employee_name")
-  programName  String   @map("program_name")
-  startDate    DateTime @map("start_date")
-  endDate      DateTime @map("end_date")
-  trainingDays Float?     @map("training_days")
-  trainingHours Float?  @map("training_hours")
-  employeeRegion String? @map("employee_region")
-  employeeLocation String? @map("employee_location")
+  id               String   @id @default(uuid())
+  empId            String   @map("emp_id")
+  employeeName     String   @map("employee_name")
+  programName      String   @map("program_name")
+  startDate        DateTime @map("start_date")
+  endDate          DateTime @map("end_date")
+  trainingDays     Float?   @map("training_days")
+  trainingHours    Float?   @map("training_hours")
+  employeeRegion   String?  @map("employee_region")
+  employeeLocation String?  @map("employee_location")
 
-  organization  String? 
-  onRollContract String? @map("onroll_contract")
-  department String?
-  departmentGroup String? @map("department_group")
-  employeeGroup String? @map("employee_group")
-  employeeGrouupMNmw String? @map("employee_grouup_m_nm_w")
-  aadharNumber     String? @map("aadhar_number")
-  designation    String? 
-  section        String? 
-  month          String?
-  year           String?
-  gender         String?
-  attendancePercentage     Float?  @map("attendance_percentage")
+  organization         String?
+  onRollContract       String? @map("onroll_contract")
+  department           String?
+  departmentGroup      String? @map("department_group")
+  employeeGroup        String? @map("employee_group")
+  employeeGrouupMNmw   String? @map("employee_grouup_m_nm_w")
+  aadharNumber         String? @map("aadhar_number")
+  designation          String?
+  section              String?
+  month                String?
+  year                 String?
+  gender               String?
+  attendancePercentage Float?  @map("attendance_percentage")
 
   location       String? // Acts as programLocation
   programRegion  String? @map("program_region")
   programAddress String? @map("program_address")
-  progCategory   String?  @map("prog_category")
+  progCategory   String? @map("prog_category")
 
   // Fields for Modern System Sync
-  sessionId     String? @map("session_id")
-  trainerName   String? @map("trainer_name")
+  sessionId       String? @map("session_id")
+  trainerName     String? @map("trainer_name")
   coordinatorName String? @map("coordinator_name")
-  averageRating Float?  @map("average_rating")
-  status        String  @default("Completed")
+  averageRating   Float?  @map("average_rating")
+  status          String  @default("Completed")
   sessionCategory String? @map("session_category")
   altProgramName  String? @map("alt_program_name")
   subjectCode     String? @map("subject_code")
@@ -838,18 +835,32 @@ model AttendanceRecord {
   @@index([empId])
   @@map("attendance_records")
 }
-model Qualifications {
- id Int @id @default(autoincrement())
- empID String?
- programId String? @map("program_id")
- testDate DateTime?
- maxMarks Int?@map("max_marks")
- obtainedMarks Int? @map("obtained_marks")
- Qualified  Boolean? @map("qualified")
- facilitator String? @map("facilitator")
- securedTest Boolean? @map("secured_test")
- 
- employee Employee? @relation(fields: [empID], references: [id])
 
- @@map("qualifications")
+model Qualifications {
+  id                 Int       @id @default(autoincrement())
+  empID              String?
+  subjectId          String?   @map("subject_id")
+  altSubjectName     String?   @map("alt_subject_name")
+  qualificationType  String?   @map("qualification_type") // e.g., "Online Test"
+  facilitator        String?   @map("facilitator")
+  enrollmentDate     DateTime? @map("enrollment_date")
+  testDate           DateTime? @map("test_date")
+  duration           String?   @map("duration")
+  maxMarks           Float?    @map("max_marks")
+  obtainedMarks      Float?    @map("obtained_marks")
+  qualified          Boolean?  @map("qualified")
+  referenceRemarks   String?   @map("reference_remarks") @db.Text
+  empLocation        String?   @map("emp_location")
+  subjectName        String?   @map("subject_name")
+  empName            String?   @map("emp_name")
+  designation        String?   @map("designation")
+  empGroup           String?   @map("emp_group")
+  gender             String?   @map("gender")
+  shortProgReference String?   @map("short_prog_reference")
+  month              String?
+  year               String?
+
+  employee Employee? @relation(fields: [empID], references: [id])
+
+  @@map("qualifications")
 }
