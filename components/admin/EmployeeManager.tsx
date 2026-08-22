@@ -629,16 +629,16 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                             <SearchableSelect
                                 name="departmentGroup"
                                 options={[
-                                    { label: 'AC Electrical', value: 'AC Electrical' },
+                                    { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
                                     { label: 'HEMM', value: 'HEMM' },
                                     { label: 'HEMM LS', value: 'HEMM LS' },
-                                    { label: 'HEMM Auto Elect', value: 'HEMM Auto Elect' },
-                                    { label: 'Stores and Procurement', value: 'Stores and Procurement' },
-                                    { label: 'Operators', value: 'Operators' },
-                                    { label: 'HR/Admin/Finance', value: 'HR/Admin/Finance' },
-                                    { label: 'Others and undefined', value: 'Others and undefined' },
+                                    { label: 'HEMM AUTO ELECT', value: 'HEMM AUTO ELECT' },
+                                    { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
+                                    { label: 'OPERATORS', value: 'OPERATORS' },
+                                    { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
+                                    { label: 'OTHERS/UNDEFINED', value: 'OTHERS/UNDEFINED' },
                                     { label: 'C&S', value: 'C&S' },
-                                    { label: 'Mining', value: 'Mining' }
+                                    { label: 'MINING', value: 'MINING' }
                                 ]}
                                 value={selectedFormDeptGroup}
                                 onChange={setSelectedFormDeptGroup}
@@ -782,21 +782,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
                             <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group</label>
-                            <SearchableSelect
-                                name="departmentGroup"
-                                options={[
-                                    { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
-                                    { label: 'OPERATORS', value: 'OPERATORS' },
-                                    { label: 'OTHERS', value: 'OTHERS' }
-                                ]}
-                                value={selectedFormDeptGroup}
-                                onChange={setSelectedFormDeptGroup}
-                                placeholder="Select Department Group"
-                                className="w-full"
-                            />
-                        </div>
+
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
