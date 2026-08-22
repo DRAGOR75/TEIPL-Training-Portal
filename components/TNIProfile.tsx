@@ -388,10 +388,16 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                         <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
                         <SearchableSelect
                             options={[
-                                { label: 'ENGG SERVICES', value: 'ENGG SERVICES' },
-                                { label: 'Operators', value: 'Operators' },
-
-                                { label: 'Others', value: 'Others' }
+                                { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
+                                { label: 'HEMM', value: 'HEMM' },
+                                { label: 'HEMM LS', value: 'HEMM LS' },
+                                { label: 'HEMM AUTO ELECT', value: 'HEMM AUTO ELECT' },
+                                { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
+                                { label: 'OPERATORS', value: 'OPERATORS' },
+                                { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
+                                { label: 'OTHERS/UNDEFINED', value: 'OTHERS/UNDEFINED' },
+                                { label: 'C&S', value: 'C&S' },
+                                { label: 'MINING', value: 'MINING' }
                             ]}
                             value={formData.departmentGroup}
                             onChange={(val) => setFormData({ ...formData, departmentGroup: val })}
