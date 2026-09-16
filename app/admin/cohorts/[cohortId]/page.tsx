@@ -9,10 +9,11 @@ export const dynamic = 'force-dynamic';
 export default async function CohortDetailPage({ params }: { params: Promise<{ cohortId: string }> }) {
     const { cohortId } = await params;
 
-    const [cohort, trainers, locations] = await Promise.all([
+    const [cohort, trainers, locations, programs] = await Promise.all([
         getCohortById(cohortId),
         getTrainers(),
-        db.location.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } })
+        db.location.findMany({ select: { id: true, name: true }, orderBy: { name: 'asc' } }),
+        db.program.findMany({ select: { id: true, name: true, category: true }, orderBy: { name: 'asc' } })
     ]);
 
     if (!cohort) {
@@ -24,6 +25,7 @@ export default async function CohortDetailPage({ params }: { params: Promise<{ c
             cohort={cohort}
             trainers={trainers}
             locations={locations}
+            programs={programs}
         />
     );
 }

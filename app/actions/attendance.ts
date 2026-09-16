@@ -33,6 +33,7 @@ export async function saveDailyAttendance(sessionId: string, empId: string, date
         });
 
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/tni-dashboard/calendar');
         revalidateTag('session-details', 'max');
         return { success: true };
     } catch (error) {
@@ -101,6 +102,7 @@ export async function updateSessionClassDates(sessionId: string, classDates: Dat
         }
 
         revalidatePath(`/admin/sessions/${sessionId}/manage`);
+        revalidatePath('/admin/tni-dashboard/calendar');
         revalidateTag('session-details', 'max');
         return { success: true };
 } catch (error) {

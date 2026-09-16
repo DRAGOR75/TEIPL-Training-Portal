@@ -92,6 +92,21 @@ export default function BulkUploadManager() {
                             Go to Qualifications Upload
                         </Link>
                     </div>
+
+                    {/* Cohorts & Session Linking Upload Card */}
+                    <div className="border border-slate-200 rounded-3xl p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-teal-500"></div>
+                        <div className="w-14 h-14 bg-teal-50 text-teal-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <HiOutlineArrowUpTray size={28} />
+                        </div>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Cohorts & Sessions</h3>
+                        <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
+                            Bulk create training cohorts and link scheduled training sessions by Session ID.
+                        </p>
+                        <Link href="/admin/cohorts?bulk=1" className="flex items-center justify-center gap-2 w-full py-3.5 bg-teal-50 hover:bg-teal-100 text-teal-700 rounded-xl font-bold text-sm transition-colors border border-teal-200 shadow-sm hover:shadow">
+                            Go to Cohort Upload
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>

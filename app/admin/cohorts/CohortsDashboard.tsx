@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
     HiOutlineAcademicCap,
@@ -10,8 +10,12 @@ import {
     HiOutlineCheckCircle,
     HiOutlineClock,
     HiOutlineDocumentText,
+    HiOutlinePencilSquare,
+    HiOutlineArrowUpTray,
 } from 'react-icons/hi2';
 import CreateCohortModal from '@/components/admin/cohort/CreateCohortModal';
+import EditCohortModal from '@/components/admin/cohort/EditCohortModal';
+import BulkUploadCohortsModal from '@/components/admin/cohort/BulkUploadCohortsModal';
 
 interface CohortsDashboardProps {
     initialCohorts: any[];
@@ -20,7 +24,18 @@ interface CohortsDashboardProps {
 
 export default function CohortsDashboard({ initialCohorts, programs }: CohortsDashboardProps) {
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
+    const [editingCohort, setEditingCohort] = useState<any | null>(null);
     const [filter, setFilter] = useState<'all' | 'Draft' | 'Active' | 'Completed'>('all');
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('bulk') === '1') {
+                setShowBulkUploadModal(true);
+            }
+        }
+    }, []);
 
     const filteredCohorts = filter === 'all'
         ? initialCohorts
@@ -56,13 +71,16 @@ export default function CohortsDashboard({ initialCohorts, programs }: CohortsDa
                             <h1 className="text-3xl font-black text-slate-900 tracking-tight">Training Cohorts</h1>
                             <p className="text-slate-500 mt-1">Multi-program learning journeys for your teams.</p>
                         </div>
-                        <button
-                            onClick={() => setShowCreateModal(true)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95 self-start"
-                        >
-                            <HiOutlinePlusCircle className="w-5 h-5" />
-                            Create Cohort
-                        </button>
+                        <div className="flex items-center gap-2.5 self-start flex-wrap">
+
+                            <button
+                                onClick={() => setShowCreateModal(true)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
+                            >
+                                <HiOutlinePlusCircle className="w-5 h-5" />
+                                Create Cohort
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -115,16 +133,45 @@ export default function CohortsDashboard({ initialCohorts, programs }: CohortsDa
                                     <div className="p-6">
                                         {/* Status Badge */}
                                         <div className="flex items-center justify-between mb-4">
-                                            <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getStatusColor(cohort.status)}`}>
-                                                {cohort.status}
-                                            </span>
-                                            <HiOutlineChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                                <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getStatusColor(cohort.status)}`}>
+                                                    {cohort.status}
+                                                </span>
+                                                {cohort.cohortYear && (
+                                                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                                                        FY {cohort.cohortYear}
+                                                    </span>
+                                                )}
+                                                {cohort.cohortGroup && (
+                                                    <span className="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                                        {cohort.cohortGroup}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        setEditingCohort(cohort);
+                                                    }}
+                                                    className="p-1 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                                    title="Edit Cohort"
+                                                >
+                                                    <HiOutlinePencilSquare className="w-4 h-4" />
+                                                </button>
+                                                <HiOutlineChevronRight className="w-4 h-4 text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
+                                            </div>
                                         </div>
 
-                                        {/* Name */}
-                                        <h3 className="text-lg font-bold text-slate-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                        {/* Name & ID */}
+                                        <h3 className="text-lg font-bold text-slate-900 mb-0.5 group-hover:text-blue-600 transition-colors">
                                             {cohort.name}
                                         </h3>
+                                        <div className="text-[11px] font-mono text-slate-400 mb-2 truncate">
+                                            ID: {cohort.id}
+                                        </div>
                                         {cohort.description && (
                                             <p className="text-sm text-slate-500 line-clamp-2 mb-4">{cohort.description}</p>
                                         )}
@@ -191,6 +238,22 @@ export default function CohortsDashboard({ initialCohorts, programs }: CohortsDa
                 <CreateCohortModal
                     programs={programs}
                     onClose={() => setShowCreateModal(false)}
+                />
+            )}
+
+            {/* Edit Modal */}
+            {editingCohort && (
+                <EditCohortModal
+                    cohort={editingCohort}
+                    programs={programs}
+                    onClose={() => setEditingCohort(null)}
+                />
+            )}
+
+            {/* Bulk Upload Modal */}
+            {showBulkUploadModal && (
+                <BulkUploadCohortsModal
+                    onClose={() => setShowBulkUploadModal(false)}
                 />
             )}
         </div>

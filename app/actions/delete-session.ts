@@ -50,6 +50,7 @@ export async function deleteTrainingSession(sessionId: string) {
         }
 
         revalidatePath('/admin/sessions');
+        revalidatePath('/admin/tni-dashboard/calendar');
         revalidatePath('/admin/tni-dashboard');
         // @ts-ignore
         revalidateTag('sessions-list');

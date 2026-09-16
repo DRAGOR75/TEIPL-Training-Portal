@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { getFinancialYear, parseFlexibleDate } from '@/lib/date-utils';
 
 // ========== READ OPERATIONS ==========
 
@@ -112,26 +113,73 @@ export async function getCohortById(cohortId: string) {
  * Create a new cohort with a list of programs.
  */
 export async function createCohort(data: {
+    id?: string;
     name: string;
     description?: string;
-    programIds: string[]; // Ordered list of program IDs
+    startDate?: string;
+    endDate?: string;
+    location?: string;
+    duration?: number;
+    totalParticipants?: number;
+    cohortGroup?: string;
+    cohortYear?: string;
+    programs: { id: string; sessionId?: string }[];
 }) {
     try {
+        const computedYear = data.cohortYear || (data.startDate ? getFinancialYear(data.startDate) : undefined);
+
         const cohort = await db.cohort.create({
             data: {
+                ...(data.id?.trim() ? { id: data.id.trim() } : {}),
                 name: data.name,
                 description: data.description,
-                programs: {
-                    create: data.programIds.map((programId, index) => ({
-                        programId,
-                        seq: index + 1,
-                    })),
-                },
-            },
-            include: {
-                programs: { include: { program: true } },
+                cohortStartDate: data.startDate ? new Date(data.startDate) : undefined,
+                cohortEndDate: data.endDate ? new Date(data.endDate) : undefined,
+                cohortRegion: data.location,
+                cohortDuration: data.duration,
+                totalParticipants: data.totalParticipants ? parseInt(data.totalParticipants.toString(), 10) : undefined,
+                cohortGroup: data.cohortGroup?.trim() || undefined,
+                cohortYear: computedYear || undefined,
             },
         });
+
+        // Create cohort programs
+        for (let i = 0; i < data.programs.length; i++) {
+            const p = data.programs[i];
+            let status = 'Pending';
+            if (p.sessionId) {
+                const session = await db.trainingSession.findUnique({ where: { id: p.sessionId } });
+                if (session && session.status === 'Completed') {
+                    status = 'Completed';
+                } else if (session) {
+                    status = 'InProgress';
+                }
+            }
+
+            await db.cohortProgram.create({
+                data: {
+                    cohortId: cohort.id,
+                    programId: p.id,
+                    seq: i + 1,
+                    sessionId: p.sessionId || null,
+                    status: status,
+                }
+            });
+        }
+
+        // Check if we should update cohort status based on linked sessions
+        const allPrograms = await db.cohortProgram.findMany({ where: { cohortId: cohort.id } });
+        if (allPrograms.length > 0 && allPrograms.every(cp => cp.status === 'Completed')) {
+            await db.cohort.update({
+                where: { id: cohort.id },
+                data: { status: 'Completed' }
+            });
+        } else if (allPrograms.some(cp => cp.sessionId)) {
+            await db.cohort.update({
+                where: { id: cohort.id },
+                data: { status: 'Active' }
+            });
+        }
 
         revalidatePath('/admin/cohorts');
         return { success: true, cohort };
@@ -148,12 +196,67 @@ export async function updateCohort(cohortId: string, data: {
     name?: string;
     description?: string;
     status?: string;
+    startDate?: string;
+    endDate?: string;
+    location?: string;
+    duration?: number;
+    totalParticipants?: number;
+    cohortGroup?: string;
+    cohortYear?: string;
+    programs?: { id: string; sessionId?: string }[];
 }) {
     try {
+        const computedYear = data.cohortYear !== undefined
+            ? data.cohortYear
+            : (data.startDate ? getFinancialYear(data.startDate) : undefined);
+
         const cohort = await db.cohort.update({
             where: { id: cohortId },
-            data,
+            data: {
+                name: data.name,
+                description: data.description,
+                status: data.status,
+                cohortStartDate: data.startDate ? new Date(data.startDate) : undefined,
+                cohortEndDate: data.endDate ? new Date(data.endDate) : undefined,
+                cohortRegion: data.location,
+                cohortDuration: data.duration,
+                totalParticipants: data.totalParticipants,
+                cohortGroup: data.cohortGroup !== undefined ? (data.cohortGroup?.trim() || null) : undefined,
+                cohortYear: computedYear,
+            },
         });
+
+        // If programs array is provided, rewrite the program sequence
+        if (data.programs) {
+            // Delete all existing programs for this cohort
+            await db.cohortProgram.deleteMany({
+                where: { cohortId: cohortId }
+            });
+
+            // Recreate them with new sequence and links
+            for (let i = 0; i < data.programs.length; i++) {
+                const p = data.programs[i];
+                let status = 'Pending';
+                if (p.sessionId) {
+                    const session = await db.trainingSession.findUnique({ where: { id: p.sessionId } });
+                    if (session && session.status === 'Completed') {
+                        status = 'Completed';
+                    } else if (session) {
+                        status = 'InProgress';
+                    }
+                }
+
+                await db.cohortProgram.create({
+                    data: {
+                        cohortId: cohort.id,
+                        programId: p.id,
+                        seq: i + 1,
+                        sessionId: p.sessionId || null,
+                        status: status,
+                    }
+                });
+            }
+        }
 
         revalidatePath('/admin/cohorts');
         revalidatePath(`/admin/cohorts/${cohortId}`);
@@ -353,6 +456,66 @@ export async function scheduleCohortSession(cohortProgramId: string, sessionData
 }
 
 /**
+ * Link an existing session to a CohortProgram.
+ */
+export async function linkExistingSessionToCohortProgram(cohortProgramId: string, sessionId: string) {
+    try {
+        const cohortProgram = await db.cohortProgram.findUnique({
+            where: { id: cohortProgramId },
+            include: { cohort: true },
+        });
+
+        if (!cohortProgram) {
+            return { success: false, error: 'Cohort program not found.' };
+        }
+
+        if (cohortProgram.sessionId) {
+            return { success: false, error: 'A session is already scheduled for this program.' };
+        }
+
+        const session = await db.trainingSession.findUnique({
+            where: { id: sessionId },
+        });
+
+        if (!session) {
+            return { success: false, error: 'Session not found.' };
+        }
+
+        // Link session and set status based on session status
+        const status = session.status === 'Completed' ? 'Completed' : 'InProgress';
+
+        await db.cohortProgram.update({
+            where: { id: cohortProgramId },
+            data: {
+                sessionId: session.id,
+                status: status,
+            },
+        });
+
+        // Activate cohort if still Draft
+        if (cohortProgram.cohort.status === 'Draft') {
+            await db.cohort.update({
+                where: { id: cohortProgram.cohortId },
+                data: { status: 'Active' },
+            });
+        }
+
+        // If the session was already completed, we might have completed the entire cohort
+        if (status === 'Completed') {
+            await markCohortProgramComplete(cohortProgramId); // reuse the existing logic to check for full cohort completion
+        }
+
+        revalidatePath(`/admin/cohorts/${cohortProgram.cohortId}`);
+        revalidatePath('/admin/sessions');
+
+        return { success: true };
+    } catch (error) {
+        console.error('Failed to link existing session:', error);
+        return { success: false, error: 'Failed to link session.' };
+    }
+}
+
+/**
  * Mark a CohortProgram as completed. Check if all programs are done → graduate members.
  */
 export async function markCohortProgramComplete(cohortProgramId: string) {
@@ -429,6 +592,50 @@ export async function submitCohortFeedback(data: {
     } catch (error) {
         console.error('Failed to submit cohort feedback:', error);
         return { success: false, error: 'Failed to submit feedback.' };
+    }
+}
+
+/**
+ * Get available existing training sessions for a specific program name.
+ * Only returns sessions that are NOT already linked to a cohort program.
+ */
+export async function getAvailableSessionsForProgram(programName: string) {
+    try {
+        const sessions = await db.trainingSession.findMany({
+            where: {
+                programName: programName,
+                cohortProgram: null, // Ensure it's not already linked
+            },
+            orderBy: {
+                startDate: 'desc',
+            },
+        });
+        return sessions;
+    } catch (error) {
+        console.error('Failed to get available sessions:', error);
+        return [];
+    }
+}
+
+/**
+ * Get all available existing training sessions across all programs.
+ * Only returns active/scheduled sessions that are NOT already linked to a cohort program.
+ */
+export async function getAllAvailableSessionsForCohort() {
+    try {
+        const sessions = await db.trainingSession.findMany({
+            where: {
+                cohortProgram: null, // Ensure it's not already linked
+            },
+            orderBy: {
+                startDate: 'desc',
+            },
+            take: 50, // Limit to recent 50 to avoid huge payloads
+        });
+        return sessions;
+    } catch (error) {
+        console.error('Failed to get all available sessions:', error);
+        return [];
     }
 }
 
@@ -561,3 +768,348 @@ export async function exportCohortProgramFeedbacks(cohortId: string) {
         return { success: false, error: 'Failed to export feedbacks.' };
     }
 }
+
+export interface BulkCohortRow {
+    cohortId?: string;
+    status?: string;
+    cohortName: string;
+    cohortGroup?: string;
+    description?: string;
+    startDate?: string;
+    endDate?: string;
+    cohortYear?: string;
+    location?: string;
+    totalParticipants?: number;
+    duration?: number;
+    programName?: string;
+    programId?: string;
+    sessionId?: string;
+    seq?: number;
+}
+
+/**
+ * Bulk upload cohorts and their programs, with session linking capability.
+ */
+export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
+    try {
+        if (!rows || rows.length === 0) {
+            return { success: false, error: 'No data rows provided.' };
+        }
+
+        // Fetch all programs from master catalog
+        const allPrograms = await db.program.findMany({
+            select: { id: true, name: true, category: true }
+        });
+        const programMap = new Map<string, { id: string; name: string }>();
+        allPrograms.forEach(p => {
+            programMap.set(p.name.trim().toLowerCase(), { id: p.id, name: p.name });
+            programMap.set(p.id.toLowerCase(), { id: p.id, name: p.name });
+        });
+
+        // Collect all session IDs from rows
+        const rawSessionIds = rows
+            .map(r => r.sessionId?.trim())
+            .filter((id): id is string => Boolean(id && id.length > 0));
+
+        // Fetch all mentioned sessions
+        const foundSessions = rawSessionIds.length > 0
+            ? await db.trainingSession.findMany({
+                where: { id: { in: rawSessionIds } },
+                include: { cohortProgram: true }
+            })
+            : [];
+        const sessionMap = new Map<string, any>();
+        foundSessions.forEach(s => sessionMap.set(s.id, s));
+
+        // Group rows by Cohort ID or Cohort Name
+        const cohortsMap = new Map<string, {
+            id?: string;
+            status?: string;
+            name: string;
+            cohortGroup?: string;
+            description?: string;
+            startDate?: string;
+            endDate?: string;
+            cohortYear?: string;
+            location?: string;
+            totalParticipants?: number;
+            duration?: number;
+            programs: Array<{
+                programName?: string;
+                programId?: string;
+                sessionId?: string;
+                seq?: number;
+            }>;
+        }>();
+
+        const idToKey = new Map<string, string>();
+        const nameToKey = new Map<string, string>();
+
+        const errors: string[] = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const rowNum = i + 1;
+            const cohortId = row.cohortId?.trim();
+            const cohortName = row.cohortName?.trim();
+
+            if (!cohortName && !cohortId) {
+                errors.push(`Row ${rowNum}: Missing "Cohort Name" or "Cohort ID".`);
+                continue;
+            }
+
+            const effectiveName = cohortName || cohortId!;
+
+            // Check session ID validity if provided
+            if (row.sessionId?.trim()) {
+                const sId = row.sessionId.trim();
+                const session = sessionMap.get(sId);
+                if (!session) {
+                    errors.push(`Row ${rowNum} (${effectiveName}): Session ID "${sId}" was not found in database.`);
+                } else if (session.cohortProgram) {
+                    // Check if already linked to a different cohort
+                    const existingCohort = await db.cohort.findUnique({
+                        where: { id: session.cohortProgram.cohortId },
+                        select: { id: true, name: true }
+                    });
+                    const isSameCohort = (cohortId && session.cohortProgram.cohortId === cohortId) ||
+                        (existingCohort && cohortName && existingCohort.name.toLowerCase() === cohortName.toLowerCase());
+
+                    if (!isSameCohort) {
+                        errors.push(`Row ${rowNum} (${effectiveName}): Session ID "${sId}" is already linked to cohort "${existingCohort?.name || session.cohortProgram.cohortId}".`);
+                    }
+                }
+            }
+
+            // Find existing group key
+            let groupKey: string | undefined;
+            if (cohortId && idToKey.has(cohortId.toLowerCase())) {
+                groupKey = idToKey.get(cohortId.toLowerCase());
+            } else if (cohortName && nameToKey.has(cohortName.toLowerCase())) {
+                groupKey = nameToKey.get(cohortName.toLowerCase());
+            }
+
+            const parsedStartDate = parseFlexibleDate(row.startDate) || row.startDate?.trim() || undefined;
+            const parsedEndDate = parseFlexibleDate(row.endDate) || row.endDate?.trim() || undefined;
+
+            if (!groupKey) {
+                groupKey = cohortId ? `id:${cohortId.toLowerCase()}` : `name:${cohortName!.toLowerCase()}`;
+                if (cohortId) idToKey.set(cohortId.toLowerCase(), groupKey);
+                if (cohortName) nameToKey.set(cohortName.toLowerCase(), groupKey);
+
+                cohortsMap.set(groupKey, {
+                    id: cohortId || undefined,
+                    status: row.status?.trim() || undefined,
+                    name: effectiveName,
+                    cohortGroup: row.cohortGroup?.trim() || undefined,
+                    description: row.description?.trim() || undefined,
+                    startDate: parsedStartDate,
+                    endDate: parsedEndDate,
+                    cohortYear: row.cohortYear?.trim() || undefined,
+                    location: row.location?.trim() || undefined,
+                    totalParticipants: row.totalParticipants ? Number(row.totalParticipants) : undefined,
+                    duration: row.duration ? Number(row.duration) : undefined,
+                    programs: [],
+                });
+            }
+
+            const c = cohortsMap.get(groupKey)!;
+            if (cohortId && !c.id) {
+                c.id = cohortId;
+                idToKey.set(cohortId.toLowerCase(), groupKey);
+            }
+            if (cohortName && (!c.name || c.name === c.id)) {
+                c.name = cohortName;
+                nameToKey.set(cohortName.toLowerCase(), groupKey);
+            }
+
+            // Overwrite missing metadata if present on subsequent rows
+            if (!c.status && row.status?.trim()) c.status = row.status.trim();
+            if (!c.cohortGroup && row.cohortGroup?.trim()) c.cohortGroup = row.cohortGroup.trim();
+            if (!c.description && row.description?.trim()) c.description = row.description.trim();
+            if (!c.startDate && parsedStartDate) c.startDate = parsedStartDate;
+            if (!c.endDate && parsedEndDate) c.endDate = parsedEndDate;
+            if (!c.cohortYear && row.cohortYear?.trim()) c.cohortYear = row.cohortYear.trim();
+            if (!c.location && row.location?.trim()) c.location = row.location.trim();
+            if (!c.totalParticipants && row.totalParticipants) c.totalParticipants = Number(row.totalParticipants);
+            if (!c.duration && row.duration) c.duration = Number(row.duration);
+
+            // If row has program info or session info, record program
+            if (row.programName || row.programId || row.sessionId) {
+                c.programs.push({
+                    programName: row.programName?.trim(),
+                    programId: row.programId?.trim(),
+                    sessionId: row.sessionId?.trim() || undefined,
+                    seq: row.seq ? Number(row.seq) : undefined,
+                });
+            }
+        }
+
+        let createdCount = 0;
+        let updatedCount = 0;
+        let programsCount = 0;
+        let linkedSessionsCount = 0;
+
+        for (const [_, cohortData] of cohortsMap.entries()) {
+            const computedYear = cohortData.cohortYear || (cohortData.startDate ? getFinancialYear(cohortData.startDate) : undefined);
+
+            // Find or create cohort: check by ID first, then by Name
+            let cohort: any = null;
+            if (cohortData.id) {
+                cohort = await db.cohort.findUnique({
+                    where: { id: cohortData.id },
+                });
+            }
+            if (!cohort && cohortData.name) {
+                cohort = await db.cohort.findFirst({
+                    where: { name: { equals: cohortData.name, mode: 'insensitive' } },
+                });
+            }
+
+            if (!cohort) {
+                cohort = await db.cohort.create({
+                    data: {
+                        ...(cohortData.id ? { id: cohortData.id } : {}),
+                        name: cohortData.name,
+                        description: cohortData.description,
+                        cohortStartDate: cohortData.startDate ? new Date(cohortData.startDate) : undefined,
+                        cohortEndDate: cohortData.endDate ? new Date(cohortData.endDate) : undefined,
+                        cohortYear: computedYear,
+                        cohortGroup: cohortData.cohortGroup,
+                        cohortRegion: cohortData.location,
+                        cohortDuration: cohortData.duration,
+                        totalParticipants: cohortData.totalParticipants,
+                        status: cohortData.status || 'Draft',
+                    }
+                });
+                createdCount++;
+            } else {
+                // Update metadata
+                cohort = await db.cohort.update({
+                    where: { id: cohort.id },
+                    data: {
+                        name: cohortData.name ?? cohort.name,
+                        description: cohortData.description ?? cohort.description,
+                        cohortStartDate: cohortData.startDate ? new Date(cohortData.startDate) : cohort.cohortStartDate,
+                        cohortEndDate: cohortData.endDate ? new Date(cohortData.endDate) : cohort.cohortEndDate,
+                        cohortYear: computedYear ?? cohort.cohortYear,
+                        cohortGroup: cohortData.cohortGroup ?? cohort.cohortGroup,
+                        cohortRegion: cohortData.location ?? cohort.cohortRegion,
+                        cohortDuration: cohortData.duration ?? cohort.cohortDuration,
+                        totalParticipants: cohortData.totalParticipants ?? cohort.totalParticipants,
+                        status: cohortData.status ?? cohort.status,
+                    }
+                });
+                updatedCount++;
+            }
+
+            // Existing programs for this cohort
+            const existingCPs = await db.cohortProgram.findMany({
+                where: { cohortId: cohort.id },
+            });
+            let nextSeq = existingCPs.length > 0 ? Math.max(...existingCPs.map(cp => cp.seq)) + 1 : 1;
+
+            // Process programs
+            for (const progData of cohortData.programs) {
+                let resolvedProgramId: string | null = null;
+                let linkedSession: any = null;
+
+                // If sessionId is provided, try to resolve program from session
+                if (progData.sessionId) {
+                    linkedSession = sessionMap.get(progData.sessionId);
+                    if (linkedSession) {
+                        const matched = programMap.get(linkedSession.programName.trim().toLowerCase());
+                        if (matched) {
+                            resolvedProgramId = matched.id;
+                        }
+                    }
+                }
+
+                // If programId or programName was explicitly provided, try to resolve that
+                if (!resolvedProgramId && progData.programId) {
+                    const matched = programMap.get(progData.programId.trim().toLowerCase());
+                    if (matched) resolvedProgramId = matched.id;
+                }
+                if (!resolvedProgramId && progData.programName) {
+                    const matched = programMap.get(progData.programName.trim().toLowerCase());
+                    if (matched) resolvedProgramId = matched.id;
+                }
+
+                if (!resolvedProgramId) {
+                    errors.push(`Cohort "${cohort.name}": Could not find program in catalog for entry with program "${progData.programName || progData.programId || 'Unknown'}" or session "${progData.sessionId || ''}".`);
+                    continue;
+                }
+
+                // Check if this program is already in the cohort
+                const existingProg = await db.cohortProgram.findFirst({
+                    where: {
+                        cohortId: cohort.id,
+                        programId: resolvedProgramId,
+                    }
+                });
+
+                let cpStatus = 'Pending';
+                if (linkedSession) {
+                    cpStatus = linkedSession.status === 'Completed' ? 'Completed' : 'InProgress';
+                }
+
+                if (existingProg) {
+                    // Update existing program if a new session link is provided
+                    if (linkedSession && existingProg.sessionId !== linkedSession.id) {
+                        await db.cohortProgram.update({
+                            where: { id: existingProg.id },
+                            data: {
+                                sessionId: linkedSession.id,
+                                status: cpStatus,
+                            }
+                        });
+                        linkedSessionsCount++;
+                    }
+                } else {
+                    // Create new cohort program
+                    await db.cohortProgram.create({
+                        data: {
+                            cohortId: cohort.id,
+                            programId: resolvedProgramId,
+                            seq: progData.seq || nextSeq++,
+                            sessionId: linkedSession ? linkedSession.id : null,
+                            status: cpStatus,
+                        }
+                    });
+                    programsCount++;
+                    if (linkedSession) linkedSessionsCount++;
+                }
+            }
+
+            // Refresh cohort status based on all its programs
+            const allCohortProgs = await db.cohortProgram.findMany({ where: { cohortId: cohort.id } });
+            if (allCohortProgs.length > 0 && allCohortProgs.every(cp => cp.status === 'Completed')) {
+                await db.cohort.update({
+                    where: { id: cohort.id },
+                    data: { status: 'Completed' }
+                });
+            } else if (allCohortProgs.some(cp => cp.sessionId)) {
+                await db.cohort.update({
+                    where: { id: cohort.id },
+                    data: { status: 'Active' }
+                });
+            }
+        }
+
+        revalidatePath('/admin/cohorts');
+        revalidatePath('/admin/sessions');
+
+        return {
+            success: true,
+            createdCount,
+            updatedCount,
+            programsCount,
+            linkedSessionsCount,
+            errors,
+        };
+    } catch (error: any) {
+        console.error('Failed to bulk upload cohorts:', error);
+        return { success: false, error: error.message || 'Failed to bulk upload cohorts.' };
+    }
+}
+

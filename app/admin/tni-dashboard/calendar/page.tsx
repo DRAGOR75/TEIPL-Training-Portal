@@ -18,23 +18,23 @@ export default async function CalendarPage() {
         getTrainers(),
         getCachedAdminLocations(),
         db.trainingSession.findMany({ 
-            select: { 
-                id: true, 
-                programName: true, 
-                trainerName: true, 
-                location: true, 
-                startDate: true, 
-                endDate: true, 
-                status: true,
+            include: {
                 nominationBatch: {
-                    select: {
+                    include: {
                         _count: {
                             select: { nominations: true }
+                        },
+                        nominations: {
+                            include: {
+                                employee: true
+                            }
                         }
                     }
                 },
-                enrollments: { select: { id: true } } 
-            } 
+                enrollments: { select: { id: true } },
+                attendanceRecords: true
+            },
+            orderBy: { startDate: 'desc' }
         })
     ]);
 

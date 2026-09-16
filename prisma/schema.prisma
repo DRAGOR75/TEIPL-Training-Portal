@@ -456,6 +456,13 @@ model Cohort {
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  cohortStartDate DateTime? @map("chort_start_date")
+  cohortEndDate DateTime? @map("chort_end_date")
+  cohortDuration  Int? @map("duration")
+  cohortRegion String? @map("cohort_region")
+  totalParticipants Int? @map("total_participants")
+  cohortYear String? @map("cohort_year")
+  cohortGroup String? @map("cohort_group")
 
   // Relations
   programs  CohortProgram[] // Programs in this journey

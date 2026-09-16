@@ -15,9 +15,13 @@ import {
     HiOutlinePlayCircle,
     HiOutlineArrowTopRightOnSquare,
     HiOutlineDocumentArrowDown,
+    HiOutlineLink,
+    HiOutlinePencilSquare,
 } from 'react-icons/hi2';
 import AddMembersModal from '@/components/admin/cohort/AddMembersModal';
 import CreateSessionModal from '@/components/admin/CreateSessionModal';
+import LinkSessionModal from '@/components/admin/cohort/LinkSessionModal';
+import EditCohortModal from '@/components/admin/cohort/EditCohortModal';
 import { removeMemberFromCohort, updateCohort, markCohortProgramComplete, exportCohortProgramFeedbacks } from '@/app/actions/cohorts';
 import { useRouter } from 'next/navigation';
 import { exportToExcel } from '@/lib/export-utils';
@@ -26,16 +30,19 @@ interface CohortDetailClientProps {
     cohort: any;
     trainers: any[];
     locations: any[];
+    programs: any[];
 }
 
-export default function CohortDetailClient({ cohort, trainers, locations }: CohortDetailClientProps) {
+export default function CohortDetailClient({ cohort, trainers, locations, programs }: CohortDetailClientProps) {
     const router = useRouter();
     const [showAddMembers, setShowAddMembers] = useState(false);
     const [scheduleFor, setScheduleFor] = useState<any>(null); // CohortProgram to schedule
+    const [linkFor, setLinkFor] = useState<any>(null); // CohortProgram to link
     const [removingId, setRemovingId] = useState<string | null>(null);
     const [markingComplete, setMarkingComplete] = useState<string | null>(null);
     const [activatingCohort, setActivatingCohort] = useState(false);
     const [exportingFeedback, setExportingFeedback] = useState(false);
+    const [showEditCohort, setShowEditCohort] = useState(false);
 
     const completedCount = cohort.programs.filter((p: any) => p.status === 'Completed').length;
     const totalPrograms = cohort.programs.length;
@@ -116,10 +123,23 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
 
                     <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                         <div>
-                            <div className="flex items-center gap-3 mb-2">
+                            <div className="flex items-center gap-3 mb-2 flex-wrap">
                                 <h1 className="text-3xl font-black text-slate-900 tracking-tight">{cohort.name}</h1>
                                 <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${getStatusBadge(cohort.status)}`}>
                                     {cohort.status}
+                                </span>
+                                {cohort.cohortYear && (
+                                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 font-mono">
+                                        FY {cohort.cohortYear}
+                                    </span>
+                                )}
+                                {cohort.cohortGroup && (
+                                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                        {cohort.cohortGroup}
+                                    </span>
+                                )}
+                                <span className="px-2.5 py-1 rounded-lg text-xs font-mono font-bold bg-slate-100 text-slate-600 border border-slate-200 select-all" title="Cohort ID">
+                                    ID: {cohort.id}
                                 </span>
                             </div>
                             {cohort.description && (
@@ -142,6 +162,13 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                         </div>
 
                         <div className="flex gap-2 self-start">
+                            <button
+                                onClick={() => setShowEditCohort(true)}
+                                className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95"
+                            >
+                                <HiOutlinePencilSquare className="w-4 h-4" />
+                                Edit
+                            </button>
                             {cohort.status === 'Draft' && (
                                 <button
                                     onClick={handleActivate}
@@ -153,22 +180,8 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                                     Activate
                                 </button>
                             )}
-                            <button
-                                onClick={() => setShowAddMembers(true)}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-blue-200 transition-all active:scale-95"
-                            >
-                                <HiOutlineUserPlus className="w-4 h-4" />
-                                Add Members
-                            </button>
-                            <button
-                                onClick={handleExportFeedback}
-                                disabled={exportingFeedback}
-                                className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 shadow-lg shadow-emerald-200 transition-all active:scale-95 disabled:opacity-50"
-                                title="Export all session feedback in this cohort to Excel"
-                            >
-                                {exportingFeedback ? <HiOutlineArrowPath className="w-4 h-4 animate-spin" /> : <HiOutlineDocumentArrowDown className="w-4 h-4" />}
-                                Export Feedback
-                            </button>
+
+
                         </div>
                     </div>
                 </div>
@@ -239,13 +252,22 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                                         {/* Actions */}
                                         <div className="flex gap-2 shrink-0">
                                             {!cp.session && cp.status === 'Pending' && (
-                                                <button
-                                                    onClick={() => setScheduleFor(cp)}
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-blue-100 active:scale-95"
-                                                >
-                                                    <HiOutlineCalendarDays className="w-4 h-4" />
-                                                    Schedule
-                                                </button>
+                                                <>
+                                                    <button
+                                                        onClick={() => setScheduleFor(cp)}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-blue-100 active:scale-95"
+                                                    >
+                                                        <HiOutlineCalendarDays className="w-4 h-4" />
+                                                        Schedule
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setLinkFor(cp)}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-indigo-100 active:scale-95"
+                                                    >
+                                                        <HiOutlineLink className="w-4 h-4" />
+                                                        Link Existing
+                                                    </button>
+                                                </>
                                             )}
                                             {cp.session && cp.status === 'InProgress' && (
                                                 <button
@@ -364,6 +386,22 @@ export default function CohortDetailClient({ cohort, trainers, locations }: Coho
                     cohortProgramId={scheduleFor.id}
                     defaultOpen={true}
                     onClose={() => setScheduleFor(null)}
+                />
+            )}
+
+            {linkFor && (
+                <LinkSessionModal
+                    cohortProgram={linkFor}
+                    cohortName={cohort.name}
+                    onClose={() => setLinkFor(null)}
+                />
+            )}
+
+            {showEditCohort && (
+                <EditCohortModal
+                    cohort={cohort}
+                    programs={programs}
+                    onClose={() => setShowEditCohort(false)}
                 />
             )}
         </div>
