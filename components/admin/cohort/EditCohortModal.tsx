@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { createCohort } from '@/app/actions/cohorts';
+import { updateCohort } from '@/app/actions/cohorts';
 import { getFinancialYear } from '@/lib/date-utils';
 import {
     HiOutlineXMark,
-    HiOutlineAcademicCap,
+    HiOutlinePencilSquare,
     HiOutlineArrowPath,
     HiOutlineChevronUp,
     HiOutlineChevronDown,
@@ -15,30 +15,41 @@ import {
 } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 
-interface CreateCohortModalProps {
+interface EditCohortModalProps {
+    cohort: any;
     programs: { id: string; name: string; category: string }[];
     onClose: () => void;
 }
 
-export default function CreateCohortModal({ programs, onClose }: CreateCohortModalProps) {
+export default function EditCohortModal({ cohort, programs, onClose }: EditCohortModalProps) {
     const router = useRouter();
-    const [name, setName] = useState('');
-    const [cohortId, setCohortId] = useState('');
-    const [description, setDescription] = useState('');
-    const [startDate, setStartDate] = useState('');
-    const [endDate, setEndDate] = useState('');
-    const [cohortYear, setCohortYear] = useState('');
-    const [cohortGroup, setCohortGroup] = useState('');
-    const [location, setLocation] = useState('');
-    const [totalParticipants, setTotalParticipants] = useState('');
-    const [duration, setDuration] = useState('');
-    const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; name: string; category: string; linkedSessionId?: string; availableSessions?: any[]; isLoadingSessions?: boolean }[]>([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [error, setError] = useState('');
+    const [name, setName] = useState(cohort.name || '');
+    const [description, setDescription] = useState(cohort.description || '');
+    const [startDate, setStartDate] = useState(cohort.cohortStartDate ? new Date(cohort.cohortStartDate).toISOString().split('T')[0] : '');
+    const [endDate, setEndDate] = useState(cohort.cohortEndDate ? new Date(cohort.cohortEndDate).toISOString().split('T')[0] : '');
+    const [cohortYear, setCohortYear] = useState(cohort.cohortYear || (cohort.cohortStartDate ? getFinancialYear(cohort.cohortStartDate) : ''));
+    const [cohortGroup, setCohortGroup] = useState(cohort.cohortGroup || '');
+    const [location, setLocation] = useState(cohort.cohortRegion || '');
+    const [duration, setDuration] = useState(cohort.cohortDuration?.toString() || '');
+    const [totalParticipants, setTotalParticipants] = useState(cohort.totalParticipants?.toString() || '');
+    
+    // Initialize selected programs from cohort.programs
+    const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; name: string; category: string; linkedSessionId?: string; availableSessions?: any[]; isLoadingSessions?: boolean }[]>(
+        (cohort.programs || []).map((cp: any) => ({
+            id: cp.program.id,
+            name: cp.program.name,
+            category: cp.program.category,
+            linkedSessionId: cp.session?.id || undefined,
+            isLoadingSessions: true,
+            availableSessions: cp.session ? [cp.session] : [], // prepopulate with the currently linked session if any
+        }))
+    );
 
     const [availableSessions, setAvailableSessions] = useState<any[]>([]);
     const [isLoadingAvailableSessions, setIsLoadingAvailableSessions] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [error, setError] = useState('');
 
     const filteredAvailableSessions = availableSessions.filter(session => {
         if (!sessionSearch.trim()) return true;
@@ -73,16 +84,49 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
         fetchSessions();
     }, []);
 
-    // availablePrograms and addProgram were removed since standalone program selection is removed
+    // Load available sessions for prepopulated programs
+    useEffect(() => {
+        const loadProgramSessions = async () => {
+            const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
+            
+            const updated = [...selectedPrograms];
+            let changed = false;
+
+            for (let i = 0; i < updated.length; i++) {
+                if (updated[i].isLoadingSessions) {
+                    try {
+                        const sessions = await getAvailableSessionsForProgram(updated[i].name);
+                        // Combine existing linked session with available ones
+                        const existingSessionId = updated[i].linkedSessionId;
+                        const existingSessionObj = updated[i].availableSessions?.[0]; // from init
+                        
+                        let allSessions = [...sessions];
+                        if (existingSessionId && existingSessionObj && !allSessions.find(s => s.id === existingSessionId)) {
+                            allSessions = [existingSessionObj, ...allSessions];
+                        }
+                        
+                        updated[i] = { ...updated[i], availableSessions: allSessions, isLoadingSessions: false };
+                        changed = true;
+                    } catch (err) {
+                        updated[i] = { ...updated[i], isLoadingSessions: false };
+                        changed = true;
+                    }
+                }
+            }
+            if (changed) {
+                setSelectedPrograms(updated);
+            }
+        };
+        loadProgramSessions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const addSession = async (session: any) => {
-        // Find matching program
         const programMatch = programs.find(p => p.name === session.programName);
         if (!programMatch) {
             setError(`Program ${session.programName} not found in master catalog.`);
             return;
         }
-        // Avoid adding the same program twice
         if (selectedPrograms.some(sp => sp.id === programMatch.id)) {
             setError(`Program ${programMatch.name} is already in the sequence.`);
             return;
@@ -91,7 +135,8 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
         setSelectedPrograms(prev => [...prev, {
             ...programMatch,
             linkedSessionId: session.id,
-            isLoadingSessions: true
+            isLoadingSessions: true,
+            availableSessions: [session]
         }]);
 
         setAvailableSessions(prev => prev.filter(s => s.id !== session.id));
@@ -99,7 +144,11 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
         try {
             const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
             const sessions = await getAvailableSessionsForProgram(programMatch.name);
-            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { ...p, availableSessions: sessions, isLoadingSessions: false } : p));
+            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { 
+                ...p, 
+                availableSessions: [session, ...sessions.filter((s:any) => s.id !== session.id)], 
+                isLoadingSessions: false 
+            } : p));
         } catch (err) {
             setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { ...p, isLoadingSessions: false } : p));
         }
@@ -129,8 +178,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
         if (selectedPrograms.length < 2) { setError('Please add at least 2 programs.'); return; }
 
         setIsSubmitting(true);
-        const result = await createCohort({
-            id: cohortId.trim() || undefined,
+        const result = await updateCohort(cohort.id, {
             name: name.trim(),
             description: description.trim() || undefined,
             startDate: startDate || undefined,
@@ -150,7 +198,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
             router.refresh();
             onClose();
         } else {
-            setError(result.error || 'Failed to create cohort.');
+            setError(result.error || 'Failed to update cohort.');
             setIsSubmitting(false);
         }
     };
@@ -167,13 +215,18 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                    <div>
-                        <h2 className="text-xl font-black text-slate-900 tracking-tight">Create Training Cohort</h2>
-                        <p className="text-slate-500 text-xs mt-0.5">Build a structured learning journey across multiple programs</p>
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-amber-50 text-amber-600 rounded-xl">
+                            <HiOutlinePencilSquare className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-black text-slate-900">Edit Cohort</h2>
+                            <p className="text-xs text-slate-500">Update metadata and programs for {cohort.name}</p>
+                        </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
                         <HiOutlineXMark className="w-5 h-5 text-slate-400" />
@@ -187,7 +240,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                         <div className="bg-red-50 text-red-600 p-3 rounded-xl text-sm font-medium">{error}</div>
                     )}
 
-                    {/* Name, Cohort ID & Description */}
+                    {/* Name & Description */}
                     <div className="space-y-4">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div className="sm:col-span-2 space-y-1.5">
@@ -195,21 +248,15 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                                 <input
                                     value={name}
                                     onChange={e => setName(e.target.value)}
-                                    placeholder="e.g. Inplant Batch 2026, Technicians Batch"
+                                    placeholder="e.g. Inplant Batch 2026"
                                     className="w-full p-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-medium transition-all"
                                 />
                             </div>
                             <div className="space-y-1.5">
-                                <label className="text-xs font-bold text-slate-700 uppercase flex items-center justify-between">
-                                    <span>Cohort ID</span>
-                                    <span className="text-[10px] text-slate-400 font-normal lowercase">optional</span>
-                                </label>
-                                <input
-                                    value={cohortId}
-                                    onChange={e => setCohortId(e.target.value)}
-                                    placeholder="e.g. CH-2026-001"
-                                    className="w-full p-3.5 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono transition-all"
-                                />
+                                <label className="text-xs font-bold text-slate-700 uppercase">Cohort ID</label>
+                                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl font-mono text-xs text-slate-600 truncate select-all flex items-center h-[46px]" title={cohort.id}>
+                                    {cohort.id}
+                                </div>
                             </div>
                         </div>
                         <div className="space-y-1.5">
@@ -304,7 +351,6 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                         </div>
                     </div>
 
-
                     {/* Selected Programs (Ordered) */}
                     <div className="space-y-2">
                         <label className="text-xs font-bold text-slate-700 uppercase">
@@ -344,7 +390,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                                                         <option value="">-- No session linked (Pending) --</option>
                                                         {program.availableSessions.map((s: any) => (
                                                             <option key={s.id} value={s.id}>
-                                                                {new Date(s.startDate).toLocaleDateString()} - {s.trainerName || 'No Trainer'} ({s.status})
+                                                                {s.startDate ? new Date(s.startDate).toLocaleDateString() : 'No Date'} - {s.trainerName || 'No Trainer'} ({s.status || 'Active'})
                                                             </option>
                                                         ))}
                                                     </select>
@@ -469,9 +515,9 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold transition-all disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-blue-200"
                     >
                         {isSubmitting ? (
-                            <><HiOutlineArrowPath className="w-4 h-4 animate-spin" /> Creating...</>
+                            <><HiOutlineArrowPath className="w-4 h-4 animate-spin" /> Saving...</>
                         ) : (
-                            'Create Cohort'
+                            'Save Changes'
                         )}
                     </button>
                 </div>

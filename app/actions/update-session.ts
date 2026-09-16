@@ -124,6 +124,7 @@ export async function updateSession(sessionId: string, formData: FormData) {
         }
 
         revalidatePath('/admin/sessions');
+        revalidatePath('/admin/tni-dashboard/calendar');
         revalidatePath('/calendar');
         revalidatePath('/admin/planning');
         revalidatePath(`/admin/sessions/${sessionId}/manage`);

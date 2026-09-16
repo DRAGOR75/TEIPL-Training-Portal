@@ -302,7 +302,7 @@ export async function sendManagerRejectionNotification(
   managerComment: string,
   trainerEmail?: string | null
 ) {
-  const coordinators = ['pln@thriveni.com', 'goraibaibhav161@gmail.com', 'ssd@thriveni.com'];
+  const coordinators = ['pln@thriveni.com', 'bvg@thriveni.com', 'ssd@thriveni.com'];
   if (trainerEmail) {
     coordinators.push(trainerEmail);
   }
@@ -499,8 +499,9 @@ export function generateBatchInvitationHtml(
 
   const dateStr = `${dateFormatter.format(startDate)} to ${dateFormatter.format(endDate)}`;
 
-  const rows = participants.map(p => `
+  const rows = participants.map((p, index) => `
     <tr>
+      <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">${index + 1}</td>
       <td style="border: 1px solid #ddd; padding: 8px;">${p.empId}</td>
       <td style="border: 1px solid #ddd; padding: 8px;">${p.name}</td>
       <td style="border: 1px solid #ddd; padding: 8px;">${p.designation || '-'}</td>
@@ -538,6 +539,7 @@ export function generateBatchInvitationHtml(
       <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
         <thead>
           <tr style="background-color: #0056b3; color: white;">
+            <th style="border: 1px solid #ddd; padding: 8px; text-align: center; width: 60px;">Sl No</th>
             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Emp Id</th>
             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Name</th>
             <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Designation</th>
