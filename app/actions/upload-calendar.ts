@@ -2,6 +2,7 @@
 
 import { db } from '@/lib/prisma';
 import { revalidateTag, revalidatePath } from 'next/cache';
+import { parseFlexibleDate } from '@/lib/date-utils';
 
 export interface CalendarUploadRecord {
     slNo?: string;
@@ -9,9 +10,13 @@ export interface CalendarUploadRecord {
     programName: string;
     altProgramName?: string | null;
     programId?: string;
+    progCategory?: string;
     startDate: string;
     endDate: string;
     days?: string;
+    trainingHours?: string;
+    sessionCategory?: string;
+    sessionId?: string;
     targetedGrade?: string;
     section?: string;
     trainerName?: string;
@@ -22,15 +27,27 @@ export interface CalendarUploadRecord {
 const parseDate = (dateStr: string): Date | null => {
     if (!dateStr || !dateStr.trim()) return null;
     
+    // Normalize narrow non-breaking space (from AM/PM like 12:00:00 AM) and other whitespace
+    let cleanedDateStr = dateStr.replace(/[\u202f\u00a0]/g, ' ').trim();
+
     // Remove day abbreviations (Mon, Tue, Wed, Thu, Fri, Sat, Sun)
-    // Matches word boundaries so it doesn't accidentally remove parts of other words
-    const cleanedDateStr = dateStr.replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi, '').trim();
+    cleanedDateStr = cleanedDateStr.replace(/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun)\b/gi, '').trim();
     
-    const parsed = new Date(cleanedDateStr);
-    if (isNaN(parsed.getTime())) {
-        return null;
+    let parsed = new Date(cleanedDateStr);
+    if (!isNaN(parsed.getTime())) {
+        return parsed;
     }
-    return parsed;
+
+    // Fallback to parseFlexibleDate (e.g. DD-MMM-YY, DD/MM/YYYY, etc.)
+    const flex = parseFlexibleDate(cleanedDateStr);
+    if (flex) {
+        parsed = new Date(flex);
+        if (!isNaN(parsed.getTime())) {
+            return parsed;
+        }
+    }
+
+    return null;
 };
 
 export async function processCalendarBatch(records: CalendarUploadRecord[]) {
@@ -58,6 +75,18 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
                 continue;
             }
 
+            // If custom sessionId is provided, check if it already exists
+            const customSessionId = record.sessionId?.trim();
+            if (customSessionId) {
+                const existingSession = await db.trainingSession.findUnique({
+                    where: { id: customSessionId }
+                });
+                if (existingSession) {
+                    errors.push(`Row ${index + 1}: Session ID "${customSessionId}" already exists in the system.`);
+                    continue;
+                }
+            }
+
             // Find Program by exact name or ID
             let program = null;
             if (record.programId) {
@@ -73,10 +102,12 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
 
             // Create a stub program if it doesn't exist
             if (!program) {
+                const validCategories = ['SAFETY_PROGRAMS', 'HEMM_PROGRAMS', 'BEHAVIOURAL_PROGRAMS', 'FUNCTIONAL_PROGRAMS', 'COMMON_PROGRAMS', 'OTHER_PROGRAMS'];
+                const matchedCat = validCategories.find(c => c.toLowerCase() === record.progCategory?.trim().toLowerCase());
                 program = await db.program.create({
                     data: {
                         name: record.programName.trim(),
-                        category: 'OTHER_PROGRAMS', // Default
+                        category: (matchedCat as any) || 'OTHER_PROGRAMS', // Default
                     }
                 });
             }
@@ -149,6 +180,13 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
                 continue;
             }
 
+            // Auto-calculate Assessment Date (+30 days)
+            const feedbackCreationDate = new Date(end.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            // Parse numeric days and hours if present
+            const parsedDays = record.days ? parseFloat(record.days.toString()) : undefined;
+            const parsedHours = record.trainingHours ? parseFloat(record.trainingHours.toString()) : undefined;
+
             // Use transaction to ensure both batch and session are created together
             await db.$transaction(async (tx) => {
                 const batch = await tx.nominationBatch.create({
@@ -166,13 +204,19 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
 
                 await tx.trainingSession.create({
                     data: {
+                        ...(customSessionId ? { id: customSessionId } : {}),
                         programName: program.name,
                         trainerName: record.trainerName?.trim() || 'TBD',
                         startDate: start,
                         endDate: end,
                         location: record.location?.trim() || 'TBD',
+                        trainingDays: isNaN(parsedDays as number) ? undefined : parsedDays,
+                        trainingHours: isNaN(parsedHours as number) ? undefined : parsedHours,
+                        sessionCategory: record.sessionCategory?.trim() || undefined,
                         nominationBatchId: batch.id,
                         requireManagerApproval: false,
+                        feedbackCreationDate: feedbackCreationDate,
+                        assessmentDate: feedbackCreationDate,
                     }
                 });
             });

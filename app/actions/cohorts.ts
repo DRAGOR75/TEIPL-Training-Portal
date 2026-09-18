@@ -1036,6 +1036,27 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                 }
 
                 if (!resolvedProgramId) {
+                    const fallbackName = progData.programName?.trim() || linkedSession?.programName?.trim();
+                    if (fallbackName) {
+                        try {
+                            const newProg = await db.program.create({
+                                data: {
+                                    name: fallbackName,
+                                    category: 'OTHER_PROGRAMS',
+                                }
+                            });
+                            programMap.set(newProg.name.trim().toLowerCase(), { id: newProg.id, name: newProg.name });
+                            resolvedProgramId = newProg.id;
+                        } catch (err: any) {
+                            const found = await db.program.findFirst({
+                                where: { name: { equals: fallbackName, mode: 'insensitive' } }
+                            });
+                            if (found) resolvedProgramId = found.id;
+                        }
+                    }
+                }
+
+                if (!resolvedProgramId) {
                     errors.push(`Cohort "${cohort.name}": Could not find program in catalog for entry with program "${progData.programName || progData.programId || 'Unknown'}" or session "${progData.sessionId || ''}".`);
                     continue;
                 }

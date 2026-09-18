@@ -125,9 +125,9 @@ export default function BulkUploadCohortsModal({ onClose }: BulkUploadCohortsMod
             location: findField(['Location', 'Region', 'Place', 'Training Location']),
             totalParticipants: findField(['Number of Participants', 'No of Participants', 'No. of Participants', 'Num Participants', 'Total Participants', 'Participants', 'Total No of Participants', 'Batch Size']),
             duration: findField(['Trg Days', 'Training Days', 'TrgDays', 'No of Days', 'Number of Days', 'Duration', 'Duration Days', 'Duration (Days)', 'Days']),
-            programName: findField(['Program Name', 'ProgramName', 'Program', 'Subject']),
+            programName: findField(['Program Name', 'ProgramName', 'Program', 'Subject', 'Session Name', 'session_name', 'session _name', 'SessionName']),
             programId: findField(['Program ID', 'ProgramId']),
-            sessionId: findField(['Session ID', 'SessionId', 'Linked Session ID', 'Session']),
+            sessionId: findField(['Session ID', 'SessionId', 'Linked Session ID', 'Session', 'session_id']),
             seq: findField(['Sequence', 'Seq', 'Order']),
         };
 
