@@ -26,21 +26,69 @@ export default function UploadCalendarPage() {
             skipEmptyLines: true,
             transformHeader: (header) => header.trim(),
             complete: (results) => {
-                const parsedRecords: CalendarUploadRecord[] = results.data.map((row: any) => {
+                const rawObjects = results.data as any[];
+                if (!rawObjects || rawObjects.length === 0) {
+                    setStatus('error');
+                    setErrorMessage('The file contains no data rows.');
+                    return;
+                }
+
+                const headers = Object.keys(rawObjects[0] || {});
+                const findField = (aliases: string[]) =>
+                    headers.find(h =>
+                        aliases.some(alias =>
+                            h.toLowerCase().replace(/[^a-z0-9]/g, '') === alias.toLowerCase().replace(/[^a-z0-9]/g, '')
+                        )
+                    );
+
+                const mapHeader = {
+                    slNo: findField(['Sl. No.', 'Sl No', 'sl_no', 'SNo', 'Serial No', 'Sl']),
+                    month: findField(['Month', 'month']),
+                    programName: findField(['Program name', 'Program Name', 'program_name', 'Program', 'Subject', 'Training Program', 'Course']),
+                    programId: findField(['Program id', 'Program ID', 'program_id', 'ProgramId']),
+                    startDate: findField(['Start Date', 'StartDate', 'start_date', 'start_date (Date)', 'Start', 'Trg Start Date', 'Training Start Date']),
+                    endDate: findField(['End Date', 'EndDate', 'end_date', 'End', 'Trg End Date', 'Training End Date']),
+                    days: findField(['Trg Days', 'Training Days', 'Days', 'days', 'Duration', 'TrgDays']),
+                    trainingHours: findField(['Trg Hours', 'Training Hours', 'Hours', 'hours', 'TrgHours']),
+                    sessionCategory: findField(['Session Category', 'session_category', 'Category', 'Template Type']),
+                    progCategory: findField(['Prog Category', 'prog_category', 'Program Category']),
+                    sessionId: findField(['Session ID', 'SessionId', 'session_id', 'Session', 'ID', 'Batch ID']),
+                    targetedGrade: findField(['Targeted Grade', 'Target Grade', 'Grade', 'targeted_grade']),
+                    section: findField(['Section', 'section', 'Department']),
+                    location: findField(['Location', 'location', 'Venue', 'Region', 'Place', 'Training Location']),
+                    trainerName: findField(['Trainer Name', 'TrainerName', 'trainer_name', 'Trainer', 'Faculty', 'Instructor']),
+                };
+
+                const parsedRecords: CalendarUploadRecord[] = rawObjects.map((row: any) => {
+                    const progName = mapHeader.programName ? row[mapHeader.programName]?.toString().trim() : '';
+                    const sDate = mapHeader.startDate ? row[mapHeader.startDate]?.toString().trim() : '';
+                    const eDate = mapHeader.endDate ? row[mapHeader.endDate]?.toString().trim() : '';
+                    const sId = mapHeader.sessionId ? row[mapHeader.sessionId]?.toString().trim() : '';
+
                     return {
-                        slNo: row['Sl. No.']?.trim() || row['Sl No']?.trim() || '',
-                        month: row['Month']?.trim() || '',
-                        programName: row['Program name']?.trim() || row['Program Name']?.trim() || '',
-                        programId: row['Program id']?.trim() || row['Program ID']?.trim() || '',
-                        startDate: row['Start Date']?.trim() || '',
-                        endDate: row['End Date']?.trim() || '',
-                        days: row['Days']?.trim() || '',
-                        targetedGrade: row['Targeted Grade']?.trim() || '',
-                        section: row['Section']?.trim() || '',
-                        location: row['Location']?.trim() || '',
-                        trainerName: row['Trainer Name']?.trim() || '',
+                        slNo: mapHeader.slNo ? row[mapHeader.slNo]?.toString().trim() : '',
+                        month: mapHeader.month ? row[mapHeader.month]?.toString().trim() : '',
+                        programName: progName || '',
+                        programId: mapHeader.programId ? row[mapHeader.programId]?.toString().trim() : '',
+                        progCategory: mapHeader.progCategory ? row[mapHeader.progCategory]?.toString().trim() : '',
+                        startDate: sDate || '',
+                        endDate: eDate || '',
+                        days: mapHeader.days ? row[mapHeader.days]?.toString().trim() : '',
+                        trainingHours: mapHeader.trainingHours ? row[mapHeader.trainingHours]?.toString().trim() : '',
+                        sessionCategory: mapHeader.sessionCategory ? row[mapHeader.sessionCategory]?.toString().trim() : '',
+                        sessionId: sId || '',
+                        targetedGrade: mapHeader.targetedGrade ? row[mapHeader.targetedGrade]?.toString().trim() : '',
+                        section: mapHeader.section ? row[mapHeader.section]?.toString().trim() : '',
+                        location: mapHeader.location ? row[mapHeader.location]?.toString().trim() : '',
+                        trainerName: mapHeader.trainerName ? row[mapHeader.trainerName]?.toString().trim() : '',
                     };
-                }).filter(r => r.programName && r.startDate && r.endDate); // Basic validation
+                }).filter(r => r.programName && r.startDate && r.endDate);
+
+                if (parsedRecords.length === 0) {
+                    setStatus('error');
+                    setErrorMessage(`Could not find valid sessions. Please ensure columns for "Program Name", "Start Date", and "End Date" exist. Detected columns: [${headers.join(', ')}]`);
+                    return;
+                }
 
                 setRecords(parsedRecords);
                 setStatus('idle');
@@ -113,7 +161,7 @@ export default function UploadCalendarPage() {
     };
 
     const downloadSample = () => {
-        const csvContent = "data:text/csv;charset=utf-8,Sl. No.,Month,Program name,Program id,Start Date,End Date,Days,Targeted Grade,Section,Trainer Name,Location\n1,Jun 2026,HEMM Maintenance,HEM08,18 Jun 2026 Thu,20 Jun 2026 Sat,3,Workman,HEMM Common,Mr. Mrinal,PB\n2,Jun 2026,Safety Compliance,SAF01,23 Jun 2026 Tue,25 Jun 2026 Thu,3,Executive,Safety Dept,John Doe,PB";
+        const csvContent = "data:text/csv;charset=utf-8,Session ID,Program Name,Category,Start Date,End Date,Trainer Name,Location,Days\n40930,DGMS Safety Norms,Safety,Jun 30 2026,Jun 30 2026,Pradip Kumar,TRC,1\n40940,Excavators - Electrical Drive,Technical,Jun 30 2026,Jul 02 2026,Sandeep Soni,TRC,3";
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -251,34 +299,64 @@ export default function UploadCalendarPage() {
                             <table className="w-full text-sm text-left">
                                 <thead className="bg-slate-50 text-slate-400 font-black uppercase tracking-wider text-[10px] border-b border-slate-200">
                                     <tr>
+                                        {records.some(r => r.sessionId) && (
+                                            <th className="px-6 py-4">Session ID</th>
+                                        )}
                                         <th className="px-6 py-4">Program Name</th>
-                                        <th className="px-6 py-4">Start Date</th>
-                                        <th className="px-6 py-4">End Date</th>
+                                        <th className="px-6 py-4">Dates</th>
                                         <th className="px-6 py-4">Trainer</th>
-                                        <th className="px-6 py-4">Section</th>
                                         <th className="px-6 py-4">Location</th>
+                                        <th className="px-6 py-4">Category / Details</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100">
                                     {records.slice(0, 100).map((record, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                                            {records.some(r => r.sessionId) && (
+                                                <td className="px-6 py-4">
+                                                    {record.sessionId ? (
+                                                        <span className="font-mono bg-blue-50 text-blue-700 px-2.5 py-1 rounded-lg text-xs font-bold border border-blue-200">
+                                                            {record.sessionId}
+                                                        </span>
+                                                    ) : (
+                                                        <span className="text-slate-300 italic text-xs">Auto UUID</span>
+                                                    )}
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4">
                                                 <div className="text-slate-900 font-bold">{record.altProgramName || record.programName}</div>
+                                                {record.section && (
+                                                    <div className="text-xs text-slate-400 font-medium">{record.section}</div>
+                                                )}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <div className="text-slate-600 font-medium font-mono">{record.startDate}</div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <div className="text-slate-600 font-medium font-mono">{record.endDate}</div>
+                                                <div className="text-slate-700 font-medium font-mono text-xs">{record.startDate}</div>
+                                                <div className="text-slate-400 font-mono text-[11px]">to {record.endDate}</div>
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
                                                 {record.trainerName || 'TBD'}
                                             </td>
                                             <td className="px-6 py-4 text-slate-600 font-medium">
-                                                {record.section || 'N/A'}
-                                            </td>
-                                            <td className="px-6 py-4 text-slate-600 font-medium">
                                                 {record.location || 'TBD'}
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    {record.sessionCategory && (
+                                                        <span className="bg-purple-50 text-purple-700 px-2 py-0.5 rounded text-[11px] font-semibold">
+                                                            {record.sessionCategory}
+                                                        </span>
+                                                    )}
+                                                    {record.days && (
+                                                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-medium">
+                                                            {record.days}d
+                                                        </span>
+                                                    )}
+                                                    {record.trainingHours && (
+                                                        <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-medium">
+                                                            {record.trainingHours}h
+                                                        </span>
+                                                    )}
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
