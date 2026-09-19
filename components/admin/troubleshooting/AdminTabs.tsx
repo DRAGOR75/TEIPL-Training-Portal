@@ -6,13 +6,15 @@ import {
     HiOutlineExclamationTriangle,
     HiOutlineClipboardDocumentCheck,
     HiOutlineRectangleGroup,
-    HiOutlineCloudArrowUp
+    HiOutlineCloudArrowUp,
+    HiOutlineChartBar
 } from 'react-icons/hi2';
 import ProductManager from './ProductManager';
 import FaultManager from './FaultManager';
 import CauseManager from './CauseManager';
 import DiagnosticSequencer from './DiagnosticSequencer';
 import BulkUploader from './BulkUploader';
+import TroubleshootingAnalytics from './TroubleshootingAnalytics';
 
 // Types for the props (using any for now to match the implicit types, or ideally import from prisma)
 interface AdminTabsProps {
@@ -22,9 +24,10 @@ interface AdminTabsProps {
 }
 
 export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsProps) {
-    const [activeTab, setActiveTab] = useState('products');
+    const [activeTab, setActiveTab] = useState('analytics');
 
     const tabs = [
+        { id: 'analytics', label: 'Live Analytics', icon: HiOutlineChartBar },
         { id: 'products', label: 'Machine Manager', icon: HiOutlineSquare3Stack3D },
         { id: 'faults', label: 'Fault Manager', icon: HiOutlineExclamationTriangle },
         { id: 'sequencer', label: 'Cause Manager', icon: HiOutlineRectangleGroup },
@@ -51,6 +54,9 @@ export default function AdminTabs({ products, faultLib, causeLib }: AdminTabsPro
             </div>
 
             <div className="animate-in fade-in zoom-in-95 duration-200">
+                {activeTab === 'analytics' && (
+                    <TroubleshootingAnalytics />
+                )}
                 {activeTab === 'sequencer' && (
                     <DiagnosticSequencer
                         products={products}

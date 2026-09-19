@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { auth } from "@/auth";
-import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({
     variable: "--font-inter",
@@ -81,7 +80,6 @@ export default async function RootLayout({
                 <Navbar session={session} hostname={host} />
                 <PWACleanup hostname={host} />
                 {children}
-                <SpeedInsights />
             </body>
         </html>
     );
