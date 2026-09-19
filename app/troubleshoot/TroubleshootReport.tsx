@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TroubleshootingProduct, ProductFault, FaultLibrary, FaultCause, CauseLibrary } from '@prisma/client';
-import { getFaultsForProduct, getCausesForFault, logTroubleshootingEvent } from '@/app/actions/troubleshooting';
+import { getFaultsForProduct, getCausesForFault, logTroubleshootingEvent, logTroubleshootingVisit } from '@/app/actions/troubleshooting';
 import {
     HiOutlineWrench,
     HiOutlineMagnifyingGlass,
@@ -59,6 +59,11 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
     const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
     const [isSymptomsExpanded, setIsSymptomsExpanded] = useState(false);
 
+    // Telemetry: Log initial page view
+    useEffect(() => {
+        logTroubleshootingVisit({ path: '/' }).catch(() => {});
+    }, []);
+
     const toggleStep = (index: number) => {
         setExpandedSteps(prev => ({
             ...prev,
@@ -80,6 +85,13 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
         setSelectedFaultId(null);
         setDiagnosis(null);
         setLoadingFaults(true);
+
+        const matchedProduct = products.find(p => p.id === id);
+        logTroubleshootingVisit({
+            path: `/product/${id}`,
+            productId: id,
+            productName: matchedProduct?.name
+        }).catch(() => {});
 
         try {
             const { success, data } = await getFaultsForProduct(id);
@@ -105,6 +117,16 @@ export default function TroubleshootReport({ products }: TroubleshootReportProps
 
         setSelectedFaultId(productFaultId);
         setLoadingDiagnosis(true);
+
+        const matchedFault = faults.find(f => f.id === productFaultId);
+        const matchedProduct = products.find(p => p.id === selectedProductId);
+        logTroubleshootingVisit({
+            path: `/fault/${productFaultId}`,
+            productId: selectedProductId || undefined,
+            productName: matchedProduct?.name,
+            faultId: productFaultId,
+            faultName: matchedFault?.fault?.name
+        }).catch(() => {});
 
         try {
             const { success, data } = await getCausesForFault(productFaultId);

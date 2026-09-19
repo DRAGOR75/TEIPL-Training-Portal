@@ -77,7 +77,7 @@ export default function Navbar({ session, hostname = '' }: { session: Session | 
                                 <NavLink href="/trainer" icon={<HiOutlineClipboardDocumentList size={18} />} text="Trainer Hub" />
                                 <NavLink href="/calendar" icon={<HiOutlineCalendarDays size={18} />} text="Calendar" />
                                 <NavLink href="/trainer/reports" icon={<HiOutlineChartBar size={18} />} text="Reports" />
-                                <a 
+                                <a
                                     href="https://drive.google.com/file/d/1zki4mlepeFs7j_KILirR64kNcWkwuMeO/view?usp=drive_link"
                                     target="_blank"
                                     rel="noopener noreferrer"
@@ -179,7 +179,7 @@ const ADMIN_TABS = [
     { id: 'troubleshooting', label: 'Diagnostics', href: '/admin/troubleshooting', icon: HiOutlineWrench },
     { id: 'manuals', label: 'Manuals', href: '/training-manuals', icon: HiOutlineBookOpen },
     { id: 'sessions', label: 'Sessions', href: '/admin/sessions', icon: HiOutlineUsers },
-    { id: 'planning', label: 'Calendar', href: '/admin/planning', icon: HiOutlineCalendarDays },
+    { id: 'planning', label: 'Calendar', href: '/admin/tni-dashboard/calendar', icon: HiOutlineCalendarDays },
     { id: 'reports', label: 'Reports', href: '/admin/reports', icon: HiOutlineChartBar },
     { id: 'email', label: 'Bulk Email', href: '/admin/bulk-email', icon: HiOutlinePaperAirplane },
 ];

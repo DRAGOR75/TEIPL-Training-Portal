@@ -100,26 +100,10 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
                 });
             }
 
-            // Create a stub program if it doesn't exist
+            // Reject if program does not exist in master catalog
             if (!program) {
-                const validCategories = ['SAFETY_PROGRAMS', 'HEMM_PROGRAMS', 'BEHAVIOURAL_PROGRAMS', 'FUNCTIONAL_PROGRAMS', 'COMMON_PROGRAMS', 'OTHER_PROGRAMS'];
-                const matchedCat = validCategories.find(c => c.toLowerCase() === record.progCategory?.trim().toLowerCase());
-                program = await db.program.create({
-                    data: {
-                        name: record.programName.trim(),
-                        category: (matchedCat as any) || 'OTHER_PROGRAMS', // Default
-                    }
-                });
-            }
-
-            // Map Location to the Location table to ensure it exists for Gantt chart mapping
-            if (record.location && record.location.trim()) {
-                const locName = record.location.trim();
-                await db.location.upsert({
-                    where: { name: locName },
-                    update: {},
-                    create: { name: locName }
-                });
+                errors.push(`Row ${index + 1}: Program "${record.programName}" not found in catalog.`);
+                continue;
             }
 
             // Map Section to the Program (DO NOT map it to Location)
@@ -129,37 +113,16 @@ export async function processCalendarBatch(records: CalendarUploadRecord[]) {
                     where: { name: sectionName }
                 });
 
-                if (!sectionObj) {
-                    sectionObj = await db.section.create({
-                        data: { name: sectionName }
-                    });
-                }
-
-                // Link the section to the program
-                await db.program.update({
-                    where: { id: program.id },
-                    data: {
-                        sections: {
-                            connect: { id: sectionObj.id }
+                if (sectionObj) {
+                    // Link the section to the program if not already connected
+                    await db.program.update({
+                        where: { id: program.id },
+                        data: {
+                            sections: {
+                                connect: { id: sectionObj.id }
+                            }
                         }
-                    }
-                });
-            }
-
-            // Upsert Trainers to ensure they exist for Gantt chart mapping
-            if (record.trainerName && record.trainerName.trim()) {
-                // Split by comma, ampersand, or the word 'and'
-                const sessionTrainers = record.trainerName
-                    .split(/,|&|\band\b/i)
-                    .map(t => t.trim())
-                    .filter(t => t.length > 0);
-                
-                for (const tName of sessionTrainers) {
-                    await db.trainer.upsert({
-                        where: { name: tName },
-                        update: {},
-                        create: { name: tName }
-                    });
+                    }).catch(() => {});
                 }
             }
 
