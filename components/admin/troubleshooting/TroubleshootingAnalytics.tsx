@@ -121,18 +121,15 @@ export default function TroubleshootingAnalytics() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-6 rounded-3xl shadow-xl">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="flex h-2.5 w-2.5 relative">
+                        <span className="flex h-2 w-2 relative">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                         </span>
-                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Live Telemetry Active</span>
-                        <span className="bg-slate-700/80 text-slate-300 text-xs px-2.5 py-0.5 rounded-full border border-slate-600">
-                            100% Free • Internal Postgres
-                        </span>
+                        <span className="text-xs font-semibold text-emerald-400">Live</span>
                     </div>
                     <h2 className="text-xl md:text-2xl font-black tracking-tight">HEMM Diagnostics Analytics</h2>
                     <p className="text-xs md:text-sm text-slate-300 mt-0.5">
-                        Monitoring traffic and technician investigations on <code className="bg-slate-800 text-red-400 font-mono px-1.5 py-0.5 rounded">hemmts.academythriveni.com</code>
+                        Monitoring traffic on <code className="bg-slate-800 text-red-400 font-mono px-1.5 py-0.5 rounded">hemmts.academythriveni.com</code>
                     </p>
                 </div>
 
@@ -160,7 +157,7 @@ export default function TroubleshootingAnalytics() {
                     </div>
                     <div className="mt-3">
                         <span className="text-3xl font-black text-slate-900 tracking-tight">{data.totalVisits.toLocaleString()}</span>
-                        <span className="text-xs font-semibold text-slate-400 ml-1.5">all-time logs</span>
+                        <span className="text-xs font-semibold text-slate-400 ml-1.5">all-time</span>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-2.5">
                         <HiOutlineCalendar className="w-3.5 h-3.5 text-slate-400" />
@@ -171,14 +168,14 @@ export default function TroubleshootingAnalytics() {
                 {/* Unique Technicians / Devices */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Unique Technicians</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Unique Visitors</span>
                         <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                             <HiOutlineUsers className="w-5 h-5" />
                         </div>
                     </div>
                     <div className="mt-3">
                         <span className="text-3xl font-black text-slate-900 tracking-tight">{data.uniqueAll.toLocaleString()}</span>
-                        <span className="text-xs font-semibold text-slate-400 ml-1.5">active devices</span>
+                        <span className="text-xs font-semibold text-slate-400 ml-1.5">devices</span>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-2.5">
                         <HiOutlineCheckBadge className="w-3.5 h-3.5 text-emerald-500" />
@@ -196,29 +193,29 @@ export default function TroubleshootingAnalytics() {
                     </div>
                     <div className="mt-3">
                         <span className="text-3xl font-black text-slate-900 tracking-tight">{data.visitsToday.toLocaleString()}</span>
-                        <span className="text-xs font-semibold text-slate-400 ml-1.5">actions today</span>
+                        <span className="text-xs font-semibold text-slate-400 ml-1.5">today</span>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-2.5">
                         <HiOutlineUsers className="w-3.5 h-3.5 text-amber-500" />
-                        <span>Active today: <strong className="text-amber-700 font-bold">{data.uniqueToday} technicians</strong></span>
+                        <span>Active today: <strong className="text-amber-700 font-bold">{data.uniqueToday} devices</strong></span>
                     </div>
                 </div>
 
                 {/* Technician Satisfaction */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm relative overflow-hidden group hover:border-slate-300 transition-all">
                     <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Technician Rating</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">User Rating</span>
                         <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center">
                             <HiOutlineStar className="w-5 h-5 fill-purple-600" />
                         </div>
                     </div>
                     <div className="mt-3 flex items-baseline gap-2">
                         <span className="text-3xl font-black text-slate-900 tracking-tight">{data.feedbackRating}</span>
-                        <span className="text-sm font-bold text-amber-500">/ 5.0 ⭐</span>
+                        <span className="text-sm font-bold text-amber-500">/ 5.0</span>
                     </div>
                     <div className="mt-3 flex items-center gap-2 text-xs text-slate-500 border-t border-slate-100 pt-2.5">
                         <HiOutlineSparkles className="w-3.5 h-3.5 text-purple-400" />
-                        <span>From <strong className="text-purple-700 font-bold">{data.feedbackCount} feedback submissions</strong></span>
+                        <span>Based on <strong className="text-purple-700 font-bold">{data.feedbackCount} reviews</strong></span>
                     </div>
                 </div>
             </div>
@@ -230,10 +227,9 @@ export default function TroubleshootingAnalytics() {
                     <div>
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-base font-bold text-slate-900">Device Breakdown</h3>
-                            <span className="text-xs font-semibold text-slate-400">Pit vs Desk</span>
                         </div>
                         <p className="text-xs text-slate-500 mb-6">
-                            Technicians in pit operations predominantly use mobile phones, while supervisors view on desktop workstations.
+                            Breakdown of technician diagnostic sessions across mobile, tablet, and desktop devices.
                         </p>
 
                         <div className="space-y-4">
@@ -268,22 +264,15 @@ export default function TroubleshootingAnalytics() {
                             )}
                         </div>
                     </div>
-
-                    <div className="mt-6 pt-4 border-t border-slate-100 bg-slate-50 -mx-6 -mb-6 p-4 rounded-b-3xl">
-                        <p className="text-[11px] text-slate-500 leading-relaxed">
-                            💡 <strong>Insight:</strong> Mobile-friendly troubleshooting guides ensure operators and field mechanics can diagnose breakdowns directly inside the pit.
-                        </p>
-                    </div>
                 </div>
 
                 {/* Top Diagnosed Machines */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-base font-bold text-slate-900">Top Diagnosed Machines</h3>
-                        <span className="text-xs font-semibold text-slate-400">By Selection</span>
                     </div>
                     <p className="text-xs text-slate-500 mb-6">
-                        Equipment models most frequently selected for fault diagnoses by technicians.
+                        Equipment models most frequently selected for fault diagnoses.
                     </p>
 
                     <div className="space-y-3.5">
@@ -320,7 +309,6 @@ export default function TroubleshootingAnalytics() {
                 <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="text-base font-bold text-slate-900">Top Investigated Faults</h3>
-                        <span className="text-xs font-semibold text-slate-400">By Frequency</span>
                     </div>
                     <p className="text-xs text-slate-500 mb-6">
                         Most common symptoms and alarms technicians looked up solutions for.
