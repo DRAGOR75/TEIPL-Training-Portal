@@ -367,12 +367,12 @@ export default function FinalizeAttendanceModal({
                                 <option value="AC ELECTRICAL">AC ELECTRICAL</option>
                                 <option value="HEMM">HEMM</option>
                                 <option value="HEMM LS">HEMM LS</option>
-                                <option value="HEMM AUTO ELECT">HEMM AUTO ELECT</option>
+                                <option value="HEMM AUTOELECTRICAL">HEMM AUTOELECTRICAL</option>
                                 <option value="STORES AND PROCUREMENT">STORES AND PROCUREMENT</option>
                                 <option value="OPERATORS">OPERATORS</option>
                                 <option value="HR/ADMIN/FINANCE">HR/ADMIN/FINANCE</option>
                                 <option value="OTHERS/UNDEFINED">OTHERS/UNDEFINED</option>
-                                <option value="C&S">C&S</option>
+                                <option value="CRUSHER & SCREENING">CRUSHER & SCREENING</option>
                                 <option value="MINING">MINING</option>
                             </select>
                         </div>

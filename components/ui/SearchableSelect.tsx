@@ -172,7 +172,7 @@ export default function SearchableSelect({
                     </div>
                 )}
 
-                <div className={`flex-1 flex flex-col min-w-0 ${icon ? 'pl-11' : 'pl-3'} py-1.5`}>
+                <div className={`flex-1 flex flex-col justify-center min-w-0 ${icon ? 'pl-11' : 'pl-3.5'} py-2`}>
                     {!isOpen || isMulti ? (
                         <div className="w-full text-left text-sm min-w-0 leading-snug">
                             {renderSelected()}
@@ -193,7 +193,7 @@ export default function SearchableSelect({
                     )}
                 </div>
 
-                <div className="pr-4 flex items-center gap-2 text-slate-400 self-start mt-3">
+                <div className={`pr-3.5 flex items-center gap-2 text-slate-400 ${isMulti ? 'self-start mt-3' : 'self-center'}`}>
                     {((isMulti ? Array.isArray(value) && value.length > 0 : value) || searchQuery) && !disabled && (
                         <div
                             onClick={handleClear}
