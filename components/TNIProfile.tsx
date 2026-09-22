@@ -391,7 +391,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
                                 { label: 'HEMM', value: 'HEMM' },
                                 { label: 'HEMM LS', value: 'HEMM LS' },
-                                { label: 'HEMM AUTO ELECT', value: 'HEMM AUTO ELECT' },
+                                { label: 'HEMM AUTOELECTRICAL', value: 'HEMM AUTOELECTRICAL' },
                                 { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
                                 { label: 'OPERATORS', value: 'OPERATORS' },
                                 { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },

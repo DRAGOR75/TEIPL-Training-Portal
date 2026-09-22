@@ -182,8 +182,16 @@ export default function ManagementClient({ session, pendingNominations, batchId 
                             <div className="space-y-3">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-slate-500">Status</span>
-                                    <span className="font-medium text-slate-900 bg-green-50 text-green-700 px-2 py-0.5 rounded">
-                                        {session.nominationBatch?.status}
+                                    <span className={`font-medium px-2 py-0.5 rounded ${
+                                        (session.status?.toLowerCase() === 'cancelled' || session.nominationBatch?.status?.toLowerCase() === 'cancelled')
+                                            ? 'bg-red-50 text-red-700'
+                                            : (session.status?.toLowerCase() === 'completed' || session.nominationBatch?.status?.toLowerCase() === 'completed')
+                                            ? 'bg-emerald-50 text-emerald-700'
+                                            : 'bg-blue-50 text-blue-700'
+                                    }`}>
+                                        {(session.status?.toLowerCase() === 'cancelled' || session.nominationBatch?.status?.toLowerCase() === 'cancelled')
+                                            ? 'Cancelled'
+                                            : session.nominationBatch?.status || session.status || 'Scheduled'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-sm">
