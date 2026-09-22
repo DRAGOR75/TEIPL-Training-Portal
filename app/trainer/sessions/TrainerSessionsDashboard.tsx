@@ -22,7 +22,8 @@ import {
     HiOutlineClipboard,
     HiOutlinePhoto,
     HiOutlineCheck,
-    HiOutlineMapPin
+    HiOutlineMapPin,
+    HiOutlineXCircle
 } from 'react-icons/hi2';
 import { getTrainingSessionsForDate } from '@/app/actions/sessions';
 import { SessionWithDetails } from '@/types/sessions';
@@ -260,14 +261,14 @@ export default function TrainerSessionsDashboard({
                                     <div>
                                         <p className="text-blue-200 text-[10px] font-black uppercase tracking-widest mb-1">Active</p>
                                         <h3 className="text-4xl font-black">
-                                            {sessions.filter(s => s.nominationBatch?.status !== 'Completed').length}
+                                            {sessions.filter(s => s.nominationBatch?.status?.toLowerCase() !== 'completed' && s.nominationBatch?.status?.toLowerCase() !== 'cancelled' && s.status?.toLowerCase() !== 'cancelled').length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80">In Progress</div>
                                     </div>
                                     <div className="border-l border-blue-500/30 pl-8">
                                         <p className="text-emerald-200 text-[10px] font-black uppercase tracking-widest mb-1">Completed</p>
                                         <h3 className="text-4xl font-black text-emerald-100">
-                                            {sessions.filter(s => s.nominationBatch?.status === 'Completed').length}
+                                            {sessions.filter(s => s.nominationBatch?.status?.toLowerCase() === 'completed' || s.status?.toLowerCase() === 'completed').length}
                                         </h3>
                                         <div className="mt-2 text-[10px] font-medium opacity-80 text-emerald-100">Finished</div>
                                     </div>
@@ -322,14 +323,34 @@ export default function TrainerSessionsDashboard({
                                                         <h3 className="font-black text-lg text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
                                                             {session.altProgramName || session.programName}
                                                         </h3>
-                                                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 border ${session.nominationBatch?.status === 'Completed'
-                                                            ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
-                                                            : 'bg-blue-100 text-blue-700 border-blue-200'
-                                                            }`}>
-                                                            {session.nominationBatch?.status === 'Completed' ? <HiOutlineCheckCircle size={10} /> : <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />}
-                                                            {session.nominationBatch?.status || 'Scheduled'}
-                                                        </span>
+                                                        {(() => {
+                                                            const isCancelled = session.status?.toLowerCase() === 'cancelled' || session.nominationBatch?.status?.toLowerCase() === 'cancelled';
+                                                            const isCompleted = !isCancelled && (session.nominationBatch?.status?.toLowerCase() === 'completed' || session.status?.toLowerCase() === 'completed');
+                                                            return (
+                                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide flex items-center gap-1 border ${
+                                                                    isCancelled
+                                                                        ? 'bg-red-100 text-red-700 border-red-200'
+                                                                        : isCompleted
+                                                                        ? 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                                                                        : 'bg-blue-100 text-blue-700 border-blue-200'
+                                                                }`}>
+                                                                    {isCancelled ? (
+                                                                        <HiOutlineXCircle size={10} />
+                                                                    ) : isCompleted ? (
+                                                                        <HiOutlineCheckCircle size={10} />
+                                                                    ) : (
+                                                                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+                                                                    )}
+                                                                    {isCancelled ? 'Cancelled' : (session.nominationBatch?.status || session.status || 'Scheduled')}
+                                                                </span>
+                                                            );
+                                                        })()}
                                                     </div>
+                                                    {(session.status?.toLowerCase() === 'cancelled' || session.nominationBatch?.status?.toLowerCase() === 'cancelled') && session.cancellationReason && (
+                                                        <p className="text-xs text-red-600 font-medium italic mt-1">
+                                                            Reason: {session.cancellationReason}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
 

@@ -471,7 +471,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
     const [designationMode, setDesignationMode] = useState<'select' | 'custom'>('select');
 
     const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
-    
+
     useEffect(() => {
         getDesignations().then(desigs => setDesignationOptions(desigs));
     }, []);
@@ -499,13 +499,13 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-1">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
-                            <input 
-                                name="id" 
-                                required 
-                                defaultValue={employee?.id} 
+                            <input
+                                name="id"
+                                required
+                                defaultValue={employee?.id}
                                 readOnly={isEdit}
-                                placeholder="E.g. E00123" 
-                                className={`w-full p-3 border border-slate-200 rounded-xl text-sm outline-none transition-all ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800'}`} 
+                                placeholder="E.g. E00123"
+                                className={`w-full p-3 border border-slate-200 rounded-xl text-sm outline-none transition-all ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800'}`}
                             />
                         </div>
                         <div className="space-y-1">
@@ -632,7 +632,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                     { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
                                     { label: 'HEMM', value: 'HEMM' },
                                     { label: 'HEMM LS', value: 'HEMM LS' },
-                                    { label: 'HEMM AUTO ELECT', value: 'HEMM AUTO ELECT' },
+                                    { label: 'HEMM AUTOELECTRICAL', value: 'HEMM AUTOELECTRICAL' },
                                     { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
                                     { label: 'OPERATORS', value: 'OPERATORS' },
                                     { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
