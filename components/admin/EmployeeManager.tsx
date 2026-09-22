@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { createEmployee, deleteEmployee, updateEmployee, getDesignations } from '@/app/actions/master-data';
+import { getManagerDetails } from '@/app/actions/tni';
 import { FormSubmitButton } from '@/components/FormSubmitButton';
 import {
     HiOutlineTrash,
@@ -471,6 +472,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
     const [designationMode, setDesignationMode] = useState<'select' | 'custom'>('select');
 
     const [designationOptions, setDesignationOptions] = useState<{ label: string, value: string }[]>([]);
+    const [selectedFormStatus, setSelectedFormStatus] = useState(employee?.status || 'Active');
 
     useEffect(() => {
         getDesignations().then(desigs => setDesignationOptions(desigs));
@@ -481,9 +483,43 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
     const [customOrganization, setCustomOrganization] = useState('');
     const [orgMode, setOrgMode] = useState<'select' | 'custom'>('select');
 
+    // Manager details state & autofill
+    const [managerId, setManagerId] = useState(employee?.managerId || '');
+    const [managerName, setManagerName] = useState(employee?.managerName || '');
+    const [managerEmail, setManagerEmail] = useState(employee?.managerEmail || '');
+    const [managerMobile, setManagerMobile] = useState(employee?.managerMobile || '');
+    const [isFetchingManager, setIsFetchingManager] = useState(false);
+
+    useEffect(() => {
+        if (employee) {
+            setManagerId(employee.managerId || '');
+            setManagerName(employee.managerName || '');
+            setManagerEmail(employee.managerEmail || '');
+            setManagerMobile(employee.managerMobile || '');
+        }
+    }, [employee]);
+
+    async function handleManagerIdBlur() {
+        if (managerId && managerId.trim() !== '') {
+            setIsFetchingManager(true);
+            try {
+                const manager = await getManagerDetails(managerId.trim());
+                if (manager) {
+                    if (manager.name) setManagerName(manager.name);
+                    if (manager.email) setManagerEmail(manager.email);
+                    if (manager.mobile) setManagerMobile(manager.mobile);
+                }
+            } catch (err) {
+                console.error('Error fetching manager details:', err);
+            } finally {
+                setIsFetchingManager(false);
+            }
+        }
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div className="sticky top-0 bg-white border-b border-slate-100 p-5 flex justify-between items-center z-10 rounded-t-3xl">
                     <h2 className="text-xl font-black text-slate-800">
                         {isEdit ? 'Edit Employee' : 'Add New Employee'}
@@ -496,331 +532,402 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                     </button>
                 </div>
                 <form action={onSubmit} className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
-                            <input
-                                name="id"
-                                required
-                                defaultValue={employee?.id}
-                                readOnly={isEdit}
-                                placeholder="E.g. E00123"
-                                className={`w-full p-3 border border-slate-200 rounded-xl text-sm outline-none transition-all ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800'}`}
-                            />
+                    {/* Section 1: Basic & Personal Information */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                            <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                Basic & Personal Information
+                            </h3>
                         </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
-                            <SearchableSelect
-                                name="grade"
-                                options={[
-                                    { label: 'Executive', value: 'EXECUTIVE' },
-                                    { label: 'Workman', value: 'WORKMAN' },
-                                    { label: 'Apprentice', value: 'APPRENTICE' },
-                                    { label: 'Trainee', value: 'TRAINEE' },
-                                    { label: 'Local', value: 'LOCAL' }
-                                ]}
-                                value={selectedGrade}
-                                onChange={setSelectedGrade}
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
 
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
-                        <input name="name" required defaultValue={employee?.name} placeholder="John Doe" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                    </div>
-
-                    <div className="space-y-1">
-                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
-                        <input name="email" type="email" required defaultValue={employee?.email} placeholder="john.doe@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
-                            {sectionMode === 'select' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Emp ID *</label>
+                                <input
+                                    name="id"
+                                    required
+                                    defaultValue={employee?.id}
+                                    readOnly={isEdit}
+                                    placeholder="E.g. E00123"
+                                    className={`w-full p-3 border border-slate-200 rounded-xl text-sm outline-none transition-all ${isEdit ? 'bg-slate-100 text-slate-500 cursor-not-allowed opacity-70' : 'bg-slate-50 focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800'}`}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
                                 <SearchableSelect
-                                    name="sectionName"
+                                    name="grade"
                                     options={[
-                                        ...sectionOptions,
-                                        ...(employee?.sectionName && employee?.sectionName !== 'OTHER_CUSTOM' && !sectionOptions.find(o => o.value === employee?.sectionName) ? [{ label: employee.sectionName, value: employee.sectionName }] : []),
-                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                        { label: 'Executive', value: 'EXECUTIVE' },
+                                        { label: 'Workman', value: 'WORKMAN' },
+                                        { label: 'Apprentice', value: 'APPRENTICE' },
+                                        { label: 'Trainee', value: 'TRAINEE' },
+                                        { label: 'Local', value: 'LOCAL' }
                                     ]}
-                                    value={selectedFormSection}
-                                    onChange={(val) => {
-                                        const v = typeof val === 'string' ? val : String(val);
-                                        if (v === 'OTHER_CUSTOM') {
-                                            setSectionMode('custom');
-                                            setCustomSection('');
-                                        } else {
-                                            setSelectedFormSection(v);
-                                        }
-                                    }}
-                                    placeholder="Select Section"
+                                    value={selectedGrade}
+                                    onChange={setSelectedGrade}
                                     className="w-full"
                                 />
-                            ) : (
-                                <div className="space-y-2">
-                                    <input
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                                <SearchableSelect
+                                    name="status"
+                                    options={[
+                                        { label: 'Active', value: 'Active' },
+                                        { label: 'Inactive', value: 'Inactive' }
+                                    ]}
+                                    value={selectedFormStatus}
+                                    onChange={setSelectedFormStatus}
+                                    placeholder="Select Status"
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Full Name *</label>
+                                <input name="name" required defaultValue={employee?.name} placeholder="John Doe" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Email Address *</label>
+                                <input name="email" type="email" required defaultValue={employee?.email} placeholder="john.doe@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
+                                <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
+                                <SearchableSelect
+                                    name="gender"
+                                    options={[
+                                        { label: 'Male', value: 'MALE' },
+                                        { label: 'Female', value: 'FEMALE' },
+                                        { label: 'Other', value: 'OTHER' }
+                                    ]}
+                                    value={selectedGender}
+                                    onChange={setSelectedGender}
+                                    placeholder="Select Gender"
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
+                                <input name="aadharNumber" defaultValue={employee?.aadharNumber || ''} placeholder="Aadhar Number" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
+                                <input type="date" name="doj" defaultValue={employee?.doj ? new Date(employee.doj).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
+                                <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 2: Department & Job Details */}
+                    <div className="space-y-4 pt-2">
+                        <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                            <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                Department & Job Details
+                            </h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
+                                <SearchableSelect
+                                    name="departmentGroup"
+                                    options={[
+                                        { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
+                                        { label: 'HEMM', value: 'HEMM' },
+                                        { label: 'HEMM LS', value: 'HEMM LS' },
+                                        { label: 'HEMM AUTOELECTRICAL', value: 'HEMM AUTOELECTRICAL' },
+                                        { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
+                                        { label: 'OPERATORS', value: 'OPERATORS' },
+                                        { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
+                                        { label: 'OTHERS/UNDEFINED', value: 'OTHERS/UNDEFINED' },
+                                        { label: 'CRUSHER & SCREENING', value: 'CRUSHER & SCREENING' },
+                                        { label: 'MINING', value: 'MINING' }
+                                    ]}
+                                    value={selectedFormDeptGroup}
+                                    onChange={setSelectedFormDeptGroup}
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
+                                <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
+                                {sectionMode === 'select' ? (
+                                    <SearchableSelect
                                         name="sectionName"
-                                        value={customSection}
-                                        onChange={e => setCustomSection(e.target.value)}
-                                        placeholder="Type custom section..."
-                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        options={[
+                                            ...sectionOptions,
+                                            ...(employee?.sectionName && employee?.sectionName !== 'OTHER_CUSTOM' && !sectionOptions.find(o => o.value === employee?.sectionName) ? [{ label: employee.sectionName, value: employee.sectionName }] : []),
+                                            { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                        ]}
+                                        value={selectedFormSection}
+                                        onChange={(val) => {
+                                            const v = typeof val === 'string' ? val : String(val);
+                                            if (v === 'OTHER_CUSTOM') {
+                                                setSectionMode('custom');
+                                                setCustomSection('');
+                                            } else {
+                                                setSelectedFormSection(v);
+                                            }
+                                        }}
+                                        placeholder="Select Section"
+                                        className="w-full"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setSectionMode('select')}
-                                        className="text-xs text-blue-600 hover:underline font-bold"
-                                    >
-                                        Back to Select
-                                    </button>
-                                </div>
-                            )}
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
-                            {designationMode === 'select' ? (
-                                <SearchableSelect
-                                    name="designation"
-                                    options={[
-                                        ...designationOptions,
-                                        ...(employee?.designation && employee?.designation !== 'OTHER_CUSTOM' && !designationOptions.find(o => o.value === employee?.designation) ? [{ label: employee.designation, value: employee.designation }] : []),
-                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
-                                    ]}
-                                    value={selectedFormDesignation}
-                                    onChange={(val) => {
-                                        const v = typeof val === 'string' ? val : String(val);
-                                        if (v === 'OTHER_CUSTOM') {
-                                            setDesignationMode('custom');
-                                            setCustomDesignation('');
-                                        } else {
-                                            setSelectedFormDesignation(v);
-                                        }
-                                    }}
-                                    placeholder="Select Designation"
-                                    className="w-full"
-                                />
-                            ) : (
-                                <div className="space-y-2">
-                                    <input
+                                ) : (
+                                    <div className="space-y-2">
+                                        <input
+                                            name="sectionName"
+                                            value={customSection}
+                                            onChange={e => setCustomSection(e.target.value)}
+                                            placeholder="Type custom section..."
+                                            className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setSectionMode('select')}
+                                            className="text-xs text-blue-600 hover:underline font-bold"
+                                        >
+                                            Back to Select
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                                {designationMode === 'select' ? (
+                                    <SearchableSelect
                                         name="designation"
-                                        value={customDesignation}
-                                        onChange={e => setCustomDesignation(e.target.value)}
-                                        placeholder="Type custom designation..."
-                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        options={[
+                                            ...designationOptions,
+                                            ...(employee?.designation && employee?.designation !== 'OTHER_CUSTOM' && !designationOptions.find(o => o.value === employee?.designation) ? [{ label: employee.designation, value: employee.designation }] : []),
+                                            { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                        ]}
+                                        value={selectedFormDesignation}
+                                        onChange={(val) => {
+                                            const v = typeof val === 'string' ? val : String(val);
+                                            if (v === 'OTHER_CUSTOM') {
+                                                setDesignationMode('custom');
+                                                setCustomDesignation('');
+                                            } else {
+                                                setSelectedFormDesignation(v);
+                                            }
+                                        }}
+                                        placeholder="Select Designation"
+                                        className="w-full"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setDesignationMode('select')}
-                                        className="text-xs text-blue-600 hover:underline font-bold"
-                                    >
-                                        Back to Select
-                                    </button>
-                                </div>
-                            )}
+                                ) : (
+                                    <div className="space-y-2">
+                                        <input
+                                            name="designation"
+                                            value={customDesignation}
+                                            onChange={e => setCustomDesignation(e.target.value)}
+                                            placeholder="Type custom designation..."
+                                            className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setDesignationMode('select')}
+                                            className="text-xs text-blue-600 hover:underline font-bold"
+                                        >
+                                            Back to Select
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department Group *</label>
-                            <SearchableSelect
-                                name="departmentGroup"
-                                options={[
-                                    { label: 'AC ELECTRICAL', value: 'AC ELECTRICAL' },
-                                    { label: 'HEMM', value: 'HEMM' },
-                                    { label: 'HEMM LS', value: 'HEMM LS' },
-                                    { label: 'HEMM AUTOELECTRICAL', value: 'HEMM AUTOELECTRICAL' },
-                                    { label: 'STORES AND PROCUREMENT', value: 'STORES AND PROCUREMENT' },
-                                    { label: 'OPERATORS', value: 'OPERATORS' },
-                                    { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
-                                    { label: 'OTHERS/UNDEFINED', value: 'OTHERS/UNDEFINED' },
-                                    { label: 'C&S', value: 'C&S' },
-                                    { label: 'MINING', value: 'MINING' }
-                                ]}
-                                value={selectedFormDeptGroup}
-                                onChange={setSelectedFormDeptGroup}
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
-                            <input name="managerId" defaultValue={employee?.managerId || ''} placeholder="Manager ID" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
-                            <input name="managerName" defaultValue={employee?.managerName || ''} placeholder="Manager Name" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
-                            <input name="managerEmail" type="email" defaultValue={employee?.managerEmail || ''} placeholder="manager@example.com" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
-                            <input name="managerMobile" defaultValue={employee?.managerMobile || ''} placeholder="+91..." className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
-                            <SearchableSelect
-                                name="gender"
-                                options={[
-                                    { label: 'Male', value: 'MALE' },
-                                    { label: 'Female', value: 'FEMALE' },
-                                    { label: 'Other', value: 'OTHER' }
-                                ]}
-                                value={selectedGender}
-                                onChange={setSelectedGender}
-                                placeholder="Select Gender"
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Joining</label>
-                            <input type="date" name="doj" defaultValue={employee?.doj ? new Date(employee.doj).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Date of Birth</label>
-                            <input type="date" name="dob" defaultValue={employee?.dob ? new Date(employee.dob).toISOString().split('T')[0] : ''} className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Mobile Number</label>
-                            <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
-                            <input name="status" defaultValue={employee?.status || 'Active'} placeholder="Status" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Aadhar Number</label>
-                            <input name="aadharNumber" defaultValue={employee?.aadharNumber || ''} placeholder="Aadhar Number" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
-                            <SearchableSelect
-                                name="location"
-                                options={locationOptions}
-                                value={selectedFormRegion}
-                                onChange={setSelectedFormRegion}
-                                placeholder="Select Region"
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Project Location</label>
-                            <input name="projectLocation" defaultValue={employee?.projectLocation || ''} placeholder="Project Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
-                            <input name="region" defaultValue={employee?.region || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
-                            {orgMode === 'select' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
                                 <SearchableSelect
-                                    name="organization"
-                                    value={selectedOrganization}
-                                    options={[
-                                        { label: 'LMEL', value: 'LMEL' },
-                                        { label: 'TSMPL', value: 'TSMPL' },
-                                        { label: 'MTLL', value: 'MTLL' },
-                                        { label: 'TEIPL', value: 'TEIPL' },
-                                        ...(employee?.organization && employee.organization !== 'OTHER_CUSTOM' && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(employee.organization) ? [{ label: employee.organization, value: employee.organization }] : []),
-                                        { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
-                                    ]}
-                                    onChange={(val) => {
-                                        const v = typeof val === 'string' ? val : String(val);
-                                        if (v === 'OTHER_CUSTOM') {
-                                            setOrgMode('custom');
-                                            setCustomOrganization('');
-                                        } else {
-                                            setSelectedOrganization(v);
-                                        }
-                                    }}
-                                    placeholder="Select Organization"
+                                    name="location"
+                                    options={locationOptions}
+                                    value={selectedFormRegion}
+                                    onChange={setSelectedFormRegion}
+                                    placeholder="Select Region"
                                     className="w-full"
                                 />
-                            ) : (
-                                <div className="space-y-2">
-                                    <input
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Location</label>
+                                <input name="region" defaultValue={employee?.region || ''} placeholder="Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Project Location</label>
+                                <input name="projectLocation" defaultValue={employee?.projectLocation || ''} placeholder="Project Location" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Organization</label>
+                                {orgMode === 'select' ? (
+                                    <SearchableSelect
                                         name="organization"
-                                        value={customOrganization}
-                                        onChange={e => setCustomOrganization(e.target.value)}
-                                        placeholder="Type custom organization..."
-                                        className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        value={selectedOrganization}
+                                        options={[
+                                            { label: 'LMEL', value: 'LMEL' },
+                                            { label: 'TSMPL', value: 'TSMPL' },
+                                            { label: 'MTLL', value: 'MTLL' },
+                                            { label: 'TEIPL', value: 'TEIPL' },
+                                            ...(employee?.organization && employee.organization !== 'OTHER_CUSTOM' && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(employee.organization) ? [{ label: employee.organization, value: employee.organization }] : []),
+                                            { label: 'Other (Type Custom)', value: 'OTHER_CUSTOM' }
+                                        ]}
+                                        onChange={(val) => {
+                                            const v = typeof val === 'string' ? val : String(val);
+                                            if (v === 'OTHER_CUSTOM') {
+                                                setOrgMode('custom');
+                                                setCustomOrganization('');
+                                            } else {
+                                                setSelectedOrganization(v);
+                                            }
+                                        }}
+                                        placeholder="Select Organization"
+                                        className="w-full"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setOrgMode('select')}
-                                        className="text-xs text-blue-600 hover:underline font-bold"
-                                    >
-                                        Back to Select
-                                    </button>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <input
+                                            name="organization"
+                                            value={customOrganization}
+                                            onChange={e => setCustomOrganization(e.target.value)}
+                                            placeholder="Type custom organization..."
+                                            className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setOrgMode('select')}
+                                            className="text-xs text-blue-600 hover:underline font-bold"
+                                        >
+                                            Back to Select
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
+                                <input name="highestQualification" defaultValue={employee?.highestQualification || ''} placeholder="Highest Qualification" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
+                                <SearchableSelect
+                                    name="employeeGrouupMNmw"
+                                    options={[
+                                        { label: 'Manager', value: 'Manager' },
+                                        { label: 'Non Manager', value: 'Non Manager' },
+                                        { label: 'Workman', value: 'Workman' }
+                                    ]}
+                                    value={selectedEmployeeGrouupMNmw}
+                                    onChange={setSelectedEmployeeGrouupMNmw}
+                                    placeholder="Select Employee Group"
+                                    className="w-full"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                                <SearchableSelect
+                                    name="onRollContract"
+                                    options={[
+                                        { label: 'On-Roll', value: 'On-Roll' },
+                                        { label: 'Contract', value: 'Contract' }
+                                    ]}
+                                    value={selectedOnRollContract}
+                                    onChange={setSelectedOnRollContract}
+                                    placeholder="Select On Roll / Contract"
+                                    className="w-full"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Section 3: Reporting Manager Details */}
+                    <div className="space-y-4 pt-2">
+                        <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
+                            <span className="w-2 h-2 rounded-full bg-purple-600"></span>
+                            <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider">
+                                Reporting Manager Details
+                            </h3>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager ID</label>
+                                    {isFetchingManager && <span className="text-[10px] text-purple-600 font-semibold animate-pulse">Fetching details...</span>}
                                 </div>
-                            )}
+                                <input
+                                    name="managerId"
+                                    value={managerId}
+                                    onChange={e => setManagerId(e.target.value)}
+                                    onBlur={handleManagerIdBlur}
+                                    onKeyDown={e => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleManagerIdBlur();
+                                        }
+                                    }}
+                                    placeholder="Manager ID"
+                                    className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Name</label>
+                                <input
+                                    name="managerName"
+                                    value={managerName}
+                                    onChange={e => setManagerName(e.target.value)}
+                                    placeholder="Manager Name"
+                                    className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Email</label>
+                                <input
+                                    name="managerEmail"
+                                    type="email"
+                                    value={managerEmail}
+                                    onChange={e => setManagerEmail(e.target.value)}
+                                    placeholder="manager@example.com"
+                                    className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Manager Mobile</label>
+                                <input
+                                    name="managerMobile"
+                                    value={managerMobile}
+                                    onChange={e => setManagerMobile(e.target.value)}
+                                    placeholder="+91..."
+                                    className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all"
+                                />
+                            </div>
                         </div>
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Department</label>
-                            <input name="department" defaultValue={employee?.department || ''} placeholder="Department" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Highest Qualification</label>
-                            <input name="highestQualification" defaultValue={employee?.highestQualification || ''} placeholder="Highest Qualification" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
-                            <SearchableSelect
-                                name="employeeGrouupMNmw"
-                                options={[
-                                    { label: 'Manager', value: 'Manager' },
-                                    { label: 'Non Manager', value: 'Non Manager' },
-                                    { label: 'Workman', value: 'Workman' }
-                                ]}
-                                value={selectedEmployeeGrouupMNmw}
-                                onChange={setSelectedEmployeeGrouupMNmw}
-                                placeholder="Select Employee Group"
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="space-y-1">
-                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
-                            <SearchableSelect
-                                name="onRollContract"
-                                options={[
-                                    { label: 'On-Roll', value: 'On-Roll' },
-                                    { label: 'Contract', value: 'Contract' }
-                                ]}
-                                value={selectedOnRollContract}
-                                onChange={setSelectedOnRollContract}
-                                placeholder="Select On Roll / Contract"
-                                className="w-full"
-                            />
-                        </div>
-                    </div>
-
 
                     <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
                         <button

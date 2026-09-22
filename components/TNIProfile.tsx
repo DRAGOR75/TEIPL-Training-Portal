@@ -396,7 +396,7 @@ export default function TNIProfile({ employee, sections, employeeView = false }:
                                 { label: 'OPERATORS', value: 'OPERATORS' },
                                 { label: 'HR/ADMIN/FINANCE', value: 'HR/ADMIN/FINANCE' },
                                 { label: 'OTHERS/UNDEFINED', value: 'OTHERS/UNDEFINED' },
-                                { label: 'C&S', value: 'C&S' },
+                                { label: 'CRUSHER & SRCEENING', value: 'CRUSHER & SRCEENING' },
                                 { label: 'MINING', value: 'MINING' }
                             ]}
                             value={formData.departmentGroup}
