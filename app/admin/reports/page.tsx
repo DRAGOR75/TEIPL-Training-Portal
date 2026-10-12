@@ -1,6 +1,7 @@
 import { getTniReportData } from '@/app/actions/reports';
 import ReportsDashboard from '@/components/admin/ReportsDashboard';
 import { Metadata } from 'next';
+import Link from 'next/link';
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 

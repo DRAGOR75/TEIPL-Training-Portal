@@ -33,11 +33,11 @@ async function main() {
     const sessionIds = sysRecords.map(r => r.sessionId).filter(Boolean) as string[];
     const sessions = await db.trainingSession.findMany({
         where: { id: { in: sessionIds } },
-        select: { id: true, programName: true, status: true, attendanceFinalizedAt: true }
+        select: { id: true, programName: true, status: true }
     });
     console.log(`\nMatching training sessions:`);
     sessions.forEach(s => {
-        console.log(`Session: ${s.id} | Prog: ${s.programName} | Status: ${s.status} | FinalizedAt: ${s.attendanceFinalizedAt}`);
+        console.log(`Session: ${s.id} | Prog: ${s.programName} | Status: ${s.status}`);
     });
 }
 
