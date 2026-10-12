@@ -187,6 +187,33 @@ export async function createEmployee(formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };
     const empId = formData.get('id') as string;
     try {
+        const departmentGroup = sanitizeInput(formData.get('departmentGroup') as string);
+        if (!departmentGroup) throw new Error("Department Group is required");
+
+        const status = sanitizeInput(formData.get('status') as string);
+        if (!status) throw new Error("Status is required");
+
+        const gender = (() => {
+            const g = formData.get('gender') as string;
+            if (!g) throw new Error("Gender is required");
+            return g.toUpperCase() as Gender;
+        })();
+
+        const sectionName = sanitizeInput(formData.get('sectionName') as string);
+        if (!sectionName) throw new Error("Section is required");
+
+        const designation = sanitizeInput(formData.get('designation') as string);
+        if (!designation) throw new Error("Designation is required");
+
+        const location = sanitizeInput(formData.get('location') as string);
+        if (!location) throw new Error("Region is required");
+
+        const employeeGrouupMNmw = sanitizeInput(formData.get('employeeGrouupMNmw') as string);
+        if (!employeeGrouupMNmw) throw new Error("Employee Group (M/NM/W) is required");
+
+        const onRollContract = sanitizeInput(formData.get('onRollContract') as string);
+        if (!onRollContract) throw new Error("On Roll / Contract is required");
+
         await db.employee.create({
             data: {
                 id: sanitizeInput(empId),
@@ -197,20 +224,16 @@ export async function createEmployee(formData: FormData) {
                     if (!g) throw new Error("Grade is required");
                     return g as Grade;
                 })(),
-                sectionName: formData.get('sectionName') as string,
-                location: formData.get('location') as string,
-                gender: (() => {
-                    const g = formData.get('gender') as string;
-                    if (!g) return null;
-                    return g.toUpperCase() as Gender;
-                })(),
+                sectionName: sectionName,
+                location: location,
+                gender: gender,
                 managerName: sanitizeInput(formData.get('managerName') as string),
                 managerEmail: sanitizeInput(formData.get('managerEmail') as string),
                 managerMobile: sanitizeInput(formData.get('managerMobile') as string),
-                designation: sanitizeInput(formData.get('designation') as string),
+                designation: designation,
                 doj: formData.get('doj') ? new Date(formData.get('doj') as string) : undefined,
                 dob: formData.get('dob') ? new Date(formData.get('dob') as string) : undefined,
-                status: sanitizeInput(formData.get('status') as string) || 'Active',
+                status: status,
                 mobile: sanitizeInput(formData.get('mobile') as string) || null,
                 projectLocation: sanitizeInput(formData.get('projectLocation') as string) || null,
                 managerId: sanitizeInput(formData.get('managerId') as string) || null,
@@ -218,18 +241,18 @@ export async function createEmployee(formData: FormData) {
                 organization: sanitizeInput(formData.get('organization') as string) || null,
                 highestQualification: sanitizeInput(formData.get('highestQualification') as string) || null,
                 department: sanitizeInput(formData.get('department') as string) || null,
-                departmentGroup: sanitizeInput(formData.get('departmentGroup') as string) || null,
+                departmentGroup: departmentGroup,
                 aadharNumber: sanitizeInput(formData.get('aadharNumber') as string) || null,
-                employeeGrouupMNmw: sanitizeInput(formData.get('employeeGrouupMNmw') as string) || null,
-                onRollContract: sanitizeInput(formData.get('onRollContract') as string) || null,
+                employeeGrouupMNmw: employeeGrouupMNmw,
+                onRollContract: onRollContract,
             }
         });
         revalidatePath('/admin/tni-dashboard');
         revalidateTag('employee-profile', 'max');
         revalidateTag('tni-reports', 'max');
         return { success: true };
-    } catch (error) {
-        return { error: 'Failed to create employee (ID or Email might exist)' };
+    } catch (error: any) {
+        return { error: error?.message || 'Failed to create employee (ID or Email might exist)' };
     }
 }
 
@@ -249,6 +272,33 @@ export async function updateEmployee(id: string, formData: FormData) {
     if (!await auth()) return { error: 'Unauthorized' };
     const newId = sanitizeInput(formData.get('id') as string);
     try {
+        const departmentGroup = sanitizeInput(formData.get('departmentGroup') as string);
+        if (!departmentGroup) throw new Error("Department Group is required");
+
+        const status = sanitizeInput(formData.get('status') as string);
+        if (!status) throw new Error("Status is required");
+
+        const gender = (() => {
+            const g = formData.get('gender') as string;
+            if (!g) throw new Error("Gender is required");
+            return g.toUpperCase() as Gender;
+        })();
+
+        const sectionName = sanitizeInput(formData.get('sectionName') as string);
+        if (!sectionName) throw new Error("Section is required");
+
+        const designation = sanitizeInput(formData.get('designation') as string);
+        if (!designation) throw new Error("Designation is required");
+
+        const location = sanitizeInput(formData.get('location') as string);
+        if (!location) throw new Error("Region is required");
+
+        const employeeGrouupMNmw = sanitizeInput(formData.get('employeeGrouupMNmw') as string);
+        if (!employeeGrouupMNmw) throw new Error("Employee Group (M/NM/W) is required");
+
+        const onRollContract = sanitizeInput(formData.get('onRollContract') as string);
+        if (!onRollContract) throw new Error("On Roll / Contract is required");
+
         await db.employee.update({
             where: { id },
             data: {
@@ -260,20 +310,16 @@ export async function updateEmployee(id: string, formData: FormData) {
                     if (!g) throw new Error("Grade is required");
                     return g as Grade;
                 })(),
-                sectionName: formData.get('sectionName') as string,
-                location: formData.get('location') as string,
-                gender: (() => {
-                    const g = formData.get('gender') as string;
-                    if (!g) return null;
-                    return g.toUpperCase() as Gender;
-                })(),
+                sectionName: sectionName,
+                location: location,
+                gender: gender,
                 managerName: sanitizeInput(formData.get('managerName') as string) || null,
                 managerEmail: sanitizeInput(formData.get('managerEmail') as string) || null,
                 managerMobile: sanitizeInput(formData.get('managerMobile') as string) || null,
-                designation: sanitizeInput(formData.get('designation') as string) || null,
+                designation: designation,
                 doj: formData.get('doj') ? new Date(formData.get('doj') as string) : null,
                 dob: formData.get('dob') ? new Date(formData.get('dob') as string) : null,
-                status: sanitizeInput(formData.get('status') as string) || 'Active',
+                status: status,
                 mobile: sanitizeInput(formData.get('mobile') as string) || null,
                 projectLocation: sanitizeInput(formData.get('projectLocation') as string) || null,
                 managerId: sanitizeInput(formData.get('managerId') as string) || null,
@@ -281,10 +327,10 @@ export async function updateEmployee(id: string, formData: FormData) {
                 organization: sanitizeInput(formData.get('organization') as string) || null,
                 highestQualification: sanitizeInput(formData.get('highestQualification') as string) || null,
                 department: sanitizeInput(formData.get('department') as string) || null,
-                departmentGroup: sanitizeInput(formData.get('departmentGroup') as string) || null,
+                departmentGroup: departmentGroup,
                 aadharNumber: sanitizeInput(formData.get('aadharNumber') as string) || null,
-                employeeGrouupMNmw: sanitizeInput(formData.get('employeeGrouupMNmw') as string) || null,
-                onRollContract: sanitizeInput(formData.get('onRollContract') as string) || null,
+                employeeGrouupMNmw: employeeGrouupMNmw,
+                onRollContract: onRollContract,
             }
         });
         revalidatePath('/admin/tni-dashboard');
@@ -295,7 +341,7 @@ export async function updateEmployee(id: string, formData: FormData) {
         if (error?.code === 'P2002') {
             return { error: 'Employee ID or Email already exists in the system.' };
         }
-        return { error: 'Failed to update employee' };
+        return { error: error?.message || 'Failed to update employee' };
     }
 }
 
