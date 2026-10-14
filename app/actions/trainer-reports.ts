@@ -2,10 +2,12 @@
 
 import { db } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { getFinancialYear, getFinancialYearDateRange } from '@/lib/date-utils';
 
 export interface TrainerReportStats {
     trainerName: string;
     isAllTrainers: boolean;
+    selectedFinancialYear: string;
     pipeline: {
         totalSessions: number;
         completedSessions: number;
@@ -19,6 +21,7 @@ export interface TrainerReportStats {
         totalTrainingDays: number;
         totalTraineeSessions: number;
         uniquePersonsTrained: number;
+        totalPrograms: number;
     };
     firstTimers: {
         totalFirstTimers: number;
@@ -85,6 +88,7 @@ export interface TrainerComparisonItem {
     trainerName: string;
     totalSessions: number;
     completedSessions: number;
+    totalPrograms: number;
     trainingHours: number;
     trainingDays: number;
     totalTraineeSessions: number;
@@ -99,9 +103,13 @@ export interface TrainerComparisonItem {
  * If user is TRAINER role, strictly enforces their own identity.
  * If user is ADMIN role, can query any trainer or all trainers.
  */
-export async function getTrainerReportData(requestedTrainerName?: string): Promise<{
+export async function getTrainerReportData(
+    requestedTrainerName?: string,
+    requestedFinancialYear?: string
+): Promise<{
     report: TrainerReportStats | null;
     availableTrainers?: string[];
+    availableYears?: string[];
     error?: string;
 }> {
     const session = await auth();
@@ -128,6 +136,10 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
 
     try {
         const isAllTrainers = !effectiveTrainerName || effectiveTrainerName === 'ALL';
+        const selectedFinancialYear = (requestedFinancialYear && requestedFinancialYear.toUpperCase() !== 'ALL')
+            ? requestedFinancialYear.replace(/^FY\s*/i, '').trim()
+            : 'ALL';
+        const dateRange = getFinancialYearDateRange(selectedFinancialYear);
 
         // 1. Fetch available trainers list (for admins / dropdowns)
         const allTrainersList = await db.trainer.findMany({
@@ -136,13 +148,47 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
         });
         const availableTrainers = allTrainersList.map(t => t.name);
 
+        // Fetch distinct financial years across the system
+        const [histYears, sysYears] = await Promise.all([
+            db.trainingHistory.findMany({
+                where: { year: { not: null } },
+                select: { year: true },
+                distinct: ['year']
+            }),
+            db.systemTrainingHistory.findMany({
+                where: { year: { not: null } },
+                select: { year: true },
+                distinct: ['year']
+            })
+        ]);
+
+        const currentFY = getFinancialYear(new Date());
+        const yearsSet = new Set<string>();
+        if (currentFY) yearsSet.add(currentFY);
+        histYears.forEach(h => { if (h.year && h.year.trim()) yearsSet.add(h.year.trim()); });
+        sysYears.forEach(s => { if (s.year && s.year.trim()) yearsSet.add(s.year.trim()); });
+
+        const availableYears = Array.from(yearsSet).sort((a, b) => {
+            const getStart = (yr: string) => parseInt(yr.split('-')[0], 10) || 0;
+            return getStart(b) - getStart(a);
+        });
+
         // 2. Fetch Training Sessions matching the filter
         const sessionWhere: any = {};
-        if (!isAllTrainers) {
-            sessionWhere.trainerName = effectiveTrainerName;
+        if (!isAllTrainers && effectiveTrainerName) {
+            sessionWhere.trainerName = {
+                contains: effectiveTrainerName.trim(),
+                mode: 'insensitive'
+            };
+        }
+        if (selectedFinancialYear !== 'ALL' && dateRange) {
+            sessionWhere.startDate = {
+                gte: dateRange.queryStart,
+                lte: dateRange.queryEnd
+            };
         }
 
-        const sessions = await db.trainingSession.findMany({
+        const rawSessions = await db.trainingSession.findMany({
             where: sessionWhere,
             include: {
                 enrollments: {
@@ -170,13 +216,10 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
             orderBy: { startDate: 'desc' }
         });
 
-        // Pipeline stats
-        const totalSessions = sessions.length;
-        const completedSessions = sessions.filter(s => s.status === 'Completed').length;
-        const scheduledSessions = sessions.filter(s => s.status === 'Scheduled').length;
-        const formingSessions = sessions.filter(s => s.status === 'Forming').length;
-        const cancelledSessions = sessions.filter(s => s.status === 'Cancelled').length;
-        const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+        // Enforce exact financial year match on sessions
+        const sessions = selectedFinancialYear === 'ALL'
+            ? rawSessions
+            : rawSessions.filter(s => getFinancialYear(s.startDate) === selectedFinancialYear);
 
         let totalTrainingHours = 0;
         let totalTrainingDays = 0;
@@ -191,8 +234,22 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
         const historyWhere: any = {
             status: { not: 'Absent' }
         };
-        if (!isAllTrainers) {
-            historyWhere.trainerName = effectiveTrainerName;
+        if (!isAllTrainers && effectiveTrainerName) {
+            historyWhere.trainerName = {
+                contains: effectiveTrainerName.trim(),
+                mode: 'insensitive'
+            };
+        }
+        if (selectedFinancialYear !== 'ALL' && dateRange) {
+            historyWhere.OR = [
+                { year: selectedFinancialYear },
+                {
+                    startDate: {
+                        gte: dateRange.queryStart,
+                        lte: dateRange.queryEnd
+                    }
+                }
+            ];
         }
 
         const [sysRecords, legacyRecords] = await Promise.all([
@@ -211,7 +268,9 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
                     section: true,
                     location: true,
                     employeeGroup: true,
-                    averageRating: true
+                    averageRating: true,
+                    year: true,
+                    sessionId: true
                 },
                 orderBy: { startDate: 'asc' }
             }),
@@ -230,23 +289,49 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
                     section: true,
                     location: true,
                     employeeGroup: true,
-                    averageRating: true
+                    averageRating: true,
+                    year: true,
+                    sessionId: true
                 },
                 orderBy: { startDate: 'asc' }
             })
         ]);
 
-        // Merge records (deduplicating if any duplicate IDs exist)
+        // Merge records (deduplicating if any duplicate IDs exist, enforcing FY)
         const seenRecordKeys = new Set<string>();
         const combinedRecords: typeof sysRecords = [];
 
         for (const r of [...legacyRecords, ...sysRecords]) {
+            if (selectedFinancialYear !== 'ALL') {
+                const matchesFY = r.year === selectedFinancialYear || getFinancialYear(r.startDate) === selectedFinancialYear;
+                if (!matchesFY) continue;
+            }
             const key = `${r.empId}_${r.programName}_${r.startDate ? new Date(r.startDate).toISOString().slice(0, 10) : ''}`;
             if (!seenRecordKeys.has(key)) {
                 seenRecordKeys.add(key);
                 combinedRecords.push(r as any);
             }
         }
+
+        // Pipeline stats: count all unique session IDs across modern completed sessions, system training history, and legacy history
+        const completedSessionIds = new Set<string>();
+        sessions.forEach(s => {
+            if (s.status === 'Completed' && s.id) {
+                completedSessionIds.add(String(s.id));
+            }
+        });
+        combinedRecords.forEach(r => {
+            if (r.sessionId) {
+                completedSessionIds.add(String(r.sessionId));
+            }
+        });
+
+        const completedSessions = completedSessionIds.size;
+        const scheduledSessions = sessions.filter(s => s.status === 'Scheduled').length;
+        const formingSessions = sessions.filter(s => s.status === 'Forming').length;
+        const cancelledSessions = sessions.filter(s => s.status === 'Cancelled').length;
+        const totalSessions = completedSessions + scheduledSessions + formingSessions + cancelledSessions;
+        const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : (completedSessions > 0 ? 100 : 0);
 
         // Add additional hours/days from completed history if training_sessions table has fewer entries
         const historyHours = combinedRecords.reduce((acc, r) => acc + (r.trainingHours || 0), 0);
@@ -383,11 +468,12 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
             : null;
 
         // 6. Program Breakdown
-        const programMap = new Map<string, { sessions: number; hours: number; persons: number }>();
+        const programMap = new Map<string, { sessions: number; hours: number; persons: number; sessionIds: Set<string> }>();
         sessions.forEach(s => {
             const p = s.programName || 'Other';
-            const curr = programMap.get(p) || { sessions: 0, hours: 0, persons: 0 };
-            curr.sessions++;
+            const curr = programMap.get(p) || { sessions: 0, hours: 0, persons: 0, sessionIds: new Set<string>() };
+            if (s.id) curr.sessionIds.add(String(s.id));
+            curr.sessions = curr.sessionIds.size;
             curr.hours += s.trainingHours || 0;
             curr.persons += s.enrollments.filter(e => e.status !== 'Absent').length;
             programMap.set(p, curr);
@@ -396,9 +482,20 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
         combinedRecords.forEach(r => {
             const p = r.programName || 'Other';
             if (!programMap.has(p)) {
-                programMap.set(p, { sessions: 1, hours: r.trainingHours || 0, persons: 1 });
+                const sIds = new Set<string>();
+                if (r.sessionId) sIds.add(String(r.sessionId));
+                programMap.set(p, {
+                    sessions: sIds.size || 1,
+                    hours: r.trainingHours || 0,
+                    persons: 1,
+                    sessionIds: sIds
+                });
             } else {
                 const curr = programMap.get(p)!;
+                if (r.sessionId) {
+                    curr.sessionIds.add(String(r.sessionId));
+                    curr.sessions = curr.sessionIds.size;
+                }
                 curr.persons++;
             }
         });
@@ -436,14 +533,52 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
             .sort((a, b) => b.count - a.count)
             .slice(0, 8);
 
-        // 8. Monthly Trend (Last 12 Months)
-        const monthMap = new Map<string, { sessions: number; trainees: number; firstTimers: number }>();
+        // 8. Monthly Trend
+        const monthMap = new Map<string, { sessions: number; trainees: number; firstTimers: number; sessionIds: Set<string> }>();
+
+        if (selectedFinancialYear !== 'ALL') {
+            // Pre-seed the 12 calendar months for this Financial Year (Apr to Mar)
+            const parts = selectedFinancialYear.split('-');
+            if (parts.length === 2) {
+                let startY = parseInt(parts[0], 10);
+                let endY = parseInt(parts[1], 10);
+                if (startY < 100) startY = (startY > 50 ? 1900 : 2000) + startY;
+                if (endY < 100) endY = (endY > 50 ? 1900 : 2000) + endY;
+
+                const monthsConfig = [
+                    { m: 3, y: startY }, // Apr
+                    { m: 4, y: startY }, // May
+                    { m: 5, y: startY }, // Jun
+                    { m: 6, y: startY }, // Jul
+                    { m: 7, y: startY }, // Aug
+                    { m: 8, y: startY }, // Sep
+                    { m: 9, y: startY }, // Oct
+                    { m: 10, y: startY }, // Nov
+                    { m: 11, y: startY }, // Dec
+                    { m: 0, y: endY },   // Jan
+                    { m: 1, y: endY },   // Feb
+                    { m: 2, y: endY },   // Mar
+                ];
+
+                monthsConfig.forEach(({ m, y }) => {
+                    const d = new Date(y, m, 1);
+                    const mKey = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
+                    monthMap.set(mKey, { sessions: 0, trainees: 0, firstTimers: 0, sessionIds: new Set<string>() });
+                });
+            }
+        }
+
         combinedRecords.forEach(r => {
             if (!r.startDate) return;
             const d = new Date(r.startDate);
             const mKey = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
-            const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0 };
+            if (selectedFinancialYear !== 'ALL' && !monthMap.has(mKey)) return;
+            const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0, sessionIds: new Set<string>() };
             curr.trainees++;
+            if (r.sessionId) {
+                curr.sessionIds.add(String(r.sessionId));
+                curr.sessions = curr.sessionIds.size;
+            }
             if (r.empId && firstTimerIds.has(r.empId)) {
                 curr.firstTimers++;
             }
@@ -454,19 +589,25 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
             if (!s.startDate) return;
             const d = new Date(s.startDate);
             const mKey = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
-            const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0 };
-            curr.sessions++;
+            if (selectedFinancialYear !== 'ALL' && !monthMap.has(mKey)) return;
+            const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0, sessionIds: new Set<string>() };
+            if (s.id) {
+                curr.sessionIds.add(String(s.id));
+                curr.sessions = curr.sessionIds.size;
+            }
             monthMap.set(mKey, curr);
         });
 
-        const monthlyTrend = Array.from(monthMap.entries())
-            .map(([month, data]) => ({
-                month,
-                sessions: data.sessions,
-                trainees: data.trainees,
-                firstTimers: data.firstTimers
-            }))
-            .slice(-10);
+        const allMonths = Array.from(monthMap.entries()).map(([month, data]) => ({
+            month,
+            sessions: data.sessions,
+            trainees: data.trainees,
+            firstTimers: data.firstTimers
+        }));
+
+        const monthlyTrend = selectedFinancialYear !== 'ALL'
+            ? allMonths
+            : allMonths.slice(-12);
 
         // 9. Recent Sessions List
         const recentSessions = sessions.slice(0, 15).map(s => ({
@@ -485,6 +626,7 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
         const report: TrainerReportStats = {
             trainerName: effectiveTrainerName || 'All Trainers',
             isAllTrainers,
+            selectedFinancialYear,
             pipeline: {
                 totalSessions,
                 completedSessions,
@@ -497,7 +639,8 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
                 totalTrainingHours: Math.round(totalTrainingHours),
                 totalTrainingDays: Math.round(totalTrainingDays),
                 totalTraineeSessions,
-                uniquePersonsTrained
+                uniquePersonsTrained,
+                totalPrograms: programMap.size
             },
             firstTimers: {
                 totalFirstTimers,
@@ -519,7 +662,8 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
 
         return {
             report,
-            availableTrainers
+            availableTrainers,
+            availableYears
         };
 
     } catch (error) {
@@ -532,17 +676,20 @@ export async function getTrainerReportData(requestedTrainerName?: string): Promi
  * Fetch Admin Comparison Leaderboard across all trainers.
  * Admin only.
  */
-export async function getAdminTrainersLeaderboard(): Promise<{
+export async function getAdminTrainersLeaderboard(financialYear: string = 'ALL'): Promise<{
     leaderboard: TrainerComparisonItem[];
     globalSummary: {
         totalTrainers: number;
         totalSessions: number;
+        totalPrograms: number;
         totalHours: number;
         totalTrainees: number;
         totalFirstTimers: number;
         firstTimerPercentage: number;
         avgRating: number | null;
     } | null;
+    availableYears?: string[];
+    selectedFinancialYear?: string;
     error?: string;
 }> {
     const session = await auth();
@@ -556,26 +703,34 @@ export async function getAdminTrainersLeaderboard(): Promise<{
             orderBy: { name: 'asc' }
         });
 
-        // Parallel aggregation of all trainer stats
+        // Parallel aggregation of all trainer stats for requested financial year
         const results = await Promise.all(
-            trainers.map(t => getTrainerReportData(t.name))
+            trainers.map(t => getTrainerReportData(t.name, financialYear))
         );
+
+        const availableYears = results.find(r => r.availableYears && r.availableYears.length > 0)?.availableYears || [];
 
         const leaderboard: TrainerComparisonItem[] = [];
         let totalSessionsSum = 0;
         let totalHoursSum = 0;
         let totalTraineesSum = 0;
         let totalFirstTimersSum = 0;
+        const orgProgramsSet = new Set<string>();
         const allRatings: number[] = [];
 
         results.forEach((res, idx) => {
             const r = res.report;
             if (!r) return;
 
+            r.programBreakdown?.forEach(p => {
+                if (p.name) orgProgramsSet.add(p.name);
+            });
+
             leaderboard.push({
                 trainerName: trainers[idx].name,
                 totalSessions: r.pipeline.totalSessions,
                 completedSessions: r.pipeline.completedSessions,
+                totalPrograms: r.output.totalPrograms,
                 trainingHours: r.output.totalTrainingHours,
                 trainingDays: r.output.totalTrainingDays,
                 totalTraineeSessions: r.output.totalTraineeSessions,
@@ -592,12 +747,13 @@ export async function getAdminTrainersLeaderboard(): Promise<{
             if (r.quality.averageRating) allRatings.push(r.quality.averageRating);
         });
 
-        // Sort by first-time trainees converted descending, then hours
-        leaderboard.sort((a, b) => b.firstTimeTrainees - a.firstTimeTrainees || b.trainingHours - a.trainingHours);
+        // Rank primarily by Training Hours delivered, then completed sessions and programs
+        leaderboard.sort((a, b) => b.trainingHours - a.trainingHours || b.completedSessions - a.completedSessions || b.totalPrograms - a.totalPrograms);
 
         const globalSummary = {
             totalTrainers: trainers.length,
             totalSessions: totalSessionsSum,
+            totalPrograms: orgProgramsSet.size,
             totalHours: totalHoursSum,
             totalTrainees: totalTraineesSum,
             totalFirstTimers: totalFirstTimersSum,
@@ -605,7 +761,7 @@ export async function getAdminTrainersLeaderboard(): Promise<{
             avgRating: allRatings.length > 0 ? Number((allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1)) : null
         };
 
-        return { leaderboard, globalSummary };
+        return { leaderboard, globalSummary, availableYears, selectedFinancialYear: financialYear };
     } catch (err) {
         console.error('Error in getAdminTrainersLeaderboard:', err);
         return { leaderboard: [], globalSummary: null, error: 'Database error' };

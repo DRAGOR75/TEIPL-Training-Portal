@@ -23,7 +23,7 @@ export default async function TrainerReportsPage() {
     const canSwitchTrainer = userRole === 'ADMIN';
 
     // Fetch report (for TRAINER role, server action enforces their own identity)
-    const { report, availableTrainers, error } = await getTrainerReportData();
+    const { report, availableTrainers, availableYears, error } = await getTrainerReportData();
 
     if (error || !report) {
         return (
@@ -57,13 +57,14 @@ export default async function TrainerReportsPage() {
                         <span className="group-hover:-translate-x-1 transition-transform">←</span> Back to Workspace
                     </Link>
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                        Personal Performance Dossier
+                        Personal Performance Record
                     </span>
                 </div>
 
                 <TrainerReportView
                     initialReport={report}
                     availableTrainers={availableTrainers}
+                    availableYears={availableYears || []}
                     canSwitchTrainer={canSwitchTrainer}
                     currentUserName={session.user.name || undefined}
                 />

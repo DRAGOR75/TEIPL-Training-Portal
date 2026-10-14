@@ -64,6 +64,7 @@ export default async function AdminTrainerPerformancePage() {
                     globalSummary={leaderboardRes.globalSummary}
                     initialReport={trainerReportRes.report}
                     availableTrainers={trainerReportRes.availableTrainers || []}
+                    availableYears={leaderboardRes.availableYears || trainerReportRes.availableYears || []}
                 />
             </div>
         </main>

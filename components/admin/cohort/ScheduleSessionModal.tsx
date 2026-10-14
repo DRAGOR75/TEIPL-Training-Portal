@@ -69,7 +69,7 @@ export default function ScheduleSessionModal({ cohortProgram, cohortName, traine
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-slate-900">Schedule Session</h2>
-                            <p className="text-xs text-slate-500">{cohortName} — {cohortProgram.program.name}</p>
+                            <p className="text-xs text-slate-500">{cohortName} — {cohortProgram.session?.altProgramName || cohortProgram.session?.programName || cohortProgram.program.name}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">

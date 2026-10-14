@@ -16,7 +16,7 @@ export async function getCohorts() {
                 programs: {
                     include: {
                         program: { select: { name: true } },
-                        session: { select: { id: true, startDate: true, endDate: true } },
+                        session: { select: { id: true, startDate: true, endDate: true, altProgramName: true, programName: true } },
                     },
                     orderBy: { seq: 'asc' },
                 },
@@ -54,6 +54,7 @@ export async function getCohortById(cohortId: string) {
                             select: {
                                 id: true,
                                 programName: true,
+                                altProgramName: true,
                                 trainerName: true,
                                 startDate: true,
                                 endDate: true,
@@ -603,7 +604,10 @@ export async function getAvailableSessionsForProgram(programName: string) {
     try {
         const sessions = await db.trainingSession.findMany({
             where: {
-                programName: programName,
+                OR: [
+                    { programName: programName },
+                    { altProgramName: programName },
+                ],
                 cohortProgram: null, // Ensure it's not already linked
             },
             orderBy: {
@@ -743,7 +747,7 @@ export async function exportCohortProgramFeedbacks(cohortId: string) {
             if (cp.session && cp.session.enrollments.length > 0) {
                 for (const enrollment of cp.session.enrollments) {
                     allFeedbacks.push({
-                        'Program Name': cp.program.name,
+                        'Program Name': cp.session?.altProgramName || cp.session?.programName || cp.program.name,
                         'Trainer': cp.session.trainerName || 'N/A',
                         'Employee Name': enrollment.employeeName,
                         'Employee ID': enrollment.empId || 'N/A',
@@ -1018,7 +1022,8 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                 if (progData.sessionId) {
                     linkedSession = sessionMap.get(progData.sessionId);
                     if (linkedSession) {
-                        const matched = programMap.get(linkedSession.programName.trim().toLowerCase());
+                        const matched = programMap.get(linkedSession.programName.trim().toLowerCase()) ||
+                            (linkedSession.altProgramName && programMap.get(linkedSession.altProgramName.trim().toLowerCase()));
                         if (matched) {
                             resolvedProgramId = matched.id;
                         }
@@ -1036,7 +1041,7 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                 }
 
                 if (!resolvedProgramId) {
-                    const fallbackName = progData.programName?.trim() || linkedSession?.programName?.trim();
+                    const fallbackName = progData.programName?.trim() || linkedSession?.altProgramName?.trim() || linkedSession?.programName?.trim();
                     if (fallbackName) {
                         try {
                             const newProg = await db.program.create({

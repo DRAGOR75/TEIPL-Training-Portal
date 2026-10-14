@@ -125,6 +125,7 @@ export default function BulkUploadCohortsModal({ onClose }: BulkUploadCohortsMod
             location: findField(['Location', 'Region', 'Place', 'Training Location']),
             totalParticipants: findField(['Number of Participants', 'No of Participants', 'No. of Participants', 'Num Participants', 'Total Participants', 'Participants', 'Total No of Participants', 'Batch Size']),
             duration: findField(['Trg Days', 'Training Days', 'TrgDays', 'No of Days', 'Number of Days', 'Duration', 'Duration Days', 'Duration (Days)', 'Days']),
+            altProgramName: findField(['Alt Program Name', 'alt_program_name', 'AltProgramName', 'Alt Name', 'Alternative Program Name', 'Alt Subject Name']),
             programName: findField(['Program Name', 'ProgramName', 'Program', 'Subject', 'Session Name', 'session_name', 'session _name', 'SessionName']),
             programId: findField(['Program ID', 'ProgramId']),
             sessionId: findField(['Session ID', 'SessionId', 'Linked Session ID', 'Session', 'session_id']),
@@ -149,7 +150,9 @@ export default function BulkUploadCohortsModal({ onClose }: BulkUploadCohortsMod
             const cohortGroup = mapHeader.cohortGroup && raw[mapHeader.cohortGroup] ? raw[mapHeader.cohortGroup].toString().trim() : undefined;
             const description = mapHeader.description && raw[mapHeader.description] ? raw[mapHeader.description].toString().trim() : undefined;
             const location = mapHeader.location && raw[mapHeader.location] ? raw[mapHeader.location].toString().trim() : undefined;
-            const programName = mapHeader.programName && raw[mapHeader.programName] ? raw[mapHeader.programName].toString().trim() : undefined;
+            const rawAltProgramName = mapHeader.altProgramName && raw[mapHeader.altProgramName] ? raw[mapHeader.altProgramName].toString().trim() : undefined;
+            const rawProgramName = mapHeader.programName && raw[mapHeader.programName] ? raw[mapHeader.programName].toString().trim() : undefined;
+            const programName = rawAltProgramName || rawProgramName;
             const programId = mapHeader.programId && raw[mapHeader.programId] ? raw[mapHeader.programId].toString().trim() : undefined;
             const sessionId = mapHeader.sessionId && raw[mapHeader.sessionId] ? raw[mapHeader.sessionId].toString().trim() : undefined;
 
