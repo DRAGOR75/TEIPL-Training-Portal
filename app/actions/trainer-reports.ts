@@ -109,7 +109,7 @@ export interface TrainerComparisonItem {
 /**
  * Standardizes raw category strings to clean, predefined master categories
  */
-export function formatCategoryTag(rawCategory?: string | null): string {
+function formatCategoryTag(rawCategory?: string | null): string {
     if (!rawCategory) return 'Functional / Other';
     const c = rawCategory.trim().toUpperCase();
     if (c === 'SAFETY_PROGRAMS' || c === 'SAFETY') return 'Safety';
