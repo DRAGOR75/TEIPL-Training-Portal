@@ -120,6 +120,15 @@ export default async function AdminHubPage() {
 
 
                     <AdminCard
+                        href="/admin/reports/trainer-performance"
+                        title="Trainer Performance & Reports"
+                        description="Cross-trainer delivery volume, hours logged, and first-time untrained workforce induction."
+                        icon={<HiOutlineChartBar size={24} />}
+                        tag="Intelligence"
+                        color="emerald"
+                    />
+
+                    <AdminCard
                         href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd"
                         title="Looker Reports"
                         description="Deep-dive analytics and program performance benchmarks."

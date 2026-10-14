@@ -40,6 +40,36 @@ export function getFinancialYear(dateInput?: string | Date | null): string {
     return `${startYear.toString().slice(-2)}-${endYear.toString().slice(-2)}`;
 }
 
+/**
+ * Returns date range bounds for a given financial year string (e.g., "24-25" or "FY 24-25").
+ * Covers April 1 00:00:00 IST of startYear to March 31 23:59:59.999 IST of endYear.
+ */
+export function getFinancialYearDateRange(fyInput?: string | null): {
+    start: Date;
+    end: Date;
+    queryStart: Date;
+    queryEnd: Date;
+} | null {
+    if (!fyInput || fyInput.toUpperCase() === 'ALL') return null;
+    const cleaned = fyInput.replace(/^FY\s*/i, '').trim();
+    const parts = cleaned.split('-');
+    if (parts.length !== 2) return null;
+    let startY = parseInt(parts[0], 10);
+    let endY = parseInt(parts[1], 10);
+    if (isNaN(startY) || isNaN(endY)) return null;
+    if (startY < 100) startY = (startY > 50 ? 1900 : 2000) + startY;
+    if (endY < 100) endY = (endY > 50 ? 1900 : 2000) + endY;
+
+    const start = new Date(`${startY}-04-01T00:00:00+05:30`);
+    const end = new Date(`${endY}-03-31T23:59:59.999+05:30`);
+
+    // 1-day safety buffer for SQL queries
+    const queryStart = new Date(start.getTime() - 24 * 60 * 60 * 1000);
+    const queryEnd = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+
+    return { start, end, queryStart, queryEnd };
+}
+
 const MONTHS_MAP: Record<string, string> = {
     jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
     jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'

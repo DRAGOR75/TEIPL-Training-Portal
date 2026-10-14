@@ -28,11 +28,12 @@ export default function LinkSessionModal({ cohortProgram, cohortName, onClose }:
     const filteredSessions = sessions.filter(session => {
         if (!search.trim()) return true;
         const q = search.toLowerCase();
+        const matchProgram = (session.altProgramName || session.programName)?.toLowerCase().includes(q);
         const matchTrainer = session.trainerName?.toLowerCase().includes(q);
         const matchLoc = session.location?.toLowerCase().includes(q);
         const matchStatus = session.status?.toLowerCase().includes(q);
         const matchDates = `${session.startDate} ${session.endDate}`.toLowerCase().includes(q);
-        return matchTrainer || matchLoc || matchStatus || matchDates;
+        return matchProgram || matchTrainer || matchLoc || matchStatus || matchDates;
     });
 
     useEffect(() => {
@@ -75,7 +76,7 @@ export default function LinkSessionModal({ cohortProgram, cohortName, onClose }:
                         </div>
                         <div>
                             <h2 className="text-xl font-black text-slate-900">Link Existing Session</h2>
-                            <p className="text-xs text-slate-500">{cohortName} — {cohortProgram.program.name}</p>
+                            <p className="text-xs text-slate-500">{cohortName} — {cohortProgram.session?.altProgramName || cohortProgram.session?.programName || cohortProgram.program.name}</p>
                         </div>
                     </div>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-xl transition-colors">
@@ -134,7 +135,7 @@ export default function LinkSessionModal({ cohortProgram, cohortName, onClose }:
                             </div>
                         ) : sessions.length === 0 ? (
                             <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 text-sm text-center">
-                                No unlinked sessions found for &quot;{cohortProgram.program.name}&quot;.
+                                No unlinked sessions found for &quot;{cohortProgram.session?.altProgramName || cohortProgram.session?.programName || cohortProgram.program.name}&quot;.
                             </div>
                         ) : filteredSessions.length === 0 ? (
                             <div className="p-6 text-center text-slate-400 text-sm space-y-1 border border-slate-200 rounded-xl">
@@ -161,6 +162,9 @@ export default function LinkSessionModal({ cohortProgram, cohortName, onClose }:
                                         />
                                         <div>
                                             <div className="text-sm font-bold text-slate-900">
+                                                {session.altProgramName || session.programName}
+                                            </div>
+                                            <div className="text-xs text-slate-600 font-medium">
                                                 {new Date(session.startDate).toLocaleDateString()} to {new Date(session.endDate).toLocaleDateString()}
                                             </div>
                                             <div className="text-xs text-slate-500 mt-0.5 flex flex-wrap gap-2">

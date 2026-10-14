@@ -216,7 +216,7 @@ export default function CohortsDashboard({ initialCohorts, programs }: CohortsDa
                                                 >
                                                     {cp.status === 'Completed' && <HiOutlineCheckCircle className="w-3 h-3 inline mr-0.5" />}
                                                     {cp.status === 'InProgress' && <HiOutlineClock className="w-3 h-3 inline mr-0.5" />}
-                                                    {cp.program.name}
+                                                    {cp.session?.altProgramName || cp.session?.programName || cp.program.name}
                                                 </span>
                                             ))}
                                             {cohort.programs.length > 4 && (

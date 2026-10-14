@@ -4,6 +4,7 @@ import {
     HiOutlineUsers,
     HiOutlineChatBubbleBottomCenterText,
     HiOutlineArrowRight,
+    HiOutlineChartBar,
 } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
@@ -72,7 +73,17 @@ export default async function TrainerHubPage() {
                         color="blue"
                     />
 
-                    {/* Card 4: Looker Studio - Sky (External) */}
+                    {/* Card 4: Impact & Performance Report - Emerald */}
+                    <TrainerCard
+                        href="/trainer/reports"
+                        title="Performance & Impact Report"
+                        description="Track completed batches, total persons trained, and newly converted first-time trainees."
+                        icon={<HiOutlineChartBar size={28} />}
+                        tag="Intelligence"
+                        color="emerald"
+                    />
+
+                    {/* Card 5: Looker Studio - Sky (External) */}
                     <TrainerCard
                         href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd"
                         title="Looker Reports"

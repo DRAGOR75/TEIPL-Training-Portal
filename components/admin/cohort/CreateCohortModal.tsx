@@ -32,7 +32,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
     const [location, setLocation] = useState('');
     const [totalParticipants, setTotalParticipants] = useState('');
     const [duration, setDuration] = useState('');
-    const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; name: string; category: string; linkedSessionId?: string; availableSessions?: any[]; isLoadingSessions?: boolean }[]>([]);
+    const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; name: string; displayName?: string; category: string; linkedSessionId?: string; availableSessions?: any[]; isLoadingSessions?: boolean }[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
 
@@ -43,7 +43,8 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
     const filteredAvailableSessions = availableSessions.filter(session => {
         if (!sessionSearch.trim()) return true;
         const q = sessionSearch.toLowerCase();
-        const matchProgram = session.programName?.toLowerCase().includes(q);
+        const displayName = session.altProgramName || session.programName;
+        const matchProgram = displayName?.toLowerCase().includes(q) || session.programName?.toLowerCase().includes(q);
         const matchTrainer = session.trainerName?.toLowerCase().includes(q);
         const matchLocation = session.location?.toLowerCase().includes(q);
         const matchStatus = session.status?.toLowerCase().includes(q);
@@ -77,21 +78,24 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
 
     const addSession = async (session: any) => {
         // Find matching program
-        const programMatch = programs.find(p => p.name === session.programName);
+        const sessionDisplayName = session.altProgramName || session.programName;
+        const programMatch = programs.find(p => p.name === session.programName || (session.altProgramName && p.name === session.altProgramName));
         if (!programMatch) {
-            setError(`Program ${session.programName} not found in master catalog.`);
+            setError(`Program ${sessionDisplayName} not found in master catalog.`);
             return;
         }
         // Avoid adding the same program twice
         if (selectedPrograms.some(sp => sp.id === programMatch.id)) {
-            setError(`Program ${programMatch.name} is already in the sequence.`);
+            setError(`Program ${sessionDisplayName} is already in the sequence.`);
             return;
         }
 
         setSelectedPrograms(prev => [...prev, {
             ...programMatch,
+            displayName: sessionDisplayName,
             linkedSessionId: session.id,
-            isLoadingSessions: true
+            isLoadingSessions: true,
+            availableSessions: [session]
         }]);
 
         setAvailableSessions(prev => prev.filter(s => s.id !== session.id));
@@ -99,7 +103,11 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
         try {
             const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
             const sessions = await getAvailableSessionsForProgram(programMatch.name);
-            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { ...p, availableSessions: sessions, isLoadingSessions: false } : p));
+            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { 
+                ...p, 
+                availableSessions: [session, ...sessions.filter((s: any) => s.id !== session.id)], 
+                isLoadingSessions: false 
+            } : p));
         } catch (err) {
             setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { ...p, isLoadingSessions: false } : p));
         }
@@ -316,43 +324,51 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {selectedPrograms.map((program, index) => (
-                                    <div
-                                        key={program.id}
-                                        className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3"
-                                    >
-                                        <span className="text-xs font-black text-blue-400 w-6 text-center">{index + 1}</span>
-                                        <div className="flex-1">
-                                            <span className="text-sm font-semibold text-slate-800">{program.name}</span>
-                                            <span className={`ml-2 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${getCategoryColor(program.category)}`}>
-                                                {program.category}
-                                            </span>
-                                            <div className="mt-2 text-xs">
-                                                {program.isLoadingSessions ? (
-                                                    <span className="text-slate-500 flex items-center gap-1">
-                                                        <HiOutlineArrowPath className="w-3 h-3 animate-spin" /> Loading sessions...
-                                                    </span>
-                                                ) : program.availableSessions && program.availableSessions.length > 0 ? (
-                                                    <select
-                                                        className="w-full p-2 border border-slate-200 rounded outline-none text-slate-700"
-                                                        value={program.linkedSessionId || ""}
-                                                        onChange={(e) => {
-                                                            const val = e.target.value;
-                                                            setSelectedPrograms(prev => prev.map(p => p.id === program.id ? { ...p, linkedSessionId: val } : p));
-                                                        }}
-                                                    >
-                                                        <option value="">-- No session linked (Pending) --</option>
-                                                        {program.availableSessions.map((s: any) => (
-                                                            <option key={s.id} value={s.id}>
-                                                                {new Date(s.startDate).toLocaleDateString()} - {s.trainerName || 'No Trainer'} ({s.status})
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                ) : (
-                                                    <span className="text-slate-400">No available sessions to link.</span>
-                                                )}
+                                {selectedPrograms.map((program, index) => {
+                                    const linkedSession = program.availableSessions?.find((s: any) => s.id === program.linkedSessionId);
+                                    const displayName = linkedSession?.altProgramName || linkedSession?.programName || program.displayName || program.name;
+                                    return (
+                                        <div
+                                            key={program.id}
+                                            className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3"
+                                        >
+                                            <span className="text-xs font-black text-blue-400 w-6 text-center">{index + 1}</span>
+                                            <div className="flex-1">
+                                                <span className="text-sm font-semibold text-slate-800">{displayName}</span>
+                                                <span className={`ml-2 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${getCategoryColor(program.category)}`}>
+                                                    {program.category}
+                                                </span>
+                                                <div className="mt-2 text-xs">
+                                                    {program.isLoadingSessions ? (
+                                                        <span className="text-slate-500 flex items-center gap-1">
+                                                            <HiOutlineArrowPath className="w-3 h-3 animate-spin" /> Loading sessions...
+                                                        </span>
+                                                    ) : program.availableSessions && program.availableSessions.length > 0 ? (
+                                                        <select
+                                                            className="w-full p-2 border border-slate-200 rounded outline-none text-slate-700"
+                                                            value={program.linkedSessionId || ""}
+                                                            onChange={(e) => {
+                                                                const val = e.target.value;
+                                                                const chosen = program.availableSessions?.find((s: any) => s.id === val);
+                                                                setSelectedPrograms(prev => prev.map(p => p.id === program.id ? { 
+                                                                    ...p, 
+                                                                    linkedSessionId: val,
+                                                                    displayName: chosen?.altProgramName || chosen?.programName || p.name
+                                                                } : p));
+                                                            }}
+                                                        >
+                                                            <option value="">-- No session linked (Pending) --</option>
+                                                            {program.availableSessions.map((s: any) => (
+                                                                <option key={s.id} value={s.id}>
+                                                                    {s.altProgramName || s.programName ? `${s.altProgramName || s.programName} — ` : ''}{new Date(s.startDate).toLocaleDateString()} - {s.trainerName || 'No Trainer'} ({s.status})
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                    ) : (
+                                                        <span className="text-slate-400">No available sessions to link.</span>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
                                         <div className="flex items-center gap-1">
                                             <button onClick={() => moveUp(index)} disabled={index === 0} className="p-1 hover:bg-blue-100 rounded disabled:opacity-30 transition-colors">
                                                 <HiOutlineChevronUp className="w-4 h-4 text-blue-600" />
@@ -365,7 +381,8 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                                             </button>
                                         </div>
                                     </div>
-                                ))}
+                                );
+                            })}
                             </div>
                         )}
                     </div>
@@ -438,7 +455,7 @@ export default function CreateCohortModal({ programs, onClose }: CreateCohortMod
                                         >
                                             <HiOutlinePlusCircle className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors shrink-0" />
                                             <div className="flex-1">
-                                                <div className="text-sm font-semibold text-slate-800">{session.programName}</div>
+                                                <div className="text-sm font-semibold text-slate-800">{session.altProgramName || session.programName}</div>
                                                 <div className="text-xs text-slate-500">
                                                     {new Date(session.startDate).toLocaleDateString()} - {session.trainerName || 'No Trainer'}
                                                     {session.location ? ` • ${session.location}` : ''}

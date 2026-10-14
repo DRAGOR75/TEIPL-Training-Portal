@@ -517,6 +517,44 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
         }
     }
 
+    function handleFormSubmit(formData: FormData) {
+        if (!selectedFormStatus || !selectedFormStatus.trim()) {
+            alert('Status is required. Please select a Status.');
+            return;
+        }
+        if (!selectedGender || !selectedGender.trim()) {
+            alert('Gender is required. Please select a Gender.');
+            return;
+        }
+        if (!selectedFormDeptGroup || !selectedFormDeptGroup.trim()) {
+            alert('Department Group is required. Please select a Department Group.');
+            return;
+        }
+        const finalSection = sectionMode === 'custom' ? customSection : selectedFormSection;
+        if (!finalSection || !finalSection.trim()) {
+            alert('Section is required. Please select or enter a Section.');
+            return;
+        }
+        const finalDesignation = designationMode === 'custom' ? customDesignation : selectedFormDesignation;
+        if (!finalDesignation || !finalDesignation.trim()) {
+            alert('Designation is required. Please select or enter a Designation.');
+            return;
+        }
+        if (!selectedFormRegion || !selectedFormRegion.trim()) {
+            alert('Region is required. Please select a Region.');
+            return;
+        }
+        if (!selectedEmployeeGrouupMNmw || !selectedEmployeeGrouupMNmw.trim()) {
+            alert('Employee Group (M/NM/W) is required. Please select an Employee Group.');
+            return;
+        }
+        if (!selectedOnRollContract || !selectedOnRollContract.trim()) {
+            alert('On Roll / Contract is required. Please select On Roll / Contract.');
+            return;
+        }
+        onSubmit(formData);
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -531,7 +569,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                         <HiOutlineXMark size={24} />
                     </button>
                 </div>
-                <form action={onSubmit} className="p-6 space-y-6">
+                <form action={handleFormSubmit} className="p-6 space-y-6">
                     {/* Section 1: Basic & Personal Information */}
                     <div className="space-y-4">
                         <div className="flex items-center gap-2 pb-1 border-b border-slate-100">
@@ -554,7 +592,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Grade *</label>
                                 <SearchableSelect
                                     name="grade"
                                     options={[
@@ -570,7 +608,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Status *</label>
                                 <SearchableSelect
                                     name="status"
                                     options={[
@@ -602,7 +640,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                 <input name="mobile" defaultValue={employee?.mobile || ''} placeholder="Mobile" className="w-full p-3 border border-slate-200 bg-slate-50 rounded-xl text-sm outline-none focus:bg-white focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 text-slate-800 transition-all" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Gender *</label>
                                 <SearchableSelect
                                     name="gender"
                                     options={[
@@ -673,7 +711,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Section *</label>
                                 {sectionMode === 'select' ? (
                                     <SearchableSelect
                                         name="sectionName"
@@ -715,7 +753,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                 )}
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Designation *</label>
                                 {designationMode === 'select' ? (
                                     <SearchableSelect
                                         name="designation"
@@ -760,7 +798,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Region *</label>
                                 <SearchableSelect
                                     name="location"
                                     options={locationOptions}
@@ -834,7 +872,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W)</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Employee Group (M/NM/W) *</label>
                                 <SearchableSelect
                                     name="employeeGrouupMNmw"
                                     options={[
@@ -849,7 +887,7 @@ function EmployeeModal({ employee, isEdit, onClose, onSubmit, sectionOptions, lo
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract</label>
+                                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">On Roll / Contract *</label>
                                 <SearchableSelect
                                     name="onRollContract"
                                     options={[

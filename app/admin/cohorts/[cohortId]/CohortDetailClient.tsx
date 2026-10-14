@@ -216,7 +216,7 @@ export default function CohortDetailClient({ cohort, trainers, locations, progra
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
                                                 <span className="text-xs font-black text-slate-400">#{cp.seq}</span>
-                                                <h3 className="font-bold text-slate-900">{cp.program.name}</h3>
+                                                <h3 className="font-bold text-slate-900">{cp.session?.altProgramName || cp.session?.programName || cp.program.name}</h3>
                                                 <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${cp.status === 'Completed'
                                                     ? 'bg-green-50 text-green-600'
                                                     : cp.status === 'InProgress'
