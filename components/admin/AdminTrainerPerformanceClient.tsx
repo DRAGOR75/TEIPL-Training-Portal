@@ -241,14 +241,9 @@ export default function AdminTrainerPerformanceClient({
                     {/* TRAINER LEADERBOARD TABLE */}
                     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-xs space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                    Trainer Comparison Leaderboard
-                                </h3>
-                                <p className="text-xs text-slate-500 font-medium mt-1">
-                                    Compare delivery volume, hours logged, and first-time untrained candidate conversion per trainer.
-                                </p>
-                            </div>
+                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                                Trainer Comparison Leaderboard
+                            </h3>
 
                             <div className="relative w-full sm:w-64">
                                 <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
