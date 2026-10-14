@@ -54,9 +54,6 @@ export default async function AdminTrainerPerformancePage() {
                     <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                         Trainer Impact & Workforce Conversion
                     </h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">
-                        Cross-trainer performance metrics, training delivery volume, and baseline untrained workforce induction.
-                    </p>
                 </div>
 
                 <AdminTrainerPerformanceClient

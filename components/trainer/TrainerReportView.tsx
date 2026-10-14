@@ -53,6 +53,12 @@ export default function TrainerReportView({
     const [activeTab, setActiveTab] = useState<'overview' | 'firstTimers' | 'sessions' | 'feedback'>('overview');
     const [searchQuery, setSearchQuery] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Session Ledger search & pagination state
+    const [sessionSearch, setSessionSearch] = useState('');
+    const [sessionPage, setSessionPage] = useState(1);
+    const sessionPageSize = 15;
+
     const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
@@ -85,6 +91,27 @@ export default function TrainerReportView({
         (currentPage - 1) * pageSize,
         currentPage * pageSize
     );
+
+    // Filter all sessions based on session search
+    const filteredSessions = (report.recentSessions || []).filter(s => {
+        const q = sessionSearch.toLowerCase();
+        return (
+            s.programName.toLowerCase().includes(q) ||
+            (s.category && s.category.toLowerCase().includes(q)) ||
+            s.status.toLowerCase().includes(q) ||
+            (s.location && s.location.toLowerCase().includes(q)) ||
+            (s.startDate && s.startDate.includes(q))
+        );
+    });
+
+    const totalSessionPages = Math.ceil(filteredSessions.length / sessionPageSize) || 1;
+    const paginatedSessions = filteredSessions.slice(
+        (sessionPage - 1) * sessionPageSize,
+        sessionPage * sessionPageSize
+    );
+
+    // Minimal neutral tag style
+    const getCategoryBadgeClass = () => 'bg-slate-100 text-slate-600 border border-slate-200/60';
 
     // Trainer switch handler (Admin mode only)
     const handleTrainerChange = (newTrainer: string) => {
@@ -137,6 +164,7 @@ export default function TrainerReportView({
         if (type === 'all') {
             const sessionsData = report.recentSessions.map(s => ({
                 'Program Name': s.programName,
+                'Predefined Category / Tag': s.category || 'Functional / Other',
                 'Status': s.status,
                 'Start Date': s.startDate,
                 'End Date': s.endDate,
@@ -195,9 +223,6 @@ export default function TrainerReportView({
                     <h1 className="text-3xl md:text-4xl font-black text-slate-900 tracking-tight">
                         {report.trainerName}
                     </h1>
-                    <p className="text-sm text-slate-500 font-medium mt-1">
-                        Performance ledger, training completion metrics, and baseline untrained-to-trained induction analytics.
-                    </p>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
@@ -368,7 +393,7 @@ export default function TrainerReportView({
                         : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
                         }`}
                 >
-                    Session Ledger ({report.pipeline.totalSessions})
+                    Sessions ({filteredSessions.length})
                 </button>
                 <button
                     onClick={() => setActiveTab('feedback')}
@@ -395,9 +420,6 @@ export default function TrainerReportView({
                                     {report.firstTimers.firstTimerPercentage}% First-Time
                                 </span>
                             </div>
-                            <p className="text-xs text-slate-500 font-medium mb-6">
-                                Compares candidates attending their <strong>very first company training</strong> under this trainer versus employees returning for refreshers.
-                            </p>
                         </div>
 
                         <div className="h-64 w-full">
@@ -448,12 +470,9 @@ export default function TrainerReportView({
                     {/* MONTHLY DELIVERY TREND */}
                     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm flex flex-col justify-between">
                         <div>
-                            <h3 className="text-lg font-black text-slate-900 tracking-tight mb-2">
-                                Monthly Training Trainees & First-Timers
+                            <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4">
+                                Monthly Training Trend
                             </h3>
-                            <p className="text-xs text-slate-500 font-medium mb-6">
-                                Trainees trained and newly converted candidates inducted month over month.
-                            </p>
                         </div>
 
                         <div className="h-64 w-full">
@@ -485,14 +504,11 @@ export default function TrainerReportView({
 
                     {/* TOP PROGRAMS DELIVERED */}
                     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
-                        <h3 className="text-lg font-black text-slate-900 tracking-tight mb-2">
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4">
                             Top Programs Delivered
                         </h3>
-                        <p className="text-xs text-slate-500 font-medium mb-6">
-                            Breakdown of programs by total attendees and training hours delivered.
-                        </p>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                             {report.programBreakdown.map((prog, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
                                     <div className="flex items-center gap-3">
@@ -501,8 +517,8 @@ export default function TrainerReportView({
                                         </span>
                                         <div>
                                             <h4 className="text-sm font-bold text-slate-800 leading-tight">{prog.name}</h4>
-                                            <span className="text-[11px] text-slate-400 font-semibold">
-                                                {prog.sessionsCount} {prog.sessionsCount === 1 ? 'program' : 'programs'} • {prog.totalHours} hrs
+                                            <span className="text-[11px] text-slate-400 font-medium">
+                                                {prog.category ? `${prog.category} • ` : ''}{prog.sessionsCount} {prog.sessionsCount === 1 ? 'session' : 'sessions'} • {prog.totalHours} hrs
                                             </span>
                                         </div>
                                     </div>
@@ -518,14 +534,39 @@ export default function TrainerReportView({
                         </div>
                     </div>
 
+                    {/* CATEGORY / TAG DISTRIBUTION */}
+                    {report.categoryBreakdown && report.categoryBreakdown.length > 0 && (
+                        <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm lg:col-span-2">
+                            <div className="flex items-center justify-between mb-3">
+                                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                                    Category Breakdown
+                                </h3>
+                                <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+                                    {report.categoryBreakdown.length} Categories
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 pt-1">
+                                {report.categoryBreakdown.map((cat, idx) => (
+                                    <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col justify-between">
+                                        <div className="text-xs font-semibold text-slate-600 truncate">{cat.category}</div>
+                                        <div className="text-xl font-black text-slate-900 mt-1">
+                                            {cat.sessionsCount} <span className="text-xs font-normal text-slate-400">{cat.sessionsCount === 1 ? 'session' : 'sessions'}</span>
+                                        </div>
+                                        <div className="text-[11px] text-slate-400 font-medium mt-1">
+                                            {cat.totalHours} hrs • {cat.personsTrained} trainees
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
                     {/* DEPARTMENT / SITE REACH */}
                     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
-                        <h3 className="text-lg font-black text-slate-900 tracking-tight mb-2">
-                            Department Reach & First-Timer Induction
+                        <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4">
+                            Department Reach
                         </h3>
-                        <p className="text-xs text-slate-500 font-medium mb-6">
-                            Which operational departments sent the most newly trained workmen to this trainer.
-                        </p>
 
                         <div className="space-y-4">
                             {report.departmentBreakdown.map((dept, idx) => {
@@ -559,18 +600,13 @@ export default function TrainerReportView({
             {activeTab === 'firstTimers' && (
                 <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-2">
-                                <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                    Untrained → Trained Conversion Ledger
-                                </h3>
-                                <span className="bg-emerald-100 text-emerald-800 text-xs font-black px-2.5 py-0.5 rounded-full">
-                                    {report.firstTimers.totalFirstTimers} Employees
-                                </span>
-                            </div>
-                            <p className="text-xs text-slate-500 font-medium mt-1">
-                                Complete roster of employees who attended their <strong>first-ever training session in the organization</strong> under this trainer.
-                            </p>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                                First-Time Trainees
+                            </h3>
+                            <span className="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-200">
+                                {report.firstTimers.totalFirstTimers}
+                            </span>
                         </div>
 
                         <div className="flex items-center gap-3 w-full md:w-auto">
@@ -676,17 +712,32 @@ export default function TrainerReportView({
                 </div>
             )}
 
-            {/* TAB 3: SESSION LEDGER */}
+            {/* TAB 3: SESSIONS */}
             {activeTab === 'sessions' && (
                 <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                Sessions Delivery Ledger
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                                Training Sessions
                             </h3>
-                            <p className="text-xs text-slate-500 font-medium mt-1">
-                                Complete log of modern training batches assigned and conducted by {report.trainerName}.
-                            </p>
+                            <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-slate-200">
+                                {filteredSessions.length}
+                            </span>
+                        </div>
+
+                        {/* Search Input for Sessions */}
+                        <div className="relative w-full md:w-72">
+                            <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Search program, category, location..."
+                                value={sessionSearch}
+                                onChange={(e) => {
+                                    setSessionSearch(e.target.value);
+                                    setSessionPage(1);
+                                }}
+                                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:border-blue-500 transition-all"
+                            />
                         </div>
                     </div>
 
@@ -695,6 +746,7 @@ export default function TrainerReportView({
                             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
                                 <tr>
                                     <th className="py-3 px-4">Program</th>
+                                    <th className="py-3 px-4">Category</th>
                                     <th className="py-3 px-4">Status</th>
                                     <th className="py-3 px-4">Dates</th>
                                     <th className="py-3 px-4">Duration</th>
@@ -704,39 +756,74 @@ export default function TrainerReportView({
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
-                                {report.recentSessions.map((s) => (
+                                {paginatedSessions.map((s) => (
                                     <tr key={s.id} className="hover:bg-slate-50/70 transition-colors">
-                                        <td className="py-3.5 px-4 font-bold text-slate-900">{s.programName}</td>
+                                        <td className="py-3.5 px-4 font-semibold text-slate-900">{s.programName}</td>
                                         <td className="py-3.5 px-4">
-                                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${s.status === 'Completed' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                                                s.status === 'Scheduled' ? 'bg-blue-50 text-blue-700 border border-blue-200' :
-                                                    s.status === 'Cancelled' ? 'bg-rose-50 text-rose-700 border border-rose-200' :
-                                                        'bg-amber-50 text-amber-700 border border-amber-200'
-                                                }`}>
+                                            <span className="inline-block px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/60">
+                                                {s.category || 'Functional'}
+                                            </span>
+                                        </td>
+                                        <td className="py-3.5 px-4">
+                                            <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-700">
+                                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                                    s.status === 'Completed' ? 'bg-emerald-500' :
+                                                    s.status === 'Scheduled' ? 'bg-blue-500' :
+                                                    s.status === 'Cancelled' ? 'bg-rose-500' :
+                                                    'bg-amber-500'
+                                                }`} />
                                                 {s.status}
                                             </span>
                                         </td>
                                         <td className="py-3.5 px-4 font-mono text-slate-600">
-                                            {s.startDate} {s.endDate && s.endDate !== s.startDate && `to ${s.endDate}`}
+                                            {s.startDate} {s.endDate && s.endDate !== s.startDate && `– ${s.endDate}`}
                                         </td>
-                                        <td className="py-3.5 px-4 font-semibold text-slate-700">
+                                        <td className="py-3.5 px-4 font-medium text-slate-700">
                                             {s.trainingHours}h ({s.trainingDays}d)
                                         </td>
-                                        <td className="py-3.5 px-4 font-semibold text-slate-700">{s.location}</td>
-                                        <td className="py-3.5 px-4 text-center font-bold text-slate-900">{s.enrolledCount}</td>
-                                        <td className="py-3.5 px-4 text-center font-black text-emerald-600">{s.attendedCount}</td>
+                                        <td className="py-3.5 px-4 text-slate-600">{s.location}</td>
+                                        <td className="py-3.5 px-4 text-center text-slate-600">{s.enrolledCount}</td>
+                                        <td className="py-3.5 px-4 text-center font-bold text-slate-900">{s.attendedCount}</td>
                                     </tr>
                                 ))}
-                                {report.recentSessions.length === 0 && (
+                                {paginatedSessions.length === 0 && (
                                     <tr>
-                                        <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
-                                            No training sessions found.
+                                        <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
+                                            No training sessions found matching your search.
                                         </td>
                                     </tr>
                                 )}
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination for Sessions */}
+                    {totalSessionPages > 1 && (
+                        <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                            <span className="text-xs text-slate-500 font-medium">
+                                Showing {(sessionPage - 1) * sessionPageSize + 1} to {Math.min(sessionPage * sessionPageSize, filteredSessions.length)} of {filteredSessions.length} sessions
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setSessionPage(p => Math.max(1, p - 1))}
+                                    disabled={sessionPage === 1}
+                                    className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 disabled:opacity-40 transition-colors"
+                                >
+                                    Previous
+                                </button>
+                                <span className="text-xs font-bold text-slate-800">
+                                    Page {sessionPage} of {totalSessionPages}
+                                </span>
+                                <button
+                                    onClick={() => setSessionPage(p => Math.min(totalSessionPages, p + 1))}
+                                    disabled={sessionPage === totalSessionPages}
+                                    className="px-3 py-1.5 text-xs font-bold bg-slate-100 text-slate-700 rounded-xl hover:bg-slate-200 disabled:opacity-40 transition-colors"
+                                >
+                                    Next
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -744,12 +831,9 @@ export default function TrainerReportView({
             {activeTab === 'feedback' && (
                 <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm space-y-6">
                     <div>
-                        <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                            Participant Voice & Feedback
+                        <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                            Trainee Feedback
                         </h3>
-                        <p className="text-xs text-slate-500 font-medium mt-1">
-                            Direct feedback, key takeaways, and action plans submitted by trainees.
-                        </p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

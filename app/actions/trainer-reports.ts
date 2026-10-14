@@ -53,8 +53,15 @@ export interface TrainerReportStats {
             date: string;
         }>;
     };
+    categoryBreakdown: Array<{
+        category: string;
+        sessionsCount: number;
+        totalHours: number;
+        personsTrained: number;
+    }>;
     programBreakdown: Array<{
         name: string;
+        category: string;
         sessionsCount: number;
         totalHours: number;
         personsTrained: number;
@@ -73,6 +80,7 @@ export interface TrainerReportStats {
     recentSessions: Array<{
         id: string;
         programName: string;
+        category: string;
         status: string;
         startDate: string;
         endDate: string;
@@ -96,6 +104,29 @@ export interface TrainerComparisonItem {
     firstTimeTrainees: number;
     firstTimerPercentage: number;
     averageRating: number | null;
+}
+
+/**
+ * Standardizes raw category strings to clean, predefined master categories
+ */
+export function formatCategoryTag(rawCategory?: string | null): string {
+    if (!rawCategory) return 'Functional / Other';
+    const c = rawCategory.trim().toUpperCase();
+    if (c === 'SAFETY_PROGRAMS' || c === 'SAFETY') return 'Safety';
+    if (c === 'HEMM_PROGRAMS' || c === 'HEMM') return 'HEMM';
+    if (c === 'BEHAVIOURAL_PROGRAMS' || c === 'BEHAVIOURAL' || c === 'BEHAVIORAL') return 'Behavioural';
+    if (c === 'OPERATOR_PROGRAMS' || c === 'OPERATOR') return 'Operator';
+    if (c === 'MINING_PROGRAMS' || c === 'MINING') return 'Mining';
+    if (c === 'COMPLIANCE_TRAINING' || c === 'COMPLIANCE') return 'Compliance';
+    if (c === 'OTHER_PROGRAMS') return 'Functional / Other';
+    if (c.includes('SAFETY')) return 'Safety';
+    if (c.includes('HEMM')) return 'HEMM';
+    if (c.includes('BEHAV')) return 'Behavioural';
+    if (c.includes('OPERAT')) return 'Operator';
+    if (c.includes('MINING')) return 'Mining';
+    if (c.includes('COMPL')) return 'Compliance';
+    if (c.includes('TECH')) return 'Technical';
+    return 'Functional / Other';
 }
 
 /**
@@ -141,15 +172,15 @@ export async function getTrainerReportData(
             : 'ALL';
         const dateRange = getFinancialYearDateRange(selectedFinancialYear);
 
-        // 1. Fetch available trainers list (for admins / dropdowns)
-        const allTrainersList = await db.trainer.findMany({
-            select: { name: true },
-            orderBy: { name: 'asc' }
-        });
-        const availableTrainers = allTrainersList.map(t => t.name);
-
-        // Fetch distinct financial years across the system
-        const [histYears, sysYears] = await Promise.all([
+        // 1. Fetch available trainers list, master program catalog tags, and distinct years
+        const [allTrainersList, masterPrograms, histYears, sysYears] = await Promise.all([
+            db.trainer.findMany({
+                select: { name: true },
+                orderBy: { name: 'asc' }
+            }),
+            db.program.findMany({
+                select: { id: true, name: true, category: true }
+            }),
             db.trainingHistory.findMany({
                 where: { year: { not: null } },
                 select: { year: true },
@@ -161,6 +192,36 @@ export async function getTrainerReportData(
                 distinct: ['year']
             })
         ]);
+        const availableTrainers = allTrainersList.map(t => t.name);
+
+        // Predefined Program Category Lookup Maps (Guarantees data consistency with Master Catalog)
+        const programCategoryById = new Map<string, string>();
+        const programCategoryByName = new Map<string, string>();
+        masterPrograms.forEach(p => {
+            if (p.id) programCategoryById.set(p.id.toLowerCase().trim(), p.category);
+            if (p.name) programCategoryByName.set(p.name.toLowerCase().trim(), p.category);
+        });
+
+        const resolvePredefinedTag = (
+            progName?: string | null,
+            altName?: string | null,
+            subCode?: string | null,
+            fallbackCat?: string | null
+        ): string => {
+            if (subCode && programCategoryById.has(subCode.toLowerCase().trim())) {
+                return formatCategoryTag(programCategoryById.get(subCode.toLowerCase().trim()));
+            }
+            if (progName && programCategoryByName.has(progName.toLowerCase().trim())) {
+                return formatCategoryTag(programCategoryByName.get(progName.toLowerCase().trim()));
+            }
+            if (altName && programCategoryByName.has(altName.toLowerCase().trim())) {
+                return formatCategoryTag(programCategoryByName.get(altName.toLowerCase().trim()));
+            }
+            if (fallbackCat) {
+                return formatCategoryTag(fallbackCat);
+            }
+            return 'Functional / Other';
+        };
 
         const currentFY = getFinancialYear(new Date());
         const yearsSet = new Set<string>();
@@ -211,6 +272,17 @@ export async function getTrainerReportData(
                         empId: true,
                         status: true
                     }
+                },
+                nominationBatch: {
+                    include: {
+                        program: {
+                            select: {
+                                id: true,
+                                name: true,
+                                category: true
+                            }
+                        }
+                    }
                 }
             },
             orderBy: { startDate: 'desc' }
@@ -260,6 +332,10 @@ export async function getTrainerReportData(
                     empId: true,
                     employeeName: true,
                     programName: true,
+                    altProgramName: true,
+                    progCategory: true,
+                    sessionCategory: true,
+                    subjectCode: true,
                     startDate: true,
                     endDate: true,
                     trainingHours: true,
@@ -281,6 +357,10 @@ export async function getTrainerReportData(
                     empId: true,
                     employeeName: true,
                     programName: true,
+                    altProgramName: true,
+                    progCategory: true,
+                    sessionCategory: true,
+                    subjectCode: true,
                     startDate: true,
                     endDate: true,
                     trainingHours: true,
@@ -467,11 +547,17 @@ export async function getTrainerReportData(
             ? Math.round((recommendedYes / recommendedTotal) * 100) 
             : null;
 
-        // 6. Program Breakdown
-        const programMap = new Map<string, { sessions: number; hours: number; persons: number; sessionIds: Set<string> }>();
+        // 6. Program Breakdown (Tagged with Predefined Master Categories)
+        const programMap = new Map<string, { category: string; sessions: number; hours: number; persons: number; sessionIds: Set<string> }>();
         sessions.forEach(s => {
-            const p = s.programName || 'Other';
-            const curr = programMap.get(p) || { sessions: 0, hours: 0, persons: 0, sessionIds: new Set<string>() };
+            const p = s.altProgramName || s.programName || 'Other';
+            const cat = resolvePredefinedTag(
+                s.programName,
+                s.altProgramName,
+                s.nominationBatch?.program?.id,
+                s.nominationBatch?.program?.category || s.sessionCategory
+            );
+            const curr = programMap.get(p) || { category: cat, sessions: 0, hours: 0, persons: 0, sessionIds: new Set<string>() };
             if (s.id) curr.sessionIds.add(String(s.id));
             curr.sessions = curr.sessionIds.size;
             curr.hours += s.trainingHours || 0;
@@ -480,11 +566,18 @@ export async function getTrainerReportData(
         });
 
         combinedRecords.forEach(r => {
-            const p = r.programName || 'Other';
+            const p = r.altProgramName || r.programName || 'Other';
+            const cat = resolvePredefinedTag(
+                r.programName,
+                r.altProgramName,
+                r.subjectCode,
+                r.progCategory || r.sessionCategory
+            );
             if (!programMap.has(p)) {
                 const sIds = new Set<string>();
                 if (r.sessionId) sIds.add(String(r.sessionId));
                 programMap.set(p, {
+                    category: cat,
                     sessions: sIds.size || 1,
                     hours: r.trainingHours || 0,
                     persons: 1,
@@ -503,12 +596,13 @@ export async function getTrainerReportData(
         const programBreakdown = Array.from(programMap.entries())
             .map(([name, val]) => ({
                 name,
+                category: val.category,
                 sessionsCount: val.sessions,
                 totalHours: Math.round(val.hours),
                 personsTrained: val.persons
             }))
             .sort((a, b) => b.personsTrained - a.personsTrained)
-            .slice(0, 10);
+            .slice(0, 15);
 
         // 7. Department Breakdown
         const deptMap = new Map<string, { count: number; firstTimers: number }>();
@@ -609,19 +703,118 @@ export async function getTrainerReportData(
             ? allMonths
             : allMonths.slice(-12);
 
-        // 9. Recent Sessions List
-        const recentSessions = sessions.slice(0, 15).map(s => ({
-            id: s.id,
-            programName: s.programName,
-            status: s.status,
-            startDate: s.startDate ? new Date(s.startDate).toISOString().slice(0, 10) : '',
-            endDate: s.endDate ? new Date(s.endDate).toISOString().slice(0, 10) : '',
-            trainingHours: s.trainingHours || 0,
-            trainingDays: s.trainingDays || 0,
-            location: s.location || 'N/A',
-            enrolledCount: s.enrollments.length,
-            attendedCount: s.enrollments.filter(e => e.status !== 'Absent').length || s.attendanceRecords.filter(a => a.status === 'Present').length
-        }));
+        // 9. Complete Session Ledger of the Trainer (Shows ALL programs conducted, tagged with predefined categories)
+        const sessionMap = new Map<string, TrainerReportStats['recentSessions'][0]>();
+
+        // 9a. Include modern sessions
+        sessions.forEach(s => {
+            const sId = String(s.id);
+            const cat = resolvePredefinedTag(
+                s.programName,
+                s.altProgramName,
+                s.nominationBatch?.program?.id,
+                s.nominationBatch?.program?.category || s.sessionCategory
+            );
+            sessionMap.set(sId, {
+                id: sId,
+                programName: s.altProgramName || s.programName,
+                category: cat,
+                status: s.status,
+                startDate: s.startDate ? new Date(s.startDate).toISOString().slice(0, 10) : '',
+                endDate: s.endDate ? new Date(s.endDate).toISOString().slice(0, 10) : '',
+                trainingHours: s.trainingHours || 0,
+                trainingDays: s.trainingDays || 0,
+                location: s.location || 'N/A',
+                enrolledCount: s.enrollments.length,
+                attendedCount: s.enrollments.filter(e => e.status !== 'Absent').length || s.attendanceRecords.filter(a => a.status === 'Present').length
+            });
+        });
+
+        // 9b. Include completed sessions from history if not already registered in modern sessions
+        const historySessionsGroup = new Map<string, {
+            recordsCount: number;
+            progName: string;
+            cat: string;
+            start: string;
+            end: string;
+            hours: number;
+            days: number;
+            loc: string;
+        }>();
+
+        combinedRecords.forEach(r => {
+            const sId = r.sessionId ? String(r.sessionId) : null;
+            if (sId && sessionMap.has(sId)) {
+                return; // Already present in modern sessionMap
+            }
+            const dateStr = r.startDate ? new Date(r.startDate).toISOString().slice(0, 10) : 'N/A';
+            const groupKey = sId || `hist_${r.programName}_${dateStr}`;
+
+            if (!historySessionsGroup.has(groupKey)) {
+                const cat = resolvePredefinedTag(
+                    r.programName,
+                    r.altProgramName,
+                    r.subjectCode,
+                    r.progCategory || r.sessionCategory
+                );
+                historySessionsGroup.set(groupKey, {
+                    recordsCount: 1,
+                    progName: r.altProgramName || r.programName || 'Training Program',
+                    cat,
+                    start: dateStr,
+                    end: r.endDate ? new Date(r.endDate).toISOString().slice(0, 10) : dateStr,
+                    hours: r.trainingHours || 0,
+                    days: r.trainingDays || 0,
+                    loc: r.location || 'N/A'
+                });
+            } else {
+                const g = historySessionsGroup.get(groupKey)!;
+                g.recordsCount++;
+                if (!g.hours && r.trainingHours) g.hours = r.trainingHours;
+                if (!g.days && r.trainingDays) g.days = r.trainingDays;
+            }
+        });
+
+        historySessionsGroup.forEach((g, key) => {
+            sessionMap.set(key, {
+                id: key,
+                programName: g.progName,
+                category: g.cat,
+                status: 'Completed',
+                startDate: g.start,
+                endDate: g.end,
+                trainingHours: g.hours,
+                trainingDays: g.days,
+                location: g.loc,
+                enrolledCount: g.recordsCount,
+                attendedCount: g.recordsCount
+            });
+        });
+
+        // All sessions of the trainer, sorted newest first without arbitrary limits
+        const recentSessions = Array.from(sessionMap.values()).sort((a, b) => {
+            return new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime();
+        });
+
+        // 10. Category Breakdown (Aggregated metrics by predefined program tag)
+        const categoryMap = new Map<string, { sessions: Set<string>; hours: number; persons: number }>();
+        recentSessions.forEach(s => {
+            const cat = s.category;
+            const curr = categoryMap.get(cat) || { sessions: new Set<string>(), hours: 0, persons: 0 };
+            curr.sessions.add(s.id);
+            curr.hours += s.trainingHours;
+            curr.persons += s.attendedCount;
+            categoryMap.set(cat, curr);
+        });
+
+        const categoryBreakdown = Array.from(categoryMap.entries())
+            .map(([category, val]) => ({
+                category,
+                sessionsCount: val.sessions.size,
+                totalHours: Math.round(val.hours),
+                personsTrained: val.persons
+            }))
+            .sort((a, b) => b.sessionsCount - a.sessionsCount);
 
         const report: TrainerReportStats = {
             trainerName: effectiveTrainerName || 'All Trainers',
@@ -654,6 +847,7 @@ export async function getTrainerReportData(
                 recommendationRate,
                 recentFeedback: recentFeedback.slice(0, 20)
             },
+            categoryBreakdown,
             programBreakdown,
             departmentBreakdown,
             monthlyTrend,
