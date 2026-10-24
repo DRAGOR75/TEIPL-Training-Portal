@@ -8,6 +8,7 @@ import Link from 'next/link';
 
 export default function UploadQualificationsPage() {
     const [records, setRecords] = useState<any[]>([]);
+    const [targetLedger, setTargetLedger] = useState<'auto' | 'tests' | 'lms'>('auto');
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
@@ -58,7 +59,7 @@ export default function UploadQualificationsPage() {
                 const chunk = records.slice(i, i + CHUNK_SIZE);
                 const currentBatchNum = Math.floor(i / CHUNK_SIZE) + 1;
 
-                const result = await bulkUploadQualifications(chunk);
+                const result = await bulkUploadQualifications(chunk, targetLedger);
 
                 if (result.success) {
                     successTotal += result.count || 0;
@@ -193,6 +194,37 @@ export default function UploadQualificationsPage() {
                         <p className="text-red-700 mt-1 font-medium">{errorMessage}</p>
                     </div>
                 )}
+
+                {/* Target Table Selector */}
+                <div className="bg-white p-4 rounded-2xl border border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-sm">
+                    <div>
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-400 block">Target Ledger Destination</span>
+                        <span className="text-sm font-bold text-slate-800">Choose which database table to import into:</span>
+                    </div>
+                    <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+                        <button
+                            type="button"
+                            onClick={() => setTargetLedger('auto')}
+                            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${targetLedger === 'auto' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                        >
+                            ⚡ Auto-Detect (Unified)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTargetLedger('tests')}
+                            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${targetLedger === 'tests' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                        >
+                            📝 Tests (test_records)
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setTargetLedger('lms')}
+                            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all ${targetLedger === 'lms' ? 'bg-white text-purple-700 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+                        >
+                            🎓 LMS (lms_records)
+                        </button>
+                    </div>
+                </div>
 
                 {records.length === 0 ? (
                     <div className="border-2 border-dashed border-slate-300 rounded-3xl p-16 flex flex-col items-center justify-center text-center bg-white hover:bg-slate-50 transition-colors shadow-sm cursor-pointer relative overflow-hidden group">

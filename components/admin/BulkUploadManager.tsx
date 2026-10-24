@@ -78,18 +78,33 @@ export default function BulkUploadManager() {
                         </Link>
                     </div>
 
-                    {/* Qualifications Upload Card */}
+                    {/* Tests & Assessments Upload Card */}
                     <div className="border border-slate-200 rounded-3xl p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-1.5 bg-purple-500"></div>
-                        <div className="w-14 h-14 bg-purple-50 text-purple-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-500"></div>
+                        <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                             <HiOutlineAcademicCap size={28} />
                         </div>
-                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Qualifications & Tests</h3>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">Tests & Assessments</h3>
                         <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
-                            Upload a unified CSV to import LMS data, online test marks, and general qualifications.
+                            Upload employee test marks, scores, examiner details, and pass/fail qualifications into <span className="font-mono text-xs font-bold text-blue-600">test_records</span>.
                         </p>
-                        <Link href="/admin/upload-qualifications" className="flex items-center justify-center gap-2 w-full py-3.5 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-xl font-bold text-sm transition-colors border border-purple-200 shadow-sm hover:shadow">
-                            Go to Qualifications Upload
+                        <Link href="/admin/upload-tests" className="flex items-center justify-center gap-2 w-full py-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl font-bold text-sm transition-colors border border-blue-200 shadow-sm hover:shadow">
+                            Go to Tests Upload
+                        </Link>
+                    </div>
+
+                    {/* LMS Records Upload Card */}
+                    <div className="border border-slate-200 rounded-3xl p-8 bg-white hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-500"></div>
+                        <div className="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <HiOutlineBookOpen size={28} />
+                        </div>
+                        <h3 className="font-black text-slate-800 text-xl mb-3 tracking-tight">LMS Participation</h3>
+                        <p className="text-sm text-slate-500 mb-8 font-medium leading-relaxed">
+                            Upload LMS course completions, hours spent, enrollment dates, and certificates into <span className="font-mono text-xs font-bold text-indigo-600">lms_records</span>.
+                        </p>
+                        <Link href="/admin/upload-lms" className="flex items-center justify-center gap-2 w-full py-3.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl font-bold text-sm transition-colors border border-indigo-200 shadow-sm hover:shadow">
+                            Go to LMS Upload
                         </Link>
                     </div>
 

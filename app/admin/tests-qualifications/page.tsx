@@ -14,7 +14,8 @@ export default async function TestsPage() {
     orderBy: { name: "asc" }
   });
 
-  const qualifications = await db.qualifications.findMany({
+  // Fetch Test Records from the separate test_records table
+  const testRecords = await db.testRecord.findMany({
     include: {
       employee: {
         select: {
@@ -26,16 +27,36 @@ export default async function TestsPage() {
     orderBy: { id: "desc" }
   });
 
-  // Basic fallback to fetch program names if we need it in the client
-  // Since qualifications only stores programId, not a relation
-  const qualificationsWithProgramName = qualifications.map(q => {
-    const program = programs.find(p => p.id === q.subjectId);
+  // Fetch LMS Records from the separate lms_records table
+  const lmsRecords = await db.lmsRecord.findMany({
+    include: {
+      employee: {
+        select: {
+          id: true,
+          name: true
+        }
+      }
+    },
+    orderBy: { id: "desc" }
+  });
+
+  // Fallback to fetch program names for tests
+  const testRecordsWithProgramName = testRecords.map(t => {
+    const program = programs.find(p => p.id === t.subjectId);
     return {
-      ...q,
-      programId: q.subjectId,
-      programName: program?.name || q.subjectName || "Unknown Program"
+      ...t,
+      programId: t.subjectId,
+      programName: program?.name || t.subjectName || "Unknown Program"
     };
   });
+
+  // Format LMS records for client view
+  const formattedLmsRecords = lmsRecords.map(l => ({
+    ...l,
+    programId: l.courseId,
+    programName: l.courseName || "Unknown Module",
+    testDate: l.completionDate || l.enrollmentDate
+  }));
 
   // Fetch completed training sessions to group tests program-wise
   const completedSessions = await db.trainingSession.findMany({
@@ -57,19 +78,23 @@ export default async function TestsPage() {
         <Link href="/admin" className="flex w-fit items-center gap-2 text-slate-400 hover:text-slate-600 font-bold text-sm uppercase tracking-wider transition-colors mb-2">
           <FiArrowLeft className="w-4 h-4" /> Back to Admin
         </Link>
-        <h1 className="text-5xl md:text-4xl font-black tracking-tighter uppercase">
-          <span className="text-slate-900">Tests &</span> <span className="text-blue-600">Qualifications</span>
-        </h1>
-
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          <h1 className="text-5xl md:text-4xl font-black tracking-tighter uppercase">
+            <span className="text-slate-900">Tests &</span> <span className="text-blue-600">LMS Ledgers</span>
+          </h1>
+          <span className="text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full">
+            Separate Tables: {testRecords.length} Tests | {lmsRecords.length} LMS
+          </span>
+        </div>
       </div>
 
       <QualificationsClient
         programs={programs}
         employees={employees}
-        initialData={qualificationsWithProgramName}
+        initialData={testRecordsWithProgramName}
+        lmsData={formattedLmsRecords}
         completedSessions={completedSessions}
       />
     </div>
   );
 }
-

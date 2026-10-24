@@ -45,6 +45,8 @@ model Employee {
   systemTrainingHistory SystemTrainingHistory[]
   attendanceRecords     AttendanceRecord[]
   qualifications        Qualifications[] //Qualifications for the employee
+  testRecords           TestRecord[]
+  lmsRecords            LmsRecord[]
 
   @@map("employees")
 }
@@ -886,4 +888,62 @@ model Qualifications {
   employee Employee? @relation(fields: [empID], references: [id])
 
   @@map("qualifications")
+}
+
+model TestRecord {
+  id                 Int       @id @default(autoincrement())
+  empID              String?   @map("emp_id")
+  subjectId          String?   @map("subject_id")
+  altSubjectName     String?   @map("alt_subject_name")
+  facilitator        String?   @map("facilitator")
+  testDate           DateTime? @map("test_date")
+  duration           String?   @map("duration")
+  maxMarks           Float?    @map("max_marks")
+  obtainedMarks      Float?    @map("obtained_marks")
+  qualified          Boolean?  @map("qualified")
+  referenceRemarks   String?   @map("reference_remarks") @db.Text
+  empLocation        String?   @map("emp_location")
+  subjectName        String?   @map("subject_name")
+  empName            String?   @map("emp_name")
+  designation        String?   @map("designation")
+  empGroup           String?   @map("emp_group")
+  gender             String?   @map("gender")
+  shortProgReference String?   @map("short_prog_reference")
+  month              String?
+  year               String?
+
+  employee Employee? @relation(fields: [empID], references: [id])
+
+  @@index([empID])
+  @@index([testDate])
+  @@map("test_records")
+}
+
+model LmsRecord {
+  id                 Int       @id @default(autoincrement())
+  empID              String?   @map("emp_id")
+  courseId           String?   @map("course_id")
+  altCourseName      String?   @map("alt_course_name")
+  enrollmentDate     DateTime? @map("enrollment_date")
+  completionDate     DateTime? @map("completion_date")
+  duration           String?   @map("duration")
+  maxMarks           Float?    @map("max_marks")
+  obtainedMarks      Float?    @map("obtained_marks")
+  qualified          Boolean?  @map("qualified")
+  referenceRemarks   String?   @map("reference_remarks") @db.Text
+  empLocation        String?   @map("emp_location")
+  courseName         String?   @map("course_name")
+  empName            String?   @map("emp_name")
+  designation        String?   @map("designation")
+  empGroup           String?   @map("emp_group")
+  gender             String?   @map("gender")
+  shortProgReference String?   @map("short_prog_reference")
+  month              String?
+  year               String?
+
+  employee Employee? @relation(fields: [empID], references: [id])
+
+  @@index([empID])
+  @@index([completionDate])
+  @@map("lms_records")
 }

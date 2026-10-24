@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { deleteQualification, bulkUploadQualifications } from '@/app/actions/qualifications';
-import { FiInbox, FiUsers, FiSearch, FiCheck, FiTrash2, FiFileText, FiUploadCloud, FiChevronLeft, FiChevronRight, FiCheckSquare, FiSquare, FiAlertCircle } from 'react-icons/fi';
+import { deleteTestRecord, deleteLmsRecord, bulkUploadTestRecords, bulkUploadQualifications } from '@/app/actions/qualifications';
+import { FiInbox, FiUsers, FiSearch, FiCheck, FiTrash2, FiFileText, FiUploadCloud, FiChevronLeft, FiChevronRight, FiCheckSquare, FiSquare, FiAlertCircle, FiBookOpen } from 'react-icons/fi';
 
-type Tab = 'sessions' | 'independent' | 'bulk';
+type Tab = 'sessions' | 'independent' | 'bulk' | 'lms';
 
 type GridRow = {
   id: string; 
@@ -20,11 +20,13 @@ export default function QualificationsClient({
   programs, 
   employees, 
   initialData, 
+  lmsData = [],
   completedSessions = []
 }: { 
   programs: any[], 
   employees: any[], 
   initialData: any[],
+  lmsData?: any[],
   completedSessions?: any[] 
 }) {
   const [activeTab, setActiveTab] = useState<Tab>('sessions');
@@ -183,9 +185,9 @@ export default function QualificationsClient({
       securedTest: row.securedTest,
     }));
 
-    const res = await bulkUploadQualifications(submitData);
+    const res = await bulkUploadTestRecords(submitData);
     if (res.success) {
-      showToast('Batch saved successfully!', 'success');
+      showToast('Batch saved successfully to test_records!', 'success');
       if (activeTab === 'independent') {
         setGridRows([]);
       } else {
@@ -217,9 +219,9 @@ export default function QualificationsClient({
     }).filter(item => item.empID); 
 
     if (data.length > 0) {
-      const res = await bulkUploadQualifications(data);
+      const res = await bulkUploadTestRecords(data);
       if (res.success) {
-        showToast('Bulk upload successful', 'success');
+        showToast('Bulk upload successful to test_records!', 'success');
       } else {
         showToast('Bulk upload failed: ' + res.error, 'error');
       }
@@ -228,13 +230,17 @@ export default function QualificationsClient({
 
   const handleDelete = async (id: number) => {
     if (confirm('Are you sure you want to delete this record?')) {
-      await deleteQualification(id);
+      if (activeTab === 'lms') {
+        await deleteLmsRecord(id);
+      } else {
+        await deleteTestRecord(id);
+      }
       showToast('Record deleted.', 'success');
     }
   };
 
   const filteredRecords = useMemo(() => {
-    let records = initialData;
+    let records = activeTab === 'lms' ? lmsData : initialData;
     if (activeTab === 'independent') records = records.filter(item => !item.programId);
     else if (activeTab === 'sessions' && sessionProgramId) records = records.filter(item => item.programId === sessionProgramId);
     
@@ -243,11 +249,12 @@ export default function QualificationsClient({
       records = records.filter(r => 
         r.employee?.name?.toLowerCase().includes(q) || 
         r.employee?.id?.toLowerCase().includes(q) ||
-        (r.programName && r.programName.toLowerCase().includes(q))
+        (r.programName && r.programName.toLowerCase().includes(q)) ||
+        (r.courseName && r.courseName.toLowerCase().includes(q))
       );
     }
     return records;
-  }, [initialData, activeTab, sessionProgramId, searchQuery]);
+  }, [initialData, lmsData, activeTab, sessionProgramId, searchQuery]);
 
   const totalPages = Math.ceil(filteredRecords.length / ITEMS_PER_PAGE) || 1;
   const paginatedRecords = useMemo(() => {
@@ -294,11 +301,24 @@ export default function QualificationsClient({
         </button>
 
         <button 
-          onClick={() => setActiveTab('bulk')}
+          onClick={() => { setActiveTab('bulk'); setCurrentPage(1); }}
           className={`p-3 text-left rounded-xl border border-slate-200 transition-all duration-200 hover:scale-[1.02] ${activeTab === 'bulk' ? 'bg-blue-600 text-white border-blue-600 shadow-lg' : 'bg-white hover:bg-slate-50 border-slate-200'}`}
         >
           <div className="font-semibold flex items-center gap-2"><FiUploadCloud /> Bulk CSV Upload</div>
           <div className="text-xs opacity-80 mt-1">Upload records from spreadsheet</div>
+        </button>
+
+        <button 
+          onClick={() => { setActiveTab('lms'); setCurrentPage(1); }}
+          className={`p-3 text-left rounded-xl border border-slate-200 transition-all duration-200 hover:scale-[1.02] ${activeTab === 'lms' ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg' : 'bg-white hover:bg-slate-50 border-slate-200'}`}
+        >
+          <div className="font-semibold flex items-center justify-between">
+            <span className="flex items-center gap-2"><FiBookOpen className="text-indigo-500" /> LMS Records</span>
+            <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">
+              {lmsData.length}
+            </span>
+          </div>
+          <div className="text-xs opacity-80 mt-1">Separate lms_records table</div>
         </button>
 
         {activeTab === 'sessions' && (
@@ -579,16 +599,21 @@ export default function QualificationsClient({
         {/* EXISTING RECORDS TABLE */}
         <div className="border border-slate-200 rounded-2xl bg-white shadow-md overflow-hidden mt-8">
           <div className="p-5 border-b bg-slate-50/80 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="font-bold text-lg flex items-center gap-2">
-              <FiFileText className="text-slate-500" />
-              {activeTab === 'sessions' ? 'Records for Selected Program' : (activeTab === 'independent' ? 'Independent Records' : 'All Records')}
-            </h2>
+            <div>
+              <h2 className="font-bold text-lg flex items-center gap-2">
+                <FiFileText className="text-slate-500" />
+                {activeTab === 'sessions' ? 'Test Records for Selected Program' : (activeTab === 'independent' ? 'Independent Test Records' : (activeTab === 'lms' ? 'LMS Module Completion Records' : 'All Test Records'))}
+              </h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {activeTab === 'lms' ? 'Stored in PostgreSQL table: lms_records' : 'Stored in PostgreSQL table: test_records'}
+              </p>
+            </div>
             
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <div className="relative w-full sm:w-64">
                 <input 
                   type="text" 
-                  placeholder="Search records..." 
+                  placeholder={activeTab === 'lms' ? "Search LMS courses, employees..." : "Search tests, employees..."} 
                   className="w-full pl-9 pr-4 py-2 text-sm border border-slate-200 rounded-xl bg-white shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -606,9 +631,9 @@ export default function QualificationsClient({
               <thead className="bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-wider sticky top-0 z-10 shadow-sm before:content-[''] before:absolute before:inset-0 before:border-b before:border-slate-200 before:pointer-events-none">
                 <tr>
                   <th className="px-4 py-3 w-[25%]">Employee</th>
-                  <th className="px-4 py-3 w-[25%]">Program</th>
-                  <th className="px-4 py-3 w-[15%]">Marks</th>
-                  <th className="px-4 py-3 w-[15%]">Date</th>
+                  <th className="px-4 py-3 w-[25%]">{activeTab === 'lms' ? 'LMS Course / Module' : 'Program'}</th>
+                  <th className="px-4 py-3 w-[15%]">{activeTab === 'lms' ? 'Duration / Hours' : 'Marks'}</th>
+                  <th className="px-4 py-3 w-[15%]">{activeTab === 'lms' ? 'Completion Date' : 'Test Date'}</th>
                   <th className="px-4 py-3 w-[10%]">Status</th>
                   <th className="px-4 py-3 w-[10%] text-right">Actions</th>
                 </tr>
@@ -617,23 +642,33 @@ export default function QualificationsClient({
                 {paginatedRecords.map(item => (
                   <tr key={item.id} className="hover:bg-slate-50/80:bg-slate-900/50 transition-colors">
                     <td className="px-4 py-2">
-                      <div className="font-semibold text-slate-900">{item.employee?.name}</div>
-                      <div className="text-xs text-slate-500 mt-0.5">{item.employee?.id}</div>
+                      <div className="font-semibold text-slate-900">{item.employee?.name || item.empName || 'Unknown Employee'}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">{item.employee?.id || item.empID || 'N/A'}</div>
                     </td>
                     <td className="px-4 py-2">
-                      {item.programName === "Unknown Program" && !item.programId ? 
-                        <span className="text-slate-400 italic">None (Independent)</span> : 
-                        <span className="font-medium text-slate-700">{item.altProgramName || item.programName}</span>}
+                      {item.courseName || item.altCourseName || item.altProgramName || item.programName || item.subjectName || (
+                        <span className="text-slate-400 italic">None (Independent)</span>
+                      )}
                     </td>
-                    <td className="px-4 py-2 font-bold text-slate-700">{item.obtainedMarks || '-'} <span className="text-slate-400 font-normal">/ {item.maxMarks || '-'}</span></td>
-                    <td className="px-4 py-2 text-slate-600">{item.testDate ? new Date(item.testDate).toLocaleDateString() : 'N/A'}</td>
+                    <td className="px-4 py-2 font-bold text-slate-700">
+                      {activeTab === 'lms' ? (
+                        item.duration ? `${item.duration} hrs` : (item.obtainedMarks !== null && item.obtainedMarks !== undefined ? `${item.obtainedMarks}/${item.maxMarks || 100}` : '-')
+                      ) : (
+                        `${item.obtainedMarks ?? '-'} / ${item.maxMarks ?? '-'}`
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-slate-600">
+                      {item.completionDate ? new Date(item.completionDate).toLocaleDateString() : (item.testDate ? new Date(item.testDate).toLocaleDateString() : 'N/A')}
+                    </td>
                     <td className="px-4 py-2">
-                      {item.Qualified ? (
+                      {item.qualified ? (
                         <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold inline-flex items-center gap-1.5 shadow-sm">
-                          <FiCheck /> Qualified
+                          <FiCheck /> {activeTab === 'lms' ? 'Completed' : 'Qualified'}
                         </span>
                       ) : (
-                        <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold shadow-sm">Pending</span>
+                        <span className="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-bold shadow-sm">
+                          {activeTab === 'lms' ? 'Enrolled' : 'Pending'}
+                        </span>
                       )}
                     </td>
                     <td className="px-4 py-2 text-right">

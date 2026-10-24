@@ -65,6 +65,7 @@ export interface TrainerReportStats {
         sessionsCount: number;
         totalHours: number;
         personsTrained: number;
+        altPrograms: string[];
     }>;
     departmentBreakdown: Array<{
         name: string;
@@ -194,17 +195,42 @@ export async function getTrainerReportData(
         ]);
         const availableTrainers = allTrainersList.map(t => t.name);
 
-        // Predefined Program Category Lookup Maps (Guarantees data consistency with Master Catalog)
+        // Predefined Program Category & Name Lookup Maps (Guarantees data consistency with Master Catalog)
         const programCategoryById = new Map<string, string>();
         const programCategoryByName = new Map<string, string>();
+        const programNameById = new Map<string, string>();
         masterPrograms.forEach(p => {
-            if (p.id) programCategoryById.set(p.id.toLowerCase().trim(), p.category);
-            if (p.name) programCategoryByName.set(p.name.toLowerCase().trim(), p.category);
+            if (p.id) {
+                const idKey = p.id.toLowerCase().trim();
+                programCategoryById.set(idKey, p.category);
+                programNameById.set(idKey, p.name.trim());
+            }
+            if (p.name) {
+                const nameKey = p.name.toLowerCase().trim();
+                programCategoryByName.set(nameKey, p.category);
+                programNameById.set(nameKey, p.name.trim());
+            }
         });
+
+        const resolveCanonicalProgramName = (
+            progName?: string | null,
+            subCodeOrProgId?: string | null
+        ): string => {
+            if (subCodeOrProgId && programNameById.has(subCodeOrProgId.toLowerCase().trim())) {
+                return programNameById.get(subCodeOrProgId.toLowerCase().trim())!;
+            }
+            if (progName && progName.trim()) {
+                const trimmed = progName.trim();
+                if (programNameById.has(trimmed.toLowerCase())) {
+                    return programNameById.get(trimmed.toLowerCase())!;
+                }
+                return trimmed;
+            }
+            return 'Other';
+        };
 
         const resolvePredefinedTag = (
             progName?: string | null,
-            altName?: string | null,
             subCode?: string | null,
             fallbackCat?: string | null
         ): string => {
@@ -213,9 +239,6 @@ export async function getTrainerReportData(
             }
             if (progName && programCategoryByName.has(progName.toLowerCase().trim())) {
                 return formatCategoryTag(programCategoryByName.get(progName.toLowerCase().trim()));
-            }
-            if (altName && programCategoryByName.has(altName.toLowerCase().trim())) {
-                return formatCategoryTag(programCategoryByName.get(altName.toLowerCase().trim()));
             }
             if (fallbackCat) {
                 return formatCategoryTag(fallbackCat);
@@ -547,41 +570,80 @@ export async function getTrainerReportData(
             ? Math.round((recommendedYes / recommendedTotal) * 100) 
             : null;
 
-        // 6. Program Breakdown (Tagged with Predefined Master Categories)
-        const programMap = new Map<string, { category: string; sessions: number; hours: number; persons: number; sessionIds: Set<string> }>();
+        // 6. Program Breakdown (Tagged with Predefined Master Categories - strictly completed programs)
+        const programMap = new Map<string, { 
+            category: string; 
+            sessions: number; 
+            hours: number; 
+            persons: number; 
+            sessionIds: Set<string>;
+            altProgramNames: Set<string>;
+        }>();
+
         sessions.forEach(s => {
-            const p = s.altProgramName || s.programName || 'Other';
+            if (s.status !== 'Completed') return;
+            const progId = s.nominationBatch?.program?.id;
+            const p = resolveCanonicalProgramName(
+                s.nominationBatch?.program?.name || s.programName,
+                progId
+            );
             const cat = resolvePredefinedTag(
-                s.programName,
-                s.altProgramName,
-                s.nominationBatch?.program?.id,
+                p,
+                progId,
                 s.nominationBatch?.program?.category || s.sessionCategory
             );
-            const curr = programMap.get(p) || { category: cat, sessions: 0, hours: 0, persons: 0, sessionIds: new Set<string>() };
+            const curr = programMap.get(p) || { 
+                category: cat, 
+                sessions: 0, 
+                hours: 0, 
+                persons: 0, 
+                sessionIds: new Set<string>(),
+                altProgramNames: new Set<string>()
+            };
             if (s.id) curr.sessionIds.add(String(s.id));
             curr.sessions = curr.sessionIds.size;
             curr.hours += s.trainingHours || 0;
             curr.persons += s.enrollments.filter(e => e.status !== 'Absent').length;
+
+            // Collect any sub-divisions or alternate program names
+            if (s.altProgramName && s.altProgramName.trim()) {
+                const alt = s.altProgramName.trim();
+                if (alt.toLowerCase() !== p.toLowerCase()) curr.altProgramNames.add(alt);
+            } else if (s.programName && s.programName.trim() && s.programName.trim().toLowerCase() !== p.toLowerCase()) {
+                curr.altProgramNames.add(s.programName.trim());
+            }
+
             programMap.set(p, curr);
         });
 
         combinedRecords.forEach(r => {
-            const p = r.altProgramName || r.programName || 'Other';
-            const cat = resolvePredefinedTag(
+            const p = resolveCanonicalProgramName(
                 r.programName,
-                r.altProgramName,
+                r.subjectCode
+            );
+            const cat = resolvePredefinedTag(
+                p,
                 r.subjectCode,
                 r.progCategory || r.sessionCategory
             );
+
+            const recordAlt = (r.altProgramName && r.altProgramName.trim()) 
+                ? r.altProgramName.trim() 
+                : (r.programName && r.programName.trim().toLowerCase() !== p.toLowerCase() ? r.programName.trim() : null);
+
             if (!programMap.has(p)) {
                 const sIds = new Set<string>();
                 if (r.sessionId) sIds.add(String(r.sessionId));
+                const altSet = new Set<string>();
+                if (recordAlt && recordAlt.toLowerCase() !== p.toLowerCase()) altSet.add(recordAlt);
+
                 programMap.set(p, {
                     category: cat,
                     sessions: sIds.size || 1,
                     hours: r.trainingHours || 0,
                     persons: 1,
-                    sessionIds: sIds
+                    sessionIds: sIds,
+                    altProgramNames: altSet
                 });
             } else {
                 const curr = programMap.get(p)!;
@@ -590,6 +652,9 @@ export async function getTrainerReportData(
                     curr.sessions = curr.sessionIds.size;
                 }
                 curr.persons++;
+                if (recordAlt && recordAlt.toLowerCase() !== p.toLowerCase()) {
+                    curr.altProgramNames.add(recordAlt);
+                }
             }
         });
 
@@ -599,7 +664,8 @@ export async function getTrainerReportData(
                 category: val.category,
                 sessionsCount: val.sessions,
                 totalHours: Math.round(val.hours),
-                personsTrained: val.persons
+                personsTrained: val.persons,
+                altPrograms: Array.from(val.altProgramNames)
             }))
             .sort((a, b) => b.personsTrained - a.personsTrained)
             .slice(0, 15);
@@ -709,15 +775,35 @@ export async function getTrainerReportData(
         // 9a. Include modern sessions
         sessions.forEach(s => {
             const sId = String(s.id);
+            const progId = s.nominationBatch?.program?.id;
+            const progName = resolveCanonicalProgramName(
+                s.nominationBatch?.program?.name || s.programName,
+                progId
+            );
             const cat = resolvePredefinedTag(
-                s.programName,
-                s.altProgramName,
-                s.nominationBatch?.program?.id,
+                progName,
+                progId,
                 s.nominationBatch?.program?.category || s.sessionCategory
             );
+
+            // Determine accurate attended count:
+            // 1. From System Training History records (finalized attendees)
+            const historyAttendees = combinedRecords.filter(r => r.sessionId && String(r.sessionId) === sId).length;
+            // 2. From distinct employees marked 'Present' in Attendance Records
+            const uniquePresentAttendance = new Set(
+                (s.attendanceRecords || [])
+                    .filter(a => a.status === 'Present')
+                    .map(a => a.empId)
+                    .filter(Boolean)
+            ).size;
+            // 3. From enrollments not marked 'Absent'
+            const nonAbsentEnrollments = (s.enrollments || []).filter(e => e.status !== 'Absent').length;
+
+            const finalAttended = historyAttendees || uniquePresentAttendance || nonAbsentEnrollments;
+
             sessionMap.set(sId, {
                 id: sId,
-                programName: s.altProgramName || s.programName,
+                programName: progName,
                 category: cat,
                 status: s.status,
                 startDate: s.startDate ? new Date(s.startDate).toISOString().slice(0, 10) : '',
@@ -726,7 +812,7 @@ export async function getTrainerReportData(
                 trainingDays: s.trainingDays || 0,
                 location: s.location || 'N/A',
                 enrolledCount: s.enrollments.length,
-                attendedCount: s.enrollments.filter(e => e.status !== 'Absent').length || s.attendanceRecords.filter(a => a.status === 'Present').length
+                attendedCount: finalAttended
             });
         });
 
@@ -747,19 +833,19 @@ export async function getTrainerReportData(
             if (sId && sessionMap.has(sId)) {
                 return; // Already present in modern sessionMap
             }
+            const progName = resolveCanonicalProgramName(r.programName, r.subjectCode);
             const dateStr = r.startDate ? new Date(r.startDate).toISOString().slice(0, 10) : 'N/A';
-            const groupKey = sId || `hist_${r.programName}_${dateStr}`;
+            const groupKey = sId || `hist_${progName}_${dateStr}`;
 
             if (!historySessionsGroup.has(groupKey)) {
                 const cat = resolvePredefinedTag(
-                    r.programName,
-                    r.altProgramName,
+                    progName,
                     r.subjectCode,
                     r.progCategory || r.sessionCategory
                 );
                 historySessionsGroup.set(groupKey, {
                     recordsCount: 1,
-                    progName: r.altProgramName || r.programName || 'Training Program',
+                    progName,
                     cat,
                     start: dateStr,
                     end: r.endDate ? new Date(r.endDate).toISOString().slice(0, 10) : dateStr,

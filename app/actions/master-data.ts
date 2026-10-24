@@ -494,6 +494,16 @@ export async function mergeEmployees(primaryId: string, duplicateId: string) {
                 data: { empID: primaryId }
             });
 
+            await tx.testRecord.updateMany({
+                where: { empID: duplicateId },
+                data: { empID: primaryId }
+            });
+
+            await tx.lmsRecord.updateMany({
+                where: { empID: duplicateId },
+                data: { empID: primaryId }
+            });
+
             // Resolve Enrollments manually to prevent sessionId + email unique constraint errors
             const dupEnrollments = await tx.enrollment.findMany({ where: { empId: duplicateId } });
             for (const enr of dupEnrollments) {

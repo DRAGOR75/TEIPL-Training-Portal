@@ -171,7 +171,6 @@ export default function TrainerReportView({
                 'Training Hours': s.trainingHours,
                 'Training Days': s.trainingDays,
                 'Location': s.location,
-                'Enrolled': s.enrolledCount,
                 'Attended': s.attendedCount,
                 'Trainer': report.trainerName
             }));
@@ -276,34 +275,56 @@ export default function TrainerReportView({
             {/* KEY METRIC KPI CARDS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
                 {/* CARD 1: SESSIONS / PROGRAMS COMPLETED */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-blue-400 transition-all">
-                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                        <HiOutlineAcademicCap className="w-5 h-5" />
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-blue-400 transition-all flex flex-col justify-between">
+                    <div>
+                        <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
+                            <HiOutlineAcademicCap className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Completed Programs</span>
+                        <div className="mt-1">
+                            <span className="text-3xl font-black text-slate-900">{report.pipeline.completedSessions}</span>
+                        </div>
+
+                        {/* Exact Status Numbers Breakdown */}
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
+                            <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+                                {report.pipeline.completedSessions} Completed
+                            </span>
+                            {report.pipeline.scheduledSessions > 0 && (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/60">
+                                    {report.pipeline.scheduledSessions} Scheduled
+                                </span>
+                            )}
+                            {report.pipeline.formingSessions > 0 && (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 border border-amber-200/60">
+                                    {report.pipeline.formingSessions} Forming
+                                </span>
+                            )}
+                            {report.pipeline.cancelledSessions > 0 && (
+                                <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/60">
+                                    {report.pipeline.cancelledSessions} Cancelled
+                                </span>
+                            )}
+                        </div>
                     </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Completed Programs</span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                        <span className="text-3xl font-black text-slate-900">{report.pipeline.completedSessions}</span>
-                        <span className="text-xs text-slate-500 font-semibold">of {report.pipeline.totalSessions} Total</span>
-                    </div>
+
                     <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-semibold">
                         <span>{report.output.totalTrainingHours} Hours Logged</span>
-                        <span className="text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full font-bold">{report.pipeline.completionRate}% Done</span>
+                        <span className="text-slate-500 font-medium">{report.pipeline.totalSessions} Total Pipeline</span>
                     </div>
                 </div>
 
                 {/* CARD 2: UNIQUE PROGRAMS DONE */}
-                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-purple-400 transition-all">
-                    <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
-                        <HiOutlineBookOpen className="w-5 h-5" />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Unique Programs</span>
-                    <div className="flex items-baseline gap-2 mt-1">
-                        <span className="text-3xl font-black text-slate-900">{report.output.totalPrograms ?? report.programBreakdown.length}</span>
-                        <span className="text-xs text-slate-500 font-semibold">Distinct Topics</span>
-                    </div>
-                    <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-purple-600 font-semibold">
-                        <span>Training Curriculum</span>
-                        <span className="bg-purple-50 px-2 py-0.5 rounded-full font-bold">Catalog Reach</span>
+                <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-xs relative overflow-hidden group hover:border-purple-400 transition-all flex flex-col justify-between">
+                    <div>
+                        <div className="w-11 h-11 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
+                            <HiOutlineBookOpen className="w-5 h-5" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Unique Programs</span>
+                        <div className="flex items-baseline gap-2 mt-1">
+                            <span className="text-3xl font-black text-slate-900">{report.output.totalPrograms ?? report.programBreakdown.length}</span>
+                            <span className="text-xs text-slate-500 font-semibold">Distinct Topics</span>
+                        </div>
                     </div>
                 </div>
 
@@ -501,36 +522,94 @@ export default function TrainerReportView({
                             <span className="text-slate-800 font-bold">{report.output.totalTraineeSessions} Total Trainee Records</span>
                         </div>
                     </div>
-
                     {/* TOP PROGRAMS DELIVERED */}
-                    <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm">
-                        <h3 className="text-lg font-black text-slate-900 tracking-tight mb-4">
-                            Top Programs Delivered
-                        </h3>
+                    <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-sm lg:col-span-2">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
+                            <div>
+                                <h3 className="text-lg font-black text-slate-900 tracking-tight">
+                                    Top Programs Delivered
+                                </h3>
+                                <p className="text-xs text-slate-500 font-medium">
+                                    Curriculum breakdown showing canonical programs and their alternate titles
+                                </p>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1 rounded-full w-fit">
+                                {report.programBreakdown.length} Completed Programs
+                            </span>
+                        </div>
 
-                        <div className="space-y-3">
-                            {report.programBreakdown.map((prog, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 hover:bg-slate-100/80 transition-colors">
-                                    <div className="flex items-center gap-3">
-                                        <span className="w-7 h-7 rounded-xl bg-white text-slate-700 font-black text-xs flex items-center justify-center shadow-xs">
-                                            {idx + 1}
-                                        </span>
-                                        <div>
-                                            <h4 className="text-sm font-bold text-slate-800 leading-tight">{prog.name}</h4>
-                                            <span className="text-[11px] text-slate-400 font-medium">
-                                                {prog.category ? `${prog.category} • ` : ''}{prog.sessionsCount} {prog.sessionsCount === 1 ? 'session' : 'sessions'} • {prog.totalHours} hrs
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="block text-sm font-black text-slate-900">{prog.personsTrained}</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Trained</span>
-                                    </div>
-                                </div>
-                            ))}
-                            {report.programBreakdown.length === 0 && (
-                                <p className="text-sm text-slate-400 text-center py-8">No programs recorded yet.</p>
-                            )}
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                        <th className="pb-3 pl-3 w-12 text-center">#</th>
+                                        <th className="pb-3 px-4">Program Name</th>
+                                        <th className="pb-3 px-4">Alt Program Name</th>
+                                        <th className="pb-3 px-4 text-center">Category</th>
+                                        <th className="pb-3 px-4 text-center">Sessions</th>
+                                        <th className="pb-3 px-4 text-center">Hours</th>
+                                        <th className="pb-3 pr-4 text-right">Trained</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-100 text-sm">
+                                    {report.programBreakdown.map((prog, idx) => (
+                                        <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
+                                            <td className="py-3.5 pl-3 text-center">
+                                                <span className="w-7 h-7 rounded-xl bg-slate-100 text-slate-700 font-black text-xs inline-flex items-center justify-center">
+                                                    {idx + 1}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 font-bold text-slate-900">
+                                                {prog.name}
+                                            </td>
+                                            <td className="py-3.5 px-4">
+                                                {prog.altPrograms && prog.altPrograms.length > 0 ? (
+                                                    <div className="flex flex-wrap gap-1.5 max-w-md">
+                                                        {prog.altPrograms.map((alt, aIdx) => (
+                                                            <span 
+                                                                key={aIdx} 
+                                                                className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/60"
+                                                            >
+                                                                {alt}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <span className="text-xs text-slate-400 italic">
+                                                        Standard (Core)
+                                                    </span>
+                                                )}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center">
+                                                <span className="inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600">
+                                                    {prog.category || 'General'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center font-bold text-slate-800">
+                                                {prog.sessionsCount}
+                                            </td>
+                                            <td className="py-3.5 px-4 text-center font-bold text-slate-800">
+                                                {prog.totalHours} hrs
+                                            </td>
+                                            <td className="py-3.5 pr-4 text-right">
+                                                <span className="block font-black text-slate-900 text-base">
+                                                    {prog.personsTrained.toLocaleString()}
+                                                </span>
+                                                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                                    trainees
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {report.programBreakdown.length === 0 && (
+                                        <tr>
+                                            <td colSpan={7} className="text-center py-8 text-sm text-slate-400">
+                                                No completed programs recorded yet.
+                                            </td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -751,7 +830,6 @@ export default function TrainerReportView({
                                     <th className="py-3 px-4">Dates</th>
                                     <th className="py-3 px-4">Duration</th>
                                     <th className="py-3 px-4">Location</th>
-                                    <th className="py-3 px-4 text-center">Enrolled</th>
                                     <th className="py-3 px-4 text-center">Attended</th>
                                 </tr>
                             </thead>
@@ -782,13 +860,12 @@ export default function TrainerReportView({
                                             {s.trainingHours}h ({s.trainingDays}d)
                                         </td>
                                         <td className="py-3.5 px-4 text-slate-600">{s.location}</td>
-                                        <td className="py-3.5 px-4 text-center text-slate-600">{s.enrolledCount}</td>
                                         <td className="py-3.5 px-4 text-center font-bold text-slate-900">{s.attendedCount}</td>
                                     </tr>
                                 ))}
                                 {paginatedSessions.length === 0 && (
                                     <tr>
-                                        <td colSpan={8} className="py-12 text-center text-slate-400 font-medium">
+                                        <td colSpan={7} className="py-12 text-center text-slate-400 font-medium">
                                             No training sessions found matching your search.
                                         </td>
                                     </tr>
