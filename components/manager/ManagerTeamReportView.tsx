@@ -215,6 +215,7 @@ export default function ManagerTeamReportView({
             return (
                 member.name.toLowerCase().includes(q) ||
                 member.empId.toLowerCase().includes(q) ||
+                (member.section && member.section.toLowerCase().includes(q)) ||
                 member.department.toLowerCase().includes(q) ||
                 member.designation.toLowerCase().includes(q) ||
                 member.location.toLowerCase().includes(q) ||
@@ -580,7 +581,7 @@ export default function ManagerTeamReportView({
                                 <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100">
                                     <tr>
                                         <th className="py-3 px-4">Employee</th>
-                                        <th className="py-3 px-4">Department & Site</th>
+                                        <th className="py-3 px-4">Section & Site</th>
                                         <th className="py-3 px-4">Training Status</th>
                                         <th className="py-3 px-4 text-center">Hours</th>
                                         <th className="py-3 px-4">Latest Program</th>
@@ -610,7 +611,7 @@ export default function ManagerTeamReportView({
                                                 </div>
                                             </td>
                                             <td className="py-3.5 px-4">
-                                                <span className="font-semibold text-slate-800 block">{member.department}</span>
+                                                <span className="font-semibold text-slate-800 block">{member.section && member.section !== 'N/A' ? member.section : member.department}</span>
                                                 <span className="text-[11px] text-slate-400 block">{member.location}</span>
                                             </td>
                                             <td className="py-3.5 px-4">
