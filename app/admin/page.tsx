@@ -13,6 +13,7 @@ import {
     HiOutlineArrowRight,
     HiOutlineChatBubbleBottomCenterText,
     HiOutlineDocumentText,
+    HiOutlineBuildingOffice2,
 } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
@@ -126,6 +127,24 @@ export default async function AdminHubPage() {
                         icon={<HiOutlineChartBar size={24} />}
                         tag="Intelligence"
                         color="emerald"
+                    />
+
+                    <AdminCard
+                        href="/admin/reports/workforce-training-status"
+                        title="Workforce Training Status"
+                        description="Trained vs untrained deficit analysis across sections, department groups, project sites, and TNI demands."
+                        icon={<HiOutlineBuildingOffice2 size={24} />}
+                        tag="Workforce Intelligence"
+                        color="purple"
+                    />
+
+                    <AdminCard
+                        href="/admin/reports/manager-team"
+                        title="Manager & Team Training"
+                        description="Filter by reporting manager to inspect their team members and view training compliance."
+                        icon={<HiOutlineUsers size={24} />}
+                        tag="Hierarchy"
+                        color="indigo"
                     />
 
                     <AdminCard

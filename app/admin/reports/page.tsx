@@ -29,13 +29,29 @@ export default async function AdminReportsPage() {
                         <p className="text-slate-500 mt-2 font-medium">Strategic overview of organizational training demand and fulfillment.</p>
                     </div>
 
-                    <Link
-                        href="/admin/reports/trainer-performance"
-                        className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-2xl shadow-sm transition-all shrink-0"
-                    >
-                        <span>Trainer Performance Report</span>
-                        <span>→</span>
-                    </Link>
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/admin/reports/workforce-training-status"
+                            className="inline-flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-2xl shadow-sm transition-all shrink-0"
+                        >
+                            <span>Workforce Training Status</span>
+                            <span>→</span>
+                        </Link>
+                        <Link
+                            href="/admin/reports/manager-team"
+                            className="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-2xl shadow-sm transition-all shrink-0"
+                        >
+                            <span>Manager & Team Training</span>
+                            <span>→</span>
+                        </Link>
+                        <Link
+                            href="/admin/reports/trainer-performance"
+                            className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-2xl shadow-sm transition-all shrink-0"
+                        >
+                            <span>Trainer Performance Report</span>
+                            <span>→</span>
+                        </Link>
+                    </div>
                 </div>
 
                 <ReportsDashboard data={reportData} />
