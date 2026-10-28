@@ -316,13 +316,9 @@ export async function getTrainerReportData(
             ? rawSessions
             : rawSessions.filter(s => getFinancialYear(s.startDate) === selectedFinancialYear);
 
-        let totalTrainingHours = 0;
-        let totalTrainingDays = 0;
-        sessions.forEach(s => {
-            if (s.status === 'Completed') {
-                totalTrainingHours += s.trainingHours || 0;
-                totalTrainingDays += s.trainingDays || 0;
-            }
+        const sessionLookupById = new Map<string, any>();
+        rawSessions.forEach(s => {
+            if (s.id) sessionLookupById.set(String(s.id), s);
         });
 
         // 3. Fetch Historical & Modern records from systemTrainingHistory and trainingHistory
@@ -416,35 +412,73 @@ export async function getTrainerReportData(
             }
         }
 
-        // Pipeline stats: count all unique session IDs across modern completed sessions, system training history, and legacy history
-        const completedSessionIds = new Set<string>();
-        sessions.forEach(s => {
-            if (s.status === 'Completed' && s.id) {
-                completedSessionIds.add(String(s.id));
-            }
-        });
-        combinedRecords.forEach(r => {
-            if (r.sessionId) {
-                completedSessionIds.add(String(r.sessionId));
-            }
-        });
+        // Map completed sessions strictly from trainingHistory and systemTrainingHistory
+        const completedSessionsMap = new Map<string, {
+            sessionId: string;
+            progName: string;
+            category: string;
+            startDate: string;
+            endDate: string;
+            trainingHours: number;
+            trainingDays: number;
+            location: string;
+            attendeeEmpIds: Set<string>;
+            recordsCount: number;
+        }>();
 
-        const completedSessions = completedSessionIds.size;
+        for (const r of combinedRecords) {
+            const progName = resolveCanonicalProgramName(r.programName, r.subjectCode);
+            const dateStr = r.startDate ? new Date(r.startDate).toISOString().slice(0, 10) : 'nodate';
+            const cat = resolvePredefinedTag(progName, r.subjectCode, r.progCategory || r.sessionCategory);
+            const loc = r.location || 'N/A';
+            const sId = r.sessionId && r.sessionId.trim() ? r.sessionId.trim() : null;
+
+            // Unique session key: if sessionId is present, use it; otherwise group by canonical program, date, location
+            const sessionKey = sId ? `sid_${sId}` : `hist_${progName.toLowerCase()}_${dateStr}_${loc.trim().toLowerCase()}`;
+
+            let rHours = r.trainingHours || 0;
+            let rDays = r.trainingDays || 0;
+            if ((!rHours || !rDays) && sId && sessionLookupById.has(sId)) {
+                const linked = sessionLookupById.get(sId);
+                if (!rHours) rHours = linked.trainingHours || 0;
+                if (!rDays) rDays = linked.trainingDays || 0;
+            }
+
+            if (!completedSessionsMap.has(sessionKey)) {
+                completedSessionsMap.set(sessionKey, {
+                    sessionId: sId || sessionKey,
+                    progName,
+                    category: cat,
+                    startDate: dateStr !== 'nodate' ? dateStr : '',
+                    endDate: r.endDate ? new Date(r.endDate).toISOString().slice(0, 10) : (dateStr !== 'nodate' ? dateStr : ''),
+                    trainingHours: rHours,
+                    trainingDays: rDays,
+                    location: loc,
+                    attendeeEmpIds: new Set(r.empId ? [r.empId] : []),
+                    recordsCount: 1
+                });
+            } else {
+                const s = completedSessionsMap.get(sessionKey)!;
+                s.recordsCount++;
+                if (r.empId) s.attendeeEmpIds.add(r.empId);
+                if (!s.trainingHours && rHours) s.trainingHours = rHours;
+                if (!s.trainingDays && rDays) s.trainingDays = rDays;
+            }
+        }
+
+        // Pipeline stats: completed sessions strictly derived from trainingHistory & systemTrainingHistory
+        const completedSessions = completedSessionsMap.size;
         const scheduledSessions = sessions.filter(s => s.status === 'Scheduled').length;
         const formingSessions = sessions.filter(s => s.status === 'Forming').length;
         const cancelledSessions = sessions.filter(s => s.status === 'Cancelled').length;
         const totalSessions = completedSessions + scheduledSessions + formingSessions + cancelledSessions;
         const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : (completedSessions > 0 ? 100 : 0);
 
-        // Add additional hours/days from completed history if training_sessions table has fewer entries
-        const historyHours = combinedRecords.reduce((acc, r) => acc + (r.trainingHours || 0), 0);
-        const historyDays = combinedRecords.reduce((acc, r) => acc + (r.trainingDays || 0), 0);
-        if (totalTrainingHours === 0 && historyHours > 0) {
-            totalTrainingHours = historyHours;
-            totalTrainingDays = historyDays;
-        }
+        // Training Hours & Days strictly calculated from completed sessions in training history & system training history
+        const totalTrainingHours = Array.from(completedSessionsMap.values()).reduce((sum, s) => sum + (s.trainingHours || 0), 0);
+        const totalTrainingDays = Array.from(completedSessionsMap.values()).reduce((sum, s) => sum + (s.trainingDays || 0), 0);
 
-        // Unique employees trained
+        // Participants strictly from training history & system training history
         const uniqueEmpIds = Array.from(new Set(combinedRecords.map(r => r.empId).filter(Boolean)));
         const uniquePersonsTrained = uniqueEmpIds.length;
         const totalTraineeSessions = combinedRecords.length;
@@ -570,99 +604,49 @@ export async function getTrainerReportData(
             ? Math.round((recommendedYes / recommendedTotal) * 100) 
             : null;
 
-        // 6. Program Breakdown (Tagged with Predefined Master Categories - strictly completed programs)
+        // 6. Program Breakdown (Strictly from training history and system training history)
         const programMap = new Map<string, { 
             category: string; 
-            sessions: number; 
+            sessions: Set<string>; 
             hours: number; 
             persons: number; 
-            sessionIds: Set<string>;
             altProgramNames: Set<string>;
         }>();
 
-        sessions.forEach(s => {
-            if (s.status !== 'Completed') return;
-            const progId = s.nominationBatch?.program?.id;
-            const p = resolveCanonicalProgramName(
-                s.nominationBatch?.program?.name || s.programName,
-                progId
-            );
-            const cat = resolvePredefinedTag(
-                p,
-                progId,
-                s.nominationBatch?.program?.category || s.sessionCategory
-            );
-            const curr = programMap.get(p) || { 
-                category: cat, 
-                sessions: 0, 
-                hours: 0, 
-                persons: 0, 
-                sessionIds: new Set<string>(),
+        for (const [sKey, s] of completedSessionsMap.entries()) {
+            const p = s.progName;
+            const curr = programMap.get(p) || {
+                category: s.category,
+                sessions: new Set<string>(),
+                hours: 0,
+                persons: 0,
                 altProgramNames: new Set<string>()
             };
-            if (s.id) curr.sessionIds.add(String(s.id));
-            curr.sessions = curr.sessionIds.size;
+            curr.sessions.add(sKey);
             curr.hours += s.trainingHours || 0;
-            curr.persons += s.enrollments.filter(e => e.status !== 'Absent').length;
-
-            // Collect any sub-divisions or alternate program names
-            if (s.altProgramName && s.altProgramName.trim()) {
-                const alt = s.altProgramName.trim();
-                if (alt.toLowerCase() !== p.toLowerCase()) curr.altProgramNames.add(alt);
-            } else if (s.programName && s.programName.trim() && s.programName.trim().toLowerCase() !== p.toLowerCase()) {
-                curr.altProgramNames.add(s.programName.trim());
-            }
-
             programMap.set(p, curr);
-        });
+        }
 
-        combinedRecords.forEach(r => {
-            const p = resolveCanonicalProgramName(
-                r.programName,
-                r.subjectCode
-            );
-            const cat = resolvePredefinedTag(
-                p,
-                r.subjectCode,
-                r.progCategory || r.sessionCategory
-            );
-
-            const recordAlt = (r.altProgramName && r.altProgramName.trim()) 
-                ? r.altProgramName.trim() 
-                : (r.programName && r.programName.trim().toLowerCase() !== p.toLowerCase() ? r.programName.trim() : null);
-
-            if (!programMap.has(p)) {
-                const sIds = new Set<string>();
-                if (r.sessionId) sIds.add(String(r.sessionId));
-                const altSet = new Set<string>();
-                if (recordAlt && recordAlt.toLowerCase() !== p.toLowerCase()) altSet.add(recordAlt);
-
-                programMap.set(p, {
-                    category: cat,
-                    sessions: sIds.size || 1,
-                    hours: r.trainingHours || 0,
-                    persons: 1,
-                    sessionIds: sIds,
-                    altProgramNames: altSet
-                });
-            } else {
-                const curr = programMap.get(p)!;
-                if (r.sessionId) {
-                    curr.sessionIds.add(String(r.sessionId));
-                    curr.sessions = curr.sessionIds.size;
-                }
+        // Add exact participant count and alternate program names for each program from combinedRecords
+        for (const r of combinedRecords) {
+            const p = resolveCanonicalProgramName(r.programName, r.subjectCode);
+            const curr = programMap.get(p);
+            if (curr) {
                 curr.persons++;
+                const recordAlt = (r.altProgramName && r.altProgramName.trim()) 
+                    ? r.altProgramName.trim() 
+                    : (r.programName && r.programName.trim().toLowerCase() !== p.toLowerCase() ? r.programName.trim() : null);
                 if (recordAlt && recordAlt.toLowerCase() !== p.toLowerCase()) {
                     curr.altProgramNames.add(recordAlt);
                 }
             }
-        });
+        }
 
         const programBreakdown = Array.from(programMap.entries())
             .map(([name, val]) => ({
                 name,
                 category: val.category,
-                sessionsCount: val.sessions,
+                sessionsCount: val.sessions.size,
                 totalHours: Math.round(val.hours),
                 personsTrained: val.persons,
                 altPrograms: Array.from(val.altProgramNames)
@@ -735,25 +719,15 @@ export async function getTrainerReportData(
             if (selectedFinancialYear !== 'ALL' && !monthMap.has(mKey)) return;
             const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0, sessionIds: new Set<string>() };
             curr.trainees++;
-            if (r.sessionId) {
-                curr.sessionIds.add(String(r.sessionId));
-                curr.sessions = curr.sessionIds.size;
-            }
+            const progName = resolveCanonicalProgramName(r.programName, r.subjectCode);
+            const dateStr = d.toISOString().slice(0, 10);
+            const sKey = r.sessionId && r.sessionId.trim() 
+                ? `sid_${r.sessionId.trim()}` 
+                : `hist_${progName.toLowerCase()}_${dateStr}_${(r.location || '').trim().toLowerCase()}`;
+            curr.sessionIds.add(sKey);
+            curr.sessions = curr.sessionIds.size;
             if (r.empId && firstTimerIds.has(r.empId)) {
                 curr.firstTimers++;
-            }
-            monthMap.set(mKey, curr);
-        });
-
-        sessions.forEach(s => {
-            if (!s.startDate) return;
-            const d = new Date(s.startDate);
-            const mKey = d.toLocaleString('en-US', { month: 'short', year: '2-digit' });
-            if (selectedFinancialYear !== 'ALL' && !monthMap.has(mKey)) return;
-            const curr = monthMap.get(mKey) || { sessions: 0, trainees: 0, firstTimers: 0, sessionIds: new Set<string>() };
-            if (s.id) {
-                curr.sessionIds.add(String(s.id));
-                curr.sessions = curr.sessionIds.size;
             }
             monthMap.set(mKey, curr);
         });
@@ -770,10 +744,28 @@ export async function getTrainerReportData(
             : allMonths.slice(-12);
 
         // 9. Complete Session Ledger of the Trainer (Shows ALL programs conducted, tagged with predefined categories)
-        const sessionMap = new Map<string, TrainerReportStats['recentSessions'][0]>();
+        const recentSessions: TrainerReportStats['recentSessions'] = [];
 
-        // 9a. Include modern sessions
+        // 9a. Completed sessions strictly from history
+        for (const [sKey, s] of completedSessionsMap.entries()) {
+            recentSessions.push({
+                id: s.sessionId || sKey,
+                programName: s.progName,
+                category: s.category,
+                status: 'Completed',
+                startDate: s.startDate,
+                endDate: s.endDate,
+                trainingHours: s.trainingHours,
+                trainingDays: s.trainingDays,
+                location: s.location,
+                enrolledCount: s.recordsCount,
+                attendedCount: s.recordsCount
+            });
+        }
+
+        // 9b. Scheduled / Forming / Cancelled pipeline sessions from trainingSession
         sessions.forEach(s => {
+            if (s.status === 'Completed') return;
             const sId = String(s.id);
             const progId = s.nominationBatch?.program?.id;
             const progName = resolveCanonicalProgramName(
@@ -786,22 +778,7 @@ export async function getTrainerReportData(
                 s.nominationBatch?.program?.category || s.sessionCategory
             );
 
-            // Determine accurate attended count:
-            // 1. From System Training History records (finalized attendees)
-            const historyAttendees = combinedRecords.filter(r => r.sessionId && String(r.sessionId) === sId).length;
-            // 2. From distinct employees marked 'Present' in Attendance Records
-            const uniquePresentAttendance = new Set(
-                (s.attendanceRecords || [])
-                    .filter(a => a.status === 'Present')
-                    .map(a => a.empId)
-                    .filter(Boolean)
-            ).size;
-            // 3. From enrollments not marked 'Absent'
-            const nonAbsentEnrollments = (s.enrollments || []).filter(e => e.status !== 'Absent').length;
-
-            const finalAttended = historyAttendees || uniquePresentAttendance || nonAbsentEnrollments;
-
-            sessionMap.set(sId, {
+            recentSessions.push({
                 id: sId,
                 programName: progName,
                 category: cat,
@@ -811,87 +788,23 @@ export async function getTrainerReportData(
                 trainingHours: s.trainingHours || 0,
                 trainingDays: s.trainingDays || 0,
                 location: s.location || 'N/A',
-                enrolledCount: s.enrollments.length,
-                attendedCount: finalAttended
+                enrolledCount: s.enrollments?.length || 0,
+                attendedCount: 0
             });
         });
 
-        // 9b. Include completed sessions from history if not already registered in modern sessions
-        const historySessionsGroup = new Map<string, {
-            recordsCount: number;
-            progName: string;
-            cat: string;
-            start: string;
-            end: string;
-            hours: number;
-            days: number;
-            loc: string;
-        }>();
+        recentSessions.sort((a, b) => new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime());
 
-        combinedRecords.forEach(r => {
-            const sId = r.sessionId ? String(r.sessionId) : null;
-            if (sId && sessionMap.has(sId)) {
-                return; // Already present in modern sessionMap
-            }
-            const progName = resolveCanonicalProgramName(r.programName, r.subjectCode);
-            const dateStr = r.startDate ? new Date(r.startDate).toISOString().slice(0, 10) : 'N/A';
-            const groupKey = sId || `hist_${progName}_${dateStr}`;
-
-            if (!historySessionsGroup.has(groupKey)) {
-                const cat = resolvePredefinedTag(
-                    progName,
-                    r.subjectCode,
-                    r.progCategory || r.sessionCategory
-                );
-                historySessionsGroup.set(groupKey, {
-                    recordsCount: 1,
-                    progName,
-                    cat,
-                    start: dateStr,
-                    end: r.endDate ? new Date(r.endDate).toISOString().slice(0, 10) : dateStr,
-                    hours: r.trainingHours || 0,
-                    days: r.trainingDays || 0,
-                    loc: r.location || 'N/A'
-                });
-            } else {
-                const g = historySessionsGroup.get(groupKey)!;
-                g.recordsCount++;
-                if (!g.hours && r.trainingHours) g.hours = r.trainingHours;
-                if (!g.days && r.trainingDays) g.days = r.trainingDays;
-            }
-        });
-
-        historySessionsGroup.forEach((g, key) => {
-            sessionMap.set(key, {
-                id: key,
-                programName: g.progName,
-                category: g.cat,
-                status: 'Completed',
-                startDate: g.start,
-                endDate: g.end,
-                trainingHours: g.hours,
-                trainingDays: g.days,
-                location: g.loc,
-                enrolledCount: g.recordsCount,
-                attendedCount: g.recordsCount
-            });
-        });
-
-        // All sessions of the trainer, sorted newest first without arbitrary limits
-        const recentSessions = Array.from(sessionMap.values()).sort((a, b) => {
-            return new Date(b.startDate || 0).getTime() - new Date(a.startDate || 0).getTime();
-        });
-
-        // 10. Category Breakdown (Aggregated metrics by predefined program tag)
+        // 10. Category Breakdown (Aggregated metrics strictly from completed history sessions)
         const categoryMap = new Map<string, { sessions: Set<string>; hours: number; persons: number }>();
-        recentSessions.forEach(s => {
+        for (const [sKey, s] of completedSessionsMap.entries()) {
             const cat = s.category;
             const curr = categoryMap.get(cat) || { sessions: new Set<string>(), hours: 0, persons: 0 };
-            curr.sessions.add(s.id);
+            curr.sessions.add(sKey);
             curr.hours += s.trainingHours;
-            curr.persons += s.attendedCount;
+            curr.persons += s.recordsCount; // participants attended
             categoryMap.set(cat, curr);
-        });
+        }
 
         const categoryBreakdown = Array.from(categoryMap.entries())
             .map(([category, val]) => ({
