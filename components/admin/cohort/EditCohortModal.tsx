@@ -7,11 +7,10 @@ import {
     HiOutlineXMark,
     HiOutlinePencilSquare,
     HiOutlineArrowPath,
-    HiOutlineChevronUp,
-    HiOutlineChevronDown,
     HiOutlineTrash,
     HiOutlinePlusCircle,
     HiOutlineMagnifyingGlass,
+    HiOutlineAcademicCap,
 } from 'react-icons/hi2';
 import { useRouter } from 'next/navigation';
 
@@ -20,6 +19,19 @@ interface EditCohortModalProps {
     programs: { id: string; name: string; category: string }[];
     onClose: () => void;
 }
+
+interface SelectedProgramItem {
+    tempId: string;
+    id: string; // master program ID
+    name: string;
+    displayName?: string;
+    category: string;
+    linkedSessionId?: string;
+    availableSessions?: any[];
+    isLoadingSessions?: boolean;
+}
+
+const generateTempId = () => `stage-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export default function EditCohortModal({ cohort, programs, onClose }: EditCohortModalProps) {
     const router = useRouter();
@@ -32,23 +44,54 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
     const [location, setLocation] = useState(cohort.cohortRegion || '');
     const [duration, setDuration] = useState(cohort.cohortDuration?.toString() || '');
     const [totalParticipants, setTotalParticipants] = useState(cohort.totalParticipants?.toString() || '');
-    
-    // Initialize selected programs from cohort.programs
-    const [selectedPrograms, setSelectedPrograms] = useState<{ id: string; name: string; displayName?: string; category: string; linkedSessionId?: string; availableSessions?: any[]; isLoadingSessions?: boolean }[]>(
-        (cohort.programs || []).map((cp: any) => ({
-            id: cp.program.id,
-            name: cp.program.name,
-            displayName: cp.session?.altProgramName || cp.session?.programName || cp.program.name,
-            category: cp.program.category,
-            linkedSessionId: cp.session?.id || undefined,
-            isLoadingSessions: true,
-            availableSessions: cp.session ? [cp.session] : [], // prepopulate with the currently linked session if any
-        }))
+
+    // Helper: auto-sort programs strictly by start date (ascending)
+    const sortProgramsByStartDate = <T extends { linkedSessionId?: string; availableSessions?: any[] }>(items: T[]): T[] => {
+        return [...items].sort((a, b) => {
+            const sessionA = a.availableSessions?.find((s: any) => s.id === a.linkedSessionId);
+            const sessionB = b.availableSessions?.find((s: any) => s.id === b.linkedSessionId);
+            const dateA = sessionA?.startDate ? new Date(sessionA.startDate).getTime() : null;
+            const dateB = sessionB?.startDate ? new Date(sessionB.startDate).getTime() : null;
+
+            if (dateA !== null && dateB !== null) {
+                return dateA - dateB;
+            }
+            if (dateA !== null) return -1;
+            if (dateB !== null) return 1;
+            return 0;
+        });
+    };
+
+    // Initialize selected programs from cohort.programs, ordered by start date
+    const [selectedPrograms, setSelectedPrograms] = useState<SelectedProgramItem[]>(
+        () => {
+            const rawPrograms = cohort.programs || [];
+            const mapped = rawPrograms.map((cp: any, idx: number) => {
+                const programName = cp.program?.name || cp.session?.programName || '';
+                const catalogMatch = programs.find(p =>
+                    (cp.program?.id && p.id === cp.program.id) ||
+                    p.name.trim().toLowerCase() === programName.trim().toLowerCase()
+                );
+                return {
+                    tempId: cp.id || `stage-${idx}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                    id: cp.program?.id || catalogMatch?.id || cp.programId || cp.id,
+                    name: programName,
+                    displayName: cp.session?.altProgramName || cp.session?.programName || programName,
+                    category: cp.program?.category || catalogMatch?.category || 'OTHER_PROGRAMS',
+                    linkedSessionId: cp.session?.id || cp.sessionId || undefined,
+                    isLoadingSessions: true,
+                    availableSessions: cp.session ? [cp.session] : [],
+                };
+            }).filter((p: any) => Boolean(p.id));
+
+            return sortProgramsByStartDate(mapped);
+        }
     );
 
     const [availableSessions, setAvailableSessions] = useState<any[]>([]);
     const [isLoadingAvailableSessions, setIsLoadingAvailableSessions] = useState(false);
     const [sessionSearch, setSessionSearch] = useState('');
+    const [selectedCatalogProgramId, setSelectedCatalogProgramId] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState('');
 
@@ -86,94 +129,160 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
         fetchSessions();
     }, []);
 
-    // Load available sessions for prepopulated programs
+    // Load available sessions for prepopulated programs in parallel without state overwrite race conditions
     useEffect(() => {
+        let isMounted = true;
         const loadProgramSessions = async () => {
             const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
-            
-            const updated = [...selectedPrograms];
-            let changed = false;
 
-            for (let i = 0; i < updated.length; i++) {
-                if (updated[i].isLoadingSessions) {
+            const unLoaded = selectedPrograms.filter(p => p.isLoadingSessions);
+            if (unLoaded.length === 0) return;
+
+            await Promise.all(
+                unLoaded.map(async (prog) => {
                     try {
-                        const sessions = await getAvailableSessionsForProgram(updated[i].name);
-                        // Combine existing linked session with available ones
-                        const existingSessionId = updated[i].linkedSessionId;
-                        const existingSessionObj = updated[i].availableSessions?.[0]; // from init
-                        
-                        let allSessions = [...sessions];
-                        if (existingSessionId && existingSessionObj && !allSessions.find(s => s.id === existingSessionId)) {
-                            allSessions = [existingSessionObj, ...allSessions];
-                        }
-                        
-                        updated[i] = { ...updated[i], availableSessions: allSessions, isLoadingSessions: false };
-                        changed = true;
+                        const sessions = await getAvailableSessionsForProgram(prog.name);
+                        if (!isMounted) return;
+
+                        setSelectedPrograms(prev => prev.map(item => {
+                            if (item.tempId !== prog.tempId) return item;
+                            const existingSessionId = item.linkedSessionId;
+                            const existingSessionObj = item.availableSessions?.[0];
+                            let allSessions = [...sessions];
+                            if (existingSessionId && existingSessionObj && !allSessions.find(s => s.id === existingSessionId)) {
+                                allSessions = [existingSessionObj, ...allSessions];
+                            }
+                            return {
+                                ...item,
+                                availableSessions: allSessions,
+                                isLoadingSessions: false,
+                            };
+                        }));
                     } catch (err) {
-                        updated[i] = { ...updated[i], isLoadingSessions: false };
-                        changed = true;
+                        if (!isMounted) return;
+                        setSelectedPrograms(prev => prev.map(item => item.tempId === prog.tempId ? { ...item, isLoadingSessions: false } : item));
                     }
-                }
-            }
-            if (changed) {
-                setSelectedPrograms(updated);
-            }
+                })
+            );
         };
         loadProgramSessions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        return () => { isMounted = false; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const addSession = async (session: any) => {
-        const sessionDisplayName = session.altProgramName || session.programName;
-        const programMatch = programs.find(p => p.name === session.programName || (session.altProgramName && p.name === session.altProgramName));
-        if (!programMatch) {
-            setError(`Program ${sessionDisplayName} not found in master catalog.`);
-            return;
+    const addProgramFromCatalog = async (programId: string) => {
+        if (!programId) return;
+        setError('');
+        const programMatch = programs.find(p => p.id === programId);
+        if (!programMatch) return;
+
+        const newTempId = generateTempId();
+        const newProgram: SelectedProgramItem = {
+            tempId: newTempId,
+            id: programMatch.id,
+            name: programMatch.name,
+            displayName: programMatch.name,
+            category: programMatch.category,
+            linkedSessionId: undefined,
+            isLoadingSessions: true,
+            availableSessions: []
+        };
+
+        setSelectedPrograms(prev => sortProgramsByStartDate([...prev, newProgram]));
+        setSelectedCatalogProgramId('');
+
+        try {
+            const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
+            const sessions = await getAvailableSessionsForProgram(programMatch.name);
+            setSelectedPrograms(prev => prev.map(p => p.tempId === newTempId ? {
+                ...p,
+                availableSessions: sessions,
+                isLoadingSessions: false
+            } : p));
+        } catch (err) {
+            setSelectedPrograms(prev => prev.map(p => p.tempId === newTempId ? { ...p, isLoadingSessions: false } : p));
         }
-        if (selectedPrograms.some(sp => sp.id === programMatch.id)) {
-            setError(`Program ${sessionDisplayName} is already in the sequence.`);
+    };
+
+    const addSession = async (session: any) => {
+        setError('');
+        const sessionDisplayName = session.altProgramName || session.programName;
+        const programMatch = programs.find(p =>
+            p.name.trim().toLowerCase() === session.programName?.trim().toLowerCase() ||
+            (session.altProgramName && p.name.trim().toLowerCase() === session.altProgramName?.trim().toLowerCase())
+        );
+
+        if (!programMatch) {
+            setError(`Program "${sessionDisplayName}" not found in master catalog.`);
             return;
         }
 
-        setSelectedPrograms(prev => [...prev, {
-            ...programMatch,
+        // Check if this exact session is already linked to any stage
+        if (selectedPrograms.some(sp => sp.linkedSessionId === session.id)) {
+            setError(`Session "${sessionDisplayName}" is already linked to a stage in this cohort.`);
+            return;
+        }
+
+        // Check if there is an unlinked placeholder stage for this program
+        const unlinkedStage = selectedPrograms.find(sp => sp.id === programMatch.id && !sp.linkedSessionId);
+
+        if (unlinkedStage) {
+            setSelectedPrograms(prev => sortProgramsByStartDate(prev.map(p => {
+                if (p.tempId !== unlinkedStage.tempId) return p;
+                const existingList = p.availableSessions || [];
+                const hasSession = existingList.some((s: any) => s.id === session.id);
+                return {
+                    ...p,
+                    displayName: sessionDisplayName,
+                    linkedSessionId: session.id,
+                    availableSessions: hasSession ? existingList : [session, ...existingList]
+                };
+            })));
+            setAvailableSessions(prev => prev.filter(s => s.id !== session.id));
+            return;
+        }
+
+        // Otherwise create a new stage for this program and link the session
+        const newTempId = generateTempId();
+        const newProgram: SelectedProgramItem = {
+            tempId: newTempId,
+            id: programMatch.id,
+            name: programMatch.name,
             displayName: sessionDisplayName,
+            category: programMatch.category,
             linkedSessionId: session.id,
             isLoadingSessions: true,
             availableSessions: [session]
-        }]);
+        };
 
+        setSelectedPrograms(prev => sortProgramsByStartDate([...prev, newProgram]));
         setAvailableSessions(prev => prev.filter(s => s.id !== session.id));
 
         try {
             const { getAvailableSessionsForProgram } = await import('@/app/actions/cohorts');
             const sessions = await getAvailableSessionsForProgram(programMatch.name);
-            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { 
-                ...p, 
-                availableSessions: [session, ...sessions.filter((s:any) => s.id !== session.id)], 
-                isLoadingSessions: false 
-            } : p));
+            setSelectedPrograms(prev => sortProgramsByStartDate(prev.map(p => p.tempId === newTempId ? {
+                ...p,
+                availableSessions: [session, ...sessions.filter((s: any) => s.id !== session.id)],
+                isLoadingSessions: false
+            } : p)));
         } catch (err) {
-            setSelectedPrograms(prev => prev.map(p => p.id === programMatch.id ? { ...p, isLoadingSessions: false } : p));
+            setSelectedPrograms(prev => prev.map(p => p.tempId === newTempId ? { ...p, isLoadingSessions: false } : p));
         }
     };
 
-    const removeProgram = (id: string) => {
-        setSelectedPrograms(prev => prev.filter(p => p.id !== id));
-    };
-
-    const moveUp = (index: number) => {
-        if (index === 0) return;
-        const newList = [...selectedPrograms];
-        [newList[index - 1], newList[index]] = [newList[index], newList[index - 1]];
-        setSelectedPrograms(newList);
-    };
-
-    const moveDown = (index: number) => {
-        if (index === selectedPrograms.length - 1) return;
-        const newList = [...selectedPrograms];
-        [newList[index], newList[index + 1]] = [newList[index + 1], newList[index]];
-        setSelectedPrograms(newList);
+    const removeProgram = (tempId: string) => {
+        const itemToRemove = selectedPrograms.find(p => p.tempId === tempId);
+        if (itemToRemove?.linkedSessionId) {
+            const linked = itemToRemove.availableSessions?.find((s: any) => s.id === itemToRemove.linkedSessionId);
+            if (linked) {
+                setAvailableSessions(prev => {
+                    if (prev.some(s => s.id === linked.id)) return prev;
+                    return [linked, ...prev];
+                });
+            }
+        }
+        setSelectedPrograms(prev => prev.filter(p => p.tempId !== tempId));
     };
 
     const handleSubmit = async () => {
@@ -357,12 +466,17 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
 
                     {/* Selected Programs (Ordered) */}
                     <div className="space-y-2">
-                        <label className="text-xs font-bold text-slate-700 uppercase">
-                            Program Sequence ({selectedPrograms.length} selected)
-                        </label>
+                        <div className="flex items-center justify-between">
+                            <label className="text-xs font-bold text-slate-700 uppercase">
+                                Program Sequence ({selectedPrograms.length} selected)
+                            </label>
+                            <span className="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">
+                                📅 Auto-ordered by Start Date
+                            </span>
+                        </div>
                         {selectedPrograms.length === 0 ? (
                             <div className="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center text-slate-400 text-sm">
-                                Add programs from the list below. You can reorder them.
+                                Add programs from the catalog or available sessions below. They will automatically be ordered by start date.
                             </div>
                         ) : (
                             <div className="space-y-2">
@@ -371,15 +485,22 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
                                     const displayName = linkedSession?.altProgramName || linkedSession?.programName || program.displayName || program.name;
                                     return (
                                         <div
-                                            key={program.id}
+                                            key={program.tempId}
                                             className="flex items-center gap-3 bg-blue-50/50 border border-blue-100 rounded-xl p-3"
                                         >
                                             <span className="text-xs font-black text-blue-400 w-6 text-center">{index + 1}</span>
                                             <div className="flex-1">
-                                                <span className="text-sm font-semibold text-slate-800">{displayName}</span>
-                                                <span className={`ml-2 text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${getCategoryColor(program.category)}`}>
-                                                    {program.category}
-                                                </span>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <span className="text-sm font-semibold text-slate-800">{displayName}</span>
+                                                    <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${getCategoryColor(program.category)}`}>
+                                                        {program.category}
+                                                    </span>
+                                                    {linkedSession?.startDate && (
+                                                        <span className="text-[11px] font-bold bg-white text-blue-700 border border-blue-200 px-2 py-0.5 rounded-md">
+                                                            📅 {new Date(linkedSession.startDate).toLocaleDateString()}
+                                                        </span>
+                                                    )}
+                                                </div>
                                                 <div className="mt-2 text-xs">
                                                     {program.isLoadingSessions ? (
                                                         <span className="text-slate-500 flex items-center gap-1">
@@ -391,42 +512,89 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
                                                             value={program.linkedSessionId || ""}
                                                             onChange={(e) => {
                                                                 const val = e.target.value;
+                                                                const oldSessionId = program.linkedSessionId;
                                                                 const chosen = program.availableSessions?.find((s: any) => s.id === val);
-                                                                setSelectedPrograms(prev => prev.map(p => p.id === program.id ? { 
-                                                                    ...p, 
-                                                                    linkedSessionId: val,
+
+                                                                // Return old session to available list
+                                                                if (oldSessionId && oldSessionId !== val) {
+                                                                    const oldSessionObj = program.availableSessions?.find((s: any) => s.id === oldSessionId);
+                                                                    if (oldSessionObj) {
+                                                                        setAvailableSessions(prev => {
+                                                                            if (prev.some(s => s.id === oldSessionObj.id)) return prev;
+                                                                            return [oldSessionObj, ...prev];
+                                                                        });
+                                                                    }
+                                                                }
+                                                                // Remove new session from available list
+                                                                if (val) {
+                                                                    setAvailableSessions(prev => prev.filter(s => s.id !== val));
+                                                                }
+
+                                                                setSelectedPrograms(prev => sortProgramsByStartDate(prev.map(p => p.tempId === program.tempId ? {
+                                                                    ...p,
+                                                                    linkedSessionId: val || undefined,
                                                                     displayName: chosen?.altProgramName || chosen?.programName || p.name
-                                                                } : p));
+                                                                } : p)));
                                                             }}
                                                         >
                                                             <option value="">-- No session linked (Pending) --</option>
-                                                            {program.availableSessions.map((s: any) => (
-                                                                <option key={s.id} value={s.id}>
-                                                                    {s.altProgramName || s.programName ? `${s.altProgramName || s.programName} — ` : ''}{s.startDate ? new Date(s.startDate).toLocaleDateString() : 'No Date'} - {s.trainerName || 'No Trainer'} ({s.status || 'Active'})
-                                                                </option>
-                                                            ))}
+                                                            {program.availableSessions.map((s: any) => {
+                                                                const isUsedElsewhere = selectedPrograms.some(other => other.tempId !== program.tempId && other.linkedSessionId === s.id);
+                                                                return (
+                                                                    <option key={s.id} value={s.id} disabled={isUsedElsewhere}>
+                                                                        {s.altProgramName || s.programName ? `${s.altProgramName || s.programName} — ` : ''}{s.startDate ? new Date(s.startDate).toLocaleDateString() : 'No Date'} - {s.trainerName || 'No Trainer'} ({s.status || 'Active'}){isUsedElsewhere ? ' (Linked to another stage)' : ''}
+                                                                    </option>
+                                                                );
+                                                            })}
                                                         </select>
                                                     ) : (
                                                         <span className="text-slate-400">No available sessions to link.</span>
                                                     )}
                                                 </div>
                                             </div>
-                                        <div className="flex items-center gap-1">
-                                            <button onClick={() => moveUp(index)} disabled={index === 0} className="p-1 hover:bg-blue-100 rounded disabled:opacity-30 transition-colors">
-                                                <HiOutlineChevronUp className="w-4 h-4 text-blue-600" />
-                                            </button>
-                                            <button onClick={() => moveDown(index)} disabled={index === selectedPrograms.length - 1} className="p-1 hover:bg-blue-100 rounded disabled:opacity-30 transition-colors">
-                                                <HiOutlineChevronDown className="w-4 h-4 text-blue-600" />
-                                            </button>
-                                            <button onClick={() => removeProgram(program.id)} className="p-1 hover:bg-red-100 rounded transition-colors">
-                                                <HiOutlineTrash className="w-4 h-4 text-red-400" />
-                                            </button>
+                                            <div className="flex items-center gap-1">
+                                                <button onClick={() => removeProgram(program.tempId)} className="p-1.5 hover:bg-red-100 rounded-lg transition-colors text-red-400 hover:text-red-600" title="Remove stage">
+                                                    <HiOutlineTrash className="w-4 h-4" />
+                                                </button>
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                             </div>
                         )}
+                    </div>
+
+                    {/* Add Program from Master Catalog */}
+                    <div className="space-y-3 bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                        <div className="flex items-center justify-between">
+                            <h3 className="text-xs font-bold text-slate-800 uppercase flex items-center gap-1.5">
+                                <HiOutlineAcademicCap className="w-4 h-4 text-blue-600" />
+                                Add Program from Catalog
+                            </h3>
+                            <span className="text-[10px] text-slate-400">Add planned stages (same program can be added multiple times)</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <select
+                                value={selectedCatalogProgramId}
+                                onChange={(e) => setSelectedCatalogProgramId(e.target.value)}
+                                className="flex-1 p-2.5 bg-white border border-slate-200 rounded-xl text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500"
+                            >
+                                <option value="">-- Choose a program from catalog to add --</option>
+                                {programs.map(p => (
+                                    <option key={p.id} value={p.id}>
+                                        {p.name} ({p.category})
+                                    </option>
+                                ))}
+                            </select>
+                            <button
+                                type="button"
+                                disabled={!selectedCatalogProgramId}
+                                onClick={() => addProgramFromCatalog(selectedCatalogProgramId)}
+                                className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 text-white px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95 shrink-0"
+                            >
+                                <HiOutlinePlusCircle className="w-4 h-4" /> Add Program
+                            </button>
+                        </div>
                     </div>
 
                     {/* Available Sessions to Link */}
@@ -434,7 +602,7 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
                         <div className="border-b border-slate-200 pb-2 flex items-center justify-between">
                             <div>
                                 <h3 className="text-sm font-bold text-slate-800 uppercase">Link Existing Sessions</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">Select a session to automatically add its program to the cohort.</p>
+                                <p className="text-xs text-slate-500 mt-0.5">Select a session to automatically add its program stage to the cohort.</p>
                             </div>
                             {availableSessions.length > 0 && (
                                 <span className="text-[11px] font-semibold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
@@ -492,6 +660,7 @@ export default function EditCohortModal({ cohort, programs, onClose }: EditCohor
                                     filteredAvailableSessions.map(session => (
                                         <button
                                             key={session.id}
+                                            type="button"
                                             onClick={() => addSession(session)}
                                             className="w-full flex items-center gap-3 p-3 hover:bg-slate-50 transition-colors text-left group"
                                         >
