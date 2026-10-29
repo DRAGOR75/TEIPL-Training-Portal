@@ -106,6 +106,17 @@ export async function updateSession(sessionId: string, formData: FormData) {
             data: dataToUpdate
         });
 
+        // If this session is linked to a cohort, re-sequence cohort programs by start date
+        const linkedCohortProg = await db.cohortProgram.findUnique({
+            where: { sessionId: sessionId },
+            select: { cohortId: true }
+        });
+        if (linkedCohortProg) {
+            const { resequenceCohortPrograms } = await import('@/app/actions/cohorts');
+            await resequenceCohortPrograms(linkedCohortProg.cohortId);
+            revalidatePath(`/admin/cohorts/${linkedCohortProg.cohortId}`);
+        }
+
         // Also update the proposed dates on the batch just to keep them in sync
         if (existingSession.nominationBatchId) {
             const batchUpdateData: any = {

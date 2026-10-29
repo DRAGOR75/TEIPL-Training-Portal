@@ -48,6 +48,18 @@ export default function CohortDetailClient({ cohort, trainers, locations, progra
     const totalPrograms = cohort.programs.length;
     const progressPercent = totalPrograms > 0 ? Math.round((completedCount / totalPrograms) * 100) : 0;
 
+    const sortedPrograms = [...cohort.programs].sort((a: any, b: any) => {
+        const dateA = a.session?.startDate ? new Date(a.session.startDate).getTime() : null;
+        const dateB = b.session?.startDate ? new Date(b.session.startDate).getTime() : null;
+        if (dateA !== null && dateB !== null) {
+            if (dateA !== dateB) return dateA - dateB;
+            return (a.seq ?? 0) - (b.seq ?? 0);
+        }
+        if (dateA !== null) return -1;
+        if (dateB !== null) return 1;
+        return (a.seq ?? 0) - (b.seq ?? 0);
+    });
+
     const handleRemoveMember = async (employeeId: string, name: string) => {
         if (!confirm(`Remove ${name} from this cohort?`)) return;
         setRemovingId(employeeId);
@@ -198,16 +210,16 @@ export default function CohortDetailClient({ cohort, trainers, locations, progra
                                     <HiOutlineDocumentText className="w-5 h-5 text-indigo-600" />
                                     Program Journey
                                 </h2>
-                                <p className="text-sm text-slate-500 mt-1">Programs can be scheduled in any order based on trainer availability.</p>
+                                <p className="text-sm text-slate-500 mt-1">Programs are sequenced chronologically by session start date.</p>
                             </div>
 
                             <div className="divide-y divide-slate-100">
-                                {cohort.programs.map((cp: any, index: number) => (
+                                {sortedPrograms.map((cp: any, index: number) => (
                                     <div key={cp.id} className="p-5 flex items-start gap-4 hover:bg-slate-50/50 transition-colors">
                                         {/* Status Icon + Line */}
                                         <div className="flex flex-col items-center gap-1 pt-0.5">
                                             {getStatusIcon(cp.status)}
-                                            {index < cohort.programs.length - 1 && (
+                                            {index < sortedPrograms.length - 1 && (
                                                 <div className={`w-0.5 h-8 rounded-full ${cp.status === 'Completed' ? 'bg-green-200' : 'bg-slate-200'}`} />
                                             )}
                                         </div>
@@ -215,7 +227,7 @@ export default function CohortDetailClient({ cohort, trainers, locations, progra
                                         {/* Program Details */}
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <span className="text-xs font-black text-slate-400">#{cp.seq}</span>
+                                                <span className="text-xs font-black text-slate-400">#{index + 1}</span>
                                                 <h3 className="font-bold text-slate-900">{cp.session?.altProgramName || cp.session?.programName || cp.program.name}</h3>
                                                 <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${cp.status === 'Completed'
                                                     ? 'bg-green-50 text-green-600'

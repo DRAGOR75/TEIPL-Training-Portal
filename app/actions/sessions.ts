@@ -406,6 +406,9 @@ export async function createSession(formData: FormData) {
                     data: { sessionId: trainingSession.id, status: 'InProgress' }
                 });
 
+                const { resequenceCohortPrograms } = await import('@/app/actions/cohorts');
+                await resequenceCohortPrograms(cohortProgram.cohortId);
+
                 const members = cohortProgram.cohort.members;
                 if (members.length > 0) {
                     const memberEmpIds = members.map(m => m.employeeId);

@@ -7,6 +7,51 @@ import { getFinancialYear, parseFlexibleDate } from '@/lib/date-utils';
 // ========== READ OPERATIONS ==========
 
 /**
+ * Resequence all CohortPrograms for a cohort strictly by training session startDate (ascending).
+ * Programs with sessions that have startDate are sequenced first chronologically.
+ * Programs without sessions or without startDate are placed afterwards.
+ */
+export async function resequenceCohortPrograms(cohortId: string) {
+    try {
+        const cps = await db.cohortProgram.findMany({
+            where: { cohortId },
+            include: {
+                session: {
+                    select: { id: true, startDate: true }
+                }
+            }
+        });
+
+        if (cps.length <= 1) return;
+
+        cps.sort((a, b) => {
+            const dateA = a.session?.startDate ? new Date(a.session.startDate).getTime() : null;
+            const dateB = b.session?.startDate ? new Date(b.session.startDate).getTime() : null;
+
+            if (dateA !== null && dateB !== null) {
+                if (dateA !== dateB) return dateA - dateB;
+                return a.seq - b.seq;
+            }
+            if (dateA !== null) return -1;
+            if (dateB !== null) return 1;
+            return a.seq - b.seq;
+        });
+
+        for (let i = 0; i < cps.length; i++) {
+            const targetSeq = i + 1;
+            if (cps[i].seq !== targetSeq) {
+                await db.cohortProgram.update({
+                    where: { id: cps[i].id },
+                    data: { seq: targetSeq }
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Failed to resequence cohort programs:', err);
+    }
+}
+
+/**
  * Get all cohorts with member counts and program progress.
  */
 export async function getCohorts() {
@@ -15,7 +60,7 @@ export async function getCohorts() {
             include: {
                 programs: {
                     include: {
-                        program: { select: { name: true } },
+                        program: { select: { id: true, name: true, category: true } },
                         session: { select: { id: true, startDate: true, endDate: true, altProgramName: true, programName: true } },
                     },
                     orderBy: { seq: 'asc' },
@@ -32,6 +77,20 @@ export async function getCohorts() {
             orderBy: { createdAt: 'desc' },
         });
 
+        cohorts.forEach(c => {
+            c.programs.sort((a, b) => {
+                const dateA = a.session?.startDate ? new Date(a.session.startDate).getTime() : null;
+                const dateB = b.session?.startDate ? new Date(b.session.startDate).getTime() : null;
+                if (dateA !== null && dateB !== null) {
+                    if (dateA !== dateB) return dateA - dateB;
+                    return a.seq - b.seq;
+                }
+                if (dateA !== null) return -1;
+                if (dateB !== null) return 1;
+                return a.seq - b.seq;
+            });
+        });
+
         return cohorts;
     } catch (error) {
         console.error('Failed to fetch cohorts:', error);
@@ -44,6 +103,8 @@ export async function getCohorts() {
  */
 export async function getCohortById(cohortId: string) {
     try {
+        await resequenceCohortPrograms(cohortId);
+
         const cohort = await db.cohort.findUnique({
             where: { id: cohortId },
             include: {
@@ -144,29 +205,74 @@ export async function createCohort(data: {
             },
         });
 
-        // Create cohort programs
-        for (let i = 0; i < data.programs.length; i++) {
-            const p = data.programs[i];
-            let status = 'Pending';
-            if (p.sessionId) {
-                const session = await db.trainingSession.findUnique({ where: { id: p.sessionId } });
-                if (session && session.status === 'Completed') {
-                    status = 'Completed';
-                } else if (session) {
-                    status = 'InProgress';
+        // Filter valid program entries (multiple stages with same programId are allowed).
+        // Deduplicate identical session links if any are passed.
+        const seenSessionIds = new Set<string>();
+        const validPrograms: { id: string; sessionId?: string }[] = [];
+        for (const p of data.programs) {
+            if (p?.id?.trim()) {
+                if (p.sessionId) {
+                    if (seenSessionIds.has(p.sessionId)) continue;
+                    seenSessionIds.add(p.sessionId);
                 }
+                validPrograms.push({ id: p.id.trim(), sessionId: p.sessionId || undefined });
             }
+        }
 
-            await db.cohortProgram.create({
-                data: {
-                    cohortId: cohort.id,
-                    programId: p.id,
-                    seq: i + 1,
-                    sessionId: p.sessionId || null,
-                    status: status,
+        // Sort programs by session.startDate if sessions exist so they are ordered by start date
+        let programsToCreate = validPrograms;
+        if (validPrograms.length > 1) {
+            const sessionIds = validPrograms.map(p => p.sessionId).filter(Boolean) as string[];
+            const sessions = sessionIds.length > 0
+                ? await db.trainingSession.findMany({
+                    where: { id: { in: sessionIds } },
+                    select: { id: true, startDate: true, status: true }
+                })
+                : [];
+            const sessionMap = new Map(sessions.map(s => [s.id, s]));
+
+            programsToCreate = [...validPrograms].sort((a, b) => {
+                const sessionA = a.sessionId ? sessionMap.get(a.sessionId) : null;
+                const sessionB = b.sessionId ? sessionMap.get(b.sessionId) : null;
+                const dateA = sessionA?.startDate ? new Date(sessionA.startDate).getTime() : null;
+                const dateB = sessionB?.startDate ? new Date(sessionB.startDate).getTime() : null;
+
+                if (dateA !== null && dateB !== null) {
+                    return dateA - dateB;
                 }
+                if (dateA !== null) return -1;
+                if (dateB !== null) return 1;
+                return 0;
             });
         }
+
+        // Create cohort programs safely in a transaction
+        await db.$transaction(async (tx) => {
+            for (let i = 0; i < programsToCreate.length; i++) {
+                const p = programsToCreate[i];
+                let status = 'Pending';
+                if (p.sessionId) {
+                    const session = await tx.trainingSession.findUnique({ where: { id: p.sessionId } });
+                    if (session && session.status === 'Completed') {
+                        status = 'Completed';
+                    } else if (session) {
+                        status = 'InProgress';
+                    }
+                }
+
+                await tx.cohortProgram.create({
+                    data: {
+                        cohortId: cohort.id,
+                        programId: p.id,
+                        seq: i + 1,
+                        sessionId: p.sessionId || null,
+                        status: status,
+                    }
+                });
+            }
+        });
+
+        await resequenceCohortPrograms(cohort.id);
 
         // Check if we should update cohort status based on linked sessions
         const allPrograms = await db.cohortProgram.findMany({ where: { cohortId: cohort.id } });
@@ -227,36 +333,81 @@ export async function updateCohort(cohortId: string, data: {
             },
         });
 
-        // If programs array is provided, rewrite the program sequence
+        // If programs array is provided, rewrite the program sequence safely inside a transaction
         if (data.programs) {
-            // Delete all existing programs for this cohort
-            await db.cohortProgram.deleteMany({
-                where: { cohortId: cohortId }
-            });
-
-            // Recreate them with new sequence and links
-            for (let i = 0; i < data.programs.length; i++) {
-                const p = data.programs[i];
-                let status = 'Pending';
-                if (p.sessionId) {
-                    const session = await db.trainingSession.findUnique({ where: { id: p.sessionId } });
-                    if (session && session.status === 'Completed') {
-                        status = 'Completed';
-                    } else if (session) {
-                        status = 'InProgress';
+            // Filter valid program entries (multiple stages with same programId are allowed).
+            // Deduplicate identical session links if any are passed.
+            const seenSessionIds = new Set<string>();
+            const validPrograms: { id: string; sessionId?: string }[] = [];
+            for (const p of data.programs) {
+                if (p?.id?.trim()) {
+                    if (p.sessionId) {
+                        if (seenSessionIds.has(p.sessionId)) continue;
+                        seenSessionIds.add(p.sessionId);
                     }
+                    validPrograms.push({ id: p.id.trim(), sessionId: p.sessionId || undefined });
                 }
+            }
 
-                await db.cohortProgram.create({
-                    data: {
-                        cohortId: cohort.id,
-                        programId: p.id,
-                        seq: i + 1,
-                        sessionId: p.sessionId || null,
-                        status: status,
+            // Sort programs by session.startDate if sessions exist so they are ordered by start date
+            let programsToCreate = validPrograms;
+            if (validPrograms.length > 1) {
+                const sessionIds = validPrograms.map(p => p.sessionId).filter(Boolean) as string[];
+                const sessions = sessionIds.length > 0
+                    ? await db.trainingSession.findMany({
+                        where: { id: { in: sessionIds } },
+                        select: { id: true, startDate: true, status: true }
+                    })
+                    : [];
+                const sessionMap = new Map(sessions.map(s => [s.id, s]));
+
+                programsToCreate = [...validPrograms].sort((a, b) => {
+                    const sessionA = a.sessionId ? sessionMap.get(a.sessionId) : null;
+                    const sessionB = b.sessionId ? sessionMap.get(b.sessionId) : null;
+                    const dateA = sessionA?.startDate ? new Date(sessionA.startDate).getTime() : null;
+                    const dateB = sessionB?.startDate ? new Date(sessionB.startDate).getTime() : null;
+
+                    if (dateA !== null && dateB !== null) {
+                        return dateA - dateB;
                     }
+                    if (dateA !== null) return -1;
+                    if (dateB !== null) return 1;
+                    return 0;
                 });
             }
+
+            await db.$transaction(async (tx) => {
+                // Delete all existing programs for this cohort
+                await tx.cohortProgram.deleteMany({
+                    where: { cohortId: cohortId }
+                });
+
+                // Recreate them with new sequence and links
+                for (let i = 0; i < programsToCreate.length; i++) {
+                    const p = programsToCreate[i];
+                    let status = 'Pending';
+                    if (p.sessionId) {
+                        const session = await tx.trainingSession.findUnique({ where: { id: p.sessionId } });
+                        if (session && session.status === 'Completed') {
+                            status = 'Completed';
+                        } else if (session) {
+                            status = 'InProgress';
+                        }
+                    }
+
+                    await tx.cohortProgram.create({
+                        data: {
+                            cohortId: cohort.id,
+                            programId: p.id,
+                            seq: i + 1,
+                            sessionId: p.sessionId || null,
+                            status: status,
+                        }
+                    });
+                }
+            });
+
+            await resequenceCohortPrograms(cohort.id);
         }
 
         revalidatePath('/admin/cohorts');
@@ -437,6 +588,9 @@ export async function scheduleCohortSession(cohortProgramId: string, sessionData
             },
         });
 
+        // Re-sequence cohort programs strictly by start date
+        await resequenceCohortPrograms(cohortProgram.cohortId);
+
         // 6. Activate cohort if still Draft
         if (cohortProgram.cohort.status === 'Draft') {
             await db.cohort.update({
@@ -492,6 +646,9 @@ export async function linkExistingSessionToCohortProgram(cohortProgramId: string
                 status: status,
             },
         });
+
+        // Re-sequence cohort programs strictly by start date
+        await resequenceCohortPrograms(cohortProgram.cohortId);
 
         // Activate cohort if still Draft
         if (cohortProgram.cohort.status === 'Draft') {
@@ -1066,13 +1223,33 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                     continue;
                 }
 
-                // Check if this program is already in the cohort
-                const existingProg = await db.cohortProgram.findFirst({
-                    where: {
-                        cohortId: cohort.id,
-                        programId: resolvedProgramId,
+                // Check if this program/session is already in the cohort
+                let existingProg = null;
+                if (linkedSession) {
+                    existingProg = await db.cohortProgram.findFirst({
+                        where: {
+                            cohortId: cohort.id,
+                            sessionId: linkedSession.id,
+                        }
+                    });
+                    if (!existingProg) {
+                        existingProg = await db.cohortProgram.findFirst({
+                            where: {
+                                cohortId: cohort.id,
+                                programId: resolvedProgramId,
+                                sessionId: null,
+                            }
+                        });
                     }
-                });
+                } else {
+                    existingProg = await db.cohortProgram.findFirst({
+                        where: {
+                            cohortId: cohort.id,
+                            programId: resolvedProgramId,
+                            sessionId: null,
+                        }
+                    });
+                }
 
                 let cpStatus = 'Pending';
                 if (linkedSession) {
@@ -1120,6 +1297,9 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                     data: { status: 'Active' }
                 });
             }
+
+            // Re-sequence cohort programs strictly by start date
+            await resequenceCohortPrograms(cohort.id);
         }
 
         revalidatePath('/admin/cohorts');
