@@ -284,7 +284,7 @@ export default function TrainerSessionsDashboard({
                                 <h3 className="font-bold text-slate-900">New Training Session</h3>
                                 <p className="text-xs text-slate-500 mt-1">Configure dates and assign a trainer.</p>
                             </div>
-                            <CreateSessionModal trainers={initialTrainers} programs={programs} locations={locations} fixedTrainerName={currentTrainerName} />
+                            <CreateSessionModal trainers={initialTrainers} programs={programs} locations={locations} defaultTrainerName={currentTrainerName} />
                         </div>
                     </div>
 
@@ -319,10 +319,37 @@ export default function TrainerSessionsDashboard({
                                             {/* Header */}
                                             <div className="flex items-start justify-between gap-4">
                                                 <div className="space-y-1">
-                                                    <div className="flex items-center gap-3">
+                                                    <div className="flex items-center gap-3 flex-wrap">
                                                         <h3 className="font-black text-lg text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
                                                             {session.altProgramName || session.programName}
                                                         </h3>
+                                                        {(() => {
+                                                            const isTrainer = currentTrainerName && session.trainerName?.toLowerCase() === currentTrainerName.toLowerCase();
+                                                            const isCoordinator = currentTrainerName && session.coordinatorName?.toLowerCase() === currentTrainerName.toLowerCase();
+
+                                                            if (isTrainer && isCoordinator) {
+                                                                return (
+                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-purple-100 text-purple-700 border border-purple-200">
+                                                                        Trainer & Coordinator
+                                                                    </span>
+                                                                );
+                                                            }
+                                                            if (isCoordinator) {
+                                                                return (
+                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                                                        Coordinator
+                                                                    </span>
+                                                                );
+                                                            }
+                                                            if (isTrainer) {
+                                                                return (
+                                                                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-700 border border-emerald-200">
+                                                                        Trainer
+                                                                    </span>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
                                                         {(() => {
                                                             const isCancelled = session.status?.toLowerCase() === 'cancelled' || session.nominationBatch?.status?.toLowerCase() === 'cancelled';
                                                             const isCompleted = !isCancelled && (session.nominationBatch?.status?.toLowerCase() === 'completed' || session.status?.toLowerCase() === 'completed');
@@ -373,6 +400,19 @@ export default function TrainerSessionsDashboard({
                                                         Trainer: <span className="font-bold text-slate-900">{session.trainerName || 'Unassigned'}</span>
                                                     </span>
                                                 </div>
+                                                {session.coordinatorName && (
+                                                    <>
+                                                        <div className="hidden md:block w-px h-5 bg-slate-200"></div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="p-1 bg-indigo-50 text-indigo-600 rounded-md">
+                                                                <HiOutlineUsers size={14} />
+                                                            </div>
+                                                            <span className="text-slate-600">
+                                                                Coordinator: <span className="font-bold text-slate-900">{session.coordinatorName}</span>
+                                                            </span>
+                                                        </div>
+                                                    </>
+                                                )}
                                                 <div className="hidden md:block w-px h-5 bg-slate-200"></div>
                                                 <div className="flex items-center gap-2">
                                                     <div className="p-1 bg-emerald-50 text-emerald-600 rounded-md">

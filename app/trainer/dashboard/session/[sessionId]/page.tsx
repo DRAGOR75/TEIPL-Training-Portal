@@ -23,10 +23,10 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
     if (!session) return notFound();
 
     const enrollments = session.enrollments || [];
-    
+
     // Merge pending nominations from the batch if they haven't submitted anything yet
     let allParticipants: any[] = [...enrollments];
-    
+
     if (session.nominationBatch && session.nominationBatch.nominations) {
         const enrolledEmpIds = new Set(enrollments.map((e: any) => e.empId));
         const enrolledEmails = new Set(enrollments.map((e: any) => e.employeeEmail));
@@ -89,7 +89,10 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                 {session.altProgramName || session.programName}
                             </h1>
                             <div className="flex items-center gap-4 text-xs text-slate-500 mt-1">
-                                <span className="flex items-center gap-1"><HiOutlineUser size={12} /> {session.trainerName}</span>
+                                <span className="flex items-center gap-1"><HiOutlineUser size={12} /> Trainer: {session.trainerName || 'Unassigned'}</span>
+                                {session.coordinatorName && (
+                                    <span className="flex items-center gap-1"><HiOutlineUsers size={12} className="text-indigo-500" /> Coordinator: {session.coordinatorName}</span>
+                                )}
                                 <span className="flex items-center gap-1"><HiOutlineCalendar size={12} /> {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}</span>
                             </div>
                         </div>
@@ -211,8 +214,8 @@ export default async function SessionDetailsPage({ params }: { params: Promise<{
                                                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border ${getStatusStyles(e.status)}`}>
                                                         {e.status === 'Completed' ? <HiOutlineCheckCircle size={12} /> :
                                                             e.status === 'Not Submitted' ? <HiOutlineExclamationCircle size={12} /> :
-                                                            e.status === 'Pending Manager' ? <HiOutlineClock size={12} /> :
-                                                                <HiOutlineExclamationCircle size={12} />}
+                                                                e.status === 'Pending Manager' ? <HiOutlineClock size={12} /> :
+                                                                    <HiOutlineExclamationCircle size={12} />}
                                                         {e.status}
                                                     </span>
                                                 </td>

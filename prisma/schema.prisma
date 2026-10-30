@@ -948,3 +948,49 @@ model LmsRecord {
   @@index([completionDate])
   @@map("lms_records")
 }
+
+
+// 27. Backup tables preserved in database (Ignored by Prisma Client, protected from db push drops)
+model BackupTrainingHistory {
+  id                    String    @id
+  empId                 String?   @map("emp_id")
+  employeeName          String?   @map("employee_name")
+  designation           String?   @map("designation")
+  department            String?   @map("department")
+  departmentGroup       String?   @map("department_group")
+  section               String?   @map("section")
+  employeeGroup         String?   @map("employee_group")
+  employeeGrouupMNmW    String?   @map("employee_grouup_m_nm_w")
+  employeeLocation      String?   @map("employee_location")
+  region                String?   @map("region")
+  organization          String?   @map("organization")
+  onrollContract        String?   @map("onroll_contract")
+  aadharNumber          String?   @map("aadhar_number")
+  gender                String?   @map("gender")
+  backedUpAt            DateTime? @map("backed_up_at")
+
+  @@ignore
+  @@map("_backup_training_history")
+}
+
+model BackupSystemTrainingHistory {
+  id                    String    @id
+  empId                 String?   @map("emp_id")
+  employeeName          String?   @map("employee_name")
+  designation           String?   @map("designation")
+  department            String?   @map("department")
+  departmentGroup       String?   @map("department_group")
+  section               String?   @map("section")
+  employeeGroup         String?   @map("employee_group")
+  employeeLocation      String?   @map("employee_location")
+  employeeRegion        String?   @map("employee_region")
+  organization          String?   @map("organization")
+  onrollContract        String?   @map("onroll_contract")
+  aadharNumber          String?   @map("aadhar_number")
+  gender                String?   @map("gender")
+  employeeGrouupMNmW    String?   @map("employee_grouup_m_nm_w")
+  backedUpAt            DateTime? @map("backed_up_at")
+
+  @@ignore
+  @@map("_backup_system_training_history")
+}

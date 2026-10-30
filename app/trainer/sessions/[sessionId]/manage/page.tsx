@@ -2,7 +2,7 @@ import { getSessionById, getPendingNominationsForProgram } from '@/app/actions/s
 import ManagementClient from '@/app/admin/sessions/[sessionId]/manage/management-client';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineUser } from 'react-icons/hi2';
+import { HiOutlineArrowLeft, HiOutlineCalendar, HiOutlineUser, HiOutlineUsers } from 'react-icons/hi2';
 import { auth } from '@/auth';
 import { db } from '@/lib/prisma';
 
@@ -20,7 +20,7 @@ export default async function ManageSessionPage({ params }: PageProps) {
         notFound();
     }
 
-    // 2. Auth Check: Ensure the logged in Trainer owns this session
+    // 2. Auth Check: Ensure the logged in Trainer or Coordinator is assigned to this session
     const userSession = await auth();
     let trainerName: string | undefined = undefined;
 
@@ -33,12 +33,15 @@ export default async function ManageSessionPage({ params }: PageProps) {
         }
     }
 
-    // Prevent access if the session belongs to another trainer
-    if (trainerName && session.trainerName && session.trainerName !== trainerName) {
+    // Prevent access if the user is a trainer/coordinator and this session is assigned to someone else
+    const isTrainer = !!(session.trainerName && trainerName && session.trainerName.toLowerCase() === trainerName.toLowerCase());
+    const isCoordinator = !!(session.coordinatorName && trainerName && session.coordinatorName.toLowerCase() === trainerName.toLowerCase());
+
+    if (trainerName && !isTrainer && !isCoordinator) {
         return (
             <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8 text-center flex-col gap-4">
                 <h1 className="text-2xl font-bold text-red-600">Access Denied</h1>
-                <p className="text-slate-600">You do not have permission to manage this session because it is assigned to another trainer.</p>
+                <p className="text-slate-600">You do not have permission to manage this session because you are not assigned as its Trainer or Coordinator.</p>
                 <Link href="/trainer/sessions" className="text-blue-600 hover:underline font-medium">Return to My Sessions</Link>
             </div>
         );
@@ -79,15 +82,35 @@ export default async function ManageSessionPage({ params }: PageProps) {
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight">
                             {session.altProgramName || session.programName}
                         </h1>
-                        <div className="flex items-center gap-6 mt-4 text-slate-600 font-medium">
+                        <div className="flex flex-wrap items-center gap-6 mt-4 text-slate-600 font-medium">
                             <div className="flex items-center gap-2">
                                 <HiOutlineCalendar className="w-5 h-5 text-slate-400" />
                                 {new Date(session.startDate).toLocaleDateString()} - {new Date(session.endDate).toLocaleDateString()}
                             </div>
                             <div className="flex items-center gap-2">
                                 <HiOutlineUser className="w-5 h-5 text-slate-400" />
-                                {session.trainerName || 'No Trainer Assigned'}
+                                <span>Trainer: {session.trainerName || 'No Trainer Assigned'}</span>
                             </div>
+                            {session.coordinatorName && (
+                                <div className="flex items-center gap-2">
+                                    <HiOutlineUsers className="w-5 h-5 text-indigo-500" />
+                                    <span>Coordinator: {session.coordinatorName}</span>
+                                </div>
+                            )}
+                            {trainerName && (isTrainer || isCoordinator) && (
+                                <div className="flex items-center gap-1.5 ml-auto">
+                                    <span className="text-xs uppercase font-bold text-slate-400">Your Role:</span>
+                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase tracking-wider ${
+                                        isTrainer && isCoordinator
+                                            ? 'bg-purple-100 text-purple-700 border-purple-200'
+                                            : isCoordinator
+                                            ? 'bg-indigo-100 text-indigo-700 border-indigo-200'
+                                            : 'bg-emerald-100 text-emerald-700 border-emerald-200'
+                                    }`}>
+                                        {isTrainer && isCoordinator ? 'Trainer & Coordinator' : isCoordinator ? 'Coordinator' : 'Trainer'}
+                                    </span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

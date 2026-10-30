@@ -28,6 +28,7 @@ type Session = {
     programName: string;
     altProgramName?: string | null;
     trainerName: string | null;
+    coordinatorName?: string | null;
     startDate: Date;
     endDate: Date;
     feedbackCreationDate?: Date | null;
@@ -367,6 +368,33 @@ export default function TrainerDashboardClient({
                                                     <h3 className="font-black text-xl text-slate-900 tracking-tight group-hover:text-blue-700 transition-colors">
                                                         {t.altProgramName || t.programName}
                                                     </h3>
+                                                    {(() => {
+                                                        const isTrainer = trainerName && t.trainerName?.toLowerCase() === trainerName.toLowerCase();
+                                                        const isCoordinator = trainerName && (t as any).coordinatorName?.toLowerCase() === trainerName.toLowerCase();
+
+                                                        if (isTrainer && isCoordinator) {
+                                                            return (
+                                                                <span className="bg-purple-100 text-purple-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-purple-200 uppercase tracking-wide">
+                                                                    Trainer & Coordinator
+                                                                </span>
+                                                            );
+                                                        }
+                                                        if (isCoordinator) {
+                                                            return (
+                                                                <span className="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-indigo-200 uppercase tracking-wide">
+                                                                    Coordinator
+                                                                </span>
+                                                            );
+                                                        }
+                                                        if (isTrainer) {
+                                                            return (
+                                                                <span className="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full border border-emerald-200 uppercase tracking-wide">
+                                                                    Trainer
+                                                                </span>
+                                                            );
+                                                        }
+                                                        return null;
+                                                    })()}
                                                     {t.emailsSent ? (
                                                         <span className="bg-slate-100 text-slate-500 text-[10px] font-bold px-2 py-1 rounded-full border border-slate-200 uppercase tracking-wide flex items-center gap-1">
                                                             <HiOutlineCheckCircle size={10} /> Completed
@@ -404,6 +432,9 @@ export default function TrainerDashboardClient({
                                                             <div>
                                                                 <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-0.5">Trainer</span>
                                                                 <span className="font-bold text-slate-900 text-sm block">{t.trainerName || 'N/A'}</span>
+                                                                {(t as any).coordinatorName && (
+                                                                    <span className="text-xs text-indigo-600 font-semibold block mt-0.5">Coord: {(t as any).coordinatorName}</span>
+                                                                )}
                                                             </div>
                                                         </div>
 
