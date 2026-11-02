@@ -491,33 +491,17 @@ export async function searchEmployeesToAdd(
         return { candidates: [] };
     }
 
-    const trimmedExclude = (excludeManagerEmail || '').trim();
+    const trimmedExclude = (excludeManagerEmail || '').trim().toLowerCase();
 
     try {
-        const whereClause: any = {
-            OR: [
-                { name: { contains: q, mode: 'insensitive' } },
-                { id: { contains: q, mode: 'insensitive' } },
-                { email: { contains: q, mode: 'insensitive' } }
-            ]
-        };
-
-        // Exclude employees who are ALREADY assigned to this specific manager.
-        // NOTE: In SQL, `NOT (managerEmail = '...')` evaluates to UNKNOWN/NULL when managerEmail IS NULL,
-        // which silently drops ALL unassigned employees! We must explicitly include `managerEmail: null`.
-        if (trimmedExclude && trimmedExclude.toLowerCase() !== 'n/a' && trimmedExclude.toLowerCase() !== 'nil') {
-            whereClause.AND = [
-                {
-                    OR: [
-                        { managerEmail: null },
-                        { managerEmail: { not: { equals: trimmedExclude, mode: 'insensitive' } } }
-                    ]
-                }
-            ];
-        }
-
         const employees = await db.employee.findMany({
-            where: whereClause,
+            where: {
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { id: { contains: q, mode: 'insensitive' } },
+                    { email: { contains: q, mode: 'insensitive' } }
+                ]
+            },
             select: {
                 id: true,
                 name: true,
@@ -529,33 +513,43 @@ export async function searchEmployeesToAdd(
                 managerName: true,
                 managerEmail: true
             },
-            take: 50,
+            take: 100,
             orderBy: { name: 'asc' }
         });
 
-        const candidates: EmployeeSearchCandidate[] = employees.map(e => {
-            const rawMgrEmail = (e.managerEmail || '').trim();
-            const isUnassigned = !rawMgrEmail ||
-                rawMgrEmail.toLowerCase() === 'n/a' ||
-                rawMgrEmail.toLowerCase() === 'nil' ||
-                rawMgrEmail.toLowerCase() === 'null';
+            // Filter out employees who are ALREADY assigned to this manager in memory.
+            // This is 100% reliable: avoids Prisma nested filter validation errors and SQL NULL issues.
+            const filteredEmployees = employees.filter(e => {
+                if (!trimmedExclude || trimmedExclude === 'n/a' || trimmedExclude === 'nil') {
+                    return true;
+                }
+                const empMgr = (e.managerEmail || '').trim().toLowerCase();
+                return empMgr !== trimmedExclude;
+            });
 
-            return {
-                id: e.id,
-                name: e.name,
-                email: e.email,
-                department: e.department || e.sectionName || 'N/A',
-                designation: e.designation || 'Staff',
-                location: e.location || 'N/A',
-                currentManagerName: isUnassigned ? undefined : (e.managerName || undefined),
-                currentManagerEmail: isUnassigned ? undefined : rawMgrEmail
-            };
-        });
+            const candidates: EmployeeSearchCandidate[] = filteredEmployees.slice(0, 50).map(e => {
+                const rawMgrEmail = (e.managerEmail || '').trim();
+                const isUnassigned = !rawMgrEmail ||
+                    rawMgrEmail.toLowerCase() === 'n/a' ||
+                    rawMgrEmail.toLowerCase() === 'nil' ||
+                    rawMgrEmail.toLowerCase() === 'null';
 
-        return { candidates };
-    } catch (error) {
-        console.error('Error searching employees to add:', error);
-        return { candidates: [], error: 'Failed to search employees' };
+                return {
+                    id: e.id,
+                    name: e.name,
+                    email: e.email,
+                    department: e.department || e.sectionName || 'N/A',
+                    designation: e.designation || 'Staff',
+                    location: e.location || 'N/A',
+                    currentManagerName: isUnassigned ? undefined : (e.managerName || undefined),
+                    currentManagerEmail: isUnassigned ? undefined : rawMgrEmail
+                };
+            });
+
+            return { candidates };
+        } catch (error) {
+            console.error('Error searching employees to add:', error);
+            return { candidates: [], error: 'Failed to search employees' };
+        }
     }
-}
 

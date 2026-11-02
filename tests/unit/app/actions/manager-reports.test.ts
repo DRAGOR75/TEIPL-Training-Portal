@@ -35,75 +35,91 @@ describe('searchEmployeesToAdd', () => {
         expect(db.employee.findMany).not.toHaveBeenCalled();
     });
 
-    it('explicitly includes unassigned employees (managerEmail is null) in where clause', async () => {
-        (auth as any).mockResolvedValue({ user: { email: 'admin@company.com' } });
-        (db.employee.findMany as any).mockResolvedValue([
-            {
-                id: 'EMP001',
-                name: 'John Doe',
-                email: 'john@company.com',
-                department: 'Engineering',
-                sectionName: 'Mining',
-                designation: 'Tech',
-                location: 'Site A',
-                managerName: null,
-                managerEmail: null,
-            },
-            {
-                id: 'EMP002',
-                name: 'Jane Smith',
-                email: 'jane@company.com',
-                department: 'Engineering',
-                sectionName: 'Mining',
-                designation: 'Lead',
-                location: 'Site A',
-                managerName: 'Other Manager',
-                managerEmail: 'other@company.com',
-            }
-        ]);
-
-        const res = await searchEmployeesToAdd('Jo', 'targetmanager@company.com');
-
-        // Check where clause contains explicit handling for managerEmail: null
-        expect(db.employee.findMany).toHaveBeenCalledWith(
-            expect.objectContaining({
-                where: expect.objectContaining({
-                    AND: [
-                        {
-                            OR: [
-                                { managerEmail: null },
-                                { managerEmail: { not: { equals: 'targetmanager@company.com', mode: 'insensitive' } } }
-                            ]
-                        }
-                    ]
-                })
-            })
-        );
-
-        expect(res.candidates.length).toBe(2);
-        // EMP001 has no manager -> should be marked as unassigned
-        expect(res.candidates[0].currentManagerEmail).toBeUndefined();
-        // EMP002 has other manager -> should retain other manager's email
-        expect(res.candidates[1].currentManagerEmail).toBe('other@company.com');
-    });
-
-    it('does not filter by managerEmail when excludeManagerEmail is empty', async () => {
-        (auth as any).mockResolvedValue({ user: { email: 'admin@company.com' } });
-        (db.employee.findMany as any).mockResolvedValue([]);
-
-        await searchEmployeesToAdd('John', '');
-
-        expect(db.employee.findMany).toHaveBeenCalledWith(
-            expect.objectContaining({
-                where: {
-                    OR: [
-                        { name: { contains: 'John', mode: 'insensitive' } },
-                        { id: { contains: 'John', mode: 'insensitive' } },
-                        { email: { contains: 'John', mode: 'insensitive' } }
-                    ]
+        it('returns unassigned employees, employees under other managers, and filters out the current manager team', async () => {
+            (auth as any).mockResolvedValue({ user: { email: 'admin@company.com' } });
+            (db.employee.findMany as any).mockResolvedValue([
+                {
+                    id: 'EMP001',
+                    name: 'John Doe',
+                    email: 'john@company.com',
+                    department: 'Engineering',
+                    sectionName: 'Mining',
+                    designation: 'Tech',
+                    location: 'Site A',
+                    managerName: null,
+                    managerEmail: null, // Unassigned
+                },
+                {
+                    id: 'EMP002',
+                    name: 'Jane Smith',
+                    email: 'jane@company.com',
+                    department: 'Engineering',
+                    sectionName: 'Mining',
+                    designation: 'Lead',
+                    location: 'Site A',
+                    managerName: 'Other Manager',
+                    managerEmail: 'other@company.com', // Other manager
+                },
+                {
+                    id: 'EMP003',
+                    name: 'Already On Team',
+                    email: 'team@company.com',
+                    department: 'Engineering',
+                    sectionName: 'Mining',
+                    designation: 'Staff',
+                    location: 'Site A',
+                    managerName: 'Target Manager',
+                    managerEmail: 'targetmanager@company.com', // Current manager (should be excluded)
+                },
+                {
+                    id: 'EMP004',
+                    name: 'NA Manager Employee',
+                    email: 'na@company.com',
+                    department: 'Operations',
+                    sectionName: 'Safety',
+                    designation: 'Operator',
+                    location: 'Site B',
+                    managerName: 'N/A',
+                    managerEmail: 'N/A', // String N/A -> unassigned
                 }
-            })
-        );
-    });
-});
+            ]);
 
+            const res = await searchEmployeesToAdd('Jo', 'targetmanager@company.com');
+
+            // Target manager employee (EMP003) must be excluded
+            expect(res.candidates.length).toBe(3);
+
+            // EMP001 (null manager) is present and marked unassigned
+            expect(res.candidates[0].id).toBe('EMP001');
+            expect(res.candidates[0].currentManagerEmail).toBeUndefined();
+
+            // EMP002 (other manager) is present and retains manager email
+            expect(res.candidates[1].id).toBe('EMP002');
+            expect(res.candidates[1].currentManagerEmail).toBe('other@company.com');
+
+            // EMP004 ('N/A' manager) is present and marked unassigned
+            expect(res.candidates[2].id).toBe('EMP004');
+            expect(res.candidates[2].currentManagerEmail).toBeUndefined();
+        });
+
+            it('does not filter out anyone when excludeManagerEmail is empty or undefined', async () => {
+                (auth as any).mockResolvedValue({ user: { email: 'admin@company.com' } });
+                (db.employee.findMany as any).mockResolvedValue([
+                    {
+                        id: 'EMP001',
+                        name: 'John Doe',
+                        email: 'john@company.com',
+                        department: 'Engineering',
+                        sectionName: 'Mining',
+                        designation: 'Tech',
+                        location: 'Site A',
+                        managerName: null,
+                        managerEmail: null,
+                    }
+                ]);
+
+                const res = await searchEmployeesToAdd('John', '');
+                expect(res.candidates.length).toBe(1);
+                expect(res.candidates[0].id).toBe('EMP001');
+            });
+        });
