@@ -479,7 +479,7 @@ export interface EmployeeSearchCandidate {
  */
 export async function searchEmployeesToAdd(
     query: string,
-    excludeManagerEmail: string
+    excludeManagerEmail?: string
 ): Promise<{ candidates: EmployeeSearchCandidate[]; error?: string }> {
     const session = await auth();
     if (!session?.user) {
@@ -491,18 +491,33 @@ export async function searchEmployeesToAdd(
         return { candidates: [] };
     }
 
+    const trimmedExclude = (excludeManagerEmail || '').trim();
+
     try {
-        const employees = await db.employee.findMany({
-            where: {
-                OR: [
-                    { name: { contains: q, mode: 'insensitive' } },
-                    { id: { contains: q, mode: 'insensitive' } },
-                    { email: { contains: q, mode: 'insensitive' } }
-                ],
-                NOT: {
-                    managerEmail: { equals: excludeManagerEmail.trim(), mode: 'insensitive' }
+        const whereClause: any = {
+            OR: [
+                { name: { contains: q, mode: 'insensitive' } },
+                { id: { contains: q, mode: 'insensitive' } },
+                { email: { contains: q, mode: 'insensitive' } }
+            ]
+        };
+
+        // Exclude employees who are ALREADY assigned to this specific manager.
+        // NOTE: In SQL, `NOT (managerEmail = '...')` evaluates to UNKNOWN/NULL when managerEmail IS NULL,
+        // which silently drops ALL unassigned employees! We must explicitly include `managerEmail: null`.
+        if (trimmedExclude && trimmedExclude.toLowerCase() !== 'n/a' && trimmedExclude.toLowerCase() !== 'nil') {
+            whereClause.AND = [
+                {
+                    OR: [
+                        { managerEmail: null },
+                        { managerEmail: { not: { equals: trimmedExclude, mode: 'insensitive' } } }
+                    ]
                 }
-            },
+            ];
+        }
+
+        const employees = await db.employee.findMany({
+            where: whereClause,
             select: {
                 id: true,
                 name: true,
@@ -514,20 +529,28 @@ export async function searchEmployeesToAdd(
                 managerName: true,
                 managerEmail: true
             },
-            take: 20,
+            take: 50,
             orderBy: { name: 'asc' }
         });
 
-        const candidates: EmployeeSearchCandidate[] = employees.map(e => ({
-            id: e.id,
-            name: e.name,
-            email: e.email,
-            department: e.department || e.sectionName || 'N/A',
-            designation: e.designation || 'Staff',
-            location: e.location || 'N/A',
-            currentManagerName: e.managerName || undefined,
-            currentManagerEmail: e.managerEmail || undefined
-        }));
+        const candidates: EmployeeSearchCandidate[] = employees.map(e => {
+            const rawMgrEmail = (e.managerEmail || '').trim();
+            const isUnassigned = !rawMgrEmail ||
+                rawMgrEmail.toLowerCase() === 'n/a' ||
+                rawMgrEmail.toLowerCase() === 'nil' ||
+                rawMgrEmail.toLowerCase() === 'null';
+
+            return {
+                id: e.id,
+                name: e.name,
+                email: e.email,
+                department: e.department || e.sectionName || 'N/A',
+                designation: e.designation || 'Staff',
+                location: e.location || 'N/A',
+                currentManagerName: isUnassigned ? undefined : (e.managerName || undefined),
+                currentManagerEmail: isUnassigned ? undefined : rawMgrEmail
+            };
+        });
 
         return { candidates };
     } catch (error) {
