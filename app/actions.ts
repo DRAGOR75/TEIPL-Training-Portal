@@ -18,7 +18,12 @@ export async function getCalendarMetadata(trainerName?: string) {
     try {
         // Fetch minimal data for ALL sessions (lightweight)
         // This allows the calendar to show dots for all past/future events without loading heavy enrollments
-        const whereClause = trainerName ? { trainerName } : {};
+        const whereClause = trainerName ? {
+            OR: [
+                { trainerName: { equals: trainerName, mode: 'insensitive' as const } },
+                { coordinatorName: { equals: trainerName, mode: 'insensitive' as const } }
+            ]
+        } : {};
 
         return await db.trainingSession.findMany({
             where: whereClause,
@@ -65,8 +70,14 @@ export async function getSessionsForDate(dateStr: string, trainerName?: string) 
             ]
         };
 
-        const whereClause = trainerName
-            ? { AND: [dateFilter, { trainerName }] }
+        const trainerFilter = trainerName ? {
+            OR: [
+                { trainerName: { equals: trainerName, mode: 'insensitive' as const } },
+                { coordinatorName: { equals: trainerName, mode: 'insensitive' as const } }
+            ]
+        } : undefined;
+        const whereClause = trainerFilter
+            ? { AND: [dateFilter, trainerFilter] }
             : dateFilter;
 
         const sessions = await db.trainingSession.findMany({
@@ -81,7 +92,7 @@ export async function getSessionsForDate(dateStr: string, trainerName?: string) 
         if (trainerName) {
             // Find all session IDs for this trainer
             const trainerSessions = await db.trainingSession.findMany({
-                where: { trainerName },
+                where: trainerFilter,
                 select: { id: true }
             });
             pendingCountWhere.sessionId = { in: trainerSessions.map(s => s.id) };
@@ -479,6 +490,7 @@ export async function createTrainingSession(formData: FormData) {
             data: {
                 programName,
                 trainerName,
+                coordinatorName: (formData.get('coordinatorName') as string) || null,
                 startDate,
                 endDate,
                 startTime: startTime || "10:00 am",

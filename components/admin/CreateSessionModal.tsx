@@ -11,6 +11,7 @@ type CreateSessionModalProps = {
     programs: any[];
     locations: any[];
     fixedTrainerName?: string;
+    defaultTrainerName?: string;
 
     // Props for external controlled state (like Gantt Chart)
     triggerComponent?: React.ReactNode;
@@ -24,7 +25,7 @@ type CreateSessionModalProps = {
 };
 
 export default function CreateSessionModal({
-    trainers, programs, locations, fixedTrainerName,
+    trainers, programs, locations, fixedTrainerName, defaultTrainerName,
     triggerComponent, fixedProgramName, fixedLocationName, fixedAltProgramName, prefillStartDate, cohortProgramId, defaultOpen, onClose
 }: CreateSessionModalProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen || false);
@@ -34,7 +35,7 @@ export default function CreateSessionModal({
     const initialProgram = programs.find(p => p.name === (fixedProgramName || ''));
     const [topics, setTopics] = useState<string>(initialProgram?.objectives || '');
 
-    const initialTrainer = fixedTrainerName ? fixedTrainerName.trim() : '';
+    const initialTrainer = fixedTrainerName ? fixedTrainerName.trim() : (defaultTrainerName ? defaultTrainerName.trim() : '');
     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
     const [trainerMode, setTrainerMode] = useState<'select' | 'custom'>('select');
     const [customTrainer, setCustomTrainer] = useState<string>('');

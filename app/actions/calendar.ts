@@ -35,7 +35,7 @@ export async function createCalendarEvent(formData: FormData) {
     const proposedTrainer = formData.get('proposedTrainer') as string;
     const proposedLocation = formData.get('proposedLocation') as string;
     const capacity = formData.get('capacity') as string;
-    
+
     if (!programId || !proposedStartDate || !proposedEndDate) {
         return { error: 'Missing required fields' };
     }
@@ -94,6 +94,7 @@ export async function confirmCalendarEvent(batchId: string, formData: FormData) 
             data: {
                 programName: batch.program.name,
                 trainerName,
+                coordinatorName: (formData.get('coordinatorName') as string) || null,
                 startDate: batch.proposedStartDate,
                 endDate: batch.proposedEndDate,
                 startTime,
@@ -109,7 +110,7 @@ export async function confirmCalendarEvent(batchId: string, formData: FormData) 
         // Update Batch Status
         await db.nominationBatch.update({
             where: { id: batch.id },
-            data: { 
+            data: {
                 status: 'Scheduled',
                 publishToCalendar: false // Hide from "Upcoming/Forming" calendar view
             }

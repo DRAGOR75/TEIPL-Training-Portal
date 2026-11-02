@@ -91,7 +91,7 @@ export default function FinalizeAttendanceModal({
                 dob: employee.dob ? new Date(employee.dob).toISOString().split('T')[0] : '',
             });
             const org = employee.organization || '';
-            const isStandardOrg = ['LMEL', 'TSMPL', 'MTLL', 'TEIPL', ''].includes(org);
+            const isStandardOrg = ['LMEL', 'TSMPL', 'MTLL', 'TEIPL', 'LICL'].includes(org);
             setCustomOrganization(isStandardOrg ? '' : org);
 
             setCustomDesignation('');
@@ -301,7 +301,8 @@ export default function FinalizeAttendanceModal({
                                     <option value="TSMPL">TSMPL</option>
                                     <option value="MTLL">MTLL</option>
                                     <option value="TEIPL">TEIPL</option>
-                                    {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL'].includes(formData.organization) && (
+                                    <option value="LICL">LICL</option>
+                                    {formData.organization && !['LMEL', 'TSMPL', 'MTLL', 'TEIPL', 'LICL'].includes(formData.organization) && (
                                         <option value={formData.organization}>{formData.organization}</option>
                                     )}
                                     <option value="OTHER_CUSTOM">Other (Type Custom)</option>
