@@ -341,7 +341,7 @@ export default function CreateSessionModal({
                                 <option value="Technical">Technical</option>
                                 <option value="Technical-VR">Technical-VR</option>
                                 <option value="Technical by OEM">Technical by OEM</option>
-                                <option value="All Nomination">Technical at OEM</option>
+                                <option value="Technical at OEM">Technical at OEM</option>
                                 <option value="Workshop">Workshop</option>
                                 <option value="Functional/Others">Functional/Others</option>
                                 <option value="Behavioural">Behavioural</option>
