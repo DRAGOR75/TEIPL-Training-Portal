@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { HiXMark, HiOutlinePaperAirplane, HiOutlineArrowPathRoundedSquare } from 'react-icons/hi2';
 
 interface BulkEmailPreviewModalProps {
@@ -56,11 +56,11 @@ export default function BulkEmailPreviewModal({ isOpen, onClose, onConfirm, samp
 
     const getPreviewHtml = () => {
         return htmlContent
-            .replace(/{name}/g, sampleData.name || 'Sample Name')
-            .replace(/{empId}/g, sampleData.empId || '000000')
-            .replace(/{password}/g, sampleData.password || '******')
-            .replace(/{department}/g, sampleData.department || 'Dept')
-            .replace(/{designation}/g, sampleData.designation || 'Role');
+            .replace(/\{name\}/gi, sampleData.name || 'Sample Name')
+            .replace(/\{empId|empid|emp_id\}/gi, sampleData.empId || '000000')
+            .replace(/\{password|pass|pwd\}/gi, sampleData.password || '******')
+            .replace(/\{department\}/gi, sampleData.department || 'Dept')
+            .replace(/\{designation\}/gi, sampleData.designation || 'Role');
     };
 
     if (!isOpen) return null;

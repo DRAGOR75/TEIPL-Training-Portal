@@ -48,7 +48,7 @@ const getBaseUrl = () => {
 export async function sendEmail({ to, subject, html, cc, bcc }: { to?: string, subject: string, html: string, cc?: string, bcc?: string }) {
   try {
     const gmail = getGmailClient();
-    const userEmail = clean(process.env.EMAIL_USER);
+    const userEmail = clean(process.env.EMAIL_USER) || clean(process.env.GMAIL_USER_EMAIL);
 
     // Construct the raw email
     // Headers must be ASCII. Use RFC 2047 encoding for the subject if it contains non-ASCII characters.
@@ -57,7 +57,7 @@ export async function sendEmail({ to, subject, html, cc, bcc }: { to?: string, s
     // Prepare options for header construction
     const options = { cc, bcc };
 
-    const str = [
+    const headers = [
       `From: "Training Thriveni" <${userEmail}>`,
       to ? `To: ${to}` : '',
       options?.cc ? `Cc: ${options.cc}` : '',
@@ -65,9 +65,10 @@ export async function sendEmail({ to, subject, html, cc, bcc }: { to?: string, s
       `Subject: ${encodedSubject}`,
       `Content-Type: text/html; charset=utf-8`,
       `MIME-Version: 1.0`,
-      ``,
-      html
-    ].filter(Boolean).join('\n');
+    ].filter(Boolean).join('\r\n');
+
+    // RFC 5322: Headers and body MUST be separated by CRLF CRLF (\r\n\r\n)
+    const str = `${headers}\r\n\r\n${html}`;
 
     // Encode the string to Base64URL format (Safe for URL)
     const encodedMessage = Buffer.from(str)

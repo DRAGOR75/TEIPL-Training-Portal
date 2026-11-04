@@ -46,7 +46,7 @@ export default function UploadLmsPage() {
         setStatus('uploading');
         setProgress({ current: 0, total: records.length });
         setErrorMessage('');
-        
+
         const TOTAL_RECORDS = records.length;
         const CHUNK_SIZE = 500;
         let successTotal = 0;
@@ -92,7 +92,7 @@ export default function UploadLmsPage() {
             setStatus('idle');
             setErrorMessage('');
             setUploadStats(null);
-            
+
             const fileInput = document.getElementById('csv-upload-lms') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
@@ -122,15 +122,15 @@ export default function UploadLmsPage() {
 
     const downloadSample = () => {
         const headers = [
-            "Emp ID", "Emp Name", "Emp Location", "Course ID", "Course Name", 
-            "Date Of Enrollment", "Date of Completion", "Duration", "Max Marks", "Marks Attained", 
-            "Pass", "Designation", "Emp Group", "Gender", 
+            "Emp ID", "Emp Name", "Emp Location", "Course ID", "Course Name", "Facilitator",
+            "Date Of Enrollment", "Date of Completion", "Duration", "Max Marks", "Marks Attained",
+            "Pass", "Designation", "Emp Group", "Gender",
             "Reference / Remarks", "MTH", "Year"
         ];
         const rowData = [
-            "10018532", "Payal Pradhan", "TRC", "LMS-PPE", "PPE Safety", 
-            "24-Mar-2025", "24-Mar-2025", "2", "100", "85", 
-            "TRUE", "Officer", "Staff", "Female", 
+            "10018532", "Payal Pradhan", "TRC", "LMS-PPE", "PPE Safety", "John Doe",
+            "24-Mar-2025", "24-Mar-2025", "2", "100", "85",
+            "TRUE", "Officer", "Staff", "Female",
             "Completed on LMS Portal", "Mar", "24-25"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
@@ -239,7 +239,7 @@ export default function UploadLmsPage() {
                                         Records will be imported strictly into the <span className="font-mono font-bold text-indigo-600">lms_records</span> database table.
                                     </p>
                                 </div>
-                                
+
                                 {status === 'completed' ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-3 rounded-xl font-bold border border-emerald-200 shadow-sm">
                                         <HiCheckCircle className="w-6 h-6" />
@@ -265,7 +265,7 @@ export default function UploadLmsPage() {
                                         <span>{progress.current} / {progress.total}</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                                        <div 
+                                        <div
                                             className="bg-indigo-600 h-full transition-all duration-300 rounded-full"
                                             style={{ width: `${(progress.current / progress.total) * 100}%` }}
                                         />
@@ -314,11 +314,10 @@ export default function UploadLmsPage() {
                                             <td className="p-4 text-slate-500">{r['Date of Completion'] || r['Test Date'] || r.completionDate || '-'}</td>
                                             <td className="p-4 font-bold text-indigo-700">{r['Duration'] || r['LMS Program Hours Spent'] || r.duration || '-'}</td>
                                             <td className="p-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                                    String(r['Pass'] || r['Qualified']).toLowerCase() === 'true' 
-                                                        ? 'bg-emerald-100 text-emerald-800' 
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${String(r['Pass'] || r['Qualified']).toLowerCase() === 'true'
+                                                        ? 'bg-emerald-100 text-emerald-800'
                                                         : 'bg-slate-100 text-slate-600'
-                                                }`}>
+                                                    }`}>
                                                     {String(r['Pass'] || r['Qualified'] || '-')}
                                                 </span>
                                             </td>
