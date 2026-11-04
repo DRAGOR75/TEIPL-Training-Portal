@@ -903,12 +903,8 @@ model TestRecord {
   obtainedMarks      Float?    @map("obtained_marks")
   qualified          Boolean?  @map("qualified")
   referenceRemarks   String?   @map("reference_remarks") @db.Text
-  empLocation        String?   @map("emp_location")
   subjectName        String?   @map("subject_name")
   empName            String?   @map("emp_name")
-  designation        String?   @map("designation")
-  empGroup           String?   @map("emp_group")
-  gender             String?   @map("gender")
   shortProgReference String?   @map("short_prog_reference")
   month              String?
   year               String?
@@ -933,12 +929,8 @@ model LmsRecord {
   obtainedMarks      Float?    @map("obtained_marks")
   qualified          Boolean?  @map("qualified")
   referenceRemarks   String?   @map("reference_remarks") @db.Text
-  empLocation        String?   @map("emp_location")
   courseName         String?   @map("course_name")
   empName            String?   @map("emp_name")
-  designation        String?   @map("designation")
-  empGroup           String?   @map("emp_group")
-  gender             String?   @map("gender")
   shortProgReference String?   @map("short_prog_reference")
   month              String?
   year               String?

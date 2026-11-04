@@ -12,7 +12,7 @@ export default function UploadLmsPage() {
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
+    const [uploadStats, setUploadStats] = useState<{ success: number; skipped?: number; errors: string[] } | null>(null);
     const [isClearingDb, setIsClearingDb] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -50,6 +50,7 @@ export default function UploadLmsPage() {
         const TOTAL_RECORDS = records.length;
         const CHUNK_SIZE = 500;
         let successTotal = 0;
+        let skippedTotal = 0;
         let allErrors: string[] = [];
         let processedCount = 0;
 
@@ -62,6 +63,7 @@ export default function UploadLmsPage() {
 
                 if (result.success) {
                     successTotal += result.count || 0;
+                    skippedTotal += result.skipped || 0;
                 } else {
                     allErrors.push(`Batch ${currentBatchNum} failed: ${result.error}`);
                 }
@@ -72,12 +74,13 @@ export default function UploadLmsPage() {
 
             setUploadStats({
                 success: successTotal,
+                skipped: skippedTotal,
                 errors: allErrors
             });
             setStatus('completed');
         } catch (err: any) {
             console.error(err);
-            setUploadStats({ success: successTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
+            setUploadStats({ success: successTotal, skipped: skippedTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
             setStatus('error');
             setErrorMessage(err.message || 'Unknown error occurred.');
         } finally {
@@ -122,16 +125,14 @@ export default function UploadLmsPage() {
 
     const downloadSample = () => {
         const headers = [
-            "Emp ID", "Emp Name", "Emp Location", "Course ID", "Course Name", "Facilitator",
+            "Emp ID", "Emp Name", "Course ID", "Course Name", "Facilitator",
             "Date Of Enrollment", "Date of Completion", "Duration", "Max Marks", "Marks Attained",
-            "Pass", "Designation", "Emp Group", "Gender",
-            "Reference / Remarks", "MTH", "Year"
+            "Pass", "Reference / Remarks", "MTH", "Year"
         ];
         const rowData = [
-            "10018532", "Payal Pradhan", "TRC", "LMS-PPE", "PPE Safety", "John Doe",
+            "10018532", "Payal Pradhan", "LMS-PPE", "PPE Safety", "John Doe",
             "24-Mar-2025", "24-Mar-2025", "2", "100", "85",
-            "TRUE", "Officer", "Staff", "Female",
-            "Completed on LMS Portal", "Mar", "24-25"
+            "TRUE", "Completed on LMS Portal", "Mar", "24-25"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
         const encodedUri = encodeURI(csvContent);
@@ -275,10 +276,15 @@ export default function UploadLmsPage() {
 
                             {/* Stats */}
                             {uploadStats && (
-                                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
                                     <div className="text-emerald-700 font-bold text-sm">
                                         Successfully imported: {uploadStats.success} LMS records
                                     </div>
+                                    {uploadStats.skipped !== undefined && uploadStats.skipped > 0 && (
+                                        <div className="text-amber-700 font-semibold text-xs">
+                                            Skipped {uploadStats.skipped} duplicate records (already present in the ledger or file)
+                                        </div>
+                                    )}
                                     {uploadStats.errors.length > 0 && (
                                         <div className="mt-2 text-rose-600 text-xs font-semibold">
                                             {uploadStats.errors.map((e, idx) => (
