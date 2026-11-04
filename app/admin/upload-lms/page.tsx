@@ -127,12 +127,12 @@ export default function UploadLmsPage() {
         const headers = [
             "Emp ID", "Emp Name", "Course ID", "Course Name", "Facilitator",
             "Date Of Enrollment", "Date of Completion", "Duration", "Max Marks", "Marks Attained",
-            "Pass", "Reference / Remarks", "MTH", "Year"
+            "Pass", "Training Mode", "Reference / Remarks", "MTH", "Year"
         ];
         const rowData = [
             "10018532", "Payal Pradhan", "LMS-PPE", "PPE Safety", "John Doe",
             "24-Mar-2025", "24-Mar-2025", "2", "100", "85",
-            "TRUE", "Completed on LMS Portal", "Mar", "24-25"
+            "TRUE", "Online Mode", "Completed on LMS Portal", "Mar", "24-25"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
         const encodedUri = encodeURI(csvContent);
@@ -321,8 +321,8 @@ export default function UploadLmsPage() {
                                             <td className="p-4 font-bold text-indigo-700">{r['Duration'] || r['LMS Program Hours Spent'] || r.duration || '-'}</td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${String(r['Pass'] || r['Qualified']).toLowerCase() === 'true'
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-slate-100 text-slate-600'
+                                                    ? 'bg-emerald-100 text-emerald-800'
+                                                    : 'bg-slate-100 text-slate-600'
                                                     }`}>
                                                     {String(r['Pass'] || r['Qualified'] || '-')}
                                                 </span>

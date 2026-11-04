@@ -905,6 +905,7 @@ model TestRecord {
   referenceRemarks   String?   @map("reference_remarks") @db.Text
   subjectName        String?   @map("subject_name")
   empName            String?   @map("emp_name")
+  trainingMode       String?   @map("training_mode")
   shortProgReference String?   @map("short_prog_reference")
   month              String?
   year               String?
@@ -931,6 +932,7 @@ model LmsRecord {
   referenceRemarks   String?   @map("reference_remarks") @db.Text
   courseName         String?   @map("course_name")
   empName            String?   @map("emp_name")
+  trainingMode       String?   @map("training_mode")
   shortProgReference String?   @map("short_prog_reference")
   month              String?
   year               String?

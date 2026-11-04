@@ -649,6 +649,13 @@ export default function QualificationsClient({
                       {item.courseName || item.altCourseName || item.altProgramName || item.programName || item.subjectName || (
                         <span className="text-slate-400 italic">None (Independent)</span>
                       )}
+                      {item.trainingMode && (
+                        <div className="mt-1">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                            {item.trainingMode}
+                          </span>
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-2 font-bold text-slate-700">
                       {activeTab === 'lms' ? (
