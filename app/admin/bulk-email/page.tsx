@@ -224,7 +224,7 @@ export default function BulkEmailPage() {
                     <HiCloudArrowUp className="w-12 h-12 text-slate-400 mb-4" />
                     <h3 className="text-lg font-medium text-slate-700 mb-2">Upload CSV File</h3>
                     <p className="text-slate-500 mb-6 max-w-md">
-                        Required Columns: <strong>EmpID</strong>, <strong>Name</strong>, <strong>Email</strong>, <strong>Password</strong><br/>
+                        Required Columns: <strong>EmpID</strong>, <strong>Name</strong>, <strong>Email</strong>, <strong>Password</strong><br />
                         <span className="text-xs text-slate-400">(Order does not matter. Headers are case-insensitive)</span>
                     </p>
                     <input

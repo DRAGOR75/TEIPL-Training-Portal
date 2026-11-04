@@ -13,7 +13,7 @@ export default function UploadQualificationsPage() {
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
+    const [uploadStats, setUploadStats] = useState<{ success: number; skipped?: number; errors: string[] } | null>(null);
     const [isClearingDb, setIsClearingDb] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +47,11 @@ export default function UploadQualificationsPage() {
         setStatus('uploading');
         setProgress({ current: 0, total: records.length });
         setErrorMessage('');
-        
+
         const TOTAL_RECORDS = records.length;
         const CHUNK_SIZE = 500;
         let successTotal = 0;
+        let skippedTotal = 0;
         let allErrors: string[] = [];
         let processedCount = 0;
 
@@ -63,6 +64,7 @@ export default function UploadQualificationsPage() {
 
                 if (result.success) {
                     successTotal += result.count || 0;
+                    skippedTotal += result.skipped || 0;
                 } else {
                     allErrors.push(`Batch ${currentBatchNum} failed: ${result.error}`);
                 }
@@ -73,12 +75,13 @@ export default function UploadQualificationsPage() {
 
             setUploadStats({
                 success: successTotal,
+                skipped: skippedTotal,
                 errors: allErrors
             });
             setStatus('completed');
         } catch (err: any) {
             console.error(err);
-            setUploadStats({ success: successTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
+            setUploadStats({ success: successTotal, skipped: skippedTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
             setStatus('error');
             setErrorMessage(err.message || 'Unknown error occurred.');
         } finally {
@@ -93,7 +96,7 @@ export default function UploadQualificationsPage() {
             setStatus('idle');
             setErrorMessage('');
             setUploadStats(null);
-            
+
             const fileInput = document.getElementById('csv-upload') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
@@ -123,17 +126,17 @@ export default function UploadQualificationsPage() {
 
     const downloadSample = () => {
         const headers = [
-            "Emp ID", "Emp Name", "Emp Location", "Subject name", 
-            "Qualification Type", "Date Of Enrollment", "Test Date", 
-            "Max Marks", "Marks Attained", "Pass", "Duration", 
-            "Facilitator", "Designation", "Emp Group", "Gender", 
+            "Emp ID", "Emp Name", "Emp Location", "Subject name",
+            "Qualification Type", "Date Of Enrollment", "Test Date",
+            "Max Marks", "Marks Attained", "Pass", "Duration",
+            "Facilitator", "Designation", "Emp Group", "Gender",
             "Reference / Remarks", "Short Prog Reference", "MTH", "Year"
         ];
         const rowData = [
-            "10018532", "John Doe", "TRC", "PPE Safety", 
-            "Online Test", "03/24/2025", "03/24/2025", 
-            "50", "42", "TRUE", "2", 
-            "Jane Smith", "Engineer", "Staff", "Male", 
+            "10018532", "John Doe", "TRC", "PPE Safety",
+            "Online Test", "03/24/2025", "03/24/2025",
+            "50", "42", "TRUE", "2",
+            "Jane Smith", "Engineer", "Staff", "Male",
             "Passed successfully", "PPE", "Mar", "2025"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
@@ -259,7 +262,7 @@ export default function UploadQualificationsPage() {
                                         This will insert {records.length} qualification records into the database.
                                     </p>
                                 </div>
-                                
+
                                 {status === 'completed' ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-3 rounded-xl font-bold border border-emerald-200 shadow-sm">
                                         <HiCheckCircle className="w-6 h-6" />
@@ -302,6 +305,9 @@ export default function UploadQualificationsPage() {
                                 <div className={`mt-6 p-6 rounded-2xl border ${uploadStats.errors.length > 0 ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200'}`}>
                                     <p className="font-bold text-lg mb-2">Upload Summary</p>
                                     <p className="text-slate-700 font-medium">✅ Successfully Imported: {uploadStats.success} records</p>
+                                    {uploadStats.skipped !== undefined && uploadStats.skipped > 0 && (
+                                        <p className="text-amber-700 font-medium text-sm mt-1">⚠️ Skipped Duplicates: {uploadStats.skipped} records (already present)</p>
+                                    )}
                                     {uploadStats.errors.length > 0 && (
                                         <div className="mt-4 text-sm text-amber-900 max-h-48 overflow-y-auto bg-amber-100/50 p-4 rounded-xl">
                                             <p className="font-bold mb-2 flex items-center gap-1"><HiExclamationCircle /> Encountered {uploadStats.errors.length} errors/warnings:</p>

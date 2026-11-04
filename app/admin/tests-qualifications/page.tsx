@@ -20,7 +20,9 @@ export default async function TestsPage() {
       employee: {
         select: {
           id: true,
-          name: true
+          name: true,
+          designation: true,
+          location: true
         }
       }
     },
@@ -33,7 +35,9 @@ export default async function TestsPage() {
       employee: {
         select: {
           id: true,
-          name: true
+          name: true,
+          designation: true,
+          location: true
         }
       }
     },

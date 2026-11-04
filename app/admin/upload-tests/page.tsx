@@ -12,7 +12,7 @@ export default function UploadTestsPage() {
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const [uploadStats, setUploadStats] = useState<{ success: number; errors: string[] } | null>(null);
+    const [uploadStats, setUploadStats] = useState<{ success: number; skipped?: number; errors: string[] } | null>(null);
     const [isClearingDb, setIsClearingDb] = useState(false);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,10 +46,11 @@ export default function UploadTestsPage() {
         setStatus('uploading');
         setProgress({ current: 0, total: records.length });
         setErrorMessage('');
-        
+
         const TOTAL_RECORDS = records.length;
         const CHUNK_SIZE = 500;
         let successTotal = 0;
+        let skippedTotal = 0;
         let allErrors: string[] = [];
         let processedCount = 0;
 
@@ -62,6 +63,7 @@ export default function UploadTestsPage() {
 
                 if (result.success) {
                     successTotal += result.count || 0;
+                    skippedTotal += result.skipped || 0;
                 } else {
                     allErrors.push(`Batch ${currentBatchNum} failed: ${result.error}`);
                 }
@@ -72,12 +74,13 @@ export default function UploadTestsPage() {
 
             setUploadStats({
                 success: successTotal,
+                skipped: skippedTotal,
                 errors: allErrors
             });
             setStatus('completed');
         } catch (err: any) {
             console.error(err);
-            setUploadStats({ success: successTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
+            setUploadStats({ success: successTotal, skipped: skippedTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
             setStatus('error');
             setErrorMessage(err.message || 'Unknown error occurred.');
         } finally {
@@ -92,7 +95,7 @@ export default function UploadTestsPage() {
             setStatus('idle');
             setErrorMessage('');
             setUploadStats(null);
-            
+
             const fileInput = document.getElementById('csv-upload-tests') as HTMLInputElement;
             if (fileInput) fileInput.value = '';
         }
@@ -122,16 +125,14 @@ export default function UploadTestsPage() {
 
     const downloadSample = () => {
         const headers = [
-            "Emp ID", "Emp Name", "Emp Location", "Subject ID", "Subject name", 
-            "Facilitator", "Test Date", "Duration", "Max Marks", "Marks Attained", 
-            "Pass", "Designation", "Emp Group", "Gender", 
-            "Reference / Remarks", "Short Prog Reference", "MTH", "Year"
+            "Emp ID", "Emp Name", "Subject ID", "Subject name",
+            "Facilitator", "Test Date", "Duration", "Max Marks", "Marks Attained",
+            "Pass", "Reference / Remarks", "Short Prog Reference", "MTH", "Year"
         ];
         const rowData = [
-            "10011377", "Soumya Ranjan Pati", "TRC", "PROG-01", "Unit and Conversion Workbook", 
-            "Gaurav", "15-Oct-2022", "1", "50", "49", 
-            "TRUE", "Officer", "Staff", "Male", 
-            "Inplant Sep 22 Batch", "Drill", "Oct", "22-23"
+            "10011377", "Soumya Ranjan Pati", "PROG-01", "Unit and Conversion Workbook",
+            "Gaurav", "15-Oct-2022", "1", "50", "49",
+            "TRUE", "Inplant Sep 22 Batch", "Drill", "Oct", "22-23"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
         const encodedUri = encodeURI(csvContent);
@@ -239,7 +240,7 @@ export default function UploadTestsPage() {
                                         Records will be imported strictly into the <span className="font-mono font-bold text-blue-600">test_records</span> database table.
                                     </p>
                                 </div>
-                                
+
                                 {status === 'completed' ? (
                                     <div className="flex items-center gap-2 text-emerald-600 bg-emerald-50 px-6 py-3 rounded-xl font-bold border border-emerald-200 shadow-sm">
                                         <HiCheckCircle className="w-6 h-6" />
@@ -265,7 +266,7 @@ export default function UploadTestsPage() {
                                         <span>{progress.current} / {progress.total}</span>
                                     </div>
                                     <div className="w-full bg-slate-100 rounded-full h-3 overflow-hidden">
-                                        <div 
+                                        <div
                                             className="bg-blue-600 h-full transition-all duration-300 rounded-full"
                                             style={{ width: `${(progress.current / progress.total) * 100}%` }}
                                         />
@@ -275,10 +276,15 @@ export default function UploadTestsPage() {
 
                             {/* Stats */}
                             {uploadStats && (
-                                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50">
+                                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
                                     <div className="text-emerald-700 font-bold text-sm">
                                         Successfully imported: {uploadStats.success} test records
                                     </div>
+                                    {uploadStats.skipped !== undefined && uploadStats.skipped > 0 && (
+                                        <div className="text-amber-700 font-semibold text-xs">
+                                            Skipped {uploadStats.skipped} duplicate records (already present in the ledger or file)
+                                        </div>
+                                    )}
                                     {uploadStats.errors.length > 0 && (
                                         <div className="mt-2 text-rose-600 text-xs font-semibold">
                                             {uploadStats.errors.map((e, idx) => (
@@ -314,11 +320,10 @@ export default function UploadTestsPage() {
                                             <td className="p-4 text-slate-500">{r['Test Date'] || r.testDate || '-'}</td>
                                             <td className="p-4 font-bold text-blue-700">{r['Marks Attained'] || r.obtainedMarks || '-'} / {r['Max Marks'] || r.maxMarks || '-'}</td>
                                             <td className="p-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                                                    String(r['Pass'] || r['Qualified']).toLowerCase() === 'true' 
-                                                        ? 'bg-emerald-100 text-emerald-800' 
+                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${String(r['Pass'] || r['Qualified']).toLowerCase() === 'true'
+                                                        ? 'bg-emerald-100 text-emerald-800'
                                                         : 'bg-slate-100 text-slate-600'
-                                                }`}>
+                                                    }`}>
                                                     {String(r['Pass'] || r['Qualified'] || '-')}
                                                 </span>
                                             </td>

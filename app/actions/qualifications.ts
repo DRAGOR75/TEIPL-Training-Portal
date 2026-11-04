@@ -134,21 +134,71 @@ export async function bulkUploadTestRecords(data: any[]) {
                 obtainedMarks: parseSafeFloat(item['Marks Attained'] || item['Marks attaind/ Grade'] || item.obtainedMarks),
                 qualified: item['Qualified'] !== undefined ? parseSafeBoolean(item['Qualified']) : (item['Pass'] !== undefined ? parseSafeBoolean(item['Pass']) : null),
                 referenceRemarks: parseSafeString(item['Reference / Remarks'] || item['Test Prog Reference'] || item.referenceRemarks),
-                empLocation: parseSafeString(item['Emp Location'] || item.empLocation || (matchedEmployee ? matchedEmployee.location : null)),
                 subjectName: parseSafeString(item['Subject name'] || item['Test Subject Name'] || item.subjectName),
                 empName: parseSafeString(rawName || (matchedEmployee ? matchedEmployee.name : null)),
-                designation: parseSafeString(item['Designation'] || item.designation || (matchedEmployee ? matchedEmployee.designation : null)),
-                empGroup: parseSafeString(item['Emp Group'] || item.empGroup || (matchedEmployee ? matchedEmployee.employeeGrouupMNmw : null)),
-                gender: parseSafeString(item['Gender'] || item.gender || (matchedEmployee ? matchedEmployee.gender : null)),
                 shortProgReference: parseSafeString(item['Short Prog Reference'] || item['Key Word'] || item.shortProgReference),
                 month: parseSafeString(item['MTH'] || item.month) || derivedMonth,
                 year: parseSafeString(item['Year'] || item.year) || derivedYear,
             };
         });
 
-        const result = await db.testRecord.createMany({ data: formatted });
+        // 1. Identify candidate identifiers for DB lookup
+        const empIds = Array.from(new Set(formatted.map(r => r.empID).filter(Boolean))) as string[];
+        const empNames = Array.from(new Set(formatted.filter(r => !r.empID && r.empName).map(r => r.empName))) as string[];
+
+        // 2. Fetch existing records for these employees to check duplicates
+        const existingRecords = await db.testRecord.findMany({
+            where: {
+                OR: [
+                    ...(empIds.length > 0 ? [{ empID: { in: empIds } }] : []),
+                    ...(empNames.length > 0 ? [{ empName: { in: empNames } }] : [])
+                ]
+            },
+            select: {
+                empID: true,
+                empName: true,
+                subjectId: true,
+                subjectName: true,
+                testDate: true,
+                year: true
+            }
+        });
+
+        const normalizeDate = (d: Date | null) => d ? d.toISOString().slice(0, 10) : 'null';
+        const buildKey = (empId: string | null, empName: string | null, subjId: string | null, subjName: string | null, date: Date | null, yr: string | null) => {
+            const empKey = (empId || empName || '').trim().toLowerCase();
+            const subjKey = (subjId || subjName || '').trim().toLowerCase();
+            const dateKey = date ? normalizeDate(date) : (yr || '').trim().toLowerCase();
+            return `${empKey}:::${subjKey}:::${dateKey}`;
+        };
+
+        const existingSet = new Set<string>();
+        existingRecords.forEach(r => {
+            existingSet.add(buildKey(r.empID, r.empName, r.subjectId, r.subjectName, r.testDate, r.year));
+        });
+
+        // 3. Filter out both in-batch duplicates and database duplicates
+        const toInsert: typeof formatted = [];
+        let duplicateCount = 0;
+
+        for (const record of formatted) {
+            const key = buildKey(record.empID, record.empName, record.subjectId, record.subjectName, record.testDate, record.year);
+            if (existingSet.has(key)) {
+                duplicateCount++;
+                continue;
+            }
+            existingSet.add(key); // Prevents duplicates within the same batch
+            toInsert.push(record);
+        }
+
+        let insertedCount = 0;
+        if (toInsert.length > 0) {
+            const result = await db.testRecord.createMany({ data: toInsert });
+            insertedCount = result.count;
+        }
+
         revalidatePath('/admin/tests-qualifications');
-        return { success: true, count: result.count };
+        return { success: true, count: insertedCount, skipped: duplicateCount };
     } catch (error: any) {
         console.error('Error in bulkUploadTestRecords:', error);
         return { success: false, error: error.message || 'Failed to upload test records' };
@@ -186,21 +236,72 @@ export async function bulkUploadLmsRecords(data: any[]) {
                 obtainedMarks: parseSafeFloat(item['Marks Attained'] || item['Marks attaind/ Grade'] || item.obtainedMarks),
                 qualified: item['Qualified'] !== undefined ? parseSafeBoolean(item['Qualified']) : (item['Pass'] !== undefined ? parseSafeBoolean(item['Pass']) : null),
                 referenceRemarks: parseSafeString(item['Reference / Remarks'] || item.referenceRemarks),
-                empLocation: parseSafeString(item['Emp Location'] || item.empLocation || (matchedEmployee ? matchedEmployee.location : null)),
                 courseName: parseSafeString(item['Course Name'] || item['Subject name'] || item['LMS Program Name'] || item.courseName || item.subjectName),
                 empName: parseSafeString(rawName || (matchedEmployee ? matchedEmployee.name : null)),
-                designation: parseSafeString(item['Designation'] || item.designation || (matchedEmployee ? matchedEmployee.designation : null)),
-                empGroup: parseSafeString(item['Emp Group'] || item.empGroup || (matchedEmployee ? matchedEmployee.employeeGrouupMNmw : null)),
-                gender: parseSafeString(item['Gender'] || item.gender || (matchedEmployee ? matchedEmployee.gender : null)),
                 shortProgReference: parseSafeString(item['Short Prog Reference'] || item.shortProgReference),
                 month: parseSafeString(item['MTH'] || item.month) || derivedMonth,
                 year: parseSafeString(item['Year'] || item.year) || derivedYear,
             };
         });
 
-        const result = await db.lmsRecord.createMany({ data: formatted });
+        // 1. Identify candidate identifiers for DB lookup
+        const empIds = Array.from(new Set(formatted.map(r => r.empID).filter(Boolean))) as string[];
+        const empNames = Array.from(new Set(formatted.filter(r => !r.empID && r.empName).map(r => r.empName))) as string[];
+
+        // 2. Fetch existing records for these employees to check duplicates
+        const existingRecords = await db.lmsRecord.findMany({
+            where: {
+                OR: [
+                    ...(empIds.length > 0 ? [{ empID: { in: empIds } }] : []),
+                    ...(empNames.length > 0 ? [{ empName: { in: empNames } }] : [])
+                ]
+            },
+            select: {
+                empID: true,
+                empName: true,
+                courseId: true,
+                courseName: true,
+                completionDate: true,
+                enrollmentDate: true,
+                year: true
+            }
+        });
+
+        const normalizeDate = (d: Date | null) => d ? d.toISOString().slice(0, 10) : 'null';
+        const buildKey = (empId: string | null, empName: string | null, courseId: string | null, courseName: string | null, compDate: Date | null, enrollDate: Date | null, yr: string | null) => {
+            const empKey = (empId || empName || '').trim().toLowerCase();
+            const courseKey = (courseId || courseName || '').trim().toLowerCase();
+            const dateKey = compDate ? normalizeDate(compDate) : (enrollDate ? normalizeDate(enrollDate) : (yr || '').trim().toLowerCase());
+            return `${empKey}:::${courseKey}:::${dateKey}`;
+        };
+
+        const existingSet = new Set<string>();
+        existingRecords.forEach(r => {
+            existingSet.add(buildKey(r.empID, r.empName, r.courseId, r.courseName, r.completionDate, r.enrollmentDate, r.year));
+        });
+
+        // 3. Filter out both in-batch duplicates and database duplicates
+        const toInsert: typeof formatted = [];
+        let duplicateCount = 0;
+
+        for (const record of formatted) {
+            const key = buildKey(record.empID, record.empName, record.courseId, record.courseName, record.completionDate, record.enrollmentDate, record.year);
+            if (existingSet.has(key)) {
+                duplicateCount++;
+                continue;
+            }
+            existingSet.add(key);
+            toInsert.push(record);
+        }
+
+        let insertedCount = 0;
+        if (toInsert.length > 0) {
+            const result = await db.lmsRecord.createMany({ data: toInsert });
+            insertedCount = result.count;
+        }
+
         revalidatePath('/admin/tests-qualifications');
-        return { success: true, count: result.count };
+        return { success: true, count: insertedCount, skipped: duplicateCount };
     } catch (error: any) {
         console.error('Error in bulkUploadLmsRecords:', error);
         return { success: false, error: error.message || 'Failed to upload LMS records' };
@@ -212,7 +313,7 @@ export async function bulkUploadLmsRecords(data: any[]) {
  */
 export async function bulkUploadQualifications(data: any[], targetTable?: 'auto' | 'tests' | 'lms') {
     try {
-        if (!data || data.length === 0) return { success: true, count: 0 };
+        if (!data || data.length === 0) return { success: true, count: 0, skipped: 0 };
 
         if (targetTable === 'tests') {
             return await bulkUploadTestRecords(data);
@@ -240,20 +341,23 @@ export async function bulkUploadQualifications(data: any[], targetTable?: 'auto'
         }
 
         let totalUploaded = 0;
+        let totalSkipped = 0;
         if (testItems.length > 0) {
             const testRes = await bulkUploadTestRecords(testItems);
             if (!testRes.success) throw new Error(testRes.error);
             totalUploaded += testRes.count || 0;
+            totalSkipped += testRes.skipped || 0;
         }
 
         if (lmsItems.length > 0) {
             const lmsRes = await bulkUploadLmsRecords(lmsItems);
             if (!lmsRes.success) throw new Error(lmsRes.error);
             totalUploaded += lmsRes.count || 0;
+            totalSkipped += lmsRes.skipped || 0;
         }
 
         revalidatePath('/admin/tests-qualifications');
-        return { success: true, count: totalUploaded };
+        return { success: true, count: totalUploaded, skipped: totalSkipped };
     } catch (error: any) {
         console.error('Error in bulkUploadQualifications:', error);
         return { success: false, error: error.message || 'Failed to bulk upload' };
