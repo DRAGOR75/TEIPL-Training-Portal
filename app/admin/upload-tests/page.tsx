@@ -127,12 +127,12 @@ export default function UploadTestsPage() {
         const headers = [
             "Emp ID", "Emp Name", "Subject ID", "Subject name",
             "Facilitator", "Test Date", "Duration", "Max Marks", "Marks Attained",
-            "Pass", "Reference / Remarks", "Short Prog Reference", "MTH", "Year"
+            "Pass", "Training Mode", "Reference / Remarks", "Short Prog Reference", "MTH", "Year"
         ];
         const rowData = [
             "10011377", "Soumya Ranjan Pati", "PROG-01", "Unit and Conversion Workbook",
             "Gaurav", "15-Oct-2022", "1", "50", "49",
-            "TRUE", "Inplant Sep 22 Batch", "Drill", "Oct", "22-23"
+            "TRUE", "Online Mode", "Inplant Sep 22 Batch", "Drill", "Oct", "22-23"
         ];
         const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
         const encodedUri = encodeURI(csvContent);
