@@ -18,7 +18,7 @@ type EditSessionModalProps = {
     mode?: 'session' | 'batch';
 };
 
-export default function EditSessionModal({ 
+export default function EditSessionModal({
     session, trainers, locations, triggerComponent, defaultOpen, onClose, mode = 'session'
 }: EditSessionModalProps) {
     const [isOpen, setIsOpen] = useState(defaultOpen || false);
@@ -65,15 +65,15 @@ export default function EditSessionModal({
                 {/* Tab Content Area */}
                 <div className="flex-1 overflow-hidden flex flex-col bg-white">
                     {activeTab === 'details' && (
-                        <DetailsTab 
-                            session={session} 
-                            trainers={trainers} 
-                            locations={locations} 
-                            mode={mode} 
-                            handleClose={handleClose} 
+                        <DetailsTab
+                            session={session}
+                            trainers={trainers}
+                            locations={locations}
+                            mode={mode}
+                            handleClose={handleClose}
                         />
                     )}
-                    
+
                     {activeTab === 'attendance' && (
                         <AttendanceTab session={session} />
                     )}
@@ -94,18 +94,18 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
     const [selectedTrainer, setSelectedTrainer] = useState<string>(initialTrainer);
     const [trainerMode, setTrainerMode] = useState<'select' | 'custom'>('select');
     const [customTrainer, setCustomTrainer] = useState<string>('');
-    
+
     const [selectedCoordinator, setSelectedCoordinator] = useState<string>(session.coordinatorName || '');
     const [coordinatorMode, setCoordinatorMode] = useState<'select' | 'custom'>('select');
     const [customCoordinator, setCustomCoordinator] = useState<string>('');
-    
-    const isLocationInList = session.location ? locations.some((l:any) => l.name === session.location) : false;
+
+    const isLocationInList = session.location ? locations.some((l: any) => l.name === session.location) : false;
     const initialLocationMode = (!session.location || isLocationInList) ? 'select' : 'custom';
-    
+
     const [locationMode, setLocationMode] = useState<'select' | 'custom'>(initialLocationMode);
     const [selectedLocation, setSelectedLocation] = useState<string>(isLocationInList ? session.location : '');
     const [customLocation, setCustomLocation] = useState<string>(!isLocationInList ? (session.location || '') : '');
-    
+
     const formatDateForInput = (dateObj: Date | string | null) => {
         if (!dateObj) return '';
         const d = new Date(dateObj);
@@ -124,7 +124,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
         }
     };
 
-    const trainerOptions = trainers.map((t:any) => ({ label: t.name, value: t.name }));
+    const trainerOptions = trainers.map((t: any) => ({ label: t.name, value: t.name }));
     if (selectedTrainer && !trainerOptions.find((o: { label: string; value: string }) => o.value === selectedTrainer)) {
         trainerOptions.push({ label: selectedTrainer, value: selectedTrainer });
     }
@@ -132,7 +132,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
         trainerOptions.push({ label: selectedCoordinator, value: selectedCoordinator });
     }
     trainerOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
-    const locationOptions = locations.map((l:any) => ({ label: l.name, value: l.name }));
+    const locationOptions = locations.map((l: any) => ({ label: l.name, value: l.name }));
     locationOptions.push({ label: "Other (Type Custom)", value: "OTHER_CUSTOM" });
 
     return (
@@ -141,7 +141,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                 const finalTrainer = trainerMode === 'custom' ? customTrainer : selectedTrainer;
                 if (!finalTrainer) { alert("Please select or enter a Primary Trainer."); return; }
                 formData.set('trainerName', finalTrainer);
-                
+
                 const finalCoordinator = coordinatorMode === 'custom' ? customCoordinator : selectedCoordinator;
                 if (finalCoordinator) {
                     formData.set('coordinatorName', finalCoordinator);
@@ -169,7 +169,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                     } else {
                         result = await updateSession(session.id, formData);
                     }
-                    
+
                     if (result.success) {
                         handleClose();
                     } else {
@@ -199,7 +199,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                             <p className="text-[10px] text-slate-400 mt-1">Leave blank to use the standard program name.</p>
                         </div>
                     </div>
-                    
+
                     <div>
                         <label className="block text-sm font-semibold text-slate-700 mb-1">Primary Trainer</label>
                         {trainerMode === 'select' ? (
@@ -239,7 +239,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                 </button>
                             </div>
                         )}
-                        
+
                         <div className="mt-4">
                             <label className="block text-sm font-semibold text-slate-700 mb-1">Coordinator / Co-Trainer (Optional)</label>
                             {coordinatorMode === 'select' ? (
@@ -329,7 +329,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                 className="w-full p-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white font-bold"
                             />
                         </div>
-                        
+
                         {/* ROW 3.75: Session Category */}
                         <div>
                             <label className="block text-sm font-semibold text-slate-700 mb-1"> Category</label>
@@ -338,7 +338,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
                                 <option value="Technical">Technical</option>
                                 <option value="Technical-VR">Technical-VR</option>
                                 <option value="Technical by OEM">Technical by OEM</option>
-                                <option value="All Nomination">Technical at OEM</option>
+                                <option value="Technical at OEM">Technical at OEM</option>
                                 <option value="Workshop">Workshop</option>
                                 <option value="Functional/Others">Functional/Others</option>
                                 <option value="Behavioural">Behavioural</option>
@@ -443,7 +443,7 @@ function DetailsTab({ session, trainers, locations, mode, handleClose }: any) {
 
 function AttendanceTab({ session }: { session: any }) {
     const [classDates, setClassDates] = useState<Date[]>(
-        session.classDates ? session.classDates.map((d: any) => new Date(d)).sort((a:Date,b:Date) => a.getTime() - b.getTime()) : []
+        session.classDates ? session.classDates.map((d: any) => new Date(d)).sort((a: Date, b: Date) => a.getTime() - b.getTime()) : []
     );
     const [newDate, setNewDate] = useState('');
     const [isSavingDates, setIsSavingDates] = useState(false);
@@ -465,7 +465,7 @@ function AttendanceTab({ session }: { session: any }) {
         if (!newDate) return;
         const d = new Date(newDate);
         if (isNaN(d.getTime())) return;
-        
+
         const dateStr = d.toISOString().split('T')[0];
         if (classDates.some(cd => cd.toISOString().split('T')[0] === dateStr)) return;
 
@@ -499,7 +499,7 @@ function AttendanceTab({ session }: { session: any }) {
         const key = `${empId}_${dateStr}`;
         const previousStatus = records[key];
         setRecords(prev => ({ ...prev, [key]: status }));
-        
+
         try {
             const res = await saveDailyAttendance(session.id, empId, date, status);
             if (!res.success) {
@@ -520,7 +520,7 @@ function AttendanceTab({ session }: { session: any }) {
                 <div className="flex flex-wrap gap-2 items-center">
                     {classDates.map((d, i) => (
                         <div key={i} className="flex items-center gap-1 bg-indigo-100 text-indigo-800 pl-3 pr-1 py-1.5 rounded-lg text-xs font-bold border border-indigo-200 shadow-sm">
-                            {d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric'})}
+                            {d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
                             <button onClick={() => handleRemoveDate(d)} className="ml-1 p-1 hover:bg-indigo-200 rounded text-indigo-500 hover:text-indigo-700 transition-colors">
                                 <HiOutlineXMark size={14} />
                             </button>
@@ -551,7 +551,7 @@ function AttendanceTab({ session }: { session: any }) {
                                 <th className="px-5 py-3 sticky left-0 z-30 border-r border-slate-200 bg-slate-100">Participant</th>
                                 {classDates.map((d, i) => (
                                     <th key={i} className="px-5 py-3 text-center border-r border-slate-200 min-w-[120px]">
-                                        {d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short'})}
+                                        {d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
                                     </th>
                                 ))}
                             </tr>
@@ -570,14 +570,14 @@ function AttendanceTab({ session }: { session: any }) {
                                         return (
                                             <td key={i} className="px-5 py-3 text-center border-r border-slate-100">
                                                 <div className="flex items-center justify-center gap-2">
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleMarkAttendance(nom.empId, d, 'Present')}
                                                         className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${status === 'Present' ? 'bg-emerald-500 text-white shadow-md ring-2 ring-emerald-200 scale-110' : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'}`}
                                                         title="Present"
                                                     >
                                                         P
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => handleMarkAttendance(nom.empId, d, 'Absent')}
                                                         className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs transition-all ${status === 'Absent' ? 'bg-rose-500 text-white shadow-md ring-2 ring-rose-200 scale-110' : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'}`}
                                                         title="Absent"
@@ -609,7 +609,7 @@ function SettingsTab({ session, handleClose }: any) {
     return (
         <div className="p-6 overflow-y-auto h-full">
             <h3 className="font-bold text-slate-800 mb-6 text-lg border-b pb-2">Session Settings</h3>
-            
+
             <div className="space-y-6">
                 <div>
                     <h4 className="font-bold text-slate-700 text-sm mb-2">Danger Zone</h4>
@@ -619,7 +619,7 @@ function SettingsTab({ session, handleClose }: any) {
                             <p className="text-xs text-red-700 font-medium mt-1">Permanently delete this session and all associated attendance records. This action cannot be undone.</p>
                         </div>
                         <button className="px-4 py-2.5 bg-red-600 text-white font-bold text-sm rounded-xl shadow-sm hover:bg-red-700 transition-colors flex items-center gap-2 whitespace-nowrap shrink-0">
-                            <HiOutlineTrash size={18}/> Delete Session
+                            <HiOutlineTrash size={18} /> Delete Session
                         </button>
                     </div>
                 </div>

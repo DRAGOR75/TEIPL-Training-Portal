@@ -178,6 +178,7 @@ export async function bulkUploadLmsRecords(data: any[]) {
                 empID: matchedEmployee ? matchedEmployee.id : null,
                 courseId: parseSafeString(item['Course ID'] || item['Subject ID'] || item.courseId || item.subjectId),
                 altCourseName: parseSafeString(item['Alt Course Name'] || item['Alt Subject Name'] || item.altCourseName),
+                facilitator: parseSafeString(item['Facilitator'] || item.facilitator || item['Examiner Name'] || item['Trainer']),
                 enrollmentDate,
                 completionDate,
                 duration: parseSafeString(item['Duration'] || item['LMS Program Hours Spent'] || item.duration),

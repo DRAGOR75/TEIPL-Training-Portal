@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import Papa from 'papaparse';
-import { HiCloudArrowUp, HiOutlinePaperAirplane, HiCheckCircle, HiExclamationCircle, HiOutlineTrash } from 'react-icons/hi2';
-import { sendBulkUserCredentials, BulkEmailResult } from '@/app/actions/bulk-email';
+import { HiCloudArrowUp, HiOutlinePaperAirplane, HiCheckCircle, HiExclamationCircle, HiOutlineTrash, HiArrowDownTray } from 'react-icons/hi2';
+import { sendBulkUserCredentials } from '@/app/actions/bulk-email';
+import BulkEmailPreviewModal from './BulkEmailPreviewModal';
 
 interface ParsedUser {
     empId: string;
@@ -16,31 +17,92 @@ interface ParsedUser {
     message?: string;
 }
 
-import BulkEmailPreviewModal from './BulkEmailPreviewModal';
-
 export default function BulkEmailPage() {
     const [users, setUsers] = useState<ParsedUser[]>([]);
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [uploadWarning, setUploadWarning] = useState<string | null>(null);
+
+    const downloadSample = () => {
+        const headers = ["Emp ID", "Name", "Email", "Password"];
+        const rowData = ["10018532", "Payal Pradhan", "payal.pradhan@thriveni.com", "Thriveni@2026"];
+        const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "bulk_email_sample.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        setUploadWarning(null);
+
         Papa.parse(file, {
             complete: (results) => {
-                const parsedUsers: ParsedUser[] = results.data
-                    .map((row: any) => ({
-                        empId: (row.EmpID || row.empId || row.empid || row['Emp ID'] || '')?.trim(),
-                        name: (row.Name || row.name || '')?.trim(),
-                        email: (row.Email || row.email || '')?.trim(),
-                        password: (row.Password || row.password || '')?.trim(),
-                        designation: '', // Not in new format
-                        department: '', // Not in new format
+                if (!results.data || results.data.length === 0) {
+                    alert('The uploaded CSV file is empty.');
+                    return;
+                }
+
+                // Helper to match headers regardless of BOM (\ufeff), casing, spaces, or aliases
+                const findField = (row: any, aliases: string[]) => {
+                    const keys = Object.keys(row || {});
+                    const match = keys.find(k =>
+                        aliases.some(alias =>
+                            k.toLowerCase().replace(/[^a-z0-9]/g, '') === alias.toLowerCase().replace(/[^a-z0-9]/g, '')
+                        )
+                    );
+                    return match ? String(row[match] ?? '').trim() : '';
+                };
+
+                const empIdAliases = ['empid', 'emp_id', 'emp id', 'employeeid', 'employee id', 'userid', 'user id', 'id', 'emp code', 'employeecode'];
+                const nameAliases = ['name', 'empname', 'emp name', 'employeename', 'employee name', 'user name', 'username'];
+                const emailAliases = ['email', 'emailid', 'email id', 'emailaddress', 'email address', 'mail'];
+                const passwordAliases = ['password', 'pass', 'pwd', 'temppassword', 'temp password', 'credentials'];
+
+                let invalidCount = 0;
+                const parsedUsers: ParsedUser[] = [];
+
+                for (const row of results.data as any[]) {
+                    const empId = findField(row, empIdAliases);
+                    const name = findField(row, nameAliases);
+                    const email = findField(row, emailAliases);
+                    const password = findField(row, passwordAliases);
+
+                    // Skip empty rows
+                    if (!empId && !name && !email) continue;
+
+                    if (!email || !email.includes('@') || !empId) {
+                        invalidCount++;
+                        continue;
+                    }
+
+                    parsedUsers.push({
+                        empId,
+                        name: name || empId,
+                        email,
+                        password,
+                        designation: '',
+                        department: '',
                         status: 'pending' as const
-                    }))
-                    .filter(user => user.email && user.email.includes('@') && user.empId); // Basic validation
+                    });
+                }
+
+                if (parsedUsers.length === 0) {
+                    const detectedHeaders = Object.keys(results.data[0] || {}).join(', ');
+                    alert(`Could not find valid users in the CSV.\n\nDetected columns: [${detectedHeaders}]\nRequired columns: EmpID, Email, Name, Password.\n\nPlease check your headers or use the Download Sample CSV button.`);
+                    return;
+                }
+
+                if (invalidCount > 0) {
+                    setUploadWarning(`Note: ${invalidCount} rows were skipped due to missing email or Employee ID.`);
+                }
 
                 setUsers(parsedUsers);
             },
@@ -71,12 +133,15 @@ export default function BulkEmailPage() {
 
                 const actualIndex = i + index;
 
-                // Generate User Specific HTML from Template
+                // Generate User Specific HTML & Subject from Template (Case-insensitive replacement)
                 const userHtml = templateHtml
-                    .replace(/{name}/g, user.name || '')
-                    .replace(/{empId}/g, user.empId || '')
-                    .replace(/{password}/g, user.password || '');
-                // Removed dynamic replacement for department/designation as they are no longer in CSV
+                    .replace(/\{name\}/gi, user.name || '')
+                    .replace(/\{empId|empid|emp_id\}/gi, user.empId || '')
+                    .replace(/\{password|pass|pwd\}/gi, user.password || '');
+
+                const userSubject = subject
+                    .replace(/\{name\}/gi, user.name || '')
+                    .replace(/\{empId|empid|emp_id\}/gi, user.empId || '');
 
                 try {
                     const result = await sendBulkUserCredentials(
@@ -84,7 +149,7 @@ export default function BulkEmailPage() {
                         user.email,
                         user.empId,
                         user.password,
-                        subject,
+                        userSubject,
                         userHtml
                     );
 
@@ -119,33 +184,48 @@ export default function BulkEmailPage() {
         if (confirm('Clear all data?')) {
             setUsers([]);
             setProgress({ current: 0, total: 0 });
+            setUploadWarning(null);
         }
     };
 
     return (
         <div className="p-8 max-w-7xl mx-auto space-y-6">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-slate-800">Bulk User Import & Email</h1>
-                    <p className="text-slate-500">Upload CSV to send credentials to users.</p>
+                    <p className="text-slate-500">Upload CSV to send credentials or custom notifications to users.</p>
                 </div>
-                {users.length > 0 && (
+                <div className="flex items-center gap-3">
                     <button
-                        onClick={handleClear}
-                        className="flex items-center gap-2 text-red-600 hover:text-red-700 px-4 py-2 hover:bg-red-50 rounded-lg transition-colors"
+                        onClick={downloadSample}
+                        className="flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg transition-colors border border-blue-200"
                     >
-                        <HiOutlineTrash /> Clear List
+                        <HiArrowDownTray /> Download Sample CSV
                     </button>
-                )}
+                    {users.length > 0 && (
+                        <button
+                            onClick={handleClear}
+                            className="flex items-center gap-2 text-red-600 hover:text-red-700 px-4 py-2 hover:bg-red-50 rounded-lg transition-colors text-sm font-semibold"
+                        >
+                            <HiOutlineTrash /> Clear List
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {uploadWarning && (
+                <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-xs font-medium">
+                    ⚠️ {uploadWarning}
+                </div>
+            )}
 
             {users.length === 0 ? (
                 <div className="border-2 border-dashed border-slate-300 rounded-xl p-12 flex flex-col items-center justify-center text-center bg-slate-50 hover:bg-slate-100 transition-colors">
                     <HiCloudArrowUp className="w-12 h-12 text-slate-400 mb-4" />
                     <h3 className="text-lg font-medium text-slate-700 mb-2">Upload CSV File</h3>
                     <p className="text-slate-500 mb-6 max-w-md">
-                        Required Columns: EmpID, Name, Email, Password <br/>
-                        <span className="text-xs text-slate-400">(Order doesn't matter, headers are required)</span>
+                        Required Columns: <strong>EmpID</strong>, <strong>Name</strong>, <strong>Email</strong>, <strong>Password</strong><br/>
+                        <span className="text-xs text-slate-400">(Order does not matter. Headers are case-insensitive)</span>
                     </p>
                     <input
                         type="file"
@@ -163,7 +243,6 @@ export default function BulkEmailPage() {
                 </div>
             ) : (
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-
                     <div className="p-4 border-b border-slate-100 bg-slate-50">
                         <div className="flex justify-between items-center mb-2">
                             <div className="font-semibold text-slate-700">
@@ -218,7 +297,7 @@ export default function BulkEmailPage() {
                                             {user.email}
                                         </td>
                                         <td className="px-6 py-3 font-mono text-xs">
-                                            {user.password}
+                                            {user.password || <span className="italic text-slate-400">None</span>}
                                         </td>
                                     </tr>
                                 ))}

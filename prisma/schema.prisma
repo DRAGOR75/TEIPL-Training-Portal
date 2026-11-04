@@ -925,6 +925,7 @@ model LmsRecord {
   empID              String?   @map("emp_id")
   courseId           String?   @map("course_id")
   altCourseName      String?   @map("alt_course_name")
+  facilitator        String?   @map("facilitator")
   enrollmentDate     DateTime? @map("enrollment_date")
   completionDate     DateTime? @map("completion_date")
   duration           String?   @map("duration")

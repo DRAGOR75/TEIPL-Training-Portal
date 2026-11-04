@@ -16,8 +16,12 @@ export async function sendBulkUserCredentials(
     customSubject?: string,
     customHtml?: string
 ): Promise<BulkEmailResult> {
-    if (!email || !empId || !password) {
-        return { email, success: false, error: 'Missing required fields' };
+    if (!email || !empId) {
+        return { email: email || 'unknown', success: false, error: 'Missing required Email or Emp ID' };
+    }
+
+    if (!customHtml && !password) {
+        return { email, success: false, error: 'Password is required when using the default credentials template' };
     }
 
     const html = customHtml || `
