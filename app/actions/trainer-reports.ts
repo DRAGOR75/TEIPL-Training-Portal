@@ -158,9 +158,9 @@ export async function getTrainerReportData(
             where: { email: session.user.email! }
         });
         if (!trainerRecord) {
-            return { 
-                report: null, 
-                error: `No trainer profile associated with ${session.user.email}. Please contact the administrator.` 
+            return {
+                report: null,
+                error: `No trainer profile associated with ${session.user.email}. Please contact the administrator.`
             };
         }
         effectiveTrainerName = trainerRecord.name;
@@ -555,8 +555,8 @@ export async function getTrainerReportData(
             }
         }
 
-        const firstTimerPercentage = uniquePersonsTrained > 0 
-            ? Math.round((totalFirstTimers / uniquePersonsTrained) * 100) 
+        const firstTimerPercentage = uniquePersonsTrained > 0
+            ? Math.round((totalFirstTimers / uniquePersonsTrained) * 100)
             : 0;
         const refresherCount = Math.max(0, uniquePersonsTrained - totalFirstTimers);
 
@@ -597,19 +597,19 @@ export async function getTrainerReportData(
             }
         });
 
-        const averageRating = allRatings.length > 0 
-            ? Number((allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1)) 
+        const averageRating = allRatings.length > 0
+            ? Number((allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(1))
             : null;
-        const recommendationRate = recommendedTotal > 0 
-            ? Math.round((recommendedYes / recommendedTotal) * 100) 
+        const recommendationRate = recommendedTotal > 0
+            ? Math.round((recommendedYes / recommendedTotal) * 100)
             : null;
 
         // 6. Program Breakdown (Strictly from training history and system training history)
-        const programMap = new Map<string, { 
-            category: string; 
-            sessions: Set<string>; 
-            hours: number; 
-            persons: number; 
+        const programMap = new Map<string, {
+            category: string;
+            sessions: Set<string>;
+            hours: number;
+            persons: number;
             altProgramNames: Set<string>;
         }>();
 
@@ -633,8 +633,8 @@ export async function getTrainerReportData(
             const curr = programMap.get(p);
             if (curr) {
                 curr.persons++;
-                const recordAlt = (r.altProgramName && r.altProgramName.trim()) 
-                    ? r.altProgramName.trim() 
+                const recordAlt = (r.altProgramName && r.altProgramName.trim())
+                    ? r.altProgramName.trim()
                     : (r.programName && r.programName.trim().toLowerCase() !== p.toLowerCase() ? r.programName.trim() : null);
                 if (recordAlt && recordAlt.toLowerCase() !== p.toLowerCase()) {
                     curr.altProgramNames.add(recordAlt);
@@ -721,8 +721,8 @@ export async function getTrainerReportData(
             curr.trainees++;
             const progName = resolveCanonicalProgramName(r.programName, r.subjectCode);
             const dateStr = d.toISOString().slice(0, 10);
-            const sKey = r.sessionId && r.sessionId.trim() 
-                ? `sid_${r.sessionId.trim()}` 
+            const sKey = r.sessionId && r.sessionId.trim()
+                ? `sid_${r.sessionId.trim()}`
                 : `hist_${progName.toLowerCase()}_${dateStr}_${(r.location || '').trim().toLowerCase()}`;
             curr.sessionIds.add(sKey);
             curr.sessions = curr.sessionIds.size;
@@ -941,7 +941,7 @@ export async function getAdminTrainersLeaderboard(financialYear: string = 'ALL')
         });
 
         // Rank primarily by Training Hours delivered, then completed sessions and programs
-        leaderboard.sort((a, b) => b.trainingHours - a.trainingHours || b.completedSessions - a.completedSessions || b.totalPrograms - a.totalPrograms);
+        leaderboard.sort((a, b) => b.completedSessions - a.completedSessions || b.trainingHours - a.trainingHours || b.totalPrograms - a.totalPrograms);
 
         const globalSummary = {
             totalTrainers: trainers.length,
