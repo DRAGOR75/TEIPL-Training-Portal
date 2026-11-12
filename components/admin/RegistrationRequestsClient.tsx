@@ -429,8 +429,8 @@ export default function RegistrationRequestsClient({
 
                                                 {/* Submitted */}
                                                 <td className="px-5 py-4 align-top text-xs text-slate-500 whitespace-nowrap">
-                                                    <div>{new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</div>
-                                                    <div className="text-[10px] text-slate-400">{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                                                    <div suppressHydrationWarning>{new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Kolkata' })}</div>
+                                                    <div suppressHydrationWarning className="text-[10px] text-slate-400">{new Date(item.createdAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' })}</div>
                                                     {item.reviewedBy && (
                                                         <div className="text-[10px] font-semibold text-slate-600 mt-1">
                                                             By: {item.reviewedBy}
