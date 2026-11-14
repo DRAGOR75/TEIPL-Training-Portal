@@ -250,7 +250,7 @@ export async function bulkUploadLmsRecords(data: any[]) {
         const empIds = Array.from(new Set(formatted.map(r => r.empID).filter(Boolean))) as string[];
         const empNames = Array.from(new Set(formatted.filter(r => !r.empID && r.empName).map(r => r.empName))) as string[];
 
-        // 2. Fetch existing records for these employees to check duplicates
+        // 2. Fetch existing records for these employees to check duplicates & open enrollments
         const existingRecords = await db.lmsRecord.findMany({
             where: {
                 OR: [
@@ -259,6 +259,7 @@ export async function bulkUploadLmsRecords(data: any[]) {
                 ]
             },
             select: {
+                id: true,
                 empID: true,
                 empName: true,
                 courseId: true,
@@ -270,30 +271,142 @@ export async function bulkUploadLmsRecords(data: any[]) {
         });
 
         const normalizeDate = (d: Date | null) => d ? d.toISOString().slice(0, 10) : 'null';
-        const buildKey = (empId: string | null, empName: string | null, courseId: string | null, courseName: string | null, compDate: Date | null, enrollDate: Date | null, yr: string | null) => {
-            const empKey = (empId || empName || '').trim().toLowerCase();
-            const courseKey = (courseId || courseName || '').trim().toLowerCase();
-            const dateKey = compDate ? normalizeDate(compDate) : (enrollDate ? normalizeDate(enrollDate) : (yr || '').trim().toLowerCase());
-            return `${empKey}:::${courseKey}:::${dateKey}`;
-        };
+        const cleanStr = (s: string | null | undefined) => (s || '').trim().toLowerCase();
 
-        const existingSet = new Set<string>();
+        // Map for OPEN / PENDING enrollments (completionDate is null)
+        // Indexed by baseKey (empKey:::courseKey) and by enrollmentDate
+        const pendingEnrollmentsMap = new Map<string, typeof existingRecords[0]>();
+
+        // Set for ALREADY COMPLETED records (completionDate is not null)
+        // Keys: baseKey:::completionDate and baseKey:::enr:::enrollmentDate
+        const completedSet = new Set<string>();
+
+        // Set to track processed items in current batch to prevent in-file duplicates
+        const processedBatchSet = new Set<string>();
+
         existingRecords.forEach(r => {
-            existingSet.add(buildKey(r.empID, r.empName, r.courseId, r.courseName, r.completionDate, r.enrollmentDate, r.year));
+            const empKey = cleanStr(r.empID || r.empName);
+            const courseKey = cleanStr(r.courseId || r.courseName);
+            const baseKey = `${empKey}:::${courseKey}`;
+
+            if (r.completionDate) {
+                const compDateKey = normalizeDate(r.completionDate);
+                completedSet.add(`${baseKey}:::${compDateKey}`);
+                if (r.enrollmentDate) {
+                    const enrollDateKey = normalizeDate(r.enrollmentDate);
+                    completedSet.add(`${baseKey}:::enr:::${enrollDateKey}`);
+                }
+            } else {
+                pendingEnrollmentsMap.set(baseKey, r);
+                if (r.enrollmentDate) {
+                    pendingEnrollmentsMap.set(`${baseKey}:::enr:::${normalizeDate(r.enrollmentDate)}`, r);
+                }
+            }
         });
 
-        // 3. Filter out both in-batch duplicates and database duplicates
+        // 3. Partition incoming rows into INSERT, UPDATE, or SKIP
         const toInsert: typeof formatted = [];
+        const toUpdate: { id: number; data: any }[] = [];
         let duplicateCount = 0;
 
         for (const record of formatted) {
-            const key = buildKey(record.empID, record.empName, record.courseId, record.courseName, record.completionDate, record.enrollmentDate, record.year);
-            if (existingSet.has(key)) {
-                duplicateCount++;
-                continue;
+            const empKey = cleanStr(record.empID || record.empName);
+            const courseKey = cleanStr(record.courseId || record.courseName);
+            const baseKey = `${empKey}:::${courseKey}`;
+            const compDateKey = record.completionDate ? normalizeDate(record.completionDate) : null;
+            const enrollDateKey = record.enrollmentDate ? normalizeDate(record.enrollmentDate) : null;
+
+            if (compDateKey) {
+                // CASE 1: Incoming row is COMPLETED
+                const completedKey = `${baseKey}:::${compDateKey}`;
+                const completedEnrollKey = enrollDateKey ? `${baseKey}:::enr:::${enrollDateKey}` : null;
+
+                // Check if already completed in DB or in current batch
+                if (completedSet.has(completedKey) || (completedEnrollKey && completedSet.has(completedEnrollKey)) || processedBatchSet.has(completedKey)) {
+                    duplicateCount++;
+                    continue;
+                }
+
+                // Check if there is an OPEN enrollment in DB waiting for completion
+                const openRecord = (enrollDateKey && pendingEnrollmentsMap.get(`${baseKey}:::enr:::${enrollDateKey}`)) 
+                                   || pendingEnrollmentsMap.get(baseKey);
+
+                if (openRecord) {
+                    // Transition: Enrolled -> Completed! UPDATE the existing record!
+                    toUpdate.push({
+                        id: openRecord.id,
+                        data: {
+                            completionDate: record.completionDate,
+                            duration: record.duration,
+                            maxMarks: record.maxMarks,
+                            obtainedMarks: record.obtainedMarks,
+                            qualified: record.qualified,
+                            referenceRemarks: record.referenceRemarks,
+                            trainingMode: record.trainingMode,
+                            facilitator: record.facilitator,
+                            month: record.month,
+                            year: record.year,
+                            ...(record.enrollmentDate && !openRecord.enrollmentDate ? { enrollmentDate: record.enrollmentDate } : {})
+                        }
+                    });
+
+                    // Remove from pending map so another row doesn't update the same record
+                    pendingEnrollmentsMap.delete(baseKey);
+                    if (openRecord.enrollmentDate) {
+                        pendingEnrollmentsMap.delete(`${baseKey}:::enr:::${normalizeDate(openRecord.enrollmentDate)}`);
+                    }
+
+                    // Mark as completed in memory
+                    completedSet.add(completedKey);
+                    if (completedEnrollKey) completedSet.add(completedEnrollKey);
+                    processedBatchSet.add(completedKey);
+                } else {
+                    // No open enrollment found -> INSERT as new completed record
+                    toInsert.push(record);
+                    completedSet.add(completedKey);
+                    if (completedEnrollKey) completedSet.add(completedEnrollKey);
+                    processedBatchSet.add(completedKey);
+                }
+            } else {
+                // CASE 2: Incoming row is ENROLLED ONLY (in-progress)
+                const pendingKey = enrollDateKey ? `${baseKey}:::enr:::${enrollDateKey}` : `${baseKey}:::pending`;
+
+                // Check if already pending in DB or processed in batch
+                if (pendingEnrollmentsMap.has(baseKey) || (enrollDateKey && pendingEnrollmentsMap.has(`${baseKey}:::enr:::${enrollDateKey}`)) || processedBatchSet.has(pendingKey)) {
+                    duplicateCount++;
+                    continue;
+                }
+
+                // Check if already completed in DB for this enrollment date
+                if (enrollDateKey && completedSet.has(`${baseKey}:::enr:::${enrollDateKey}`)) {
+                    duplicateCount++;
+                    continue;
+                }
+
+                // Brand new enrollment -> INSERT
+                toInsert.push(record);
+                pendingEnrollmentsMap.set(baseKey, { id: 0, ...record } as any);
+                if (enrollDateKey) {
+                    pendingEnrollmentsMap.set(`${baseKey}:::enr:::${enrollDateKey}`, { id: 0, ...record } as any);
+                }
+                processedBatchSet.add(pendingKey);
             }
-            existingSet.add(key);
-            toInsert.push(record);
+        }
+
+        // 4. Execute Updates and Inserts
+        let updatedCount = 0;
+        if (toUpdate.length > 0) {
+            const UPDATE_CHUNK = 50;
+            for (let u = 0; u < toUpdate.length; u += UPDATE_CHUNK) {
+                const batch = toUpdate.slice(u, u + UPDATE_CHUNK);
+                await db.$transaction(
+                    batch.map(item => db.lmsRecord.update({
+                        where: { id: item.id },
+                        data: item.data
+                    }))
+                );
+            }
+            updatedCount = toUpdate.length;
         }
 
         let insertedCount = 0;
@@ -303,7 +416,13 @@ export async function bulkUploadLmsRecords(data: any[]) {
         }
 
         revalidatePath('/admin/tests-qualifications');
-        return { success: true, count: insertedCount, skipped: duplicateCount };
+        return { 
+            success: true, 
+            count: insertedCount + updatedCount, 
+            inserted: insertedCount, 
+            updated: updatedCount, 
+            skipped: duplicateCount 
+        };
     } catch (error: any) {
         console.error('Error in bulkUploadLmsRecords:', error);
         return { success: false, error: error.message || 'Failed to upload LMS records' };
