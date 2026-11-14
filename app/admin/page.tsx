@@ -14,6 +14,7 @@ import {
     HiOutlineChatBubbleBottomCenterText,
     HiOutlineDocumentText,
     HiOutlineBuildingOffice2,
+    HiOutlineUserPlus,
 } from 'react-icons/hi2';
 import { SiLooker } from 'react-icons/si';
 
@@ -57,6 +58,16 @@ export default async function AdminHubPage() {
                         tag="Batches"
                         color="emerald"
                     />
+
+                    <AdminCard
+                        href="/admin/registration-requests"
+                        title="Registration Requests"
+                        description="Review, edit, and approve walk-in participant registrations and session enrollments."
+                        icon={<HiOutlineUserPlus size={24} />}
+                        tag="Approvals"
+                        color="blue"
+                    />
+
 
                     <AdminCard
                         href="/admin/dashboard"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import {
     HiOutlineAcademicCap,
     HiOutlineUsers,
@@ -53,9 +53,11 @@ export default function AdminTrainerPerformanceClient({
     const [searchFilter, setSearchFilter] = useState('');
     const [isPending, startTransition] = useTransition();
 
-    const filteredLeaderboard = leaderboardData.filter(t =>
-        t.trainerName.toLowerCase().includes(searchFilter.toLowerCase())
-    );
+    const filteredLeaderboard = useMemo(() => {
+        return [...leaderboardData]
+            .filter(t => t.trainerName.toLowerCase().includes(searchFilter.toLowerCase()))
+            .sort((a, b) => b.completedSessions - a.completedSessions || b.trainingHours - a.trainingHours || b.totalPrograms - a.totalPrograms);
+    }, [leaderboardData, searchFilter]);
 
     const handleYearChange = (newYear: string) => {
         setSelectedYear(newYear);
@@ -75,7 +77,9 @@ export default function AdminTrainerPerformanceClient({
     };
 
     const exportLeaderboard = () => {
-        const rows = leaderboardData.map((t, idx) => ({
+        const rows = [...leaderboardData]
+            .sort((a, b) => b.completedSessions - a.completedSessions || b.trainingHours - a.trainingHours || b.totalPrograms - a.totalPrograms)
+            .map((t, idx) => ({
             'Rank': idx + 1,
             'Trainer Name': t.trainerName,
             'Financial Year': selectedYear === 'ALL' ? 'All Years' : `FY ${selectedYear}`,
@@ -241,9 +245,14 @@ export default function AdminTrainerPerformanceClient({
                     {/* TRAINER LEADERBOARD TABLE */}
                     <div className="bg-white rounded-3xl p-6 md:p-8 border border-slate-200/80 shadow-xs space-y-6">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                Trainer Comparison Leaderboard
-                            </h3>
+                            <div>
+                                <h3 className="text-xl font-black text-slate-900 tracking-tight">
+                                    Trainer Leaderboard
+                                </h3>
+                                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                                    Ranked by number of programs completed
+                                </p>
+                            </div>
 
                             <div className="relative w-full sm:w-64">
                                 <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />

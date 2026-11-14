@@ -168,8 +168,56 @@ model NominationBatch {
   program         Program          @relation(fields: [programId], references: [id])
   nominations     Nomination[]
   trainingSession TrainingSession?
+  registrationRequests RegistrationRequest[]
 
   @@map("nomination_batches")
+}
+
+// 5.1 Registration & Enrollment Requests (JIT Walk-ins awaiting Admin Approval)
+model RegistrationRequest {
+  id                    String    @id @default(uuid())
+  empId                 String    @map("emp_id")
+  name                  String
+  email                 String
+  mobile                String?
+  gender                Gender?
+  grade                 Grade?    @default(EXECUTIVE)
+
+  // Department & Job Details
+  departmentGroup       String?   @map("department_group")
+  department            String?
+  sectionName           String?   @map("section_name")
+  designation           String?
+  location              String?   // Region
+  region                String?   // Location
+  projectLocation       String?   @map("project_location")
+  organization          String?
+  employeeGrouupMNmw    String?   @map("employee_grouup_m_nm_w")
+  onRollContract        String?   @map("on_roll_contract")
+  highestQualification  String?   @map("highest_qualification")
+
+  // Reporting Manager Details
+  managerId             String?   @map("manager_id")
+  managerName           String?   @map("manager_name")
+  managerEmail          String?   @map("manager_email")
+  managerMobile         String?   @map("manager_mobile")
+
+  // Target Session & Workflow State
+  batchId               String    @map("batch_id")
+  status                String    @default("Pending") // Pending, Approved, Rejected
+  rejectionReason       String?   @map("rejection_reason")
+  reviewedBy            String?   @map("reviewed_by")
+  reviewedAt            DateTime? @map("reviewed_at")
+
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @updatedAt @map("updated_at")
+
+  batch                 NominationBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+
+  @@index([empId])
+  @@index([status])
+  @@index([batchId])
+  @@map("registration_requests")
 }
 
 model TrainingSession {

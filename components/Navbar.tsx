@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import {
     HiOutlineBars3, HiOutlineXMark, HiOutlineHome, HiOutlineShieldCheck,
     HiOutlineDocumentText, HiOutlineSquares2X2, HiOutlineClipboardDocumentList,
-    HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers,
+    HiOutlineChartBar, HiOutlineWrench, HiOutlineBookOpen, HiOutlineUsers, HiOutlineUserPlus,
     HiOutlinePaperAirplane, HiOutlineChatBubbleBottomCenterText, HiOutlineChevronDown,
     HiOutlineCalendarDays, HiOutlineQuestionMarkCircle
 } from 'react-icons/hi2';
@@ -179,6 +179,7 @@ const ADMIN_TABS = [
     { id: 'troubleshooting', label: 'Diagnostics', href: '/admin/troubleshooting', icon: HiOutlineWrench },
     { id: 'manuals', label: 'Manuals', href: '/training-manuals', icon: HiOutlineBookOpen },
     { id: 'sessions', label: 'Sessions', href: '/admin/sessions', icon: HiOutlineUsers },
+    { id: 'registration-requests', label: 'Registration Requests', href: '/admin/registration-requests', icon: HiOutlineUserPlus },
     { id: 'planning', label: 'Calendar', href: '/admin/tni-dashboard/calendar', icon: HiOutlineCalendarDays },
     { id: 'reports', label: 'Reports', href: '/admin/reports', icon: HiOutlineChartBar },
     { id: 'email', label: 'Bulk Email', href: '/admin/bulk-email', icon: HiOutlinePaperAirplane },

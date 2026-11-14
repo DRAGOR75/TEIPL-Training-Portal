@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Papa from 'papaparse';
-import { HiCloudArrowUp, HiCheckCircle, HiExclamationCircle, HiOutlineTrash, HiOutlineDocumentArrowDown, HiOutlineBookOpen } from 'react-icons/hi2';
-import { bulkUploadLmsRecords, clearLmsRecords } from '@/app/actions/qualifications';
+import { HiCloudArrowUp, HiCheckCircle, HiExclamationCircle, HiOutlineDocumentArrowDown, HiOutlineBookOpen, HiArrowPath } from 'react-icons/hi2';
+import { bulkUploadLmsRecords } from '@/app/actions/qualifications';
 import Link from 'next/link';
 
 export default function UploadLmsPage() {
@@ -12,8 +12,13 @@ export default function UploadLmsPage() {
     const [progress, setProgress] = useState({ current: 0, total: 0 });
     const [status, setStatus] = useState<'idle' | 'parsing' | 'uploading' | 'completed' | 'error'>('idle');
     const [errorMessage, setErrorMessage] = useState('');
-    const [uploadStats, setUploadStats] = useState<{ success: number; skipped?: number; errors: string[] } | null>(null);
-    const [isClearingDb, setIsClearingDb] = useState(false);
+    const [uploadStats, setUploadStats] = useState<{
+        success: number;
+        inserted?: number;
+        updated?: number;
+        skipped?: number;
+        errors: string[];
+    } | null>(null);
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -50,6 +55,8 @@ export default function UploadLmsPage() {
         const TOTAL_RECORDS = records.length;
         const CHUNK_SIZE = 500;
         let successTotal = 0;
+        let insertedTotal = 0;
+        let updatedTotal = 0;
         let skippedTotal = 0;
         let allErrors: string[] = [];
         let processedCount = 0;
@@ -63,6 +70,8 @@ export default function UploadLmsPage() {
 
                 if (result.success) {
                     successTotal += result.count || 0;
+                    insertedTotal += (result.inserted !== undefined ? result.inserted : (result.count || 0));
+                    updatedTotal += result.updated || 0;
                     skippedTotal += result.skipped || 0;
                 } else {
                     allErrors.push(`Batch ${currentBatchNum} failed: ${result.error}`);
@@ -74,13 +83,21 @@ export default function UploadLmsPage() {
 
             setUploadStats({
                 success: successTotal,
+                inserted: insertedTotal,
+                updated: updatedTotal,
                 skipped: skippedTotal,
                 errors: allErrors
             });
             setStatus('completed');
         } catch (err: any) {
             console.error(err);
-            setUploadStats({ success: successTotal, skipped: skippedTotal, errors: [...allErrors, err.message || "Process interrupted or failed."] });
+            setUploadStats({
+                success: successTotal,
+                inserted: insertedTotal,
+                updated: updatedTotal,
+                skipped: skippedTotal,
+                errors: [...allErrors, err.message || "Process interrupted or failed."]
+            });
             setStatus('error');
             setErrorMessage(err.message || 'Unknown error occurred.');
         } finally {
@@ -101,40 +118,23 @@ export default function UploadLmsPage() {
         }
     };
 
-    const handleClearDatabase = async () => {
-        if (!confirm('CRITICAL WARNING: This will permanently delete ALL stored records in the lms_records table.\n\nAre you absolutely sure you want to proceed?')) {
-            return;
-        }
-
-        setIsClearingDb(true);
-        try {
-            const result = await clearLmsRecords();
-            if (result.success) {
-                alert(`Successfully cleared LMS ledger. Wiped ${result.count || 0} records!`);
-                setRecords([]);
-                setStatus('idle');
-            } else {
-                alert(`Error clearing database: ${result.error}`);
-            }
-        } catch (err: any) {
-            alert(`Error: ${err.message}`);
-        } finally {
-            setIsClearingDb(false);
-        }
-    };
-
     const downloadSample = () => {
         const headers = [
             "Emp ID", "Emp Name", "Course ID", "Course Name", "Facilitator",
             "Date Of Enrollment", "Date of Completion", "Duration", "Max Marks", "Marks Attained",
             "Pass", "Training Mode", "Reference / Remarks", "MTH", "Year"
         ];
-        const rowData = [
+        const row1 = [
             "10018532", "Payal Pradhan", "LMS-PPE", "PPE Safety", "John Doe",
-            "24-Mar-2025", "24-Mar-2025", "2", "100", "85",
+            "24-Mar-2025", "28-Mar-2025", "2", "100", "85",
             "TRUE", "Online Mode", "Completed on LMS Portal", "Mar", "24-25"
         ];
-        const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rowData.join(",");
+        const row2 = [
+            "10018533", "Ravi Kumar", "LMS-HEMM", "HEMM Safety & Operations", "John Doe",
+            "10-Apr-2025", "", "3", "100", "",
+            "", "Online Mode", "Enrolled / In-Progress", "Apr", "25-26"
+        ];
+        const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), row1.join(","), row2.join(",")].join("\n");
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
@@ -168,20 +168,13 @@ export default function UploadLmsPage() {
                             Bulk Upload LMS Records
                         </h1>
                         <p className="text-slate-500 mt-2 font-medium">
-                            Import e-learning completions, module hours spent, enrollment dates, and pass certificates into the dedicated LMS ledger.
+                            Import e-learning completions, update in-progress enrollments, and sync ongoing modules into the LMS ledger.
                         </p>
                     </div>
                     <div className="flex gap-3">
                         <button
-                            onClick={handleClearDatabase}
-                            disabled={isClearingDb || isProcessing}
-                            className="flex items-center gap-2 text-rose-600 hover:text-rose-700 bg-rose-50 border border-rose-200 hover:bg-rose-100 px-4 py-2 rounded-lg transition-colors text-sm font-semibold disabled:opacity-50"
-                        >
-                            <HiOutlineTrash className="w-5 h-5" /> {isClearingDb ? 'Clearing DB...' : 'Wipe LMS Ledger'}
-                        </button>
-                        <button
                             onClick={downloadSample}
-                            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors text-sm font-semibold"
+                            className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 bg-indigo-50 border border-indigo-200 hover:bg-indigo-100 px-4 py-2 rounded-lg transition-colors text-sm font-semibold shadow-sm"
                         >
                             <HiOutlineDocumentArrowDown className="w-5 h-5" /> Sample LMS CSV
                         </button>
@@ -276,19 +269,32 @@ export default function UploadLmsPage() {
 
                             {/* Stats */}
                             {uploadStats && (
-                                <div className="mt-6 p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-1">
-                                    <div className="text-emerald-700 font-bold text-sm">
-                                        Successfully imported: {uploadStats.success} LMS records
+                                <div className="mt-6 p-5 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+                                    <div className="text-slate-900 font-black text-sm uppercase tracking-wider flex items-center gap-2">
+                                        <HiCheckCircle className="text-emerald-600 w-5 h-5" />
+                                        LMS Sync Summary
                                     </div>
-                                    {uploadStats.skipped !== undefined && uploadStats.skipped > 0 && (
-                                        <div className="text-amber-700 font-semibold text-xs">
-                                            Skipped {uploadStats.skipped} duplicate records (already present in the ledger or file)
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                        <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-3">
+                                            <div className="text-emerald-700 text-xs font-bold uppercase tracking-wider">Newly Enrolled / Added</div>
+                                            <div className="text-2xl font-black text-emerald-800">{uploadStats.inserted ?? uploadStats.success}</div>
+                                            <div className="text-[11px] text-emerald-600 font-medium mt-0.5">New records created</div>
                                         </div>
-                                    )}
+                                        <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-3">
+                                            <div className="text-indigo-700 text-xs font-bold uppercase tracking-wider">Completions Updated</div>
+                                            <div className="text-2xl font-black text-indigo-800">{uploadStats.updated ?? 0}</div>
+                                            <div className="text-[11px] text-indigo-600 font-medium mt-0.5">Pending enrollments marked completed</div>
+                                        </div>
+                                        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+                                            <div className="text-amber-700 text-xs font-bold uppercase tracking-wider">Unchanged / Skipped</div>
+                                            <div className="text-2xl font-black text-amber-800">{uploadStats.skipped ?? 0}</div>
+                                            <div className="text-[11px] text-amber-600 font-medium mt-0.5">Already completed or already enrolled</div>
+                                        </div>
+                                    </div>
                                     {uploadStats.errors.length > 0 && (
-                                        <div className="mt-2 text-rose-600 text-xs font-semibold">
+                                        <div className="mt-3 p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs font-semibold space-y-1">
                                             {uploadStats.errors.map((e, idx) => (
-                                                <div key={idx}>{e}</div>
+                                                <div key={idx}>⚠️ {e}</div>
                                             ))}
                                         </div>
                                     )}
@@ -311,24 +317,34 @@ export default function UploadLmsPage() {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-slate-100 font-medium">
-                                    {records.slice(0, 50).map((r, i) => (
-                                        <tr key={i} className="hover:bg-slate-50/50">
-                                            <td className="p-4 font-bold text-slate-900">{r['Emp ID'] || r.empID || r.EmpId || '-'}</td>
-                                            <td className="p-4 text-slate-600">{r['Emp Name'] || r.empName || '-'}</td>
-                                            <td className="p-4 text-slate-700 font-semibold">{r['Course Name'] || r['Subject name'] || r.courseName || r.subjectName || '-'}</td>
-                                            <td className="p-4 text-slate-500">{r['Date Of Enrollment'] || r['enrollment Date'] || r.enrollmentDate || '-'}</td>
-                                            <td className="p-4 text-slate-500">{r['Date of Completion'] || r['Test Date'] || r.completionDate || '-'}</td>
-                                            <td className="p-4 font-bold text-indigo-700">{r['Duration'] || r['LMS Program Hours Spent'] || r.duration || '-'}</td>
-                                            <td className="p-4">
-                                                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${String(r['Pass'] || r['Qualified']).toLowerCase() === 'true'
-                                                    ? 'bg-emerald-100 text-emerald-800'
-                                                    : 'bg-slate-100 text-slate-600'
+                                    {records.slice(0, 50).map((r, i) => {
+                                        const hasCompDate = !!(r['Date of Completion'] || r['Completion Date'] || r.completionDate);
+                                        const isPass = String(r['Pass'] || r['Qualified']).toLowerCase() === 'true';
+
+                                        return (
+                                            <tr key={i} className="hover:bg-slate-50/50">
+                                                <td className="p-4 font-bold text-slate-900">{r['Emp ID'] || r.empID || r.EmpId || '-'}</td>
+                                                <td className="p-4 text-slate-600">{r['Emp Name'] || r.empName || '-'}</td>
+                                                <td className="p-4 text-slate-700 font-semibold">{r['Course Name'] || r['Subject name'] || r.courseName || r.subjectName || '-'}</td>
+                                                <td className="p-4 text-slate-500">{r['Date Of Enrollment'] || r['enrollment Date'] || r.enrollmentDate || '-'}</td>
+                                                <td className="p-4 text-slate-500">{r['Date of Completion'] || r['Completion Date'] || r['Test Date'] || r.completionDate || '-'}</td>
+                                                <td className="p-4 font-bold text-indigo-700">{r['Duration'] || r['LMS Program Hours Spent'] || r.duration || '-'}</td>
+                                                <td className="p-4">
+                                                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                                                        !hasCompDate
+                                                            ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                                            : isPass
+                                                            ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                                            : 'bg-slate-100 text-slate-600 border border-slate-200'
                                                     }`}>
-                                                    {String(r['Pass'] || r['Qualified'] || '-')}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                        {!hasCompDate
+                                                            ? 'In-Progress'
+                                                            : (r['Pass'] || r['Qualified'] || 'Completed')}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
