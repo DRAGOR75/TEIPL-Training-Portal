@@ -321,8 +321,8 @@ export default function UploadTestsPage() {
                                             <td className="p-4 font-bold text-blue-700">{r['Marks Attained'] || r.obtainedMarks || '-'} / {r['Max Marks'] || r.maxMarks || '-'}</td>
                                             <td className="p-4">
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${String(r['Pass'] || r['Qualified']).toLowerCase() === 'true'
-                                                        ? 'bg-emerald-100 text-emerald-800'
-                                                        : 'bg-slate-100 text-slate-600'
+                                                    ? 'bg-emerald-100 text-emerald-800'
+                                                    : 'bg-slate-100 text-slate-600'
                                                     }`}>
                                                     {String(r['Pass'] || r['Qualified'] || '-')}
                                                 </span>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { joinBatch, getBatchBasicDetails, getEmployeeForConfirmation } from '@/app/actions/sessions';
-import { submitRegistrationRequest } from '@/app/actions/registration-requests';
+import { submitRegistrationRequest, searchEmployeesForEnrollment, EnrollmentEmployeeCandidate } from '@/app/actions/registration-requests';
 import { getSections, getDesignations, getLocations } from '@/app/actions/master-data';
 import { getManagerDetails } from '@/app/actions/tni';
 import {
@@ -17,7 +17,10 @@ import {
     HiOutlinePhone,
     HiOutlineClock,
     HiOutlineBuildingOffice2,
-    HiOutlineArrowLeft
+    HiOutlineArrowLeft,
+    HiOutlineMagnifyingGlass,
+    HiOutlineXMark,
+    HiOutlineChevronRight
 } from 'react-icons/hi2';
 import { useParams } from 'next/navigation';
 import SearchableSelect from '@/components/ui/SearchableSelect';
@@ -43,6 +46,11 @@ export default function JoinPage() {
 
     // Manager auto-fetch status in registration
     const [isFetchingManager, setIsFetchingManager] = useState(false);
+
+    // Employee Searchable Lookup State (Name, Emp ID, Email)
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<EnrollmentEmployeeCandidate[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
 
     useEffect(() => {
         async function fetchBatchDetails() {
@@ -129,11 +137,35 @@ export default function JoinPage() {
         }
     }
 
-    async function handleJoinSubmit(e: React.FormEvent) {
-        e.preventDefault();
-        const cleanEmpId = empId.trim().toUpperCase();
+    useEffect(() => {
+        if (isConfirming || isRegistering || status === 'enrolled' || status === 'request_submitted') return;
+        const q = searchQuery.trim();
+        if (q.length < 2) {
+            setSearchResults([]);
+            setIsSearching(false);
+            return;
+        }
+
+        const timer = setTimeout(async () => {
+            setIsSearching(true);
+            try {
+                const res = await searchEmployeesForEnrollment(q);
+                setSearchResults(res.candidates || []);
+            } catch {
+                setSearchResults([]);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 300);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery, isConfirming, isRegistering, status]);
+
+    async function verifyEmployeeId(targetId: string) {
+        const cleanEmpId = targetId.trim().toUpperCase();
         if (!cleanEmpId) return;
 
+        setEmpId(cleanEmpId);
         setStatus('loading');
         setResult(null);
 
@@ -160,6 +192,35 @@ export default function JoinPage() {
             setStatus('error');
             setResult({ error: res.error });
         }
+    }
+
+    function openRegistrationFromSearch(prefillQuery?: string) {
+        const q = (prefillQuery ?? searchQuery).trim();
+        if (q) {
+            if (q.includes('@')) {
+                setRegData(prev => ({ ...prev, email: q.toLowerCase() }));
+                setEmpId('');
+            } else if (q.includes(' ')) {
+                setRegData(prev => ({ ...prev, name: toTitleCase(q) }));
+                setEmpId('');
+            } else {
+                setEmpId(q.toUpperCase());
+            }
+        }
+        setIsRegistering(true);
+        setStatus('idle');
+        setResult(null);
+    }
+
+    async function handleJoinSubmit(e: React.FormEvent) {
+        e.preventDefault();
+        if (searchResults.length === 1) {
+            await verifyEmployeeId(searchResults[0].id);
+            return;
+        }
+        const target = (empId || searchQuery).trim();
+        if (!target) return;
+        await verifyEmployeeId(target);
     }
 
     async function handleConfirmJoin() {
@@ -311,6 +372,8 @@ export default function JoinPage() {
                             setStatus('idle');
                             setIsRegistering(false);
                             setEmpId('');
+                            setSearchQuery('');
+                            setSearchResults([]);
                         }}
                         className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition-all shadow-md text-sm"
                     >
@@ -434,6 +497,8 @@ export default function JoinPage() {
                             onClick={() => {
                                 setIsConfirming(false);
                                 setEmpId('');
+                                setSearchQuery('');
+                                setSearchResults([]);
                                 setStatus('idle');
                             }}
                             disabled={status === 'loading'}
@@ -809,6 +874,8 @@ export default function JoinPage() {
                             onClick={() => {
                                 setStatus('idle');
                                 setEmpId('');
+                                setSearchQuery('');
+                                setSearchResults([]);
                             }}
                             className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3 rounded-xl transition-all text-sm"
                         >
@@ -821,9 +888,12 @@ export default function JoinPage() {
     }
 
     // --- VIEW 6: DEFAULT QUICK JOIN VIEW ---
+    const trimmedSearch = searchQuery.trim();
+    const canTryExactId = trimmedSearch.length >= 2 && !trimmedSearch.includes(' ') && !trimmedSearch.includes('@');
+
     return (
         <div className="min-h-screen bg-slate-100 flex flex-col items-center justify-center p-4">
-            <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-xl border border-slate-100 max-w-md w-full space-y-6">
+            <div className="bg-white p-6 sm:p-10 rounded-3xl shadow-xl border border-slate-100 max-w-lg w-full space-y-6">
                 <div className="text-center space-y-2">
                     <span className="inline-block px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full uppercase tracking-wider">
                         Session Enrollment
@@ -849,7 +919,7 @@ export default function JoinPage() {
                             )}
                         </div>
                     ) : (
-                        <p className="text-slate-500 text-xs">Enter your Employee ID to join this training batch.</p>
+                        <p className="text-slate-500 text-xs">Search by Name, Employee ID, or Email to join this training batch.</p>
                     )}
                 </div>
 
@@ -861,32 +931,132 @@ export default function JoinPage() {
                 )}
 
                 <form onSubmit={handleJoinSubmit} className="space-y-4">
-                    <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">Employee ID</label>
-                        <input
-                            type="text"
-                            required
-                            value={empId}
-                            onChange={(e) => setEmpId(e.target.value.toUpperCase())}
-                            placeholder="e.g. E00123"
-                            className="w-full p-4 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-lg font-mono font-bold uppercase placeholder:font-sans placeholder:font-normal placeholder:text-sm"
-                        />
+                    <div className="space-y-2">
+                        <label className="text-xs font-bold text-slate-700 uppercase tracking-wider block">
+                            Search Employee (Name, Emp ID, or Email)
+                        </label>
+                        <div className="relative">
+                            <HiOutlineMagnifyingGlass className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => {
+                                    setSearchQuery(e.target.value);
+                                    setEmpId('');
+                                }}
+                                placeholder="Type your name, Emp ID, or email to search..."
+                                className="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 outline-none focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder:font-normal placeholder:text-slate-400"
+                                autoFocus
+                            />
+                            {isSearching ? (
+                                <HiOutlineArrowPath className="absolute right-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 animate-spin" />
+                            ) : searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearchQuery('');
+                                        setSearchResults([]);
+                                        setEmpId('');
+                                    }}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors"
+                                    aria-label="Clear search"
+                                >
+                                    <HiOutlineXMark className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={status === 'loading'}
-                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-200"
-                    >
-                        {status === 'loading' ? (
-                            <>
-                                <HiOutlineArrowPath className="w-5 h-5 animate-spin" />
-                                Verifying Employee...
-                            </>
-                        ) : (
-                            'Continue to Join'
-                        )}
-                    </button>
+                    {/* Live Search Results */}
+                    {trimmedSearch.length >= 2 ? (
+                        <div className="border border-slate-200 rounded-2xl bg-slate-50/50 overflow-hidden">
+                            {searchResults.length > 0 ? (
+                                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100 bg-white">
+                                    {searchResults.map((candidate) => (
+                                        <button
+                                            key={candidate.id}
+                                            type="button"
+                                            disabled={status === 'loading'}
+                                            onClick={() => verifyEmployeeId(candidate.id)}
+                                            className="w-full text-left py-3 px-4 flex items-center justify-between gap-3 hover:bg-blue-50/60 transition-colors disabled:opacity-50"
+                                        >
+                                            <div className="min-w-0">
+                                                <div className="font-bold text-xs text-slate-900 truncate">
+                                                    {candidate.name}{' '}
+                                                    <span className="font-mono text-blue-600 font-semibold">({candidate.id})</span>
+                                                </div>
+                                                <div className="text-[11px] text-slate-500 truncate mt-0.5">
+                                                    {candidate.email}
+                                                </div>
+                                                <div className="text-[10px] text-slate-400 truncate mt-0.5">
+                                                    {candidate.designation} • {candidate.department} • {candidate.location}
+                                                </div>
+                                            </div>
+                                            <span className="inline-flex items-center gap-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] uppercase tracking-wider px-3 py-1.5 rounded-xl shrink-0">
+                                                {status === 'loading' && empId === candidate.id ? (
+                                                    <HiOutlineArrowPath className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    <>
+                                                        <span>Select</span>
+                                                        <HiOutlineChevronRight className="w-3.5 h-3.5" />
+                                                    </>
+                                                )}
+                                            </span>
+                                        </button>
+                                    ))}
+                                </div>
+                            ) : !isSearching ? (
+                                <div className="p-5 text-center space-y-3 bg-white">
+                                    <p className="text-xs text-slate-500 font-medium">
+                                        No registered employees found matching <span className="font-bold text-slate-800">"{searchQuery}"</span>.
+                                    </p>
+                                    <div className="flex flex-col gap-2">
+                                        {canTryExactId && (
+                                            <button
+                                                type="submit"
+                                                disabled={status === 'loading'}
+                                                className="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5"
+                                            >
+                                                {status === 'loading' ? (
+                                                    <><HiOutlineArrowPath className="w-4 h-4 animate-spin" /> Verifying...</>
+                                                ) : (
+                                                    `Continue with Employee ID "${trimmedSearch.toUpperCase()}"`
+                                                )}
+                                            </button>
+                                        )}
+                                        <button
+                                            type="button"
+                                            onClick={() => openRegistrationFromSearch(searchQuery)}
+                                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-4 rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-sm shadow-blue-200"
+                                        >
+                                            <HiOutlineUserPlus className="w-4 h-4" />
+                                            Not Registered? Register & Request Enrollment
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="p-6 text-center text-xs text-slate-400 font-medium bg-white flex items-center justify-center gap-2">
+                                    <HiOutlineArrowPath className="w-4 h-4 animate-spin text-blue-500" />
+                                    Searching employees...
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-slate-400 text-center py-4 font-medium bg-slate-50 rounded-2xl border border-dashed border-slate-200">
+                            Type at least 2 characters to search employees by Name, Emp ID, or Email.
+                        </p>
+                    )}
+
+                    <div className="pt-2 border-t border-slate-100 text-center">
+                        <button
+                            type="button"
+                            onClick={() => openRegistrationFromSearch('')}
+                            className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                            <HiOutlineUserPlus className="w-4 h-4" />
+                            New participant? Register & Request Enrollment
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

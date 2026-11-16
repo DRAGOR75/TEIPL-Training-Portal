@@ -4,7 +4,7 @@ import { db } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { Grade, Gender } from '@prisma/client';
-import { sendManagerSessionApprovalEmail } from '@/lib/email';
+import { sendManagerSessionApprovalEmail, sendRegistrationRequestNotificationEmail } from '@/lib/email';
 
 export interface SubmitRegistrationRequestPayload {
     empId: string;
@@ -133,7 +133,7 @@ export async function submitRegistrationRequest(payload: SubmitRegistrationReque
         }
 
         // 5. Create the registration request
-        await db.registrationRequest.create({
+        const newRequest = await db.registrationRequest.create({
             data: {
                 empId: cleanEmpId,
                 name: cleanName,
@@ -159,6 +159,34 @@ export async function submitRegistrationRequest(payload: SubmitRegistrationReque
                 batchId: batchId,
                 status: 'Pending'
             }
+        });
+
+        // 6. Send notification email to bvg@thriveni.com and cyn@thriveni.com
+        sendRegistrationRequestNotificationEmail({
+            participant: {
+                empId: cleanEmpId,
+                name: cleanName,
+                email: cleanEmail,
+                mobile: payload.mobile?.trim() || null,
+                grade: payload.grade || Grade.EXECUTIVE,
+                designation: payload.designation?.trim() || null,
+                department: payload.department?.trim() || null,
+                sectionName: payload.sectionName?.trim() || null,
+                location: payload.location?.trim() || null,
+                managerName: payload.managerName?.trim() || null,
+                managerEmail: payload.managerEmail?.trim() || null,
+            },
+            batchDetails: {
+                programName: batch.trainingSession?.altProgramName || batch.program.name,
+                trainerName: batch.trainingSession?.trainerName,
+                startDate: batch.trainingSession?.startDate,
+                endDate: batch.trainingSession?.endDate,
+                location: batch.trainingSession?.location,
+                sessionId: batch.trainingSession?.id || null,
+            },
+            requestId: newRequest.id
+        }).catch(err => {
+            console.error("Failed to send admin notification email for registration request:", err);
         });
 
         revalidatePath('/admin/registration-requests');
@@ -476,5 +504,63 @@ export async function rejectRegistrationRequest(requestId: string, reason: strin
     } catch (error: any) {
         console.error("Error in rejectRegistrationRequest:", error);
         return { success: false, error: error.message || "Failed to reject request" };
+    }
+}
+
+export interface EnrollmentEmployeeCandidate {
+    id: string;
+    name: string;
+    email: string;
+    department: string;
+    designation: string;
+    location: string;
+}
+
+/**
+ * Search employees by name, Employee ID, or email for Quick Join self-enrollment.
+ */
+export async function searchEmployeesForEnrollment(
+    query: string
+): Promise<{ candidates: EnrollmentEmployeeCandidate[]; error?: string }> {
+    const q = (query || '').trim();
+    if (!q || q.length < 2) {
+        return { candidates: [] };
+    }
+
+    try {
+        const employees = await db.employee.findMany({
+            where: {
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { id: { contains: q, mode: 'insensitive' } },
+                    { email: { contains: q, mode: 'insensitive' } }
+                ]
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                department: true,
+                sectionName: true,
+                designation: true,
+                location: true
+            },
+            take: 30,
+            orderBy: { name: 'asc' }
+        });
+
+        const candidates: EnrollmentEmployeeCandidate[] = employees.map(e => ({
+            id: e.id,
+            name: e.name,
+            email: e.email,
+            department: e.sectionName || e.department || 'N/A',
+            designation: e.designation || 'Staff',
+            location: e.location || 'N/A'
+        }));
+
+        return { candidates };
+    } catch (error: any) {
+        console.error("Error in searchEmployeesForEnrollment:", error);
+        return { candidates: [], error: "Failed to search employees" };
     }
 }
