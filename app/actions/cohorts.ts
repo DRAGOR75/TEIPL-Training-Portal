@@ -791,7 +791,6 @@ export async function getAllAvailableSessionsForCohort() {
             orderBy: {
                 startDate: 'desc',
             },
-            take: 50, // Limit to recent 50 to avoid huge payloads
         });
         return sessions;
     } catch (error) {
