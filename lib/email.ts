@@ -26,11 +26,7 @@ const getGmailClient = () => {
  * HELPER: Get Base URL dynamically
  */
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-
-  // Explicitly check for Vercel Production Environment
+  // If in Vercel environment, prefer the real domain over any localhost fallback
   if (process.env.VERCEL_ENV === 'production') {
     return 'https://teipl-training.vercel.app';
   }
@@ -39,7 +35,16 @@ const getBaseUrl = () => {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return 'https://teipl-training.vercel.app';
+  // Use NEXT_PUBLIC_APP_URL if provided and not localhost in production
+  if (process.env.NEXT_PUBLIC_APP_URL && (!process.env.NEXT_PUBLIC_APP_URL.includes('localhost') || process.env.NODE_ENV !== 'production')) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://teipl-training.vercel.app';
+  }
+
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 };
 
 /**
@@ -642,4 +647,187 @@ export async function sendBatchInvitationEmail(
 
   return result;
 }
+
+/**
+ * EMAIL FOR ADMINS (New Participant Registration Request Notification)
+ * Sends notification to bvg@thriveni.com and cyn@thriveni.com when a walk-in participant submits a registration request.
+ */
+export async function sendRegistrationRequestNotificationEmail({
+  participant,
+  batchDetails,
+  requestId,
+}: {
+  participant: {
+    empId: string;
+    name: string;
+    email: string;
+    mobile?: string | null;
+    grade?: string | null;
+    designation?: string | null;
+    department?: string | null;
+    sectionName?: string | null;
+    location?: string | null;
+    managerName?: string | null;
+    managerEmail?: string | null;
+  };
+  batchDetails: {
+    programName: string;
+    trainerName?: string | null;
+    startDate?: Date | null;
+    endDate?: Date | null;
+    location?: string | null;
+    sessionId?: string | null;
+  };
+  requestId?: string;
+}) {
+  const baseUrl = getBaseUrl();
+  const reviewLink = `${baseUrl}/admin/registration-requests`;
+
+  const recipients = ['bvg@thriveni.com', 'cyn@thriveni.com'];
+  const to = recipients.join(', ');
+
+  const subject = `New Registration Request: ${participant.name} (${participant.empId}) - ${batchDetails.programName}`;
+
+  let dateStr = 'TBD';
+  if (batchDetails.startDate) {
+    const dateFormatter = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
+    dateStr = batchDetails.endDate
+      ? `${dateFormatter.format(new Date(batchDetails.startDate))} to ${dateFormatter.format(new Date(batchDetails.endDate))}`
+      : dateFormatter.format(new Date(batchDetails.startDate));
+  }
+
+  const html = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: 0 auto; padding: 24px; color: #1e293b; line-height: 1.6; border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
+      <div style="border-bottom: 2px solid #2563eb; padding-bottom: 16px; margin-bottom: 20px;">
+        <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #2563eb; background-color: #eff6ff; padding: 4px 10px; border-radius: 6px; margin-bottom: 8px;">
+          Action Required: Admin Confirmation
+        </span>
+        <h2 style="margin: 0; color: #0f172a; font-size: 20px; font-weight: 800;">
+          New Participant Registration Request
+        </h2>
+        <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">
+          A walk-in participant has submitted their profile details to join a training session and is awaiting your review.
+        </p>
+      </div>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; font-weight: 700;">
+          Target Training Program
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr>
+            <td style="padding: 4px 0; color: #64748b; width: 140px; font-weight: 500;">Program:</td>
+            <td style="padding: 4px 0; color: #0f172a; font-weight: 700;">${batchDetails.programName}</td>
+          </tr>
+          ${batchDetails.trainerName ? `
+          <tr>
+            <td style="padding: 4px 0; color: #64748b; font-weight: 500;">Trainer:</td>
+            <td style="padding: 4px 0; color: #0f172a;">${batchDetails.trainerName}</td>
+          </tr>` : ''}
+          ${dateStr !== 'TBD' ? `
+          <tr>
+            <td style="padding: 4px 0; color: #64748b; font-weight: 500;">Dates:</td>
+            <td style="padding: 4px 0; color: #0f172a;">${dateStr}</td>
+          </tr>` : ''}
+          ${batchDetails.location ? `
+          <tr>
+            <td style="padding: 4px 0; color: #64748b; font-weight: 500;">Location:</td>
+            <td style="padding: 4px 0; color: #0f172a;">${batchDetails.location}</td>
+          </tr>` : ''}
+        </table>
+      </div>
+
+      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <h3 style="margin: 0 0 12px 0; font-size: 13px; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; font-weight: 700;">
+          Participant Details
+        </h3>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; width: 140px; font-weight: 500;">Full Name:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 700;">${participant.name}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Employee ID:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-family: monospace; font-weight: 700;">${participant.empId}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Official Email:</td>
+            <td style="padding: 6px 0; color: #0f172a;"><a href="mailto:${participant.email}" style="color: #2563eb; text-decoration: none;">${participant.email}</a></td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Mobile:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${participant.mobile || '-'}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Grade / Designation:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${participant.grade || '-'} ${participant.designation ? `• ${participant.designation}` : ''}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Department / Section:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${[participant.department, participant.sectionName].filter(Boolean).join(' • ') || '-'}</td>
+          </tr>
+          <tr style="border-bottom: 1px solid #f1f5f9;">
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Location:</td>
+            <td style="padding: 6px 0; color: #0f172a;">${participant.location || '-'}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 500;">Reporting Manager:</td>
+            <td style="padding: 6px 0; color: #0f172a;">
+              ${participant.managerName || '-'} 
+              ${participant.managerEmail ? `<span style="color: #64748b; font-size: 12px;">(${participant.managerEmail})</span>` : ''}
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align: center; margin: 24px 0;">
+        <a href="${reviewLink}" style="background-color: #2563eb; color: #ffffff; padding: 12px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2);">
+          Review & Approve Request
+        </a>
+      </div>
+
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 16px; margin-top: 24px; text-align: center;">
+        <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+          You can also navigate to <strong>Admin Portal &rarr; Registration Requests</strong> to approve or reject this request.
+        </p>
+        <p style="margin: 4px 0 0 0; font-size: 11px; color: #cbd5e1;">
+          This is an automated notification from the Thriveni Training Management System.
+        </p>
+      </div>
+    </div>
+  `;
+
+  const result = await sendEmail({
+    to,
+    subject,
+    html
+  });
+
+  // Log in EmailLog
+  try {
+    for (const email of recipients) {
+      await db.emailLog.create({
+        data: {
+          recipientEmail: email,
+          recipientType: 'Admin',
+          emailType: 'RegistrationRequestNotification',
+          subject,
+          status: result.success ? 'Sent' : 'Failed',
+          errorMessage: result.error || null,
+          sessionId: batchDetails.sessionId || null,
+        }
+      }).catch(err => console.error(`Failed to log email for ${email}:`, err));
+    }
+  } catch (err) {
+    console.error('Error logging registration request notification email:', err);
+  }
+
+  return result;
+}
+
 
