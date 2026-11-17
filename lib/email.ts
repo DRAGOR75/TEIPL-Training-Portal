@@ -26,11 +26,7 @@ const getGmailClient = () => {
  * HELPER: Get Base URL dynamically
  */
 const getBaseUrl = () => {
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-
-  // Explicitly check for Vercel Production Environment
+  // If in Vercel environment, prefer the real domain over any localhost fallback
   if (process.env.VERCEL_ENV === 'production') {
     return 'https://teipl-training.vercel.app';
   }
@@ -39,7 +35,16 @@ const getBaseUrl = () => {
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  return 'https://teipl-training.vercel.app';
+  // Use NEXT_PUBLIC_APP_URL if provided and not localhost in production
+  if (process.env.NEXT_PUBLIC_APP_URL && (!process.env.NEXT_PUBLIC_APP_URL.includes('localhost') || process.env.NODE_ENV !== 'production')) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    return 'https://teipl-training.vercel.app';
+  }
+
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 };
 
 /**
