@@ -824,7 +824,7 @@ export async function searchEmployeesForCohort(query: string, cohortId?: string)
                     select: { id: true },
                 } : false,
             },
-            take: 20,
+            take: 50,
         });
 
         return employees.map(emp => ({

@@ -118,6 +118,12 @@ export default function AddMembersModal({ cohortId, onClose }: AddMembersModalPr
                         </div>
                     )}
 
+                    {results.length >= 50 && (
+                        <div className="px-4 py-2 bg-amber-50 text-amber-700 text-xs border-b border-amber-100 font-medium text-center">
+                            Showing top 50 results. Refine your search query to narrow down further if needed.
+                        </div>
+                    )}
+
                     {results.length === 0 && query.length >= 2 && !isSearching && (
                         <div className="p-8 text-center text-slate-400 text-sm">No employees found.</div>
                     )}
