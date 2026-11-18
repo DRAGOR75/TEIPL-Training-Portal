@@ -159,7 +159,7 @@ export default async function AdminHubPage() {
                     />
 
                     <AdminCard
-                        href="https://lookerstudio.google.com/reporting/de8484cd-fb51-4155-b9d5-1130c3365c4f/page/p_px2aw4z0yd"
+                        href="https://datastudio.google.com/reporting/1d92cfc8-4daa-4419-9966-4bc9dc0947a5/page/G1izF"
                         title="Looker Reports"
                         description="Deep-dive analytics and program performance benchmarks."
                         icon={<SiLooker size={24} />}
@@ -174,7 +174,7 @@ export default async function AdminHubPage() {
 
                 <div className="mt-20 text-center">
                     <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.25em]">
-                        Thriveni Earthmovers and infra &copy; {new Date().getFullYear()}
+                        Thriveni Earthmovers and infra ptd ltd&copy; {new Date().getFullYear()}
                     </p>
                 </div>
             </div>

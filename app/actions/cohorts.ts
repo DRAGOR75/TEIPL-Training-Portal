@@ -898,7 +898,7 @@ export async function exportCohortProgramFeedbacks(cohortId: string) {
 
         // Flatten all enrollments into a single array
         const allFeedbacks = [];
-        
+
         for (const cp of cohortPrograms) {
             if (cp.session && cp.session.enrollments.length > 0) {
                 for (const enrollment of cp.session.enrollments) {
