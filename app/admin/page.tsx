@@ -174,7 +174,7 @@ export default async function AdminHubPage() {
 
                 <div className="mt-20 text-center">
                     <p className="text-slate-400 font-bold text-xs uppercase tracking-[0.25em]">
-                        Thriveni Earthmovers and infra &copy; {new Date().getFullYear()}
+                        Thriveni Earthmovers and infra ptd ltd&copy; {new Date().getFullYear()}
                     </p>
                 </div>
             </div>
