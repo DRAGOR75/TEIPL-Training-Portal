@@ -51,6 +51,8 @@ interface EmployeeImportRow {
     'TNI Source'?: string;
     'Status-Completed/Cancelled/Open'?: string;
     'Separated  TNI (Technical)'?: string;
+    'Separated TNI (Technical)'?: string;
+    'Training Need'?: string;
     // Fallbacks just in case headers vary slightly
     id?: string;
     'Emp ID'?: string;
@@ -59,6 +61,16 @@ interface EmployeeImportRow {
     'Name'?: string;
     email?: string;
     'Subject Code'?: string;
+    'SubjectCode'?: string;
+    'Subject code'?: string;
+    'Program ID'?: string;
+    'Program Id'?: string;
+    'ProgramID'?: string;
+    'Program Code'?: string;
+    'ProgramCode'?: string;
+    'Program code'?: string;
+    'Subject ID'?: string;
+    'SubjectId'?: string;
     'DOB'?: string;
     'DOJ'?: string;
     'Date of Birth'?: string;
@@ -94,6 +106,7 @@ interface EmployeeImportRow {
     'Manager Mobile'?: string;
     'Employee Group (M/NM/W)'?: string;
     'On Roll/Contract'?: string;
+    [key: string]: any;
 }
 
 export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
@@ -257,66 +270,75 @@ export async function processEmployeeUpload(rowData: EmployeeImportRow[]) {
                 managerApprovalStatus = 'Rejected';
             }
 
-            // Extract programs from 'Subject Code' or 'Separated  TNI (Technical)'
-            let subjectCodesString = row['Subject Code'] ? row['Subject Code'].toString().trim() : '';
-            let programsString = row['Separated  TNI (Technical)'] || row['Training Need Identified'] || '';
-            programsString = programsString.toString().trim();
+            // Extract programs from 'Subject Code' / 'Program ID' or 'Training Need Identified'
+            const rawSubjectCode = (
+                row['Subject Code'] || 
+                row['SubjectCode'] || 
+                row['Subject code'] || 
+                row['Program ID'] || 
+                row['Program Id'] || 
+                row['ProgramID'] || 
+                row['Program Code'] || 
+                row['ProgramCode'] || 
+                row['Program code'] || 
+                row['Subject ID'] || 
+                row['SubjectId'] || 
+                ''
+            )?.toString().trim();
+
+            const programsString = (
+                row['Separated  TNI (Technical)'] || 
+                row['Separated TNI (Technical)'] || 
+                row['Training Need Identified'] || 
+                row['Training Need'] || 
+                ''
+            )?.toString().trim();
 
             let programIdsToLink = new Set<string>();
-            const combinedString = `${subjectCodesString} ${programsString}`;
 
-            // Regex to find standard UUIDs
-            const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/gi;
-            const matches = combinedString.match(uuidRegex);
+            if (rawSubjectCode) {
+                // Priority 1: User explicitly provided Subject Code(s) / Program ID(s)
+                // E.g. "BEH07", "SFT05", "BEH07, SFT05", "BEH07 / SFT05"
+                const codes = rawSubjectCode
+                    .split(/[,;/|#\r\n]+/)
+                    .map(c => c.trim().replace(/^["']|["']$/g, ''))
+                    .filter(Boolean);
 
-            if (matches && matches.length > 0) {
-                // Scenario A: We found specific Program IDs (UUIDs)
-                // We ONLY link these IDs, completely ignoring any extra text/names to prevent fragments.
-                for (const code of matches) {
+                for (const code of codes) {
                     const key = code.toLowerCase();
                     if (programMap.has(key)) {
                         programIdsToLink.add(programMap.get(key)!.id);
                     } else {
-                        errors.push(`Row Error (${empId}): Program ID '${code}' not found in database.`);
+                        errors.push(`Row Error (${empId}): Program ID / Subject Code '${code}' not found in master catalog.`);
                     }
                 }
             } else if (programsString) {
-                // Scenario B: No IDs found. Fallback to parsing names separated by comma or hash.
-                const programParts = programsString.split(/,|#/);
+                // Priority 2: Fallback to Program Name only when no Subject Code was provided
+                // Check if the entire string matches a program in master catalog directly
+                const wholeKey = programsString.toLowerCase();
+                if (programMap.has(wholeKey)) {
+                    programIdsToLink.add(programMap.get(wholeKey)!.id);
+                } else {
+                    // Split by delimiter outside parentheses or by hash
+                    const programParts = programsString
+                        .split(/[,#](?![^(]*\))/)
+                        .map((p: string) => p.trim().replace(/^["']|["']$/g, ''))
+                        .filter(Boolean);
 
-                for (let rawProgName of programParts) {
-                    let progName = rawProgName.trim();
-                    if (!progName || progName.includes('(1 Days)') || progName.includes('(2 Days)')) continue;
-
-                    progName = progName.replace(/["']/g, ''); // Remove quotes
-
-                    if (progName.toLowerCase().startsWith('additional programs') || progName.toLowerCase().startsWith('computer skills')) {
-                        continue;
-                    }
-
-                    const progKey = progName.toLowerCase();
-
-                    if (programMap.has(progKey)) {
-                        programIdsToLink.add(programMap.get(progKey)!.id);
-                    } else {
-                        // Create missing program dynamically
-                        let newCategory: TrainingCategory = 'OTHER_PROGRAMS';
-                        const programCategory = row['Training Group'] ? row['Training Group'].toString() : '';
-
-                        if (programCategory.toUpperCase().includes('MINING')) {
-                            newCategory = 'MINING_PROGRAMS';
-                        } else if (programCategory.toUpperCase().includes('HEMM') || programCategory.toUpperCase().includes('FUNCTIONAL')) {
-                            newCategory = 'HEMM_PROGRAMS';
+                    for (const rawProgName of programParts) {
+                        let progName = rawProgName.trim();
+                        if (!progName || progName.includes('(1 Days)') || progName.includes('(2 Days)')) continue;
+                        if (progName.toLowerCase().startsWith('additional programs') || progName.toLowerCase().startsWith('computer skills')) {
+                            continue;
                         }
 
-                        const newProg = await db.program.create({
-                            data: {
-                                name: progName,
-                                category: newCategory,
-                            }
-                        });
-                        programMap.set(progKey, { id: newProg.id, category: newCategory });
-                        programIdsToLink.add(newProg.id);
+                        const progKey = progName.toLowerCase();
+                        if (programMap.has(progKey)) {
+                            programIdsToLink.add(programMap.get(progKey)!.id);
+                        } else {
+                            // Do NOT create random programs with UUIDs. Report warning so catalog stays clean.
+                            errors.push(`Row Error (${empId}): Program '${progName}' not found in master catalog.`);
+                        }
                     }
                 }
             }
