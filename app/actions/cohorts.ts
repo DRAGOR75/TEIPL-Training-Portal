@@ -1199,20 +1199,17 @@ export async function bulkUploadCohorts(rows: BulkCohortRow[]) {
                 if (!resolvedProgramId) {
                     const fallbackName = progData.programName?.trim() || linkedSession?.altProgramName?.trim() || linkedSession?.programName?.trim();
                     if (fallbackName) {
-                        try {
-                            const newProg = await db.program.create({
-                                data: {
-                                    name: fallbackName,
-                                    category: 'OTHER_PROGRAMS',
-                                }
-                            });
-                            programMap.set(newProg.name.trim().toLowerCase(), { id: newProg.id, name: newProg.name });
-                            resolvedProgramId = newProg.id;
-                        } catch (err: any) {
+                        const matched = programMap.get(fallbackName.toLowerCase());
+                        if (matched) {
+                            resolvedProgramId = matched.id;
+                        } else {
                             const found = await db.program.findFirst({
                                 where: { name: { equals: fallbackName, mode: 'insensitive' } }
                             });
-                            if (found) resolvedProgramId = found.id;
+                            if (found) {
+                                programMap.set(found.name.trim().toLowerCase(), { id: found.id, name: found.name });
+                                resolvedProgramId = found.id;
+                            }
                         }
                     }
                 }
